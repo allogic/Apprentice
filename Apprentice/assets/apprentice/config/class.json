@@ -1,0 +1,349 @@
+{
+	"Version": 1,
+
+	"ClassTypes": {
+
+		"miner": {
+
+			"Id": "miner",
+			"DisplayName": "Miner",
+
+			"Interactions": {
+
+				"DestroyBlock": {
+
+					"game:ore-*": 1.0,
+
+					"game:ore-bituminouscoal-*": 0.5,
+					"game:ore-lignite-*": 0.5,
+
+					"game:stone-*": 0.01,
+					"game:gravel-*": 0.05,
+					"game:sand-*": 0.01
+				},
+
+				"Prospect": {
+					"*": 5.0
+				},
+
+				"Pan": {
+					"*": 2.0
+				}
+			}
+		},
+
+
+		"woodworker": {
+
+			"Id": "woodworker",
+			"DisplayName": "Woodworker",
+
+			"Interactions": {
+
+				"DestroyBlock": {
+
+					"game:log-*": 1.0,
+					"game:leaves-*": 0.05,
+					"game:branch-*": 0.1
+				},
+
+				"Craft": {
+
+					"game:planks-*": 0.5,
+					"game:chest-*": 3.0,
+					"game:chair-*": 2.0,
+					"game:table-*": 2.5
+				},
+
+				"PlaceBlock": {
+
+					"game:planks-*": 0.1,
+					"game:fence-*": 0.2
+				}
+			}
+		},
+
+
+		"farmer": {
+
+			"Id": "farmer",
+			"DisplayName": "Farmer",
+
+			"Interactions": {
+
+				"Plant": {
+
+					"game:seed-*": 0.25,
+					"game:sapling-*": 0.5
+				},
+
+				"Harvest": {
+
+					"game:crop-*": 2.0,
+					"game:berry-*": 0.5,
+					"game:fruit-*": 1.0,
+					"game:vegetable-*": 1.0
+				},
+
+				"DestroyBlock": {
+
+					"game:crop-*": 0.1
+				}
+			}
+		},
+
+
+		"builder": {
+
+			"Id": "builder",
+			"DisplayName": "Builder",
+
+			"Interactions": {
+
+				"PlaceBlock": {
+
+					"game:stone-*": 0.05,
+					"game:brick-*": 0.1,
+					"game:planks-*": 0.05,
+					"game:*stairs": 0.15,
+					"game:*slab": 0.1,
+					"game:*wall": 0.1,
+
+					"game:*": 0.01
+				}
+			}
+		},
+
+
+		"blacksmith": {
+
+			"Id": "blacksmith",
+			"DisplayName": "Blacksmith",
+
+			"Interactions": {
+
+				"Smith": {
+
+					"game:toolhead-*": 3.0,
+					"game:weapon-*": 5.0,
+					"game:armor-*": 8.0
+				},
+
+				"Smelt": {
+
+					"game:ingot-*": 1.0,
+					"game:*metal*": 2.0
+				},
+
+				"Repair": {
+
+					"game:*": 1.0
+				}
+			}
+		},
+
+
+		"cook": {
+
+			"Id": "cook",
+			"DisplayName": "Cook",
+
+			"Interactions": {
+
+				"Cook": {
+
+					"game:meal-*": 4.0,
+					"game:bread-*": 3.0,
+					"game:pie-*": 5.0
+				},
+
+				"Process": {
+
+					"game:juice-*": 1.0,
+					"game:jam-*": 2.0
+				}
+			}
+		},
+
+
+		"potter": {
+
+			"Id": "potter",
+			"DisplayName": "Potter",
+
+			"Interactions": {
+
+				"Craft": {
+
+					"game:clay-*": 1.0
+				},
+
+				"Smelt": {
+
+					"game:ceramic-*": 3.0
+				}
+			}
+		},
+
+
+		"leatherworker": {
+
+			"Id": "leatherworker",
+			"DisplayName": "Leatherworker",
+
+			"Interactions": {
+
+				"Process": {
+
+					"game:rawhide-*": 2.0,
+					"game:leather-*": 3.0
+				},
+
+				"Craft": {
+
+					"game:armor-*": 5.0,
+					"game:clothing-*": 3.0
+				}
+			}
+		},
+
+
+		"tailor": {
+
+			"Id": "tailor",
+			"DisplayName": "Tailor",
+
+			"Interactions": {
+
+				"Craft": {
+
+					"game:cloth-*": 2.0,
+					"game:linen-*": 3.0,
+					"game:clothing-*": 5.0
+				}
+			}
+		},
+
+
+		"hunter": {
+
+			"Id": "hunter",
+			"DisplayName": "Hunter",
+
+			"Interactions": {
+
+				"KillPvE": {
+
+					"game:hare-*": 2.0,
+					"game:wolf-*": 8.0,
+					"game:bear-*": 25.0,
+					"game:hyena-*": 15.0
+				},
+
+				"Harvest": {
+
+					"game:hide-*": 1.0,
+					"game:bone-*": 0.5
+				}
+			}
+		},
+
+
+		"warrior": {
+
+			"Id": "warrior",
+			"DisplayName": "Warrior",
+
+			"Interactions": {
+
+				"KillPvE": {
+
+					"game:drifter-*": 5.0,
+					"game:locust-*": 8.0,
+					"game:shiver-*": 15.0
+				},
+
+				"KillPvP": {
+
+					"*": 25.0
+				}
+			}
+		},
+
+
+		"ranger": {
+
+			"Id": "ranger",
+			"DisplayName": "Ranger",
+
+			"Interactions": {
+
+				"KillPvE": {
+
+					"game:*": 3.0
+				},
+
+				"KillPvP": {
+
+					"*": 25.0
+				}
+			}
+		},
+
+
+		"fisher": {
+
+			"Id": "fisher",
+			"DisplayName": "Fisher",
+
+			"Interactions": {
+
+				"Fish": {
+
+					"game:fish-*": 3.0
+				}
+			}
+		},
+
+
+		"animalhusbandry": {
+
+			"Id": "animalhusbandry",
+			"DisplayName": "Animal Husbandry",
+
+			"Interactions": {
+
+				"Breed": {
+
+					"game:*": 4.0
+				},
+
+				"Milk": {
+
+					"game:*": 2.0
+				},
+
+				"Shear": {
+
+					"game:*": 2.0
+				}
+			}
+		},
+
+
+		"beekeeper": {
+
+			"Id": "beekeeper",
+			"DisplayName": "Beekeeper",
+
+			"Interactions": {
+
+				"Harvest": {
+
+					"game:beehive-*": 5.0,
+					"game:honey-*": 2.0
+				}
+			}
+		}
+	}
+}
