@@ -15,7 +15,7 @@ namespace Apprentice
 
 		public override void Start(ICoreAPI api)
 		{
-
+			api.ChatCommands.Create(api).RequiresPrivilege(Privilege.cha)
 		}
 
 		public override void StartServerSide(ICoreServerAPI api)
