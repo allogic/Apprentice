@@ -35,6 +35,8 @@ namespace Apprentice
 			api.Event.HandInteract += OnHandInteract;
 			api.Event.EntityMounted += OnEntityMounted;
 			api.Event.EntityUnmounted += OnEntityUnmounted;
+			api.Event.MatchesRecipe += OnMatchesRecipe;
+			api.Event.MatchesGridRecipe += OnMatchGridRecipe;
 		}
 		public override void StartClientSide(ICoreClientAPI api)
 		{
@@ -106,6 +108,14 @@ namespace Apprentice
 			if (serverApi == null) return;
 
 			// TODO
+		}
+		private bool OnMatchesRecipe(IPlayer player, IRecipeBase recipe, ItemSlot[] ingredients)
+		{
+			return false;
+		}
+		private bool OnMatchGridRecipe(IPlayer player, GridRecipe recipe, ItemSlot[] ingredients, int gridWidth)
+		{
+			return false;
 		}
 	}
 }
