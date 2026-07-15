@@ -3,7 +3,7 @@ using Vintagestory.API.Common;
 using Vintagestory.API.Server;
 
 namespace Apprentice
-{
+{ 
 	public class ApprenticeModSystem : ModSystem
 	{
 		private ICoreServerAPI? serverApi = null;
