@@ -1,0 +1,9 @@
+Experience equation validation passed.
+10.4 total XP -> Level 2.
+11.4 total XP -> Level 2.
+30 total XP -> Level 3.
+450 total XP -> Level 10.
+545 total XP -> Level 11.
+Level 100 begins at 29025 total XP.
+Level 100 -> 101 costs 545 XP.
+Level 101 begins at 29570 total XP.

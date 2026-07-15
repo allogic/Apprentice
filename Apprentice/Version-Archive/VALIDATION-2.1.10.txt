@@ -1,0 +1,19 @@
+PASS: modinfo version is 2.1.10
+PASS: 2.1.10 compiles with no C# errors (warnings only from existing nullable/reference mismatches)
+PASS: node details effect text now reports current and next-rank values
+PASS: ranger effect labels were clarified (for example, Skirmisher and Arrowstorm wording)
+PASS: hunter profession icon was redesigned
+PASS: first node in every tree was updated away from a generic experience-only presentation
+PASS: hunter tree now has weapon patterns configured for weapon-damage bonuses
+PASS: shield maximum-health node bonuses are included in player stat application
+PASS: three GUI text lines were removed for a cleaner layout
+PASS: node IDs remain unchanged for save compatibility
+
+Manual in-game smoke test recommended:
+1. Install only Apprentice-2.1.10-SkillTreeClarityUpdate.zip in the Mods folder.
+2. Open the skill tree UI with U.
+3. Check the Hunter profession icon and confirm it looks cleaner.
+4. Inspect Ranger nodes such as Skirmisher and Arrowstorm and verify the effects panel now explains the affected stat more clearly.
+5. Open multiple professions and confirm the first skill in each tree now has a more individual identity.
+6. Confirm the previously unwanted extra guide/info text lines are no longer visible.
+7. Buy a few nodes and confirm purchase handling still works.

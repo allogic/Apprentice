@@ -1,0 +1,22 @@
+PASS: modinfo version is 2.1.14b
+PASS: source compiles with no C# errors
+PASS: Combat category icon draws a shield behind crossed swords
+PASS: Eagle Eye uses an eye glyph
+PASS: GUI sizes itself from the active game window bounds
+PASS: SKILLTREE, STATS, and HIDDEN CLASSES tabs are present and clickable
+PASS: Stats tab reads purchased node bonuses and unlocked hidden-class bonuses
+PASS: locked hidden classes display question marks and conceal their requirements
+PASS: eight hidden-class definitions are included
+PASS: hidden classes unlock from capstone combinations and persist in watched attributes
+PASS: discovery notifications are sent when a hidden class unlocks
+PASS: Lumberjack, Weapon Master, Shadow Archer, Berserk, Deepwarden, Wildheart, Grand Artisan, and Stormforged effects are wired into runtime effect handling
+PASS: Berserk uses a 48 in-game-hour cooldown
+PASS: tree IDs and node IDs remain unchanged
+
+Manual in-game testing recommended:
+1. Open the U window at several resolutions and verify it reaches close to the game-window edges.
+2. Switch between all three tabs.
+3. Purchase nodes and verify the Stats tab updates.
+4. Inspect Hidden Classes before unlocking: names and requirements should remain concealed.
+5. Unlock a required capstone combination and verify the discovery notification, icon, name, requirements, and effects become visible.
+6. Test the more complex Shadow Archer and Berserk mechanics on a server.

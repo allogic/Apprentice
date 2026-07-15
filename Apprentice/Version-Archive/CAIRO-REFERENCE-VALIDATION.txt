@@ -1,0 +1,12 @@
+Interactive SkillTree 2.1.1 static validation passed.
+- Apprentice.csproj directly references Lib/cairo-sharp.dll.
+- The assembly is marked Private=false.
+- The Cairo namespace, Context and ImageSurface usages remain.
+- Format.ARGB32 uses the current API spelling.
+- The interactive canvas and server purchase packets remain.
+- Project XML and JSON parse successfully.
+- C# braces are balanced.
+
+A real compile against the user's Vintage Story 1.22.3 installation is still
+required. Any remaining compiler messages after this fix will be separate API
+signature issues rather than the original missing Cairo assembly.

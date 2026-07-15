@@ -1,0 +1,10 @@
+Native events compile hotfix 1.1.1 static validation passed.
+- EntityDeathInteractionAdapter is compiled in InteractionEventBridge.cs.
+- The standalone adapter file has been removed.
+- Bridge construction still resolves the adapter in the same namespace.
+- OnEntityDeath subscription and unsubscription remain present.
+- DamageSource.GetCauseEntity projectile attribution remains present.
+- Project version and startup marker are updated to 1.1.1.
+- C# braces are balanced.
+
+A local Vintage Story compile is still required.

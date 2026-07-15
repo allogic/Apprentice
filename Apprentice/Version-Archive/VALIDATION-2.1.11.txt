@@ -1,0 +1,16 @@
+PASS: modinfo version is 2.1.11
+PASS: 2.1.11 compiles with no C# errors (warnings only from existing nullable/reference mismatches)
+PASS: class header now includes an XP counter next to the XP bar
+PASS: XP bar width was reduced to make room for the counter
+PASS: XP counter shows current total XP and XP needed to reach the next level
+PASS: confusing selected-path highlight lines were removed from the skill-tree connection rendering
+PASS: existing 2.1.10 clarity improvements remain in place
+PASS: node IDs remain unchanged for save compatibility
+
+Manual in-game smoke test recommended:
+1. Install only Apprentice-2.1.11-HeaderXpCounter.zip in the Mods folder.
+2. Open the skill tree UI with U.
+3. Confirm the class header shows the XP bar with a text counter next to it.
+4. Verify the text communicates current XP and XP needed for the next level.
+5. Check the tree and confirm the previously confusing highlighted yellow lines are gone.
+6. Confirm normal connection lines still render between valid nodes.

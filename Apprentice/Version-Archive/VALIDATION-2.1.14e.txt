@@ -1,0 +1,15 @@
+PASS: modinfo version is 2.1.14e
+PASS: tabs use the compact 150-pixel design width
+PASS: third tab displays HIDDEN
+PASS: complete interface uses one Apprentice-dialog scale transform
+PASS: text, panels, icons, spacing, and cards share the same transform
+PASS: hit testing converts mouse coordinates back into design space
+PASS: middle-button drag deltas convert back into design space
+PASS: game-window frame dimensions are not used for interface scaling
+PASS: tree IDs, node IDs, hidden-class IDs, and tab IDs remain unchanged
+
+Manual in-game testing recommended:
+1. Open the U window at several GUI-scale settings.
+2. Confirm the complete interface fills and scales with its own dialog.
+3. Click all three tabs and multiple nodes to verify hit alignment.
+4. Pan and zoom the skill tree and test the Learn Rank button.

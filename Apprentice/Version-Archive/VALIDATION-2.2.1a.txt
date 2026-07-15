@@ -1,0 +1,22 @@
+Apprentice 2.2.1a static validation
+
+PASS: modinfo version is valid SemVer 2.2.1-a
+PASS: game dependency remains Vintage Story 1.22.3
+PASS: nine race character-class definitions are present and enabled
+PASS: every race has one positive and one negative trait
+PASS: every referenced race trait has a matching trait definition
+PASS: all six vanilla class codes are present as disabled compatibility records
+PASS: compatibility records are commoner, hunter, malefactor, clockmaker, blackguard, and tailor
+PASS: compatibility records preserve vanilla trait codes and use non-null gear arrays
+PASS: obsolete index-based class patches have been replaced with an empty array
+PASS: DamageItem durability prefix uses the API parameter name itemSlot
+PASS: Apprentice profession, skill-tree, and hidden-class IDs are unchanged
+PASS: GUI source retains the complete approved 2.1.14i baseline
+
+Manual in-game validation required:
+1. Start the server and confirm there are no replace-vanilla-characterclasses errors.
+2. Confirm the class loader reports 15 classes: 6 disabled compatibility classes plus 9 races.
+3. On an existing vanilla-class character, run `/player <name> allowcharselonce` and `.charsel`.
+4. Confirm `.charsel` opens and offers only the nine Apprentice races.
+5. Select a race, reconnect, and confirm the selected race persists.
+6. Open the Apprentice U window and compare its layout with the approved 2.1.14i screenshot.

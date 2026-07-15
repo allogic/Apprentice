@@ -1,0 +1,12 @@
+Interactive SkillTree 2.1.4 static validation passed.
+- The root uses the stable AutosizedMainDialog pattern.
+- Background sizing and canvas rendering use independent bounds objects.
+- The background is sized from contentBounds, not canvasBounds.
+- Every composer construction stage has a unique diagnostic marker.
+- The open-time refresh remains removed.
+- Cairo reference and interactive canvas remain.
+- Server-authoritative purchases and all 18 trees remain.
+- Project XML and JSON parse successfully.
+- C# braces are balanced.
+
+A real runtime test against Vintage Story 1.22.3 is still required.

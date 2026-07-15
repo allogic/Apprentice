@@ -1,121 +1,316 @@
-﻿using Vintagestory.API.Client;
+using System;
+using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Server;
 
 namespace Apprentice
 {
-	public class ApprenticeModSystem : ModSystem
-	{
-		private ICoreServerAPI? serverApi = null;
-		private ICoreClientAPI? clientApi = null;
+    public sealed class ApprenticeModSystem : ModSystem
+    {
+        private ClassConfig? classConfig;
+        private SkillTreeConfig? skillTreeConfig;
 
-		private ExperienceManager? experienceManager = null;
-		private InterfaceManager? interfaceManager = null;
-		private OverlayManager? overlayManager = null;
+        private IServerNetworkChannel? serverNetworkChannel;
+        private IClientNetworkChannel? clientNetworkChannel;
 
-		public override void Start(ICoreAPI api)
-		{
+        private ClassesManager? classesManager;
+        private ExperienceManager? experienceManager;
+        private SkillTreeManager? skillTreeManager;
+        private InteractionEventBridge? interactionEventBridge;
 
-		}
+        private InterfaceManager? interfaceManager;
+        private OverlayManager? overlayManager;
+        private ICoreClientAPI? apiForClientLogging;
 
-		public override void StartServerSide(ICoreServerAPI api)
-		{
-			serverApi = api;
+        public override void Start(ICoreAPI api)
+        {
+            if (api.Side == EnumAppSide.Server)
+            {
+                ICoreServerAPI serverApi =
+                    (ICoreServerAPI)api;
 
-			experienceManager = new ExperienceManager(api);
+                serverNetworkChannel =
+                    serverApi.Network
+                        .RegisterChannel(
+                            ApprenticeConstants.NetworkChannel
+                        )
+                        .RegisterMessageType<
+                            ExperienceNotificationPacket
+                        >()
+                        .RegisterMessageType<
+                            SkillPurchaseRequestPacket
+                        >()
+                        .RegisterMessageType<
+                            SkillPurchaseResultPacket
+                        >();
+            }
+            else
+            {
+                ICoreClientAPI clientApi =
+                    (ICoreClientAPI)api;
 
-			// TODO: move these into xp-mgr directly, since we push callbacks..
-			api.Event.PlayerJoin += OnPlayerJoin;
-			api.Event.PlayerLeave += OnPlayerLeave;
-			api.Event.PlayerDeath += OnPlayerDeath;
-			api.Event.PlayerRespawn += OnPlayerRespawn;
-			api.Event.SaveGameLoaded += OnSaveGameLoaded;
-			api.Event.GameWorldSave += OnGameWorldSave;
-			api.Event.DidBreakBlock += OnDidBreakBlock;
-			api.Event.HandInteract += OnHandInteract;
-			api.Event.EntityMounted += OnEntityMounted;
-			api.Event.EntityUnmounted += OnEntityUnmounted;
-			api.Event.MatchesRecipe += OnMatchesRecipe;
-			api.Event.MatchesGridRecipe += OnMatchGridRecipe;
-		}
-		public override void StartClientSide(ICoreClientAPI api)
-		{
-			clientApi = api;
+                clientNetworkChannel =
+                    clientApi.Network
+                        .RegisterChannel(
+                            ApprenticeConstants.NetworkChannel
+                        )
+                        .RegisterMessageType<
+                            ExperienceNotificationPacket
+                        >()
+                        .RegisterMessageType<
+                            SkillPurchaseRequestPacket
+                        >()
+                        .RegisterMessageType<
+                            SkillPurchaseResultPacket
+                        >();
+            }
+        }
 
-			interfaceManager = new InterfaceManager(api);
-			overlayManager = new OverlayManager(api);
-		}
+        public override void AssetsLoaded(ICoreAPI api)
+        {
+            classConfig =
+                ClassConfigLoader.Load(api);
 
-		private void OnPlayerJoin(IServerPlayer player)
-		{
-			if (serverApi == null) return;
+            skillTreeConfig =
+                SkillTreeConfigLoader.Load(api);
+        }
 
-			// TODO
-		}
-		private void OnPlayerLeave(IServerPlayer player)
-		{
-			if (serverApi == null) return;
+        public override void StartServerSide(
+            ICoreServerAPI api)
+        {
+            ClassConfig loadedClassConfig =
+                classConfig
+                ?? throw new InvalidOperationException(
+                    "class.json was not loaded before " +
+                    "server startup."
+                );
 
-			// TODO
-		}
-		private void OnPlayerDeath(IServerPlayer player, DamageSource damageSource)
-		{
-			if (serverApi == null) return;
+            SkillTreeConfig loadedSkillTreeConfig =
+                skillTreeConfig
+                ?? throw new InvalidOperationException(
+                    "skilltrees.json was not loaded before server startup."
+                );
 
-			// TODO
-		}
-		private void OnPlayerRespawn(IServerPlayer player)
-		{
-			if (serverApi == null) return;
+            IServerNetworkChannel networkChannel =
+                serverNetworkChannel
+                ?? throw new InvalidOperationException(
+                    "The Apprentice server network channel " +
+                    "was not registered."
+                );
 
-			// TODO
-		}
-		private void OnSaveGameLoaded()
-		{
-			if (serverApi == null) return;
+            BaseConfig baseConfig =
+                BaseConfigLoader.Load(api);
 
-			// TODO
-		}
-		private void OnGameWorldSave()
-		{
-			if (serverApi == null) return;
+            classesManager =
+                new ClassesManager(
+                    api,
+                    loadedClassConfig
+                );
 
-			// TODO
-		}
-		private void OnDidBreakBlock(IServerPlayer player, int oldblockId, BlockSelection blockSel)
-		{
-			if (serverApi == null) return;
-			if (experienceManager == null) return;
+            skillTreeManager =
+                new SkillTreeManager(
+                    api,
+                    loadedClassConfig,
+                    loadedSkillTreeConfig,
+                    networkChannel
+                );
 
-			Block block = serverApi.World.GetBlock(oldblockId);
+            experienceManager =
+                new ExperienceManager(
+                    api,
+                    networkChannel,
+                    loadedClassConfig,
+                    baseConfig,
+                    skillTreeManager
+                );
 
-			experienceManager.UpdatePlayerExperienceByBreakingBlocks(player, block);
-		}
-		private void OnHandInteract(IServerPlayer player, EnumHandInteractNw enumHandInteract, float secondsPassed, ref EnumHandling handling)
-		{
-			if (serverApi == null) return;
+            interactionEventBridge =
+                new InteractionEventBridge(
+                    api,
+                    experienceManager
+                );
+        }
 
-			// TODO
-		}
-		private void OnEntityMounted(EntityAgent mountingEntity, IMountableSeat mountedSeat)
-		{
-			if (serverApi == null) return;
+        public override void StartClientSide(
+            ICoreClientAPI api)
+        {
+            apiForClientLogging = api;
+            api.Logger.Notification(
+                "[Apprentice] Client startup: begin — " +
+                "Interactive SkillTree Stable Shell, version 2.1.5."
+            );
 
-			// TODO
-		}
-		private void OnEntityUnmounted(EntityAgent mountingEntity, IMountableSeat mountedSeat)
-		{
-			if (serverApi == null) return;
+            try
+            {
+                ClassConfig loadedClassConfig =
+                    classConfig
+                    ?? throw new InvalidOperationException(
+                        "class.json was not loaded before " +
+                        "client startup."
+                    );
 
-			// TODO
-		}
-		private bool OnMatchesRecipe(IPlayer player, IRecipeBase recipe, ItemSlot[] ingredients)
-		{
-			return false;
-		}
-		private bool OnMatchGridRecipe(IPlayer player, GridRecipe recipe, ItemSlot[] ingredients, int gridWidth)
-		{
-			return false;
-		}
-	}
+                api.Logger.Notification(
+                    "[Apprentice] Client startup: class config ready."
+                );
+
+                SkillTreeConfig loadedSkillTreeConfig =
+                    skillTreeConfig
+                    ?? throw new InvalidOperationException(
+                        "skilltrees.json was not loaded before client startup."
+                    );
+
+                api.Logger.Notification(
+                    "[Apprentice] Client startup: skill trees ready."
+                );
+
+                IClientNetworkChannel networkChannel =
+                    clientNetworkChannel
+                    ?? throw new InvalidOperationException(
+                        "The Apprentice client network channel " +
+                        "was not registered."
+                    );
+
+                api.Logger.Notification(
+                    "[Apprentice] Client startup: network ready."
+                );
+
+                BaseConfig baseConfig =
+                    BaseConfigLoader.Load(api);
+
+                api.Logger.Notification(
+                    "[Apprentice] Client startup: base config ready."
+                );
+
+                // These managers now register lightweight handlers only.
+                // They do not compose a GUI during connection.
+                interfaceManager =
+                    new InterfaceManager(
+                        api,
+                        loadedClassConfig,
+                        loadedSkillTreeConfig,
+                        networkChannel
+                    );
+
+                api.Logger.Notification(
+                    "[Apprentice] Client startup: hotkey ready."
+                );
+
+                overlayManager =
+                    new OverlayManager(
+                        api,
+                        baseConfig,
+                        loadedClassConfig
+                    );
+
+                api.Logger.Notification(
+                    "[Apprentice] Client startup: lazy HUD ready."
+                );
+
+                networkChannel.SetMessageHandler<
+                    ExperienceNotificationPacket
+                >(OnExperienceNotification);
+
+                networkChannel.SetMessageHandler<
+                    SkillPurchaseResultPacket
+                >(OnSkillPurchaseResult);
+
+                api.Logger.Notification(
+                    "[Apprentice] Client startup: complete."
+                );
+            }
+            catch (Exception exception)
+            {
+                // A client-side display failure must not prevent joining.
+                api.Logger.Error(
+                    "[Apprentice] Client-side startup failed. " +
+                    "Server progression can continue, but the UI " +
+                    "may be unavailable."
+                );
+                api.Logger.Error(exception);
+            }
+        }
+
+        private void OnExperienceNotification(
+            ExperienceNotificationPacket packet)
+        {
+            ICoreClientAPI? api =
+                apiForClientLogging;
+
+            if (api == null)
+            {
+                return;
+            }
+
+            try
+            {
+                // Network packet callbacks are not a safe place to create
+                // or update GUI elements. Always transfer the work to the
+                // client main thread first.
+                api.Event.EnqueueMainThreadTask(
+                    () =>
+                    {
+                        try
+                        {
+                            overlayManager?.Enqueue(packet);
+                            interfaceManager?.RefreshIfOpen();
+                        }
+                        catch (Exception exception)
+                        {
+                            api.Logger.Error(
+                                "[Apprentice] Main-thread XP " +
+                                "notification handling failed."
+                            );
+
+                            api.Logger.Error(exception);
+                        }
+                    },
+                    "apprentice-xp-notification"
+                );
+            }
+            catch (Exception exception)
+            {
+                api.Logger.Error(
+                    "[Apprentice] Could not enqueue the XP " +
+                    "notification on the client main thread."
+                );
+
+                api.Logger.Error(exception);
+            }
+        }
+
+        private void OnSkillPurchaseResult(
+            SkillPurchaseResultPacket packet)
+        {
+            ICoreClientAPI? api = apiForClientLogging;
+            if (api == null) return;
+
+            api.Event.EnqueueMainThreadTask(
+                () =>
+                {
+                    interfaceManager?.ApplyPurchaseResult(packet);
+                },
+                "apprentice-skill-purchase-result"
+            );
+        }
+
+        public override void Dispose()
+        {
+            interactionEventBridge?.Dispose();
+            skillTreeManager?.Dispose();
+            classesManager?.Dispose();
+
+            interfaceManager?.Dispose();
+            overlayManager?.Dispose();
+
+            interactionEventBridge = null;
+            experienceManager = null;
+            skillTreeManager = null;
+            classesManager = null;
+            interfaceManager = null;
+            overlayManager = null;
+            apiForClientLogging = null;
+
+            base.Dispose();
+        }
+    }
 }

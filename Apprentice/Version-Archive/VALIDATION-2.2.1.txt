@@ -1,0 +1,30 @@
+Apprentice 2.2.1 static validation
+
+PASS: modinfo version is 2.2.1
+PASS: game dependency remains Vintage Story 1.22.3
+PASS: nine race character-class definitions are present and enabled
+PASS: every race has one positive and one negative trait
+PASS: every referenced race trait has a matching trait definition
+PASS: every race has localized name and description keys
+PASS: all six vanilla character definitions are preserved
+PASS: all six vanilla classes are patched to enabled false
+PASS: no direct game-domain characterclasses override remains
+PASS: DamageItem durability prefix uses the API parameter name itemSlot
+PASS: Apprentice profession IDs and class.json are unchanged
+PASS: skilltrees.json and all node IDs are unchanged
+PASS: hidden-class IDs and discovery mechanics are unchanged
+PASS: GUI source retains the complete approved 2.1.14i baseline
+PASS: tabs use the compact fixed 150-unit width
+PASS: Apprentice content bounds remain fixed at 1280 x 780
+PASS: whole-dialog canvas scaling is retained
+PASS: path and capstone labels retain raised backed rendering
+PASS: profession names remain horizontally and vertically centered
+PASS: profession level labels remain centered in their right-hand columns
+
+Manual in-game validation required:
+1. Create a new world and confirm only the nine races appear in character creation.
+2. Select each race and confirm all trait/stat labels resolve without raw lang keys.
+3. Confirm the selected race persists after reconnecting.
+4. Confirm the race modifiers appear in the character stats view.
+5. Open the Apprentice U window and compare its layout with the approved 2.1.14i screenshot.
+6. On an existing vanilla-class character, run `.charsel` and confirm the selector opens without a crash.
