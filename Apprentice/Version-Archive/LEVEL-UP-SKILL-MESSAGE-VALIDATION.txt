@@ -1,0 +1,9 @@
+Level-up skill message 1.0.9 static validation passed.
+- Discovery text is: Level up <skill> to <new level>.
+- Project version is 1.0.9.
+- Startup marker is updated.
+- Passive HUD behavior is unchanged.
+- Multi-skill handling is unchanged.
+- C# braces are balanced.
+
+A local Vintage Story compile and runtime test is still required.

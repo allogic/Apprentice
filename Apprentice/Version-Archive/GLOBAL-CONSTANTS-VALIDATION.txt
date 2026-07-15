@@ -1,0 +1,9 @@
+MasterySkillTree 2.0.1 static validation passed.
+- SkillMasteryPatches.cs imports Vintagestory.API.Config.
+- GlobalConstants.GeneralChatGroup remains unchanged.
+- Recipe-lock notification remains server-side.
+- Skill-tree, mastery and GUI source files remain present.
+- Project XML and JSON parse successfully.
+- C# braces are balanced.
+
+A local compile against the Vintage Story assemblies is still required.

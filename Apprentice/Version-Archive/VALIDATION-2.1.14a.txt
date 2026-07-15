@@ -1,0 +1,12 @@
+PASS: modinfo version is 2.1.14a
+PASS: 2.1.14a compiles with no C# errors
+PASS: Sharpshooter icon uses the restored crosshair style
+PASS: Master Sharpshooter icon uses the restored crosshair style
+PASS: requirement plus/minus markers are more centrally aligned inside their circles
+PASS: no gameplay effects were changed in this hotfix
+PASS: tree IDs and node IDs remain unchanged for save compatibility
+
+Manual in-game smoke test recommended:
+1. Install only Apprentice-2.1.14a-CrosshairHotfix.zip in the Mods folder.
+2. Open the Ranger tree and confirm Sharpshooter and Master Sharpshooter use the crosshair-style icons again.
+3. Open node details and check requirement markers so the + and - sit centered within the circular marker icons.

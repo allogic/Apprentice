@@ -1,0 +1,13 @@
+Multi-skill progress-bar static validation passed.
+- Project version is 1.0.5.
+- XP packet GUI work is dispatched through EnqueueMainThreadTask.
+- Level-ups use TriggerIngameDiscovery only.
+- Normal gains use top-left stat-bar rows.
+- Active rows are keyed by class ID and shown simultaneously.
+- Multiple level-up discoveries are queued.
+- Level-up packets remove any normal row for the same class.
+- Old experimental popup sources are absent.
+- C# braces are balanced.
+
+A real Vintage Story compile/run is still required because the game assemblies
+are not installed in this environment.

@@ -1,0 +1,15 @@
+PASS: modinfo version is 2.1.14c
+PASS: Apprentice canvas bounds are restored to 1120 x 682
+PASS: active game-window dimensions no longer expand the Apprentice dialog
+PASS: SKILLTREE, STATS, and HIDDEN CLASSES tabs remain present
+PASS: all eight Hidden Classes cards fit in two rows at 1120 x 682
+PASS: tab hit testing retains the 44-pixel content offset
+PASS: hidden-class discovery storage and runtime hooks remain unchanged
+PASS: tree IDs and node IDs remain unchanged
+PASS: skilltrees.json parses as valid JSON
+
+Manual in-game testing recommended:
+1. Open the U window and confirm the compact 1120 x 682 layout is restored.
+2. Switch between all three tabs and test their hit regions.
+3. Learn a node and verify that the purchase still succeeds.
+4. Verify Stats and Hidden Classes at the GUI scale used for normal play.

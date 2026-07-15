@@ -1,0 +1,22 @@
+Apprentice 2.2.1b static validation
+
+PASS: modinfo version is valid SemVer 2.2.1-b
+PASS: game dependency remains Vintage Story 1.22.3
+PASS: six disabled vanilla compatibility records are in the Apprentice class file
+PASS: disabled aliases cover class codes from the previously loaded Aldi's Classes setup
+PASS: nine race character-class definitions remain present and enabled
+PASS: every enabled race has one positive and one negative trait
+PASS: only the nine races are enabled in the Apprentice class file
+PASS: the game-domain compatibility file retains six disabled vanilla records
+PASS: obsolete index-based class patches remain an empty array
+PASS: DamageItem durability prefix uses the API parameter name itemSlot
+PASS: Apprentice profession, skill-tree, and hidden-class IDs are unchanged
+PASS: GUI source retains the complete approved 2.1.14i baseline
+
+Manual in-game validation required:
+1. Start the server and confirm there are no JSON patch errors.
+2. Confirm the class loader reports more than nine total classes but only nine enabled races.
+3. Run `/player <name> allowcharselonce`, then `.charsel` on the existing character.
+4. Confirm `.charsel` opens and offers only the nine Apprentice races.
+5. Select a race, reconnect, and confirm the selected race persists.
+6. Open the Apprentice U window and compare its layout with the approved 2.1.14i screenshot.

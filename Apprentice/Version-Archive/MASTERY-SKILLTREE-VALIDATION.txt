@@ -1,0 +1,13 @@
+MasterySkillTree 2.0.0 static validation passed.
+- Skill-tree and class JSON parse successfully.
+- One-point-per-level accounting is derived from class level.
+- Server-authoritative purchase packets and validation are present.
+- Node ranks, prerequisites, exclusivity, costs and capstones are stored.
+- Miner, Woodworker, Warrior, Ranger, Spearman and Tank mastery hooks are wired.
+- Skill-node XP, tool-speed, weapon-damage, max-health and recipe-unlock effects are wired.
+- Grid recipe capstone enforcement is installed before ingredient consumption.
+- The U-key GUI includes class navigation, XP bar, node grid, details and purchase feedback.
+- Previous interactions, combat, Tank filtering and tree-felling systems remain.
+- C# braces are balanced.
+
+A real compile and runtime test against the local Vintage Story 1.22.3 assemblies is still required.

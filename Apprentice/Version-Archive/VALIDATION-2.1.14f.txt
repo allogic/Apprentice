@@ -1,0 +1,16 @@
+PASS: modinfo version is 2.1.14f
+PASS: Apprentice content bounds are fixed at 1280 x 780
+PASS: width and height preserve the 1120 x 682 design aspect ratio
+PASS: no game-window or render-frame dimensions control dialog sizing
+PASS: tabs retain the compact 150-pixel design width
+PASS: third tab displays HIDDEN
+PASS: complete interface still uses one Apprentice-dialog scale transform
+PASS: hit testing and drag deltas still convert back into design space
+PASS: tree IDs, node IDs, hidden-class IDs, and tab IDs remain unchanged
+
+Manual in-game testing recommended:
+1. Open the U window at the GUI scale shown in the supplied screenshot.
+2. Confirm the complete window and all of its contents are visibly larger.
+3. Confirm the three tabs remain compact at the upper-left.
+4. Click every tab, several professions, nodes, and the Learn Rank button.
+5. Pan and zoom the tree and confirm the pointer remains aligned.

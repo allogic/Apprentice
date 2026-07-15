@@ -1,0 +1,238 @@
+PASS: modinfo version is 2.1.8
+PASS: Vintage Story dependency remains 1.22.3
+PASS: skill-tree configuration schema version is 2
+PASS: all 18 profession trees are present
+PASS: profession IDs are unchanged
+PASS: miner: node IDs and ordering are unchanged
+PASS: miner: path A has a profession-specific name
+PASS: miner: path B has a profession-specific name
+PASS: miner: expert A has a profession-specific name
+PASS: miner: expert B has a profession-specific name
+PASS: miner/foundation: displayed effect label is defined
+PASS: miner/discipline: displayed effect label is defined
+PASS: miner/path-a: displayed effect label is defined
+PASS: miner/path-b: displayed effect label is defined
+PASS: miner/expert-a: displayed effect label is defined
+PASS: miner/expert-b: displayed effect label is defined
+PASS: woodworker: node IDs and ordering are unchanged
+PASS: woodworker: path A has a profession-specific name
+PASS: woodworker: path B has a profession-specific name
+PASS: woodworker: expert A has a profession-specific name
+PASS: woodworker: expert B has a profession-specific name
+PASS: woodworker/foundation: displayed effect label is defined
+PASS: woodworker/discipline: displayed effect label is defined
+PASS: woodworker/path-a: displayed effect label is defined
+PASS: woodworker/path-b: displayed effect label is defined
+PASS: woodworker/expert-a: displayed effect label is defined
+PASS: woodworker/expert-b: displayed effect label is defined
+PASS: farmer: node IDs and ordering are unchanged
+PASS: farmer: path A has a profession-specific name
+PASS: farmer: path B has a profession-specific name
+PASS: farmer: expert A has a profession-specific name
+PASS: farmer: expert B has a profession-specific name
+PASS: farmer/foundation: displayed effect label is defined
+PASS: farmer/discipline: displayed effect label is defined
+PASS: farmer/path-a: displayed effect label is defined
+PASS: farmer/path-b: displayed effect label is defined
+PASS: farmer/expert-a: displayed effect label is defined
+PASS: farmer/expert-b: displayed effect label is defined
+PASS: builder: node IDs and ordering are unchanged
+PASS: builder: path A has a profession-specific name
+PASS: builder: path B has a profession-specific name
+PASS: builder: expert A has a profession-specific name
+PASS: builder: expert B has a profession-specific name
+PASS: builder/foundation: displayed effect label is defined
+PASS: builder/discipline: displayed effect label is defined
+PASS: builder/path-a: displayed effect label is defined
+PASS: builder/path-b: displayed effect label is defined
+PASS: builder/expert-a: displayed effect label is defined
+PASS: builder/expert-b: displayed effect label is defined
+PASS: blacksmith: node IDs and ordering are unchanged
+PASS: blacksmith: path A has a profession-specific name
+PASS: blacksmith: path B has a profession-specific name
+PASS: blacksmith: expert A has a profession-specific name
+PASS: blacksmith: expert B has a profession-specific name
+PASS: blacksmith/foundation: displayed effect label is defined
+PASS: blacksmith/discipline: displayed effect label is defined
+PASS: blacksmith/path-a: displayed effect label is defined
+PASS: blacksmith/path-b: displayed effect label is defined
+PASS: blacksmith/expert-a: displayed effect label is defined
+PASS: blacksmith/expert-b: displayed effect label is defined
+PASS: cook: node IDs and ordering are unchanged
+PASS: cook: path A has a profession-specific name
+PASS: cook: path B has a profession-specific name
+PASS: cook: expert A has a profession-specific name
+PASS: cook: expert B has a profession-specific name
+PASS: cook/foundation: displayed effect label is defined
+PASS: cook/discipline: displayed effect label is defined
+PASS: cook/path-a: displayed effect label is defined
+PASS: cook/path-b: displayed effect label is defined
+PASS: cook/expert-a: displayed effect label is defined
+PASS: cook/expert-b: displayed effect label is defined
+PASS: potter: node IDs and ordering are unchanged
+PASS: potter: path A has a profession-specific name
+PASS: potter: path B has a profession-specific name
+PASS: potter: expert A has a profession-specific name
+PASS: potter: expert B has a profession-specific name
+PASS: potter/foundation: displayed effect label is defined
+PASS: potter/discipline: displayed effect label is defined
+PASS: potter/path-a: displayed effect label is defined
+PASS: potter/path-b: displayed effect label is defined
+PASS: potter/expert-a: displayed effect label is defined
+PASS: potter/expert-b: displayed effect label is defined
+PASS: leatherworker: node IDs and ordering are unchanged
+PASS: leatherworker: path A has a profession-specific name
+PASS: leatherworker: path B has a profession-specific name
+PASS: leatherworker: expert A has a profession-specific name
+PASS: leatherworker: expert B has a profession-specific name
+PASS: leatherworker/foundation: displayed effect label is defined
+PASS: leatherworker/discipline: displayed effect label is defined
+PASS: leatherworker/path-a: displayed effect label is defined
+PASS: leatherworker/path-b: displayed effect label is defined
+PASS: leatherworker/expert-a: displayed effect label is defined
+PASS: leatherworker/expert-b: displayed effect label is defined
+PASS: tailor: node IDs and ordering are unchanged
+PASS: tailor: path A has a profession-specific name
+PASS: tailor: path B has a profession-specific name
+PASS: tailor: expert A has a profession-specific name
+PASS: tailor: expert B has a profession-specific name
+PASS: tailor/foundation: displayed effect label is defined
+PASS: tailor/discipline: displayed effect label is defined
+PASS: tailor/path-a: displayed effect label is defined
+PASS: tailor/path-b: displayed effect label is defined
+PASS: tailor/expert-a: displayed effect label is defined
+PASS: tailor/expert-b: displayed effect label is defined
+PASS: hunter: node IDs and ordering are unchanged
+PASS: hunter: path A has a profession-specific name
+PASS: hunter: path B has a profession-specific name
+PASS: hunter: expert A has a profession-specific name
+PASS: hunter: expert B has a profession-specific name
+PASS: hunter/foundation: displayed effect label is defined
+PASS: hunter/discipline: displayed effect label is defined
+PASS: hunter/path-a: displayed effect label is defined
+PASS: hunter/path-b: displayed effect label is defined
+PASS: hunter/expert-a: displayed effect label is defined
+PASS: hunter/expert-b: displayed effect label is defined
+PASS: warrior: node IDs and ordering are unchanged
+PASS: warrior: path A has a profession-specific name
+PASS: warrior: path B has a profession-specific name
+PASS: warrior: expert A has a profession-specific name
+PASS: warrior: expert B has a profession-specific name
+PASS: warrior/foundation: displayed effect label is defined
+PASS: warrior/discipline: displayed effect label is defined
+PASS: warrior/path-a: displayed effect label is defined
+PASS: warrior/path-b: displayed effect label is defined
+PASS: warrior/expert-a: displayed effect label is defined
+PASS: warrior/expert-b: displayed effect label is defined
+PASS: ranger: node IDs and ordering are unchanged
+PASS: ranger: path A has a profession-specific name
+PASS: ranger: path B has a profession-specific name
+PASS: ranger: expert A has a profession-specific name
+PASS: ranger: expert B has a profession-specific name
+PASS: ranger/foundation: displayed effect label is defined
+PASS: ranger/discipline: displayed effect label is defined
+PASS: ranger/path-a: displayed effect label is defined
+PASS: ranger/path-b: displayed effect label is defined
+PASS: ranger/expert-a: displayed effect label is defined
+PASS: ranger/expert-b: displayed effect label is defined
+PASS: fisher: node IDs and ordering are unchanged
+PASS: fisher: path A has a profession-specific name
+PASS: fisher: path B has a profession-specific name
+PASS: fisher: expert A has a profession-specific name
+PASS: fisher: expert B has a profession-specific name
+PASS: fisher/foundation: displayed effect label is defined
+PASS: fisher/discipline: displayed effect label is defined
+PASS: fisher/path-a: displayed effect label is defined
+PASS: fisher/path-b: displayed effect label is defined
+PASS: fisher/expert-a: displayed effect label is defined
+PASS: fisher/expert-b: displayed effect label is defined
+PASS: animalhusbandry: node IDs and ordering are unchanged
+PASS: animalhusbandry: path A has a profession-specific name
+PASS: animalhusbandry: path B has a profession-specific name
+PASS: animalhusbandry: expert A has a profession-specific name
+PASS: animalhusbandry: expert B has a profession-specific name
+PASS: animalhusbandry/foundation: displayed effect label is defined
+PASS: animalhusbandry/discipline: displayed effect label is defined
+PASS: animalhusbandry/path-a: displayed effect label is defined
+PASS: animalhusbandry/path-b: displayed effect label is defined
+PASS: animalhusbandry/expert-a: displayed effect label is defined
+PASS: animalhusbandry/expert-b: displayed effect label is defined
+PASS: beekeeper: node IDs and ordering are unchanged
+PASS: beekeeper: path A has a profession-specific name
+PASS: beekeeper: path B has a profession-specific name
+PASS: beekeeper: expert A has a profession-specific name
+PASS: beekeeper: expert B has a profession-specific name
+PASS: beekeeper/foundation: displayed effect label is defined
+PASS: beekeeper/discipline: displayed effect label is defined
+PASS: beekeeper/path-a: displayed effect label is defined
+PASS: beekeeper/path-b: displayed effect label is defined
+PASS: beekeeper/expert-a: displayed effect label is defined
+PASS: beekeeper/expert-b: displayed effect label is defined
+PASS: spearman: node IDs and ordering are unchanged
+PASS: spearman: path A has a profession-specific name
+PASS: spearman: path B has a profession-specific name
+PASS: spearman: expert A has a profession-specific name
+PASS: spearman: expert B has a profession-specific name
+PASS: spearman/foundation: displayed effect label is defined
+PASS: spearman/discipline: displayed effect label is defined
+PASS: spearman/path-a: displayed effect label is defined
+PASS: spearman/path-b: displayed effect label is defined
+PASS: spearman/expert-a: displayed effect label is defined
+PASS: spearman/expert-b: displayed effect label is defined
+PASS: shield: node IDs and ordering are unchanged
+PASS: shield: path A has a profession-specific name
+PASS: shield: path B has a profession-specific name
+PASS: shield: expert A has a profession-specific name
+PASS: shield: expert B has a profession-specific name
+PASS: shield/foundation: displayed effect label is defined
+PASS: shield/discipline: displayed effect label is defined
+PASS: shield/path-a: displayed effect label is defined
+PASS: shield/path-b: displayed effect label is defined
+PASS: shield/expert-a: displayed effect label is defined
+PASS: shield/expert-b: displayed effect label is defined
+PASS: tank: node IDs and ordering are unchanged
+PASS: tank: path A has a profession-specific name
+PASS: tank: path B has a profession-specific name
+PASS: tank: expert A has a profession-specific name
+PASS: tank: expert B has a profession-specific name
+PASS: tank/foundation: displayed effect label is defined
+PASS: tank/discipline: displayed effect label is defined
+PASS: tank/path-a: displayed effect label is defined
+PASS: tank/path-b: displayed effect label is defined
+PASS: tank/expert-a: displayed effect label is defined
+PASS: tank/expert-b: displayed effect label is defined
+PASS: every profession has an explicit vector icon mapping
+PASS: placeholder "CB" is not rendered as text
+PASS: placeholder "GA" is not rendered as text
+PASS: placeholder "CR" is not rendered as text
+PASS: placeholder "MI" is not rendered as text
+PASS: placeholder "I" is not rendered as text
+PASS: placeholder "II" is not rendered as text
+PASS: placeholder "A" is not rendered as text
+PASS: placeholder "B" is not rendered as text
+PASS: placeholder "A+" is not rendered as text
+PASS: placeholder "B+" is not rendered as text
+PASS: skill nodes use icon rendering
+PASS: categories use icon rendering
+PASS: professions use icon rendering
+PASS: purchase pending state is implemented
+PASS: authoritative purchase results are applied directly to the canvas
+PASS: temporary authoritative client display cache is implemented
+PASS: server logs incoming purchase requests
+PASS: server logs rejection reasons
+PASS: server logs successful purchases
+PASS: point spending remains scoped through the tree class ID
+PASS: purchased node path is marked dirty for synchronization
+PASS: 2.1.8 compiles with no C# errors
+
+Summary: 226 passed, 0 failed.
+
+Runtime test scope
+------------------
+The release was reference-compiled and statically validated in this environment. A live Vintage Story 1.22.3 client/server session was not available, so the following smoke test remains to be performed in game:
+
+1. Install only Apprentice-2.1.8-IconSkillTree.zip in the Mods folder.
+2. Open the skill tree with U and verify category, profession, branch, expert, and capstone icons at the intended game-window sizes.
+3. Purchase one rank in two different professions and confirm pending feedback, immediate rank/point updates, persistence after reopening, and profession isolation.
+4. Confirm the server log shows the request, validation snapshot, and accepted or exact rejected result.
+5. Confirm no blank canvas, Cairo font exception, overlapping header, disconnect crash, or shutdown crash occurs.
