@@ -1,0 +1,617 @@
+{
+  "textureWidth": 16,
+  "textureHeight": 16,
+  "textureSizes": {
+    "race": [
+      16,
+      16
+    ],
+    "seraph": [
+      32,
+      76
+    ]
+  },
+  "textures": {
+    "race": "apprentice:entity/humanoid/races/dwarf",
+    "seraph": "entity/humanoid/seraph-naked"
+  },
+  "elements": [
+    {
+      "name": "dwarf-native-0-origin",
+      "stepParentName": "Head",
+      "from": [
+        3,
+        2,
+        2.5
+      ],
+      "to": [
+        3,
+        2,
+        2.5
+      ],
+      "uv": [
+        0,
+        0
+      ],
+      "rotationOrigin": [
+        3,
+        2,
+        2.5
+      ],
+      "faces": {},
+      "children": [
+        {
+          "name": "earL",
+          "from": [
+            -0.5,
+            -0.5,
+            1.9
+          ],
+          "to": [
+            0.5,
+            1,
+            2.4
+          ],
+          "uv": [
+            25,
+            6.5
+          ],
+          "rotationOrigin": [
+            -0.5,
+            0.5,
+            2.4
+          ],
+          "rotationY": -22.5,
+          "rotationZ": 10,
+          "faces": {
+            "north": {
+              "texture": "#seraph",
+              "uv": [
+                25,
+                7,
+                26,
+                8.5
+              ],
+              "windMode": [
+                -1,
+                -1,
+                -1,
+                -1
+              ]
+            },
+            "east": {
+              "texture": "#seraph",
+              "uv": [
+                26,
+                7,
+                26.5,
+                8.5
+              ]
+            },
+            "south": {
+              "texture": "#seraph",
+              "uv": [
+                26.5,
+                7,
+                27.5,
+                8.5
+              ]
+            },
+            "up": {
+              "texture": "#seraph",
+              "uv": [
+                25,
+                6.5,
+                26,
+                7
+              ]
+            },
+            "down": {
+              "texture": "#seraph",
+              "uv": [
+                26,
+                6.5,
+                27,
+                7
+              ]
+            }
+          }
+        },
+        {
+          "name": "earR",
+          "from": [
+            -0.5,
+            -0.5,
+            -2.4
+          ],
+          "to": [
+            0.5,
+            1,
+            -1.9
+          ],
+          "uv": [
+            25,
+            10
+          ],
+          "rotationOrigin": [
+            -0.5,
+            0.5,
+            -2.4
+          ],
+          "rotationY": 22.5,
+          "rotationZ": 10,
+          "faces": {
+            "north": {
+              "texture": "#seraph",
+              "uv": [
+                25,
+                10.5,
+                26,
+                12
+              ],
+              "windMode": [
+                -1,
+                -1,
+                -1,
+                -1
+              ]
+            },
+            "east": {
+              "texture": "#seraph",
+              "uv": [
+                26,
+                10.5,
+                26.5,
+                12
+              ]
+            },
+            "south": {
+              "texture": "#seraph",
+              "uv": [
+                26.5,
+                10.5,
+                27.5,
+                12
+              ],
+              "windMode": [
+                -1,
+                -1,
+                -1,
+                -1
+              ]
+            },
+            "up": {
+              "texture": "#seraph",
+              "uv": [
+                25,
+                10,
+                26,
+                10.5
+              ]
+            },
+            "down": {
+              "texture": "#seraph",
+              "uv": [
+                26,
+                10,
+                27,
+                10.5
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "dwarf-native-1-origin",
+      "stepParentName": "Head",
+      "from": [
+        0,
+        2.4,
+        2.5
+      ],
+      "to": [
+        0,
+        2.4,
+        2.5
+      ],
+      "uv": [
+        0,
+        0
+      ],
+      "rotationOrigin": [
+        0,
+        2.4,
+        2.5
+      ],
+      "faces": {},
+      "children": [
+        {
+          "name": "nose1",
+          "from": [
+            -0.1,
+            -0.4,
+            -0.3
+          ],
+          "to": [
+            0.4,
+            0.2,
+            0.3
+          ],
+          "uv": [
+            3.5,
+            12.5
+          ],
+          "rotationOrigin": [
+            -0.1,
+            0,
+            0
+          ],
+          "rotationZ": -30,
+          "faces": {
+            "north": {
+              "texture": "#seraph",
+              "uv": [
+                3.5,
+                12.5,
+                4,
+                13
+              ]
+            },
+            "south": {
+              "texture": "#seraph",
+              "uv": [
+                4,
+                12.5,
+                4.5,
+                13
+              ]
+            },
+            "west": {
+              "texture": "#seraph",
+              "uv": [
+                4.5,
+                12.5,
+                5,
+                13
+              ]
+            }
+          },
+          "children": [
+            {
+              "name": "nose2",
+              "from": [
+                -0.05,
+                -0.4,
+                -0.05
+              ],
+              "to": [
+                0.45,
+                0.2,
+                0.65
+              ],
+              "uv": [
+                3.5,
+                13.5
+              ],
+              "rotationOrigin": [
+                0,
+                0,
+                0.3
+              ],
+              "rotationZ": 14,
+              "faces": {
+                "north": {
+                  "texture": "#seraph",
+                  "uv": [
+                    3.5,
+                    14,
+                    4,
+                    14.5
+                  ]
+                },
+                "south": {
+                  "texture": "#seraph",
+                  "uv": [
+                    4,
+                    14,
+                    4.5,
+                    14.5
+                  ]
+                },
+                "west": {
+                  "texture": "#seraph",
+                  "uv": [
+                    4.5,
+                    14,
+                    5,
+                    14.5
+                  ]
+                },
+                "up": {
+                  "texture": "#seraph",
+                  "uv": [
+                    3.5,
+                    13.5,
+                    4,
+                    14
+                  ]
+                },
+                "down": {
+                  "texture": "#seraph",
+                  "uv": [
+                    4,
+                    13.5,
+                    4.5,
+                    14
+                  ]
+                }
+              },
+              "children": [
+                {
+                  "name": "nose3",
+                  "from": [
+                    0,
+                    -0.3,
+                    0.05
+                  ],
+                  "to": [
+                    0.5,
+                    0.1,
+                    0.65
+                  ],
+                  "uv": [
+                    3.5,
+                    15
+                  ],
+                  "rotationOrigin": [
+                    0,
+                    0,
+                    0.3
+                  ],
+                  "rotationZ": 28,
+                  "faces": {
+                    "north": {
+                      "texture": "#seraph",
+                      "uv": [
+                        3.5,
+                        15.5,
+                        4,
+                        16
+                      ]
+                    },
+                    "south": {
+                      "texture": "#seraph",
+                      "uv": [
+                        4,
+                        15.5,
+                        4.5,
+                        16
+                      ]
+                    },
+                    "west": {
+                      "texture": "#seraph",
+                      "uv": [
+                        4.5,
+                        15.5,
+                        5,
+                        16
+                      ]
+                    },
+                    "up": {
+                      "texture": "#seraph",
+                      "uv": [
+                        3.5,
+                        15,
+                        4,
+                        15.5
+                      ]
+                    },
+                    "down": {
+                      "texture": "#seraph",
+                      "uv": [
+                        4,
+                        15,
+                        4.5,
+                        15.5
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "dwarf-face-root",
+      "stepParentName": "Head",
+      "from": [
+        0,
+        2.4,
+        2.5
+      ],
+      "to": [
+        0,
+        2.4,
+        2.5
+      ],
+      "rotationOrigin": [
+        0,
+        2.4,
+        2.5
+      ],
+      "faces": {},
+      "children": [
+        {
+          "name": "dwarf-brow",
+          "from": [
+            -0.1,
+            0.45,
+            -1.65
+          ],
+          "to": [
+            0.45,
+            1.05,
+            1.65
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -0.1,
+            0.45,
+            -1.65
+          ],
+          "faces": {
+            "north": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "east": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "south": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "west": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "up": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "down": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            }
+          }
+        },
+        {
+          "name": "dwarf-jaw",
+          "from": [
+            -0.1,
+            -1.65,
+            -1.45
+          ],
+          "to": [
+            0.45,
+            -0.65,
+            1.45
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -0.1,
+            -1.65,
+            -1.45
+          ],
+          "faces": {
+            "north": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "east": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "south": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "west": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "up": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "down": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            }
+          }
+        }
+      ],
+      "attachmentpoints": [
+        {
+          "code": "Apprentice-dwarf-face",
+          "posX": "0",
+          "posY": "0",
+          "posZ": "0",
+          "rotationX": "0",
+          "rotationY": "0",
+          "rotationZ": "0"
+        }
+      ]
+    }
+  ]
+}

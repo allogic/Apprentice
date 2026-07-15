@@ -1,0 +1,137 @@
+[
+  {
+    "enabled": true,
+    "code": "apprentice-race-dragonborn",
+    "traits": [
+      "apprentice-race-dragonborn-blood",
+      "apprentice-race-dragonborn-burden"
+    ],
+    "gear": [
+      { "type": "item", "code": "game:clothes-upperbody-commoner-shirt" },
+      { "type": "item", "code": "game:clothes-upperbodyover-commoner-coat" },
+      { "type": "item", "code": "game:clothes-lowerbody-commoner-trousers" },
+      { "type": "item", "code": "game:clothes-foot-commoner-boots" },
+      { "type": "item", "code": "game:clothes-hand-commoner-gloves" }
+    ]
+  },
+  {
+    "enabled": true,
+    "code": "apprentice-race-dwarf",
+    "traits": [
+      "apprentice-race-dwarf-stoneborn",
+      "apprentice-race-dwarf-stocky"
+    ],
+    "gear": [
+      { "type": "item", "code": "game:clothes-upperbody-commoner-shirt" },
+      { "type": "item", "code": "game:clothes-upperbodyover-commoner-coat" },
+      { "type": "item", "code": "game:clothes-lowerbody-commoner-trousers" },
+      { "type": "item", "code": "game:clothes-foot-commoner-boots" },
+      { "type": "item", "code": "game:clothes-hand-commoner-gloves" }
+    ]
+  },
+  {
+    "enabled": true,
+    "code": "apprentice-race-elf",
+    "traits": [
+      "apprentice-race-elf-keen",
+      "apprentice-race-elf-delicate"
+    ],
+    "gear": [
+      { "type": "item", "code": "game:clothes-upperbody-commoner-shirt" },
+      { "type": "item", "code": "game:clothes-upperbodyover-commoner-coat" },
+      { "type": "item", "code": "game:clothes-lowerbody-commoner-trousers" },
+      { "type": "item", "code": "game:clothes-foot-commoner-boots" },
+      { "type": "item", "code": "game:clothes-hand-commoner-gloves" }
+    ]
+  },
+  {
+    "enabled": true,
+    "code": "apprentice-race-gnome",
+    "traits": [
+      "apprentice-race-gnome-cunning",
+      "apprentice-race-gnome-small"
+    ],
+    "gear": [
+      { "type": "item", "code": "game:clothes-upperbody-commoner-shirt" },
+      { "type": "item", "code": "game:clothes-upperbodyover-commoner-coat" },
+      { "type": "item", "code": "game:clothes-lowerbody-commoner-trousers" },
+      { "type": "item", "code": "game:clothes-foot-commoner-boots" },
+      { "type": "item", "code": "game:clothes-hand-commoner-gloves" }
+    ]
+  },
+  {
+    "enabled": true,
+    "code": "apprentice-race-goliath",
+    "traits": [
+      "apprentice-race-goliath-giantkin",
+      "apprentice-race-goliath-appetite"
+    ],
+    "gear": [
+      { "type": "item", "code": "game:clothes-upperbody-commoner-shirt" },
+      { "type": "item", "code": "game:clothes-upperbodyover-commoner-coat" },
+      { "type": "item", "code": "game:clothes-lowerbody-commoner-trousers" },
+      { "type": "item", "code": "game:clothes-foot-commoner-boots" },
+      { "type": "item", "code": "game:clothes-hand-commoner-gloves" }
+    ]
+  },
+  {
+    "enabled": true,
+    "code": "apprentice-race-halfling",
+    "traits": [
+      "apprentice-race-halfling-lucky",
+      "apprentice-race-halfling-small"
+    ],
+    "gear": [
+      { "type": "item", "code": "game:clothes-upperbody-commoner-shirt" },
+      { "type": "item", "code": "game:clothes-upperbodyover-commoner-coat" },
+      { "type": "item", "code": "game:clothes-lowerbody-commoner-trousers" },
+      { "type": "item", "code": "game:clothes-foot-commoner-boots" },
+      { "type": "item", "code": "game:clothes-hand-commoner-gloves" }
+    ]
+  },
+  {
+    "enabled": true,
+    "code": "apprentice-race-human",
+    "traits": [
+      "apprentice-race-human-versatile",
+      "apprentice-race-human-mortal"
+    ],
+    "gear": [
+      { "type": "item", "code": "game:clothes-upperbody-commoner-shirt" },
+      { "type": "item", "code": "game:clothes-upperbodyover-commoner-coat" },
+      { "type": "item", "code": "game:clothes-lowerbody-commoner-trousers" },
+      { "type": "item", "code": "game:clothes-foot-commoner-boots" },
+      { "type": "item", "code": "game:clothes-hand-commoner-gloves" }
+    ]
+  },
+  {
+    "enabled": true,
+    "code": "apprentice-race-orc",
+    "traits": [
+      "apprentice-race-orc-relentless",
+      "apprentice-race-orc-appetite"
+    ],
+    "gear": [
+      { "type": "item", "code": "game:clothes-upperbody-commoner-shirt" },
+      { "type": "item", "code": "game:clothes-upperbodyover-commoner-coat" },
+      { "type": "item", "code": "game:clothes-lowerbody-commoner-trousers" },
+      { "type": "item", "code": "game:clothes-foot-commoner-boots" },
+      { "type": "item", "code": "game:clothes-hand-commoner-gloves" }
+    ]
+  },
+  {
+    "enabled": true,
+    "code": "apprentice-race-tiefling",
+    "traits": [
+      "apprentice-race-tiefling-legacy",
+      "apprentice-race-tiefling-unsettling"
+    ],
+    "gear": [
+      { "type": "item", "code": "game:clothes-upperbody-commoner-shirt" },
+      { "type": "item", "code": "game:clothes-upperbodyover-commoner-coat" },
+      { "type": "item", "code": "game:clothes-lowerbody-commoner-trousers" },
+      { "type": "item", "code": "game:clothes-foot-commoner-boots" },
+      { "type": "item", "code": "game:clothes-hand-commoner-gloves" }
+    ]
+  }
+]

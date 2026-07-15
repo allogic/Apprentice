@@ -1,0 +1,1153 @@
+{
+  "textureWidth": 16,
+  "textureHeight": 16,
+  "textureSizes": {
+    "race": [
+      16,
+      16
+    ]
+  },
+  "textures": {
+    "race": "apprentice:entity/humanoid/races/dragonborn",
+    "bone": "apprentice:entity/humanoid/races/bone"
+  },
+  "elements": [
+    {
+      "name": "dragonborn-face-root",
+      "stepParentName": "Head",
+      "from": [
+        0,
+        2.4,
+        2.5
+      ],
+      "to": [
+        0,
+        2.4,
+        2.5
+      ],
+      "rotationOrigin": [
+        0,
+        2.4,
+        2.5
+      ],
+      "faces": {},
+      "children": [
+        {
+          "name": "dragonborn-brow-left",
+          "from": [
+            0,
+            0.42,
+            0.08
+          ],
+          "to": [
+            0.78,
+            1.12,
+            2.42
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            0.28,
+            0.7,
+            0.1
+          ],
+          "rotationX": -10,
+          "faces": {
+            "north": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "east": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "south": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "west": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "up": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "down": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            }
+          }
+        },
+        {
+          "name": "dragonborn-brow-right",
+          "from": [
+            0,
+            0.42,
+            -2.42
+          ],
+          "to": [
+            0.78,
+            1.12,
+            -0.08
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            0.28,
+            0.7,
+            -0.1
+          ],
+          "rotationX": 10,
+          "faces": {
+            "north": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "east": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "south": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "west": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "up": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "down": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            }
+          }
+        },
+        {
+          "name": "dragonborn-forehead-plate",
+          "from": [
+            0.02,
+            1.16,
+            -0.72
+          ],
+          "to": [
+            0.68,
+            2.3,
+            0.72
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            0.02,
+            1.16,
+            -0.72
+          ],
+          "faces": {
+            "north": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "east": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "south": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "west": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "up": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "down": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            }
+          }
+        },
+        {
+          "name": "dragonborn-cheek-left",
+          "from": [
+            0,
+            -1.02,
+            1.3
+          ],
+          "to": [
+            0.68,
+            0.36,
+            2.78
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            0.25,
+            -0.25,
+            1.35
+          ],
+          "rotationX": -8,
+          "faces": {
+            "north": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "east": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "south": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "west": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "up": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "down": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            }
+          }
+        },
+        {
+          "name": "dragonborn-cheek-right",
+          "from": [
+            0,
+            -1.02,
+            -2.78
+          ],
+          "to": [
+            0.68,
+            0.36,
+            -1.3
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            0.25,
+            -0.25,
+            -1.35
+          ],
+          "rotationX": 8,
+          "faces": {
+            "north": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "east": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "south": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "west": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "up": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "down": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            }
+          }
+        },
+        {
+          "name": "dragonborn-upper-muzzle",
+          "from": [
+            0.1,
+            -0.76,
+            -1.48
+          ],
+          "to": [
+            1.92,
+            0.22,
+            1.48
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            0.1,
+            -0.76,
+            -1.48
+          ],
+          "faces": {
+            "north": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "east": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "south": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "west": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "up": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "down": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            }
+          }
+        },
+        {
+          "name": "dragonborn-nose-cap",
+          "from": [
+            1.78,
+            -0.66,
+            -1.22
+          ],
+          "to": [
+            2.48,
+            0.1,
+            1.22
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            1.78,
+            -0.66,
+            -1.22
+          ],
+          "faces": {
+            "north": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "east": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "south": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "west": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "up": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "down": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            }
+          }
+        },
+        {
+          "name": "dragonborn-lower-jaw",
+          "from": [
+            0.06,
+            -1.68,
+            -1.62
+          ],
+          "to": [
+            1.78,
+            -0.8,
+            1.62
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            0.06,
+            -1.68,
+            -1.62
+          ],
+          "faces": {
+            "north": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "east": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "south": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "west": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "up": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "down": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            }
+          }
+        },
+        {
+          "name": "dragonborn-jaw-tip",
+          "from": [
+            1.58,
+            -1.52,
+            -1.36
+          ],
+          "to": [
+            2.18,
+            -0.86,
+            1.36
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            1.58,
+            -1.52,
+            -1.36
+          ],
+          "faces": {
+            "north": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "east": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "south": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "west": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "up": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "down": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            }
+          }
+        },
+        {
+          "name": "dragonborn-chin",
+          "from": [
+            0.02,
+            -2.02,
+            -1.2
+          ],
+          "to": [
+            0.92,
+            -1.46,
+            1.2
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            0.02,
+            -2.02,
+            -1.2
+          ],
+          "faces": {
+            "north": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "east": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "south": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "west": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "up": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "down": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            }
+          }
+        },
+        {
+          "name": "dragonborn-horn-left-base",
+          "from": [
+            0.02,
+            1.3,
+            1.52
+          ],
+          "to": [
+            0.7,
+            2.86,
+            2.18
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            0.34,
+            1.32,
+            1.84
+          ],
+          "rotationX": -18,
+          "rotationZ": 18,
+          "faces": {
+            "north": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "east": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "south": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "west": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "up": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "down": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            }
+          }
+        },
+        {
+          "name": "dragonborn-horn-left-tip",
+          "from": [
+            0.08,
+            2.6,
+            1.68
+          ],
+          "to": [
+            0.48,
+            3.9,
+            2.08
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            0.28,
+            2.62,
+            1.88
+          ],
+          "rotationX": -24,
+          "rotationZ": 24,
+          "faces": {
+            "north": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "east": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "south": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "west": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "up": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "down": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            }
+          }
+        },
+        {
+          "name": "dragonborn-horn-right-base",
+          "from": [
+            0.02,
+            1.3,
+            -2.18
+          ],
+          "to": [
+            0.7,
+            2.86,
+            -1.52
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            0.34,
+            1.32,
+            -1.84
+          ],
+          "rotationX": 18,
+          "rotationZ": 18,
+          "faces": {
+            "north": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "east": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "south": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "west": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "up": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "down": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            }
+          }
+        },
+        {
+          "name": "dragonborn-horn-right-tip",
+          "from": [
+            0.08,
+            2.6,
+            -2.08
+          ],
+          "to": [
+            0.48,
+            3.9,
+            -1.68
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            0.28,
+            2.62,
+            -1.88
+          ],
+          "rotationX": 24,
+          "rotationZ": 24,
+          "faces": {
+            "north": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "east": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "south": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "west": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "up": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "down": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            }
+          }
+        }
+      ],
+      "attachmentpoints": [
+        {
+          "code": "Apprentice-dragonborn-face",
+          "posX": "0",
+          "posY": "0",
+          "posZ": "0",
+          "rotationX": "0",
+          "rotationY": "0",
+          "rotationZ": "0"
+        }
+      ]
+    }
+  ]
+}

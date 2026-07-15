@@ -1,0 +1,72 @@
+[
+  {
+    "enabled": false,
+    "code": "commoner",
+    "traits": [],
+    "gear": []
+  },
+  {
+    "enabled": false,
+    "code": "hunter",
+    "traits": [
+      "focused",
+      "resourceful",
+      "fleetfooted",
+      "bowyer",
+      "farsighted",
+      "claustrophobic"
+    ],
+    "gear": []
+  },
+  {
+    "enabled": false,
+    "code": "malefactor",
+    "traits": [
+      "forager",
+      "pilferer",
+      "furtive",
+      "improviser",
+      "frail",
+      "nervous"
+    ],
+    "gear": []
+  },
+  {
+    "enabled": false,
+    "code": "clockmaker",
+    "traits": [
+      "precise",
+      "technical",
+      "fleetfooted",
+      "tinkerer",
+      "frail",
+      "nervous"
+    ],
+    "gear": []
+  },
+  {
+    "enabled": false,
+    "code": "blackguard",
+    "traits": [
+      "soldier",
+      "hardy",
+      "merciless",
+      "ravenous",
+      "nearsighted",
+      "heavyhanded"
+    ],
+    "gear": []
+  },
+  {
+    "enabled": false,
+    "code": "tailor",
+    "traits": [
+      "clothier",
+      "mender",
+      "civil",
+      "weak",
+      "kind"
+    ],
+    "gear": []
+  }
+]

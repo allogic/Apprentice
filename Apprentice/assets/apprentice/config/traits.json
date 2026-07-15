@@ -1,0 +1,156 @@
+[
+  {
+    "code": "apprentice-race-dragonborn-blood",
+    "type": "positive",
+    "attributes": {
+      "maxhealthExtraPoints": 2,
+      "meleeWeaponsDamage": 0.08
+    }
+  },
+  {
+    "code": "apprentice-race-dragonborn-burden",
+    "type": "negative",
+    "attributes": {
+      "hungerrate": 0.15,
+      "walkspeed": -0.03
+    }
+  },
+  {
+    "code": "apprentice-race-dwarf-stoneborn",
+    "type": "positive",
+    "attributes": {
+      "maxhealthExtraPoints": 2,
+      "miningSpeedMul": 0.12,
+      "oreDropRate": 0.08,
+      "armorWalkSpeedAffectedness": -0.1
+    }
+  },
+  {
+    "code": "apprentice-race-dwarf-stocky",
+    "type": "negative",
+    "attributes": {
+      "walkspeed": -0.08,
+      "hungerrate": 0.08
+    }
+  },
+  {
+    "code": "apprentice-race-elf-keen",
+    "type": "positive",
+    "attributes": {
+      "rangedWeaponsAcc": 0.12,
+      "forageDropRate": 0.1,
+      "walkspeed": 0.06
+    }
+  },
+  {
+    "code": "apprentice-race-elf-delicate",
+    "type": "negative",
+    "attributes": {
+      "maxhealthExtraPoints": -2,
+      "meleeWeaponsDamage": -0.08
+    }
+  },
+  {
+    "code": "apprentice-race-gnome-cunning",
+    "type": "positive",
+    "attributes": {
+      "mechanicalsDamage": 0.15,
+      "rustyGearDropRate": 0.1,
+      "temporalGearTLRepairCost": -0.1
+    }
+  },
+  {
+    "code": "apprentice-race-gnome-small",
+    "type": "negative",
+    "attributes": {
+      "maxhealthExtraPoints": -2,
+      "meleeWeaponsDamage": -0.12
+    }
+  },
+  {
+    "code": "apprentice-race-goliath-giantkin",
+    "type": "positive",
+    "attributes": {
+      "maxhealthExtraPoints": 3,
+      "meleeWeaponsDamage": 0.12,
+      "armorWalkSpeedAffectedness": -0.15
+    }
+  },
+  {
+    "code": "apprentice-race-goliath-appetite",
+    "type": "negative",
+    "attributes": {
+      "hungerrate": 0.2,
+      "rangedWeaponsAcc": -0.08
+    }
+  },
+  {
+    "code": "apprentice-race-halfling-lucky",
+    "type": "positive",
+    "attributes": {
+      "animalSeekingRange": -0.15,
+      "forageDropRate": 0.1,
+      "wholeVesselLootChance": 0.08
+    }
+  },
+  {
+    "code": "apprentice-race-halfling-small",
+    "type": "negative",
+    "attributes": {
+      "maxhealthExtraPoints": -2,
+      "meleeWeaponsDamage": -0.12
+    }
+  },
+  {
+    "code": "apprentice-race-human-versatile",
+    "type": "positive",
+    "attributes": {
+      "forageDropRate": 0.04,
+      "miningSpeedMul": 0.04,
+      "meleeWeaponsDamage": 0.04,
+      "rangedWeaponsDamage": 0.04,
+      "mechanicalsDamage": 0.04
+    }
+  },
+  {
+    "code": "apprentice-race-human-mortal",
+    "type": "negative",
+    "attributes": {
+      "hungerrate": 0.05
+    }
+  },
+  {
+    "code": "apprentice-race-orc-relentless",
+    "type": "positive",
+    "attributes": {
+      "maxhealthExtraPoints": 3,
+      "meleeWeaponsDamage": 0.12,
+      "walkspeed": 0.05
+    }
+  },
+  {
+    "code": "apprentice-race-orc-appetite",
+    "type": "negative",
+    "attributes": {
+      "hungerrate": 0.2,
+      "rangedWeaponsAcc": -0.08
+    }
+  },
+  {
+    "code": "apprentice-race-tiefling-legacy",
+    "type": "positive",
+    "attributes": {
+      "maxhealthExtraPoints": 1,
+      "rangedWeaponsDamage": 0.06,
+      "temporalGearTLRepairCost": -0.1
+    }
+  },
+  {
+    "code": "apprentice-race-tiefling-unsettling",
+    "type": "negative",
+    "attributes": {
+      "animalSeekingRange": 0.15,
+      "hungerrate": 0.08
+    }
+  }
+]

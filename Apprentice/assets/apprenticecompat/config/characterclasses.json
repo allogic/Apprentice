@@ -1,0 +1,210 @@
+[
+  {
+    "enabled": false,
+    "code": "commoner",
+    "traits": [],
+    "gear": []
+  },
+  {
+    "enabled": false,
+    "code": "hunter",
+    "traits": [
+      "focused",
+      "resourceful",
+      "fleetfooted",
+      "bowyer",
+      "farsighted",
+      "claustrophobic"
+    ],
+    "gear": []
+  },
+  {
+    "enabled": false,
+    "code": "malefactor",
+    "traits": [
+      "forager",
+      "pilferer",
+      "furtive",
+      "improviser",
+      "frail",
+      "nervous"
+    ],
+    "gear": []
+  },
+  {
+    "enabled": false,
+    "code": "clockmaker",
+    "traits": [
+      "precise",
+      "technical",
+      "fleetfooted",
+      "tinkerer",
+      "frail",
+      "nervous"
+    ],
+    "gear": []
+  },
+  {
+    "enabled": false,
+    "code": "blackguard",
+    "traits": [
+      "soldier",
+      "hardy",
+      "merciless",
+      "ravenous",
+      "nearsighted",
+      "heavyhanded"
+    ],
+    "gear": []
+  },
+  {
+    "enabled": false,
+    "code": "tailor",
+    "traits": [
+      "clothier",
+      "mender",
+      "civil",
+      "weak",
+      "kind"
+    ],
+    "gear": []
+  },
+  {
+    "enabled": false,
+    "code": "miner",
+    "traits": [],
+    "gear": []
+  },
+  {
+    "enabled": false,
+    "code": "farmer",
+    "traits": [],
+    "gear": []
+  },
+  {
+    "enabled": false,
+    "code": "lumberjack",
+    "traits": [],
+    "gear": []
+  },
+  {
+    "enabled": false,
+    "code": "blacksmith",
+    "traits": [],
+    "gear": []
+  },
+  {
+    "enabled": false,
+    "code": "potter",
+    "traits": [],
+    "gear": []
+  },
+  {
+    "enabled": false,
+    "code": "carpenter",
+    "traits": [],
+    "gear": []
+  },
+  {
+    "enabled": false,
+    "code": "wanderer",
+    "traits": [],
+    "gear": []
+  },
+  {
+    "enabled": false,
+    "code": "innkeeper",
+    "traits": [],
+    "gear": []
+  },
+  {
+    "enabled": false,
+    "code": "handwright",
+    "traits": [],
+    "gear": []
+  },
+  {
+    "enabled": false,
+    "code": "druid",
+    "traits": [],
+    "gear": []
+  },
+  {
+    "enabled": false,
+    "code": "squire",
+    "traits": [],
+    "gear": []
+  },
+  {
+    "enabled": false,
+    "code": "wildrunner",
+    "traits": [],
+    "gear": []
+  },
+  {
+    "enabled": false,
+    "code": "mercenary",
+    "traits": [],
+    "gear": []
+  },
+  {
+    "enabled": false,
+    "code": "entropic",
+    "traits": [],
+    "gear": []
+  },
+  {
+    "enabled": false,
+    "code": "threadweaver",
+    "traits": [],
+    "gear": []
+  },
+  {
+    "enabled": false,
+    "code": "mason",
+    "traits": [],
+    "gear": []
+  },
+  {
+    "enabled": false,
+    "code": "earthshaper",
+    "traits": [],
+    "gear": []
+  },
+  {
+    "enabled": false,
+    "code": "deepforger",
+    "traits": [],
+    "gear": []
+  },
+  {
+    "enabled": false,
+    "code": "shadowstrider",
+    "traits": [],
+    "gear": []
+  },
+  {
+    "enabled": false,
+    "code": "timberborn",
+    "traits": [],
+    "gear": []
+  },
+  {
+    "enabled": false,
+    "code": "homesteader",
+    "traits": [],
+    "gear": []
+  },
+  {
+    "enabled": false,
+    "code": "drunkard",
+    "traits": [],
+    "gear": []
+  },
+  {
+    "enabled": false,
+    "code": "healer",
+    "traits": [],
+    "gear": []
+  }
+]

@@ -1,0 +1,15 @@
+[
+  {
+    "code": "baseskin",
+    "variants": [
+      { "code": "apprentice-dragonborn", "texture": "apprentice:entity/humanoid/races/skins/dragonborn" },
+      { "code": "apprentice-dwarf", "texture": "apprentice:entity/humanoid/races/skins/dwarf" },
+      { "code": "apprentice-elf", "texture": "apprentice:entity/humanoid/races/skins/elf" },
+      { "code": "apprentice-gnome", "texture": "apprentice:entity/humanoid/races/skins/gnome" },
+      { "code": "apprentice-goliath", "texture": "apprentice:entity/humanoid/races/skins/goliath" },
+      { "code": "apprentice-halfling", "texture": "apprentice:entity/humanoid/races/skins/halfling" },
+      { "code": "apprentice-orc", "texture": "apprentice:entity/humanoid/races/skins/orc" },
+      { "code": "apprentice-tiefling", "texture": "apprentice:entity/humanoid/races/skins/tiefling" }
+    ]
+  }
+]

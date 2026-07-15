@@ -1,0 +1,3235 @@
+{
+  "Version": 2,
+  "Trees": {
+    "miner": {
+      "ClassId": "miner",
+      "DisplayName": "Miner",
+      "Theme": "Excavation",
+      "PassiveDescription": "+0.75% stone and ore mining speed per mastery rank (max 50).",
+      "PassiveEffect": {
+        "Type": "MiningSpeed",
+        "ValuePerRank": 0.0075
+      },
+      "WeaponPatterns": [],
+      "Nodes": [
+        {
+          "Id": "foundation",
+          "DisplayName": "Sure Swing",
+          "Description": "A cleaner pickaxe motion lets you remove stone and ore faster.",
+          "Cost": 1,
+          "MaxRank": 3,
+          "RequiredClassLevel": 2,
+          "RequiredPointsSpent": 0,
+          "Requires": [],
+          "RequiresAny": [],
+          "Column": 1,
+          "Row": 0,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "MiningSpeed",
+              "ValuePerRank": 0.02,
+              "Stat": "Stone and ore mining speed"
+            }
+          ]
+        },
+        {
+          "Id": "discipline",
+          "DisplayName": "Tempered Handle",
+          "Description": "Careful tool control gives each pickaxe more working life.",
+          "Cost": 2,
+          "MaxRank": 3,
+          "RequiredClassLevel": 5,
+          "RequiredPointsSpent": 2,
+          "Requires": [
+            "foundation"
+          ],
+          "RequiresAny": [],
+          "Column": 1,
+          "Row": 1,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "DurabilitySave",
+              "ValuePerRank": 0.05,
+              "Stat": "Pickaxe durability saved",
+              "Code": "*:pickaxe-*"
+            }
+          ]
+        },
+        {
+          "Id": "path-a",
+          "DisplayName": "Surveyor",
+          "Description": "Careful extraction turns good ore readings into better recovery from ore blocks.",
+          "Cost": 3,
+          "MaxRank": 3,
+          "RequiredClassLevel": 10,
+          "RequiredPointsSpent": 6,
+          "Requires": [
+            "discipline"
+          ],
+          "RequiresAny": [],
+          "ExclusiveGroup": "specialization",
+          "Column": 0,
+          "Row": 2,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "OreYield",
+              "ValuePerRank": 0.03,
+              "Stat": "Ore block drops",
+              "Code": "*ore*"
+            }
+          ]
+        },
+        {
+          "Id": "path-b",
+          "DisplayName": "Deep Delver",
+          "Description": "Experience underground teaches you how to survive dangerous drops and shafts.",
+          "Cost": 3,
+          "MaxRank": 3,
+          "RequiredClassLevel": 10,
+          "RequiredPointsSpent": 6,
+          "Requires": [
+            "discipline"
+          ],
+          "RequiresAny": [],
+          "ExclusiveGroup": "specialization",
+          "Column": 2,
+          "Row": 2,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "FallDamageReduction",
+              "ValuePerRank": 0.04,
+              "Stat": "Fall damage taken"
+            }
+          ]
+        },
+        {
+          "Id": "expert-a",
+          "DisplayName": "Master Surveyor",
+          "Description": "Expert geological reading improves recovery from crystal-bearing stone.",
+          "Cost": 5,
+          "MaxRank": 2,
+          "RequiredClassLevel": 25,
+          "RequiredPointsSpent": 15,
+          "Requires": [
+            "path-a"
+          ],
+          "RequiresAny": [],
+          "Column": 0,
+          "Row": 3,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "CrystalYield",
+              "ValuePerRank": 0.05,
+              "Stat": "Crystal-bearing block drops",
+              "Code": "*crystal*"
+            }
+          ]
+        },
+        {
+          "Id": "expert-b",
+          "DisplayName": "Earthbreaker",
+          "Description": "Years below ground harden your body against the pressure of deep work.",
+          "Cost": 5,
+          "MaxRank": 2,
+          "RequiredClassLevel": 25,
+          "RequiredPointsSpent": 15,
+          "Requires": [
+            "path-b"
+          ],
+          "RequiresAny": [],
+          "Column": 2,
+          "Row": 3,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "MaxHealth",
+              "ValuePerRank": 0.5,
+              "Stat": "Maximum health"
+            }
+          ]
+        },
+        {
+          "Id": "capstone",
+          "DisplayName": "Miner Grandmaster",
+          "Description": "The final miner mastery reward. Unlocks the exclusive miner grandmaster recipe.",
+          "Cost": 8,
+          "MaxRank": 1,
+          "RequiredClassLevel": 40,
+          "RequiredPointsSpent": 28,
+          "Requires": [],
+          "RequiresAny": [
+            "expert-a",
+            "expert-b"
+          ],
+          "Column": 1,
+          "Row": 4,
+          "Capstone": true,
+          "Effects": [
+            {
+              "Type": "UnlockRecipe",
+              "ValuePerRank": 0,
+              "Code": "apprentice:mastersurveykit"
+            }
+          ]
+        }
+      ]
+    },
+    "woodworker": {
+      "ClassId": "woodworker",
+      "DisplayName": "Woodworker",
+      "Theme": "Forestcraft",
+      "PassiveDescription": "+0.75% chopping speed against wood per mastery rank (max 50).",
+      "PassiveEffect": {
+        "Type": "WoodMiningSpeed",
+        "ValuePerRank": 0.0075
+      },
+      "WeaponPatterns": [],
+      "Nodes": [
+        {
+          "Id": "foundation",
+          "DisplayName": "Lumber Grip",
+          "Description": "Strong axe control speeds up work on logs and wooden blocks.",
+          "Cost": 1,
+          "MaxRank": 3,
+          "RequiredClassLevel": 2,
+          "RequiredPointsSpent": 0,
+          "Requires": [],
+          "RequiresAny": [],
+          "Column": 1,
+          "Row": 0,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "ToolSpeed",
+              "ValuePerRank": 0.02,
+              "Stat": "Woodcutting speed"
+            }
+          ]
+        },
+        {
+          "Id": "discipline",
+          "DisplayName": "Edge Keeper",
+          "Description": "Good maintenance reduces durability lost by axes.",
+          "Cost": 2,
+          "MaxRank": 3,
+          "RequiredClassLevel": 5,
+          "RequiredPointsSpent": 2,
+          "Requires": [
+            "foundation"
+          ],
+          "RequiresAny": [],
+          "Column": 1,
+          "Row": 1,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "DurabilitySave",
+              "ValuePerRank": 0.05,
+              "Stat": "Axe durability saved",
+              "Code": "*:axe-*"
+            }
+          ]
+        },
+        {
+          "Id": "path-a",
+          "DisplayName": "Joiner",
+          "Description": "Precise joinery sometimes produces an additional plank or wooden component.",
+          "Cost": 3,
+          "MaxRank": 3,
+          "RequiredClassLevel": 10,
+          "RequiredPointsSpent": 6,
+          "Requires": [
+            "discipline"
+          ],
+          "RequiresAny": [],
+          "ExclusiveGroup": "specialization",
+          "Column": 0,
+          "Row": 2,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "JoineryYield",
+              "ValuePerRank": 0.04,
+              "Stat": "Plank and joinery output",
+              "Code": "*plank*"
+            }
+          ]
+        },
+        {
+          "Id": "path-b",
+          "DisplayName": "Feller",
+          "Description": "Efficient cuts recover more material from log blocks.",
+          "Cost": 3,
+          "MaxRank": 3,
+          "RequiredClassLevel": 10,
+          "RequiredPointsSpent": 6,
+          "Requires": [
+            "discipline"
+          ],
+          "RequiresAny": [],
+          "ExclusiveGroup": "specialization",
+          "Column": 2,
+          "Row": 2,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "BlockDropYield",
+              "ValuePerRank": 0.04,
+              "Stat": "Log block drops",
+              "Code": "*log*"
+            }
+          ]
+        },
+        {
+          "Id": "expert-a",
+          "DisplayName": "Master Joiner",
+          "Description": "Master joinery improves the output of storage and furniture work.",
+          "Cost": 5,
+          "MaxRank": 2,
+          "RequiredClassLevel": 25,
+          "RequiredPointsSpent": 15,
+          "Requires": [
+            "path-a"
+          ],
+          "RequiresAny": [],
+          "Column": 0,
+          "Row": 3,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "FurnitureYield",
+              "ValuePerRank": 0.05,
+              "Stat": "Furniture and storage output",
+              "Code": "*chest*"
+            }
+          ]
+        },
+        {
+          "Id": "expert-b",
+          "DisplayName": "Timber Stride",
+          "Description": "Hauling timber strengthens your stride and increases movement speed.",
+          "Cost": 5,
+          "MaxRank": 2,
+          "RequiredClassLevel": 25,
+          "RequiredPointsSpent": 15,
+          "Requires": [
+            "path-b"
+          ],
+          "RequiresAny": [],
+          "Column": 2,
+          "Row": 3,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "WalkSpeed",
+              "ValuePerRank": 0.02,
+              "Stat": "Movement speed"
+            }
+          ]
+        },
+        {
+          "Id": "capstone",
+          "DisplayName": "Woodworker Grandmaster",
+          "Description": "The final woodworker mastery reward. Unlocks the exclusive woodworker grandmaster recipe.",
+          "Cost": 8,
+          "MaxRank": 1,
+          "RequiredClassLevel": 40,
+          "RequiredPointsSpent": 28,
+          "Requires": [],
+          "RequiresAny": [
+            "expert-a",
+            "expert-b"
+          ],
+          "Column": 1,
+          "Row": 4,
+          "Capstone": true,
+          "Effects": [
+            {
+              "Type": "UnlockRecipe",
+              "ValuePerRank": 0,
+              "Code": "apprentice:joinersbench"
+            }
+          ]
+        }
+      ]
+    },
+    "farmer": {
+      "ClassId": "farmer",
+      "DisplayName": "Farmer",
+      "Theme": "Cultivation",
+      "PassiveDescription": "+0.2% crop harvest yield per mastery rank (max +10%).",
+      "PassiveEffect": {
+        "Type": "CropYield",
+        "ValuePerRank": 0.002
+      },
+      "WeaponPatterns": [],
+      "Nodes": [
+        {
+          "Id": "foundation",
+          "DisplayName": "Green Thumb",
+          "Description": "Healthy fields return more edible produce at harvest.",
+          "Cost": 1,
+          "MaxRank": 3,
+          "RequiredClassLevel": 2,
+          "RequiredPointsSpent": 0,
+          "Requires": [],
+          "RequiresAny": [],
+          "Column": 1,
+          "Row": 0,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "CropYield",
+              "ValuePerRank": 0.05,
+              "Stat": "Crop harvest yield",
+              "Code": "*"
+            }
+          ]
+        },
+        {
+          "Id": "discipline",
+          "DisplayName": "Hoe Rhythm",
+          "Description": "Practiced fieldwork reduces durability lost by hoes.",
+          "Cost": 2,
+          "MaxRank": 3,
+          "RequiredClassLevel": 5,
+          "RequiredPointsSpent": 2,
+          "Requires": [
+            "foundation"
+          ],
+          "RequiresAny": [],
+          "Column": 1,
+          "Row": 1,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "DurabilitySave",
+              "ValuePerRank": 0.05,
+              "Stat": "Hoe durability saved",
+              "Code": "*:hoe-*"
+            }
+          ]
+        },
+        {
+          "Id": "path-a",
+          "DisplayName": "Seedkeeper",
+          "Description": "Careful seed handling returns more seeds from harvests.",
+          "Cost": 3,
+          "MaxRank": 3,
+          "RequiredClassLevel": 10,
+          "RequiredPointsSpent": 6,
+          "Requires": [
+            "discipline"
+          ],
+          "RequiresAny": [],
+          "ExclusiveGroup": "specialization",
+          "Column": 0,
+          "Row": 2,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "SeedYield",
+              "ValuePerRank": 0.08,
+              "Stat": "Seed yield",
+              "Code": "*seed*"
+            }
+          ]
+        },
+        {
+          "Id": "path-b",
+          "DisplayName": "Harvestmaster",
+          "Description": "Produce from your harvest provides more food saturation.",
+          "Cost": 3,
+          "MaxRank": 3,
+          "RequiredClassLevel": 10,
+          "RequiredPointsSpent": 6,
+          "Requires": [
+            "discipline"
+          ],
+          "RequiresAny": [],
+          "ExclusiveGroup": "specialization",
+          "Column": 2,
+          "Row": 2,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "FoodSatiety",
+              "ValuePerRank": 0.04,
+              "Stat": "Food saturation gained"
+            }
+          ]
+        },
+        {
+          "Id": "expert-a",
+          "DisplayName": "Master Seedkeeper",
+          "Description": "Knowledge of useful plants improves healing received.",
+          "Cost": 5,
+          "MaxRank": 2,
+          "RequiredClassLevel": 25,
+          "RequiredPointsSpent": 15,
+          "Requires": [
+            "path-a"
+          ],
+          "RequiresAny": [],
+          "Column": 0,
+          "Row": 3,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "HealingEffectiveness",
+              "ValuePerRank": 0.04,
+              "Stat": "Healing received"
+            }
+          ]
+        },
+        {
+          "Id": "expert-b",
+          "DisplayName": "Bountiful Reaper",
+          "Description": "Reliable food supplies reduce the rate at which hunger drains.",
+          "Cost": 5,
+          "MaxRank": 2,
+          "RequiredClassLevel": 25,
+          "RequiredPointsSpent": 15,
+          "Requires": [
+            "path-b"
+          ],
+          "RequiresAny": [],
+          "Column": 2,
+          "Row": 3,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "HungerReduction",
+              "ValuePerRank": 0.025,
+              "Stat": "Hunger drain"
+            }
+          ]
+        },
+        {
+          "Id": "capstone",
+          "DisplayName": "Farmer Grandmaster",
+          "Description": "The final farmer mastery reward. Unlocks the exclusive farmer grandmaster recipe.",
+          "Cost": 8,
+          "MaxRank": 1,
+          "RequiredClassLevel": 40,
+          "RequiredPointsSpent": 28,
+          "Requires": [],
+          "RequiresAny": [
+            "expert-a",
+            "expert-b"
+          ],
+          "Column": 1,
+          "Row": 4,
+          "Capstone": true,
+          "Effects": [
+            {
+              "Type": "UnlockRecipe",
+              "ValuePerRank": 0,
+              "Code": "apprentice:graftingkit"
+            }
+          ]
+        }
+      ]
+    },
+    "builder": {
+      "ClassId": "builder",
+      "DisplayName": "Builder",
+      "Theme": "Architecture",
+      "PassiveDescription": "-0.1% fall damage per mastery rank (max -5%).",
+      "PassiveEffect": {
+        "Type": "FallDamageReduction",
+        "ValuePerRank": 0.001
+      },
+      "WeaponPatterns": [],
+      "Nodes": [
+        {
+          "Id": "foundation",
+          "DisplayName": "Site Runner",
+          "Description": "Moving safely through active worksites increases your movement speed.",
+          "Cost": 1,
+          "MaxRank": 3,
+          "RequiredClassLevel": 2,
+          "RequiredPointsSpent": 0,
+          "Requires": [],
+          "RequiresAny": [],
+          "Column": 1,
+          "Row": 0,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "WalkSpeed",
+              "ValuePerRank": 0.01,
+              "Stat": "Movement speed"
+            }
+          ]
+        },
+        {
+          "Id": "discipline",
+          "DisplayName": "Sure Footing",
+          "Description": "Experience on scaffolds and roofs reduces fall damage.",
+          "Cost": 2,
+          "MaxRank": 3,
+          "RequiredClassLevel": 5,
+          "RequiredPointsSpent": 2,
+          "Requires": [
+            "foundation"
+          ],
+          "RequiresAny": [],
+          "Column": 1,
+          "Row": 1,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "FallDamageReduction",
+              "ValuePerRank": 0.05,
+              "Stat": "Fall damage taken"
+            }
+          ]
+        },
+        {
+          "Id": "path-a",
+          "DisplayName": "Architect",
+          "Description": "Efficient plans sometimes produce additional shaped building pieces.",
+          "Cost": 3,
+          "MaxRank": 3,
+          "RequiredClassLevel": 10,
+          "RequiredPointsSpent": 6,
+          "Requires": [
+            "discipline"
+          ],
+          "RequiresAny": [],
+          "ExclusiveGroup": "specialization",
+          "Column": 0,
+          "Row": 2,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "CraftYield",
+              "ValuePerRank": 0.04,
+              "Stat": "Shaped building output",
+              "Code": "*stairs*"
+            }
+          ]
+        },
+        {
+          "Id": "path-b",
+          "DisplayName": "Mason",
+          "Description": "Careful demolition recovers more stone and brick material.",
+          "Cost": 3,
+          "MaxRank": 3,
+          "RequiredClassLevel": 10,
+          "RequiredPointsSpent": 6,
+          "Requires": [
+            "discipline"
+          ],
+          "RequiresAny": [],
+          "ExclusiveGroup": "specialization",
+          "Column": 2,
+          "Row": 2,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "BlockDropYield",
+              "ValuePerRank": 0.04,
+              "Stat": "Stone and brick block drops",
+              "Code": "*stone*"
+            }
+          ]
+        },
+        {
+          "Id": "expert-a",
+          "DisplayName": "Master Architect",
+          "Description": "Precise tool use reduces durability lost by chisels.",
+          "Cost": 5,
+          "MaxRank": 2,
+          "RequiredClassLevel": 25,
+          "RequiredPointsSpent": 15,
+          "Requires": [
+            "path-a"
+          ],
+          "RequiresAny": [],
+          "Column": 0,
+          "Row": 3,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "DurabilitySave",
+              "ValuePerRank": 0.08,
+              "Stat": "Chisel durability saved",
+              "Code": "*:chisel-*"
+            }
+          ]
+        },
+        {
+          "Id": "expert-b",
+          "DisplayName": "Monument Builder",
+          "Description": "Heavy construction work increases your maximum health.",
+          "Cost": 5,
+          "MaxRank": 2,
+          "RequiredClassLevel": 25,
+          "RequiredPointsSpent": 15,
+          "Requires": [
+            "path-b"
+          ],
+          "RequiresAny": [],
+          "Column": 2,
+          "Row": 3,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "MaxHealth",
+              "ValuePerRank": 0.5,
+              "Stat": "Maximum health"
+            }
+          ]
+        },
+        {
+          "Id": "capstone",
+          "DisplayName": "Builder Grandmaster",
+          "Description": "The final builder mastery reward. Unlocks the exclusive builder grandmaster recipe.",
+          "Cost": 8,
+          "MaxRank": 1,
+          "RequiredClassLevel": 40,
+          "RequiredPointsSpent": 28,
+          "Requires": [],
+          "RequiresAny": [
+            "expert-a",
+            "expert-b"
+          ],
+          "Column": 1,
+          "Row": 4,
+          "Capstone": true,
+          "Effects": [
+            {
+              "Type": "UnlockRecipe",
+              "ValuePerRank": 0,
+              "Code": "apprentice:architectstable"
+            }
+          ]
+        }
+      ]
+    },
+    "blacksmith": {
+      "ClassId": "blacksmith",
+      "DisplayName": "Blacksmith",
+      "Theme": "Forgecraft",
+      "PassiveDescription": "-0.1% fire and heat damage per mastery rank (max -5%).",
+      "PassiveEffect": {
+        "Type": "FireDamageReduction",
+        "ValuePerRank": 0.001
+      },
+      "WeaponPatterns": [
+        "*:sword-*",
+        "*:falx-*",
+        "*:knife-*",
+        "*:axe-*",
+        "*:mace-*",
+        "*:sabre-*"
+      ],
+      "Nodes": [
+        {
+          "Id": "foundation",
+          "DisplayName": "Forge Rhythm",
+          "Description": "Efficient hammer work reduces durability lost by smithing hammers.",
+          "Cost": 1,
+          "MaxRank": 3,
+          "RequiredClassLevel": 2,
+          "RequiredPointsSpent": 0,
+          "Requires": [],
+          "RequiresAny": [],
+          "Column": 1,
+          "Row": 0,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "DurabilitySave",
+              "ValuePerRank": 0.05,
+              "Stat": "Hammer durability saved",
+              "Code": "*:hammer-*"
+            }
+          ]
+        },
+        {
+          "Id": "discipline",
+          "DisplayName": "Heatwise",
+          "Description": "Constant work near furnaces reduces fire and heat damage.",
+          "Cost": 2,
+          "MaxRank": 3,
+          "RequiredClassLevel": 5,
+          "RequiredPointsSpent": 2,
+          "Requires": [
+            "foundation"
+          ],
+          "RequiresAny": [],
+          "Column": 1,
+          "Row": 1,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "FireDamageReduction",
+              "ValuePerRank": 0.04,
+              "Stat": "Fire and heat damage taken"
+            }
+          ]
+        },
+        {
+          "Id": "path-a",
+          "DisplayName": "Bladesmith",
+          "Description": "Exceptional blade work has a chance to produce an additional forged blade component.",
+          "Cost": 3,
+          "MaxRank": 3,
+          "RequiredClassLevel": 10,
+          "RequiredPointsSpent": 6,
+          "Requires": [
+            "discipline"
+          ],
+          "RequiresAny": [],
+          "ExclusiveGroup": "specialization",
+          "Column": 0,
+          "Row": 2,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "SmithingYield",
+              "ValuePerRank": 0.03,
+              "Stat": "Forged blade output",
+              "Code": "*sword*"
+            }
+          ]
+        },
+        {
+          "Id": "path-b",
+          "DisplayName": "Armorsmith",
+          "Description": "Understanding armor construction reduces incoming damage.",
+          "Cost": 3,
+          "MaxRank": 3,
+          "RequiredClassLevel": 10,
+          "RequiredPointsSpent": 6,
+          "Requires": [
+            "discipline"
+          ],
+          "RequiresAny": [],
+          "ExclusiveGroup": "specialization",
+          "Column": 2,
+          "Row": 2,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "DamageReduction",
+              "ValuePerRank": 0.015,
+              "Stat": "Damage taken"
+            }
+          ]
+        },
+        {
+          "Id": "expert-a",
+          "DisplayName": "Master Bladesmith",
+          "Description": "Mastery of weapon balance increases damage with forged melee weapons.",
+          "Cost": 5,
+          "MaxRank": 2,
+          "RequiredClassLevel": 25,
+          "RequiredPointsSpent": 15,
+          "Requires": [
+            "path-a"
+          ],
+          "RequiresAny": [],
+          "Column": 0,
+          "Row": 3,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "WeaponDamage",
+              "ValuePerRank": 0.03,
+              "Stat": "Forged melee weapon damage",
+              "Code": "*"
+            }
+          ]
+        },
+        {
+          "Id": "expert-b",
+          "DisplayName": "Master Armorer",
+          "Description": "Years shaping protection increase your maximum health.",
+          "Cost": 5,
+          "MaxRank": 2,
+          "RequiredClassLevel": 25,
+          "RequiredPointsSpent": 15,
+          "Requires": [
+            "path-b"
+          ],
+          "RequiresAny": [],
+          "Column": 2,
+          "Row": 3,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "MaxHealth",
+              "ValuePerRank": 0.5,
+              "Stat": "Maximum health"
+            }
+          ]
+        },
+        {
+          "Id": "capstone",
+          "DisplayName": "Blacksmith Grandmaster",
+          "Description": "The final blacksmith mastery reward. Unlocks the exclusive blacksmith grandmaster recipe.",
+          "Cost": 8,
+          "MaxRank": 1,
+          "RequiredClassLevel": 40,
+          "RequiredPointsSpent": 28,
+          "Requires": [],
+          "RequiresAny": [
+            "expert-a",
+            "expert-b"
+          ],
+          "Column": 1,
+          "Row": 4,
+          "Capstone": true,
+          "Effects": [
+            {
+              "Type": "UnlockRecipe",
+              "ValuePerRank": 0,
+              "Code": "apprentice:masterforgeplans"
+            }
+          ]
+        }
+      ]
+    },
+    "cook": {
+      "ClassId": "cook",
+      "DisplayName": "Cook",
+      "Theme": "Cuisine",
+      "PassiveDescription": "+0.2% food saturation per mastery rank (max +10%).",
+      "PassiveEffect": {
+        "Type": "FoodSatiety",
+        "ValuePerRank": 0.002
+      },
+      "WeaponPatterns": [],
+      "Nodes": [
+        {
+          "Id": "foundation",
+          "DisplayName": "Well Fed",
+          "Description": "Better meals provide more saturation when eaten.",
+          "Cost": 1,
+          "MaxRank": 3,
+          "RequiredClassLevel": 2,
+          "RequiredPointsSpent": 0,
+          "Requires": [],
+          "RequiresAny": [],
+          "Column": 1,
+          "Row": 0,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "FoodSatiety",
+              "ValuePerRank": 0.05,
+              "Stat": "Food saturation gained"
+            }
+          ]
+        },
+        {
+          "Id": "discipline",
+          "DisplayName": "Kitchen Economy",
+          "Description": "Efficient meal planning reduces hunger drain.",
+          "Cost": 2,
+          "MaxRank": 3,
+          "RequiredClassLevel": 5,
+          "RequiredPointsSpent": 2,
+          "Requires": [
+            "foundation"
+          ],
+          "RequiresAny": [],
+          "Column": 1,
+          "Row": 1,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "HungerReduction",
+              "ValuePerRank": 0.02,
+              "Stat": "Hunger drain"
+            }
+          ]
+        },
+        {
+          "Id": "path-a",
+          "DisplayName": "Gourmet",
+          "Description": "Refined nutrition improves the healing you receive.",
+          "Cost": 3,
+          "MaxRank": 3,
+          "RequiredClassLevel": 10,
+          "RequiredPointsSpent": 6,
+          "Requires": [
+            "discipline"
+          ],
+          "RequiresAny": [],
+          "ExclusiveGroup": "specialization",
+          "Column": 0,
+          "Row": 2,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "HealingEffectiveness",
+              "ValuePerRank": 0.05,
+              "Stat": "Healing received"
+            }
+          ]
+        },
+        {
+          "Id": "path-b",
+          "DisplayName": "Feastmaker",
+          "Description": "Large-batch cooking has a chance to create additional meal output.",
+          "Cost": 3,
+          "MaxRank": 3,
+          "RequiredClassLevel": 10,
+          "RequiredPointsSpent": 6,
+          "Requires": [
+            "discipline"
+          ],
+          "RequiresAny": [],
+          "ExclusiveGroup": "specialization",
+          "Column": 2,
+          "Row": 2,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "CookYield",
+              "ValuePerRank": 0.04,
+              "Stat": "Meal output",
+              "Code": "*meal*"
+            }
+          ]
+        },
+        {
+          "Id": "expert-a",
+          "DisplayName": "Master Gourmet",
+          "Description": "A consistently excellent diet increases maximum health.",
+          "Cost": 5,
+          "MaxRank": 2,
+          "RequiredClassLevel": 25,
+          "RequiredPointsSpent": 15,
+          "Requires": [
+            "path-a"
+          ],
+          "RequiresAny": [],
+          "Column": 0,
+          "Row": 3,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "MaxHealth",
+              "ValuePerRank": 0.4,
+              "Stat": "Maximum health"
+            }
+          ]
+        },
+        {
+          "Id": "expert-b",
+          "DisplayName": "Banquet Master",
+          "Description": "Years beside crowded ovens reduce fire and heat damage taken.",
+          "Cost": 5,
+          "MaxRank": 2,
+          "RequiredClassLevel": 25,
+          "RequiredPointsSpent": 15,
+          "Requires": [
+            "path-b"
+          ],
+          "RequiresAny": [],
+          "Column": 2,
+          "Row": 3,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "FireDamageReduction",
+              "ValuePerRank": 0.04,
+              "Stat": "Fire and heat damage taken"
+            }
+          ]
+        },
+        {
+          "Id": "capstone",
+          "DisplayName": "Cook Grandmaster",
+          "Description": "The final cook mastery reward. Unlocks the exclusive cook grandmaster recipe.",
+          "Cost": 8,
+          "MaxRank": 1,
+          "RequiredClassLevel": 40,
+          "RequiredPointsSpent": 28,
+          "Requires": [],
+          "RequiresAny": [
+            "expert-a",
+            "expert-b"
+          ],
+          "Column": 1,
+          "Row": 4,
+          "Capstone": true,
+          "Effects": [
+            {
+              "Type": "UnlockRecipe",
+              "ValuePerRank": 0,
+              "Code": "apprentice:mastercookbook"
+            }
+          ]
+        }
+      ]
+    },
+    "potter": {
+      "ClassId": "potter",
+      "DisplayName": "Potter",
+      "Theme": "Ceramics",
+      "PassiveDescription": "-0.1% fire and heat damage per mastery rank (max -5%).",
+      "PassiveEffect": {
+        "Type": "FireDamageReduction",
+        "ValuePerRank": 0.001
+      },
+      "WeaponPatterns": [],
+      "Nodes": [
+        {
+          "Id": "foundation",
+          "DisplayName": "Clay Sense",
+          "Description": "Efficient forming sometimes produces an additional raw clay item.",
+          "Cost": 1,
+          "MaxRank": 3,
+          "RequiredClassLevel": 2,
+          "RequiredPointsSpent": 0,
+          "Requires": [],
+          "RequiresAny": [],
+          "Column": 1,
+          "Row": 0,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "RawClayYield",
+              "ValuePerRank": 0.04,
+              "Stat": "Raw clay-form output",
+              "Code": "*-raw*"
+            }
+          ]
+        },
+        {
+          "Id": "discipline",
+          "DisplayName": "Kilnwise",
+          "Description": "Long exposure to kilns reduces fire and heat damage.",
+          "Cost": 2,
+          "MaxRank": 3,
+          "RequiredClassLevel": 5,
+          "RequiredPointsSpent": 2,
+          "Requires": [
+            "foundation"
+          ],
+          "RequiresAny": [],
+          "Column": 1,
+          "Row": 1,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "FireDamageReduction",
+              "ValuePerRank": 0.04,
+              "Stat": "Fire and heat damage taken"
+            }
+          ]
+        },
+        {
+          "Id": "path-a",
+          "DisplayName": "Fine Ceramist",
+          "Description": "Fine ceramic work has a chance to create extra decorative pottery.",
+          "Cost": 3,
+          "MaxRank": 3,
+          "RequiredClassLevel": 10,
+          "RequiredPointsSpent": 6,
+          "Requires": [
+            "discipline"
+          ],
+          "RequiresAny": [],
+          "ExclusiveGroup": "specialization",
+          "Column": 0,
+          "Row": 2,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "DecorativeClayYield",
+              "ValuePerRank": 0.05,
+              "Stat": "Decorative pottery output",
+              "Code": "*flowerpot*"
+            }
+          ]
+        },
+        {
+          "Id": "path-b",
+          "DisplayName": "Kilnmaster",
+          "Description": "Kiln experience reduces hunger drain during long production sessions.",
+          "Cost": 3,
+          "MaxRank": 3,
+          "RequiredClassLevel": 10,
+          "RequiredPointsSpent": 6,
+          "Requires": [
+            "discipline"
+          ],
+          "RequiresAny": [],
+          "ExclusiveGroup": "specialization",
+          "Column": 2,
+          "Row": 2,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "HungerReduction",
+              "ValuePerRank": 0.02,
+              "Stat": "Hunger drain"
+            }
+          ]
+        },
+        {
+          "Id": "expert-a",
+          "DisplayName": "Master Ceramist",
+          "Description": "Master shaping improves output when producing storage vessels.",
+          "Cost": 5,
+          "MaxRank": 2,
+          "RequiredClassLevel": 25,
+          "RequiredPointsSpent": 15,
+          "Requires": [
+            "path-a"
+          ],
+          "RequiresAny": [],
+          "Column": 0,
+          "Row": 3,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "StorageClayYield",
+              "ValuePerRank": 0.05,
+              "Stat": "Storage-vessel output",
+              "Code": "*storagevessel*"
+            }
+          ]
+        },
+        {
+          "Id": "expert-b",
+          "DisplayName": "Inferno Potter",
+          "Description": "Extreme kiln work increases maximum health.",
+          "Cost": 5,
+          "MaxRank": 2,
+          "RequiredClassLevel": 25,
+          "RequiredPointsSpent": 15,
+          "Requires": [
+            "path-b"
+          ],
+          "RequiresAny": [],
+          "Column": 2,
+          "Row": 3,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "MaxHealth",
+              "ValuePerRank": 0.4,
+              "Stat": "Maximum health"
+            }
+          ]
+        },
+        {
+          "Id": "capstone",
+          "DisplayName": "Potter Grandmaster",
+          "Description": "The final potter mastery reward. Unlocks the exclusive potter grandmaster recipe.",
+          "Cost": 8,
+          "MaxRank": 1,
+          "RequiredClassLevel": 40,
+          "RequiredPointsSpent": 28,
+          "Requires": [],
+          "RequiresAny": [
+            "expert-a",
+            "expert-b"
+          ],
+          "Column": 1,
+          "Row": 4,
+          "Capstone": true,
+          "Effects": [
+            {
+              "Type": "UnlockRecipe",
+              "ValuePerRank": 0,
+              "Code": "apprentice:masterkiln"
+            }
+          ]
+        }
+      ]
+    },
+    "leatherworker": {
+      "ClassId": "leatherworker",
+      "DisplayName": "Leatherworker",
+      "Theme": "Tanning",
+      "PassiveDescription": "+0.2% hide yield per mastery rank (max +10%).",
+      "PassiveEffect": {
+        "Type": "HideYield",
+        "ValuePerRank": 0.002
+      },
+      "WeaponPatterns": [],
+      "Nodes": [
+        {
+          "Id": "foundation",
+          "DisplayName": "Clean Skinning",
+          "Description": "Careful carcass work recovers more hides.",
+          "Cost": 1,
+          "MaxRank": 3,
+          "RequiredClassLevel": 2,
+          "RequiredPointsSpent": 0,
+          "Requires": [],
+          "RequiresAny": [],
+          "Column": 1,
+          "Row": 0,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "HideYield",
+              "ValuePerRank": 0.08,
+              "Stat": "Hide yield from carcasses",
+              "Code": "*hide*"
+            }
+          ]
+        },
+        {
+          "Id": "discipline",
+          "DisplayName": "Knife Care",
+          "Description": "Controlled cutting reduces durability lost by knives.",
+          "Cost": 2,
+          "MaxRank": 3,
+          "RequiredClassLevel": 5,
+          "RequiredPointsSpent": 2,
+          "Requires": [
+            "foundation"
+          ],
+          "RequiresAny": [],
+          "Column": 1,
+          "Row": 1,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "DurabilitySave",
+              "ValuePerRank": 0.05,
+              "Stat": "Knife durability saved",
+              "Code": "*:knife-*"
+            }
+          ]
+        },
+        {
+          "Id": "path-a",
+          "DisplayName": "Saddler",
+          "Description": "Layered, fitted leather reduces projectile damage taken.",
+          "Cost": 3,
+          "MaxRank": 3,
+          "RequiredClassLevel": 10,
+          "RequiredPointsSpent": 6,
+          "Requires": [
+            "discipline"
+          ],
+          "RequiresAny": [],
+          "ExclusiveGroup": "specialization",
+          "Column": 0,
+          "Row": 2,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "ProjectileDamageReduction",
+              "ValuePerRank": 0.03,
+              "Stat": "Projectile damage taken"
+            }
+          ]
+        },
+        {
+          "Id": "path-b",
+          "DisplayName": "Tanner",
+          "Description": "Efficient tanning has a chance to produce additional leather output.",
+          "Cost": 3,
+          "MaxRank": 3,
+          "RequiredClassLevel": 10,
+          "RequiredPointsSpent": 6,
+          "Requires": [
+            "discipline"
+          ],
+          "RequiresAny": [],
+          "ExclusiveGroup": "specialization",
+          "Column": 2,
+          "Row": 2,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "CraftYield",
+              "ValuePerRank": 0.05,
+              "Stat": "Leather output",
+              "Code": "*leather*"
+            }
+          ]
+        },
+        {
+          "Id": "expert-a",
+          "DisplayName": "Master Saddler",
+          "Description": "Knowledge of fitted protective gear reduces incoming damage.",
+          "Cost": 5,
+          "MaxRank": 2,
+          "RequiredClassLevel": 25,
+          "RequiredPointsSpent": 15,
+          "Requires": [
+            "path-a"
+          ],
+          "RequiresAny": [],
+          "Column": 0,
+          "Row": 3,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "DamageReduction",
+              "ValuePerRank": 0.015,
+              "Stat": "Damage taken"
+            }
+          ]
+        },
+        {
+          "Id": "expert-b",
+          "DisplayName": "Hide Master",
+          "Description": "Hard physical hide work increases maximum health.",
+          "Cost": 5,
+          "MaxRank": 2,
+          "RequiredClassLevel": 25,
+          "RequiredPointsSpent": 15,
+          "Requires": [
+            "path-b"
+          ],
+          "RequiresAny": [],
+          "Column": 2,
+          "Row": 3,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "MaxHealth",
+              "ValuePerRank": 0.4,
+              "Stat": "Maximum health"
+            }
+          ]
+        },
+        {
+          "Id": "capstone",
+          "DisplayName": "Leatherworker Grandmaster",
+          "Description": "The final leatherworker mastery reward. Unlocks the exclusive leatherworker grandmaster recipe.",
+          "Cost": 8,
+          "MaxRank": 1,
+          "RequiredClassLevel": 40,
+          "RequiredPointsSpent": 28,
+          "Requires": [],
+          "RequiresAny": [
+            "expert-a",
+            "expert-b"
+          ],
+          "Column": 1,
+          "Row": 4,
+          "Capstone": true,
+          "Effects": [
+            {
+              "Type": "UnlockRecipe",
+              "ValuePerRank": 0,
+              "Code": "apprentice:saddlersbench"
+            }
+          ]
+        }
+      ]
+    },
+    "tailor": {
+      "ClassId": "tailor",
+      "DisplayName": "Tailor",
+      "Theme": "Textiles",
+      "PassiveDescription": "-0.1% projectile damage taken per mastery rank (max -5%).",
+      "PassiveEffect": {
+        "Type": "ProjectileDamageReduction",
+        "ValuePerRank": 0.001
+      },
+      "WeaponPatterns": [],
+      "Nodes": [
+        {
+          "Id": "foundation",
+          "DisplayName": "Padded Step",
+          "Description": "Layered clothing reduces fall damage taken.",
+          "Cost": 1,
+          "MaxRank": 3,
+          "RequiredClassLevel": 2,
+          "RequiredPointsSpent": 0,
+          "Requires": [],
+          "RequiresAny": [],
+          "Column": 1,
+          "Row": 0,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "FallDamageReduction",
+              "ValuePerRank": 0.03,
+              "Stat": "Fall damage taken"
+            }
+          ]
+        },
+        {
+          "Id": "discipline",
+          "DisplayName": "Sharp Shears",
+          "Description": "Careful cutting reduces durability lost by shears.",
+          "Cost": 2,
+          "MaxRank": 3,
+          "RequiredClassLevel": 5,
+          "RequiredPointsSpent": 2,
+          "Requires": [
+            "foundation"
+          ],
+          "RequiresAny": [],
+          "Column": 1,
+          "Row": 1,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "DurabilitySave",
+              "ValuePerRank": 0.06,
+              "Stat": "Shears durability saved",
+              "Code": "*:shears-*"
+            }
+          ]
+        },
+        {
+          "Id": "path-a",
+          "DisplayName": "Couturier",
+          "Description": "Supportive fitted garments improve healing received.",
+          "Cost": 3,
+          "MaxRank": 3,
+          "RequiredClassLevel": 10,
+          "RequiredPointsSpent": 6,
+          "Requires": [
+            "discipline"
+          ],
+          "RequiresAny": [],
+          "ExclusiveGroup": "specialization",
+          "Column": 0,
+          "Row": 2,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "HealingEffectiveness",
+              "ValuePerRank": 0.04,
+              "Stat": "Healing received"
+            }
+          ]
+        },
+        {
+          "Id": "path-b",
+          "DisplayName": "Weaver",
+          "Description": "Efficient weaving has a chance to produce additional cloth.",
+          "Cost": 3,
+          "MaxRank": 3,
+          "RequiredClassLevel": 10,
+          "RequiredPointsSpent": 6,
+          "Requires": [
+            "discipline"
+          ],
+          "RequiresAny": [],
+          "ExclusiveGroup": "specialization",
+          "Column": 2,
+          "Row": 2,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "CraftYield",
+              "ValuePerRank": 0.05,
+              "Stat": "Cloth output",
+              "Code": "*cloth*"
+            }
+          ]
+        },
+        {
+          "Id": "expert-a",
+          "DisplayName": "Master Couturier",
+          "Description": "Reinforced fitted clothing reduces incoming damage.",
+          "Cost": 5,
+          "MaxRank": 2,
+          "RequiredClassLevel": 25,
+          "RequiredPointsSpent": 15,
+          "Requires": [
+            "path-a"
+          ],
+          "RequiresAny": [],
+          "Column": 0,
+          "Row": 3,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "DamageReduction",
+              "ValuePerRank": 0.0125,
+              "Stat": "Damage taken"
+            }
+          ]
+        },
+        {
+          "Id": "expert-b",
+          "DisplayName": "Loom Master",
+          "Description": "Efficient clothing and bedding reduce hunger drain.",
+          "Cost": 5,
+          "MaxRank": 2,
+          "RequiredClassLevel": 25,
+          "RequiredPointsSpent": 15,
+          "Requires": [
+            "path-b"
+          ],
+          "RequiresAny": [],
+          "Column": 2,
+          "Row": 3,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "HungerReduction",
+              "ValuePerRank": 0.02,
+              "Stat": "Hunger drain"
+            }
+          ]
+        },
+        {
+          "Id": "capstone",
+          "DisplayName": "Tailor Grandmaster",
+          "Description": "The final tailor mastery reward. Unlocks the exclusive tailor grandmaster recipe.",
+          "Cost": 8,
+          "MaxRank": 1,
+          "RequiredClassLevel": 40,
+          "RequiredPointsSpent": 28,
+          "Requires": [],
+          "RequiresAny": [
+            "expert-a",
+            "expert-b"
+          ],
+          "Column": 1,
+          "Row": 4,
+          "Capstone": true,
+          "Effects": [
+            {
+              "Type": "UnlockRecipe",
+              "ValuePerRank": 0,
+              "Code": "apprentice:sewingkit"
+            }
+          ]
+        }
+      ]
+    },
+    "hunter": {
+      "ClassId": "hunter",
+      "DisplayName": "Hunter",
+      "Theme": "Huntcraft",
+      "PassiveDescription": "+0.1% damage against animals per mastery rank (max +5%).",
+      "PassiveEffect": {
+        "Type": "AnimalDamage",
+        "ValuePerRank": 0.001
+      },
+      "WeaponPatterns": [
+        "*:bow-*",
+        "*:arrow-*",
+        "*:spear-*",
+        "*:javelin-*",
+        "*:knife-*",
+        "*:club-*"
+      ],
+      "Nodes": [
+        {
+          "Id": "foundation",
+          "DisplayName": "Trail Legs",
+          "Description": "Long pursuits increase your movement speed.",
+          "Cost": 1,
+          "MaxRank": 3,
+          "RequiredClassLevel": 2,
+          "RequiredPointsSpent": 0,
+          "Requires": [],
+          "RequiresAny": [],
+          "Column": 1,
+          "Row": 0,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "WalkSpeed",
+              "ValuePerRank": 0.01,
+              "Stat": "Movement speed"
+            }
+          ]
+        },
+        {
+          "Id": "discipline",
+          "DisplayName": "Field Dressing",
+          "Description": "Clean carcass work recovers more hides.",
+          "Cost": 2,
+          "MaxRank": 3,
+          "RequiredClassLevel": 5,
+          "RequiredPointsSpent": 2,
+          "Requires": [
+            "foundation"
+          ],
+          "RequiresAny": [],
+          "Column": 1,
+          "Row": 1,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "HideYield",
+              "ValuePerRank": 0.08,
+              "Stat": "Hide yield from carcasses",
+              "Code": "*hide*"
+            }
+          ]
+        },
+        {
+          "Id": "path-a",
+          "DisplayName": "Tracker",
+          "Description": "Sneaking reveals the direction of nearby animals within a larger radius.",
+          "Cost": 3,
+          "MaxRank": 3,
+          "RequiredClassLevel": 10,
+          "RequiredPointsSpent": 6,
+          "Requires": [
+            "discipline"
+          ],
+          "RequiresAny": [],
+          "ExclusiveGroup": "specialization",
+          "Column": 0,
+          "Row": 2,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "TrackingRange",
+              "ValuePerRank": 8.0,
+              "Stat": "Animal tracking range"
+            }
+          ]
+        },
+        {
+          "Id": "path-b",
+          "DisplayName": "Butcher",
+          "Description": "Careful butchering recovers more meat from carcasses.",
+          "Cost": 3,
+          "MaxRank": 3,
+          "RequiredClassLevel": 10,
+          "RequiredPointsSpent": 6,
+          "Requires": [
+            "discipline"
+          ],
+          "RequiresAny": [],
+          "ExclusiveGroup": "specialization",
+          "Column": 2,
+          "Row": 2,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "MeatYield",
+              "ValuePerRank": 0.1,
+              "Stat": "Meat yield from carcasses",
+              "Code": "*meat*"
+            }
+          ]
+        },
+        {
+          "Id": "expert-a",
+          "DisplayName": "Master Tracker",
+          "Description": "Tracking reports identify the animal and its approximate distance.",
+          "Cost": 5,
+          "MaxRank": 2,
+          "RequiredClassLevel": 25,
+          "RequiredPointsSpent": 15,
+          "Requires": [
+            "path-a"
+          ],
+          "RequiresAny": [],
+          "Column": 0,
+          "Row": 3,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "TrackingDetail",
+              "ValuePerRank": 1.0,
+              "Stat": "Tracking information"
+            }
+          ]
+        },
+        {
+          "Id": "expert-b",
+          "DisplayName": "Apex Hunter",
+          "Description": "Knowledge of animal weak points increases damage dealt to animals.",
+          "Cost": 5,
+          "MaxRank": 2,
+          "RequiredClassLevel": 25,
+          "RequiredPointsSpent": 15,
+          "Requires": [
+            "path-b"
+          ],
+          "RequiresAny": [],
+          "Column": 2,
+          "Row": 3,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "AnimalDamage",
+              "ValuePerRank": 0.05,
+              "Stat": "Damage dealt to animals",
+              "Code": "*"
+            }
+          ]
+        },
+        {
+          "Id": "capstone",
+          "DisplayName": "Hunter Grandmaster",
+          "Description": "The final hunter mastery reward. Unlocks the exclusive hunter grandmaster recipe.",
+          "Cost": 8,
+          "MaxRank": 1,
+          "RequiredClassLevel": 40,
+          "RequiredPointsSpent": 28,
+          "Requires": [],
+          "RequiresAny": [
+            "expert-a",
+            "expert-b"
+          ],
+          "Column": 1,
+          "Row": 4,
+          "Capstone": true,
+          "Effects": [
+            {
+              "Type": "UnlockRecipe",
+              "ValuePerRank": 0,
+              "Code": "apprentice:advancedtrapkit"
+            }
+          ]
+        }
+      ]
+    },
+    "warrior": {
+      "ClassId": "warrior",
+      "DisplayName": "Warrior",
+      "Theme": "One-Handed Combat",
+      "PassiveDescription": "+0.5% one-handed melee damage per mastery rank (max 50).",
+      "PassiveEffect": {
+        "Type": "WeaponDamage",
+        "ValuePerRank": 0.005
+      },
+      "WeaponPatterns": [
+        "*:sword-*",
+        "*:falx-*",
+        "*:knife-*",
+        "*:axe-*",
+        "*:club-*",
+        "*:mace-*",
+        "*:cleaver-*",
+        "*:sabre-*"
+      ],
+      "Nodes": [
+        {
+          "Id": "foundation",
+          "DisplayName": "Combat Drill",
+          "Description": "Core weapon practice increases one-handed melee damage.",
+          "Cost": 1,
+          "MaxRank": 3,
+          "RequiredClassLevel": 2,
+          "RequiredPointsSpent": 0,
+          "Requires": [],
+          "RequiresAny": [],
+          "Column": 1,
+          "Row": 0,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "WeaponDamage",
+              "ValuePerRank": 0.02,
+              "Stat": "One-handed melee damage",
+              "Code": "*"
+            }
+          ]
+        },
+        {
+          "Id": "discipline",
+          "DisplayName": "Weapon Keeper",
+          "Description": "Controlled strikes reduce durability lost by melee weapons.",
+          "Cost": 2,
+          "MaxRank": 3,
+          "RequiredClassLevel": 5,
+          "RequiredPointsSpent": 2,
+          "Requires": [
+            "foundation"
+          ],
+          "RequiresAny": [],
+          "Column": 1,
+          "Row": 1,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "DurabilitySave",
+              "ValuePerRank": 0.04,
+              "Stat": "Melee weapon durability saved",
+              "Code": "*:sword-*|*:falx-*|*:knife-*|*:axe-*|*:club-*|*:mace-*|*:cleaver-*|*:sabre-*"
+            }
+          ]
+        },
+        {
+          "Id": "path-a",
+          "DisplayName": "Duelist",
+          "Description": "Duelist footwork reduces projectile damage taken.",
+          "Cost": 3,
+          "MaxRank": 3,
+          "RequiredClassLevel": 10,
+          "RequiredPointsSpent": 6,
+          "Requires": [
+            "discipline"
+          ],
+          "RequiresAny": [],
+          "ExclusiveGroup": "specialization",
+          "Column": 0,
+          "Row": 2,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "ProjectileDamageReduction",
+              "ValuePerRank": 0.025,
+              "Stat": "Projectile damage taken"
+            }
+          ]
+        },
+        {
+          "Id": "path-b",
+          "DisplayName": "Berserker",
+          "Description": "When below 35% health, your weapon damage increases.",
+          "Cost": 3,
+          "MaxRank": 3,
+          "RequiredClassLevel": 10,
+          "RequiredPointsSpent": 6,
+          "Requires": [
+            "discipline"
+          ],
+          "RequiresAny": [],
+          "ExclusiveGroup": "specialization",
+          "Column": 2,
+          "Row": 2,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "LowHealthDamage",
+              "ValuePerRank": 0.04,
+              "Stat": "Weapon damage below 35% health",
+              "Code": "*"
+            }
+          ]
+        },
+        {
+          "Id": "expert-a",
+          "DisplayName": "Master Duelist",
+          "Description": "Defensive timing reduces incoming damage.",
+          "Cost": 5,
+          "MaxRank": 2,
+          "RequiredClassLevel": 25,
+          "RequiredPointsSpent": 15,
+          "Requires": [
+            "path-a"
+          ],
+          "RequiresAny": [],
+          "Column": 0,
+          "Row": 3,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "DamageReduction",
+              "ValuePerRank": 0.0125,
+              "Stat": "Damage taken"
+            }
+          ]
+        },
+        {
+          "Id": "expert-b",
+          "DisplayName": "Warbringer",
+          "Description": "Hard combat experience increases maximum health.",
+          "Cost": 5,
+          "MaxRank": 2,
+          "RequiredClassLevel": 25,
+          "RequiredPointsSpent": 15,
+          "Requires": [
+            "path-b"
+          ],
+          "RequiresAny": [],
+          "Column": 2,
+          "Row": 3,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "MaxHealth",
+              "ValuePerRank": 0.5,
+              "Stat": "Maximum health"
+            }
+          ]
+        },
+        {
+          "Id": "capstone",
+          "DisplayName": "Warrior Grandmaster",
+          "Description": "The final warrior mastery reward. Unlocks the exclusive warrior grandmaster recipe.",
+          "Cost": 8,
+          "MaxRank": 1,
+          "RequiredClassLevel": 40,
+          "RequiredPointsSpent": 28,
+          "Requires": [],
+          "RequiresAny": [
+            "expert-a",
+            "expert-b"
+          ],
+          "Column": 1,
+          "Row": 4,
+          "Capstone": true,
+          "Effects": [
+            {
+              "Type": "UnlockRecipe",
+              "ValuePerRank": 0,
+              "Code": "apprentice:masterweaponpatterns"
+            }
+          ]
+        }
+      ]
+    },
+    "ranger": {
+      "ClassId": "ranger",
+      "DisplayName": "Ranger",
+      "Theme": "Ranged Combat",
+      "PassiveDescription": "+0.5% bow, sling and crossbow damage per mastery rank (max 50).",
+      "PassiveEffect": {
+        "Type": "WeaponDamage",
+        "ValuePerRank": 0.005
+      },
+      "WeaponPatterns": [
+        "*:bow-*",
+        "*:crossbow-*",
+        "*:sling-*",
+        "*:arrow-*",
+        "*:bolt-*"
+      ],
+      "Nodes": [
+        {
+          "Id": "foundation",
+          "DisplayName": "Eagle Eye",
+          "Description": "Ranged practice increases damage with bows, crossbows, slings, arrows, and bolts.",
+          "Cost": 1,
+          "MaxRank": 3,
+          "RequiredClassLevel": 2,
+          "RequiredPointsSpent": 0,
+          "Requires": [],
+          "RequiresAny": [],
+          "Column": 1,
+          "Row": 0,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "RangedDamage",
+              "ValuePerRank": 0.02,
+              "Stat": "Ranged weapon damage",
+              "Code": "*"
+            }
+          ]
+        },
+        {
+          "Id": "discipline",
+          "DisplayName": "String Care",
+          "Description": "Careful handling reduces durability lost by bows and crossbows.",
+          "Cost": 2,
+          "MaxRank": 3,
+          "RequiredClassLevel": 5,
+          "RequiredPointsSpent": 2,
+          "Requires": [
+            "foundation"
+          ],
+          "RequiresAny": [],
+          "Column": 1,
+          "Row": 1,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "DurabilitySave",
+              "ValuePerRank": 0.05,
+              "Stat": "Bow and crossbow durability saved",
+              "Code": "*bow*"
+            }
+          ]
+        },
+        {
+          "Id": "path-a",
+          "DisplayName": "Sharpshooter",
+          "Description": "Careful aim increases ranged critical-hit chance.",
+          "Cost": 3,
+          "MaxRank": 3,
+          "RequiredClassLevel": 10,
+          "RequiredPointsSpent": 6,
+          "Requires": [
+            "discipline"
+          ],
+          "RequiresAny": [],
+          "ExclusiveGroup": "specialization",
+          "Column": 0,
+          "Row": 2,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "RangedCritChance",
+              "ValuePerRank": 0.025,
+              "Stat": "Ranged critical-hit chance",
+              "Code": "*"
+            }
+          ]
+        },
+        {
+          "Id": "path-b",
+          "DisplayName": "Skirmisher",
+          "Description": "Constant repositioning reduces projectile damage taken.",
+          "Cost": 3,
+          "MaxRank": 3,
+          "RequiredClassLevel": 10,
+          "RequiredPointsSpent": 6,
+          "Requires": [
+            "discipline"
+          ],
+          "RequiresAny": [],
+          "ExclusiveGroup": "specialization",
+          "Column": 2,
+          "Row": 2,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "ProjectileDamageReduction",
+              "ValuePerRank": 0.03,
+              "Stat": "Projectile damage taken"
+            }
+          ]
+        },
+        {
+          "Id": "expert-a",
+          "DisplayName": "Master Sharpshooter",
+          "Description": "Ranged critical hits deal additional damage.",
+          "Cost": 5,
+          "MaxRank": 2,
+          "RequiredClassLevel": 25,
+          "RequiredPointsSpent": 15,
+          "Requires": [
+            "path-a"
+          ],
+          "RequiresAny": [],
+          "Column": 0,
+          "Row": 3,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "RangedCritDamage",
+              "ValuePerRank": 0.1,
+              "Stat": "Ranged critical-hit bonus damage",
+              "Code": "*"
+            }
+          ]
+        },
+        {
+          "Id": "expert-b",
+          "DisplayName": "Arrowstorm",
+          "Description": "Efficient fletching has a chance to produce additional arrows or bolts.",
+          "Cost": 5,
+          "MaxRank": 2,
+          "RequiredClassLevel": 25,
+          "RequiredPointsSpent": 15,
+          "Requires": [
+            "path-b"
+          ],
+          "RequiresAny": [],
+          "Column": 2,
+          "Row": 3,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "CraftYield",
+              "ValuePerRank": 0.08,
+              "Stat": "Arrow and bolt output",
+              "Code": "*arrow*"
+            }
+          ]
+        },
+        {
+          "Id": "capstone",
+          "DisplayName": "Ranger Grandmaster",
+          "Description": "The final ranger mastery reward. Unlocks the exclusive ranger grandmaster recipe.",
+          "Cost": 8,
+          "MaxRank": 1,
+          "RequiredClassLevel": 40,
+          "RequiredPointsSpent": 28,
+          "Requires": [],
+          "RequiresAny": [
+            "expert-a",
+            "expert-b"
+          ],
+          "Column": 1,
+          "Row": 4,
+          "Capstone": true,
+          "Effects": [
+            {
+              "Type": "UnlockRecipe",
+              "ValuePerRank": 0,
+              "Code": "apprentice:compositebow"
+            }
+          ]
+        }
+      ]
+    },
+    "fisher": {
+      "ClassId": "fisher",
+      "DisplayName": "Fisher",
+      "Theme": "Angling",
+      "PassiveDescription": "+0.2% fish catch yield per mastery rank (max +10%).",
+      "PassiveEffect": {
+        "Type": "FishYield",
+        "ValuePerRank": 0.002
+      },
+      "WeaponPatterns": [],
+      "Nodes": [
+        {
+          "Id": "foundation",
+          "DisplayName": "Good Haul",
+          "Description": "Successful catches produce more fish.",
+          "Cost": 1,
+          "MaxRank": 3,
+          "RequiredClassLevel": 2,
+          "RequiredPointsSpent": 0,
+          "Requires": [],
+          "RequiresAny": [],
+          "Column": 1,
+          "Row": 0,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "FishYield",
+              "ValuePerRank": 0.08,
+              "Stat": "Fish catch yield",
+              "Code": "*fish*"
+            }
+          ]
+        },
+        {
+          "Id": "discipline",
+          "DisplayName": "Line Keeper",
+          "Description": "Careful tackle use reduces durability lost by fishing equipment.",
+          "Cost": 2,
+          "MaxRank": 3,
+          "RequiredClassLevel": 5,
+          "RequiredPointsSpent": 2,
+          "Requires": [
+            "foundation"
+          ],
+          "RequiresAny": [],
+          "Column": 1,
+          "Row": 1,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "DurabilitySave",
+              "ValuePerRank": 0.05,
+              "Stat": "Fishing-tool durability saved",
+              "Code": "*fishing*"
+            }
+          ]
+        },
+        {
+          "Id": "path-a",
+          "DisplayName": "Angler",
+          "Description": "Fresh fish meals provide more saturation.",
+          "Cost": 3,
+          "MaxRank": 3,
+          "RequiredClassLevel": 10,
+          "RequiredPointsSpent": 6,
+          "Requires": [
+            "discipline"
+          ],
+          "RequiresAny": [],
+          "ExclusiveGroup": "specialization",
+          "Column": 0,
+          "Row": 2,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "FoodSatiety",
+              "ValuePerRank": 0.04,
+              "Stat": "Food saturation gained"
+            }
+          ]
+        },
+        {
+          "Id": "path-b",
+          "DisplayName": "Netcaster",
+          "Description": "Efficient netcraft has a chance to produce additional net-related output.",
+          "Cost": 3,
+          "MaxRank": 3,
+          "RequiredClassLevel": 10,
+          "RequiredPointsSpent": 6,
+          "Requires": [
+            "discipline"
+          ],
+          "RequiresAny": [],
+          "ExclusiveGroup": "specialization",
+          "Column": 2,
+          "Row": 2,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "CraftYield",
+              "ValuePerRank": 0.05,
+              "Stat": "Net output",
+              "Code": "*net*"
+            }
+          ]
+        },
+        {
+          "Id": "expert-a",
+          "DisplayName": "Master Angler",
+          "Description": "A reliable fish diet reduces hunger drain.",
+          "Cost": 5,
+          "MaxRank": 2,
+          "RequiredClassLevel": 25,
+          "RequiredPointsSpent": 15,
+          "Requires": [
+            "path-a"
+          ],
+          "RequiresAny": [],
+          "Column": 0,
+          "Row": 3,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "HungerReduction",
+              "ValuePerRank": 0.02,
+              "Stat": "Hunger drain"
+            }
+          ]
+        },
+        {
+          "Id": "expert-b",
+          "DisplayName": "River Reaper",
+          "Description": "Sure footing on wet banks reduces fall damage taken.",
+          "Cost": 5,
+          "MaxRank": 2,
+          "RequiredClassLevel": 25,
+          "RequiredPointsSpent": 15,
+          "Requires": [
+            "path-b"
+          ],
+          "RequiresAny": [],
+          "Column": 2,
+          "Row": 3,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "FallDamageReduction",
+              "ValuePerRank": 0.04,
+              "Stat": "Fall damage taken"
+            }
+          ]
+        },
+        {
+          "Id": "capstone",
+          "DisplayName": "Fisher Grandmaster",
+          "Description": "The final fisher mastery reward. Unlocks the exclusive fisher grandmaster recipe.",
+          "Cost": 8,
+          "MaxRank": 1,
+          "RequiredClassLevel": 40,
+          "RequiredPointsSpent": 28,
+          "Requires": [],
+          "RequiresAny": [
+            "expert-a",
+            "expert-b"
+          ],
+          "Column": 1,
+          "Row": 4,
+          "Capstone": true,
+          "Effects": [
+            {
+              "Type": "UnlockRecipe",
+              "ValuePerRank": 0,
+              "Code": "apprentice:masterfishingrod"
+            }
+          ]
+        }
+      ]
+    },
+    "animalhusbandry": {
+      "ClassId": "animalhusbandry",
+      "DisplayName": "Husbandry",
+      "Theme": "Husbandry",
+      "PassiveDescription": "-0.1% damage taken from animals per mastery rank (max -5%).",
+      "PassiveEffect": {
+        "Type": "AnimalDamageReduction",
+        "ValuePerRank": 0.001
+      },
+      "WeaponPatterns": [],
+      "Nodes": [
+        {
+          "Id": "foundation",
+          "DisplayName": "Calm Presence",
+          "Description": "Experience around animals reduces damage received from animals.",
+          "Cost": 1,
+          "MaxRank": 3,
+          "RequiredClassLevel": 2,
+          "RequiredPointsSpent": 0,
+          "Requires": [],
+          "RequiresAny": [],
+          "Column": 1,
+          "Row": 0,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "AnimalDamageReduction",
+              "ValuePerRank": 0.04,
+              "Stat": "Damage taken from animals"
+            }
+          ]
+        },
+        {
+          "Id": "discipline",
+          "DisplayName": "Dairy Hand",
+          "Description": "Careful milking increases milk yield.",
+          "Cost": 2,
+          "MaxRank": 3,
+          "RequiredClassLevel": 5,
+          "RequiredPointsSpent": 2,
+          "Requires": [
+            "foundation"
+          ],
+          "RequiresAny": [],
+          "Column": 1,
+          "Row": 1,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "MilkYield",
+              "ValuePerRank": 0.08,
+              "Stat": "Milk yield",
+              "Code": "*milk*"
+            }
+          ]
+        },
+        {
+          "Id": "path-a",
+          "DisplayName": "Breeder",
+          "Description": "Knowledge of animal products helps you get more nourishment from food.",
+          "Cost": 3,
+          "MaxRank": 3,
+          "RequiredClassLevel": 10,
+          "RequiredPointsSpent": 6,
+          "Requires": [
+            "discipline"
+          ],
+          "RequiresAny": [],
+          "ExclusiveGroup": "specialization",
+          "Column": 0,
+          "Row": 2,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "FoodSatiety",
+              "ValuePerRank": 0.04,
+              "Stat": "Food saturation gained"
+            }
+          ]
+        },
+        {
+          "Id": "path-b",
+          "DisplayName": "Shepherd",
+          "Description": "Careful flock work reduces durability lost by shears.",
+          "Cost": 3,
+          "MaxRank": 3,
+          "RequiredClassLevel": 10,
+          "RequiredPointsSpent": 6,
+          "Requires": [
+            "discipline"
+          ],
+          "RequiresAny": [],
+          "ExclusiveGroup": "specialization",
+          "Column": 2,
+          "Row": 2,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "DurabilitySave",
+              "ValuePerRank": 0.07,
+              "Stat": "Shears durability saved",
+              "Code": "*:shears-*"
+            }
+          ]
+        },
+        {
+          "Id": "expert-a",
+          "DisplayName": "Master Breeder",
+          "Description": "Knowledge of animal health improves healing received.",
+          "Cost": 5,
+          "MaxRank": 2,
+          "RequiredClassLevel": 25,
+          "RequiredPointsSpent": 15,
+          "Requires": [
+            "path-a"
+          ],
+          "RequiresAny": [],
+          "Column": 0,
+          "Row": 3,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "HealingEffectiveness",
+              "ValuePerRank": 0.04,
+              "Stat": "Healing received"
+            }
+          ]
+        },
+        {
+          "Id": "expert-b",
+          "DisplayName": "Herdmaster",
+          "Description": "Years managing large animals increase maximum health.",
+          "Cost": 5,
+          "MaxRank": 2,
+          "RequiredClassLevel": 25,
+          "RequiredPointsSpent": 15,
+          "Requires": [
+            "path-b"
+          ],
+          "RequiresAny": [],
+          "Column": 2,
+          "Row": 3,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "MaxHealth",
+              "ValuePerRank": 0.4,
+              "Stat": "Maximum health"
+            }
+          ]
+        },
+        {
+          "Id": "capstone",
+          "DisplayName": "Husbandry Grandmaster",
+          "Description": "The final animal husbandry mastery reward. Unlocks the exclusive animal husbandry grandmaster recipe.",
+          "Cost": 8,
+          "MaxRank": 1,
+          "RequiredClassLevel": 40,
+          "RequiredPointsSpent": 28,
+          "Requires": [],
+          "RequiresAny": [
+            "expert-a",
+            "expert-b"
+          ],
+          "Column": 1,
+          "Row": 4,
+          "Capstone": true,
+          "Effects": [
+            {
+              "Type": "UnlockRecipe",
+              "ValuePerRank": 0,
+              "Code": "apprentice:veterinarykit"
+            }
+          ]
+        }
+      ]
+    },
+    "beekeeper": {
+      "ClassId": "beekeeper",
+      "DisplayName": "Beekeeper",
+      "Theme": "Apiary",
+      "PassiveDescription": "-0.2% bee and wasp damage per mastery rank (max -10%).",
+      "PassiveEffect": {
+        "Type": "BeeDamageReduction",
+        "ValuePerRank": 0.002
+      },
+      "WeaponPatterns": [],
+      "Nodes": [
+        {
+          "Id": "foundation",
+          "DisplayName": "Smoker\u2019s Calm",
+          "Description": "Apiary experience reduces damage received from bees and similar insects.",
+          "Cost": 1,
+          "MaxRank": 3,
+          "RequiredClassLevel": 2,
+          "RequiredPointsSpent": 0,
+          "Requires": [],
+          "RequiresAny": [],
+          "Column": 1,
+          "Row": 0,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "BeeDamageReduction",
+              "ValuePerRank": 0.08,
+              "Stat": "Bee and wasp damage taken"
+            }
+          ]
+        },
+        {
+          "Id": "discipline",
+          "DisplayName": "Hive Hands",
+          "Description": "Regular apiary work reduces hunger drain.",
+          "Cost": 2,
+          "MaxRank": 3,
+          "RequiredClassLevel": 5,
+          "RequiredPointsSpent": 2,
+          "Requires": [
+            "foundation"
+          ],
+          "RequiresAny": [],
+          "Column": 1,
+          "Row": 1,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "HungerReduction",
+              "ValuePerRank": 0.02,
+              "Stat": "Hunger drain"
+            }
+          ]
+        },
+        {
+          "Id": "path-a",
+          "DisplayName": "Hivekeeper",
+          "Description": "Careful hive work recovers more honeycomb and honey.",
+          "Cost": 3,
+          "MaxRank": 3,
+          "RequiredClassLevel": 10,
+          "RequiredPointsSpent": 6,
+          "Requires": [
+            "discipline"
+          ],
+          "RequiresAny": [],
+          "ExclusiveGroup": "specialization",
+          "Column": 0,
+          "Row": 2,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "HoneyYield",
+              "ValuePerRank": 0.08,
+              "Stat": "Honey and comb yield",
+              "Code": "*honey*"
+            }
+          ]
+        },
+        {
+          "Id": "path-b",
+          "DisplayName": "Honeywright",
+          "Description": "Honey-rich food provides more saturation.",
+          "Cost": 3,
+          "MaxRank": 3,
+          "RequiredClassLevel": 10,
+          "RequiredPointsSpent": 6,
+          "Requires": [
+            "discipline"
+          ],
+          "RequiresAny": [],
+          "ExclusiveGroup": "specialization",
+          "Column": 2,
+          "Row": 2,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "FoodSatiety",
+              "ValuePerRank": 0.05,
+              "Stat": "Food saturation gained"
+            }
+          ]
+        },
+        {
+          "Id": "expert-a",
+          "DisplayName": "Master Hivekeeper",
+          "Description": "Knowledge of honey and remedies improves healing received.",
+          "Cost": 5,
+          "MaxRank": 2,
+          "RequiredClassLevel": 25,
+          "RequiredPointsSpent": 15,
+          "Requires": [
+            "path-a"
+          ],
+          "RequiresAny": [],
+          "Column": 0,
+          "Row": 3,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "HealingEffectiveness",
+              "ValuePerRank": 0.05,
+              "Stat": "Healing received"
+            }
+          ]
+        },
+        {
+          "Id": "expert-b",
+          "DisplayName": "Bee Line",
+          "Description": "Efficient routes between hives increase your movement speed.",
+          "Cost": 5,
+          "MaxRank": 2,
+          "RequiredClassLevel": 25,
+          "RequiredPointsSpent": 15,
+          "Requires": [
+            "path-b"
+          ],
+          "RequiresAny": [],
+          "Column": 2,
+          "Row": 3,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "WalkSpeed",
+              "ValuePerRank": 0.025,
+              "Stat": "Movement speed"
+            }
+          ]
+        },
+        {
+          "Id": "capstone",
+          "DisplayName": "Beekeeper Grandmaster",
+          "Description": "The final beekeeper mastery reward. Unlocks the exclusive beekeeper grandmaster recipe.",
+          "Cost": 8,
+          "MaxRank": 1,
+          "RequiredClassLevel": 40,
+          "RequiredPointsSpent": 28,
+          "Requires": [],
+          "RequiresAny": [
+            "expert-a",
+            "expert-b"
+          ],
+          "Column": 1,
+          "Row": 4,
+          "Capstone": true,
+          "Effects": [
+            {
+              "Type": "UnlockRecipe",
+              "ValuePerRank": 0,
+              "Code": "apprentice:framehive"
+            }
+          ]
+        }
+      ]
+    },
+    "spearman": {
+      "ClassId": "spearman",
+      "DisplayName": "Spearman",
+      "Theme": "Polearm Combat",
+      "PassiveDescription": "+0.5% melee and thrown-spear damage per mastery rank (max 50).",
+      "PassiveEffect": {
+        "Type": "WeaponDamage",
+        "ValuePerRank": 0.005
+      },
+      "WeaponPatterns": [
+        "*:spear-*",
+        "*:javelin-*",
+        "*:pike-*",
+        "*:*spear*"
+      ],
+      "Nodes": [
+        {
+          "Id": "foundation",
+          "DisplayName": "Long Reach",
+          "Description": "Polearm practice increases spear and javelin damage.",
+          "Cost": 1,
+          "MaxRank": 3,
+          "RequiredClassLevel": 2,
+          "RequiredPointsSpent": 0,
+          "Requires": [],
+          "RequiresAny": [],
+          "Column": 1,
+          "Row": 0,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "WeaponDamage",
+              "ValuePerRank": 0.02,
+              "Stat": "Spear and javelin damage",
+              "Code": "*"
+            }
+          ]
+        },
+        {
+          "Id": "discipline",
+          "DisplayName": "Shaft Care",
+          "Description": "Controlled thrusts reduce durability lost by spears.",
+          "Cost": 2,
+          "MaxRank": 3,
+          "RequiredClassLevel": 5,
+          "RequiredPointsSpent": 2,
+          "Requires": [
+            "foundation"
+          ],
+          "RequiresAny": [],
+          "Column": 1,
+          "Row": 1,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "DurabilitySave",
+              "ValuePerRank": 0.05,
+              "Stat": "Spear durability saved",
+              "Code": "*:spear-*"
+            }
+          ]
+        },
+        {
+          "Id": "path-a",
+          "DisplayName": "Lancer",
+          "Description": "A braced lancer stance reduces projectile damage taken.",
+          "Cost": 3,
+          "MaxRank": 3,
+          "RequiredClassLevel": 10,
+          "RequiredPointsSpent": 6,
+          "Requires": [
+            "discipline"
+          ],
+          "RequiresAny": [],
+          "ExclusiveGroup": "specialization",
+          "Column": 0,
+          "Row": 2,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "ProjectileDamageReduction",
+              "ValuePerRank": 0.04,
+              "Stat": "Projectile damage taken"
+            }
+          ]
+        },
+        {
+          "Id": "path-b",
+          "DisplayName": "Impaler",
+          "Description": "Knowledge of animal anatomy increases damage dealt to animals.",
+          "Cost": 3,
+          "MaxRank": 3,
+          "RequiredClassLevel": 10,
+          "RequiredPointsSpent": 6,
+          "Requires": [
+            "discipline"
+          ],
+          "RequiresAny": [],
+          "ExclusiveGroup": "specialization",
+          "Column": 2,
+          "Row": 2,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "AnimalDamage",
+              "ValuePerRank": 0.04,
+              "Stat": "Damage dealt to animals",
+              "Code": "*"
+            }
+          ]
+        },
+        {
+          "Id": "expert-a",
+          "DisplayName": "Master Lancer",
+          "Description": "Mastered spacing and bracing reduce all incoming damage.",
+          "Cost": 5,
+          "MaxRank": 2,
+          "RequiredClassLevel": 25,
+          "RequiredPointsSpent": 15,
+          "Requires": [
+            "path-a"
+          ],
+          "RequiresAny": [],
+          "Column": 0,
+          "Row": 3,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "DamageReduction",
+              "ValuePerRank": 0.02,
+              "Stat": "Damage taken"
+            }
+          ]
+        },
+        {
+          "Id": "expert-b",
+          "DisplayName": "Spearstorm",
+          "Description": "When below 35% health, spear damage increases.",
+          "Cost": 5,
+          "MaxRank": 2,
+          "RequiredClassLevel": 25,
+          "RequiredPointsSpent": 15,
+          "Requires": [
+            "path-b"
+          ],
+          "RequiresAny": [],
+          "Column": 2,
+          "Row": 3,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "LowHealthDamage",
+              "ValuePerRank": 0.04,
+              "Stat": "Weapon damage below 35% health",
+              "Code": "*"
+            }
+          ]
+        },
+        {
+          "Id": "capstone",
+          "DisplayName": "Spearman Grandmaster",
+          "Description": "The final spearman mastery reward. Unlocks the exclusive spearman grandmaster recipe.",
+          "Cost": 8,
+          "MaxRank": 1,
+          "RequiredClassLevel": 40,
+          "RequiredPointsSpent": 28,
+          "Requires": [],
+          "RequiresAny": [
+            "expert-a",
+            "expert-b"
+          ],
+          "Column": 1,
+          "Row": 4,
+          "Capstone": true,
+          "Effects": [
+            {
+              "Type": "UnlockRecipe",
+              "ValuePerRank": 0,
+              "Code": "apprentice:atlatl"
+            }
+          ]
+        }
+      ]
+    },
+    "shield": {
+      "ClassId": "shield",
+      "DisplayName": "Shield",
+      "Theme": "Defense",
+      "PassiveDescription": "-0.1% damage while holding a shield per mastery rank (max -5%).",
+      "PassiveEffect": {
+        "Type": "ShieldedDamageReduction",
+        "ValuePerRank": 0.001
+      },
+      "WeaponPatterns": [],
+      "Nodes": [
+        {
+          "Id": "foundation",
+          "DisplayName": "Shield Drill",
+          "Description": "Defensive conditioning increases maximum health.",
+          "Cost": 1,
+          "MaxRank": 3,
+          "RequiredClassLevel": 2,
+          "RequiredPointsSpent": 0,
+          "Requires": [],
+          "RequiresAny": [],
+          "Column": 1,
+          "Row": 0,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "MaxHealth",
+              "ValuePerRank": 0.25,
+              "Stat": "Maximum health"
+            }
+          ]
+        },
+        {
+          "Id": "discipline",
+          "DisplayName": "Braced Guard",
+          "Description": "Holding a shield reduces incoming damage.",
+          "Cost": 2,
+          "MaxRank": 3,
+          "RequiredClassLevel": 5,
+          "RequiredPointsSpent": 2,
+          "Requires": [
+            "foundation"
+          ],
+          "RequiresAny": [],
+          "Column": 1,
+          "Row": 1,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "ShieldedDamageReduction",
+              "ValuePerRank": 0.025,
+              "Stat": "Damage taken while holding a shield"
+            }
+          ]
+        },
+        {
+          "Id": "path-a",
+          "DisplayName": "Guardian",
+          "Description": "Protective discipline improves healing received.",
+          "Cost": 3,
+          "MaxRank": 3,
+          "RequiredClassLevel": 10,
+          "RequiredPointsSpent": 6,
+          "Requires": [
+            "discipline"
+          ],
+          "RequiresAny": [],
+          "ExclusiveGroup": "specialization",
+          "Column": 0,
+          "Row": 2,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "HealingEffectiveness",
+              "ValuePerRank": 0.04,
+              "Stat": "Healing received"
+            }
+          ]
+        },
+        {
+          "Id": "path-b",
+          "DisplayName": "Bulwark",
+          "Description": "A reinforced stance reduces all incoming damage.",
+          "Cost": 3,
+          "MaxRank": 3,
+          "RequiredClassLevel": 10,
+          "RequiredPointsSpent": 6,
+          "Requires": [
+            "discipline"
+          ],
+          "RequiresAny": [],
+          "ExclusiveGroup": "specialization",
+          "Column": 2,
+          "Row": 2,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "DamageReduction",
+              "ValuePerRank": 0.015,
+              "Stat": "Damage taken"
+            }
+          ]
+        },
+        {
+          "Id": "expert-a",
+          "DisplayName": "Master Guardian",
+          "Description": "Shield awareness reduces projectile damage.",
+          "Cost": 5,
+          "MaxRank": 2,
+          "RequiredClassLevel": 25,
+          "RequiredPointsSpent": 15,
+          "Requires": [
+            "path-a"
+          ],
+          "RequiresAny": [],
+          "Column": 0,
+          "Row": 3,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "ProjectileDamageReduction",
+              "ValuePerRank": 0.05,
+              "Stat": "Projectile damage taken"
+            }
+          ]
+        },
+        {
+          "Id": "expert-b",
+          "DisplayName": "Living Wall",
+          "Description": "Below 35% health, incoming damage is reduced further.",
+          "Cost": 5,
+          "MaxRank": 2,
+          "RequiredClassLevel": 25,
+          "RequiredPointsSpent": 15,
+          "Requires": [
+            "path-b"
+          ],
+          "RequiresAny": [],
+          "Column": 2,
+          "Row": 3,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "LowHealthDamageReduction",
+              "ValuePerRank": 0.04,
+              "Stat": "Damage taken below 35% health"
+            }
+          ]
+        },
+        {
+          "Id": "capstone",
+          "DisplayName": "Shield Grandmaster",
+          "Description": "The final shield mastery reward. Unlocks the exclusive shield grandmaster recipe.",
+          "Cost": 8,
+          "MaxRank": 1,
+          "RequiredClassLevel": 40,
+          "RequiredPointsSpent": 28,
+          "Requires": [],
+          "RequiresAny": [
+            "expert-a",
+            "expert-b"
+          ],
+          "Column": 1,
+          "Row": 4,
+          "Capstone": true,
+          "Effects": [
+            {
+              "Type": "UnlockRecipe",
+              "ValuePerRank": 0,
+              "Code": "apprentice:towershield"
+            }
+          ]
+        }
+      ]
+    },
+    "tank": {
+      "ClassId": "tank",
+      "DisplayName": "Tank",
+      "Theme": "Endurance",
+      "PassiveDescription": "+0.1 maximum health per mastery rank (max +5 HP).",
+      "PassiveEffect": {
+        "Type": "MaxHealth",
+        "ValuePerRank": 0.1
+      },
+      "WeaponPatterns": [],
+      "Nodes": [
+        {
+          "Id": "foundation",
+          "DisplayName": "Iron Constitution",
+          "Description": "Hard conditioning increases maximum health.",
+          "Cost": 1,
+          "MaxRank": 3,
+          "RequiredClassLevel": 2,
+          "RequiredPointsSpent": 0,
+          "Requires": [],
+          "RequiresAny": [],
+          "Column": 1,
+          "Row": 0,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "MaxHealth",
+              "ValuePerRank": 0.35,
+              "Stat": "Maximum health"
+            }
+          ]
+        },
+        {
+          "Id": "discipline",
+          "DisplayName": "Pain Tolerance",
+          "Description": "General toughness reduces incoming damage.",
+          "Cost": 2,
+          "MaxRank": 3,
+          "RequiredClassLevel": 5,
+          "RequiredPointsSpent": 2,
+          "Requires": [
+            "foundation"
+          ],
+          "RequiresAny": [],
+          "Column": 1,
+          "Row": 1,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "DamageReduction",
+              "ValuePerRank": 0.015,
+              "Stat": "Damage taken"
+            }
+          ]
+        },
+        {
+          "Id": "path-a",
+          "DisplayName": "Ironhide",
+          "Description": "Heat, fire, and burning deal less damage.",
+          "Cost": 3,
+          "MaxRank": 3,
+          "RequiredClassLevel": 10,
+          "RequiredPointsSpent": 6,
+          "Requires": [
+            "discipline"
+          ],
+          "RequiresAny": [],
+          "ExclusiveGroup": "specialization",
+          "Column": 0,
+          "Row": 2,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "FireDamageReduction",
+              "ValuePerRank": 0.05,
+              "Stat": "Fire and heat damage taken"
+            }
+          ]
+        },
+        {
+          "Id": "path-b",
+          "DisplayName": "Juggernaut",
+          "Description": "A Juggernaut keeps advancing under missile fire, reducing projectile damage taken.",
+          "Cost": 3,
+          "MaxRank": 3,
+          "RequiredClassLevel": 10,
+          "RequiredPointsSpent": 6,
+          "Requires": [
+            "discipline"
+          ],
+          "RequiresAny": [],
+          "ExclusiveGroup": "specialization",
+          "Column": 2,
+          "Row": 2,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "ProjectileDamageReduction",
+              "ValuePerRank": 0.05,
+              "Stat": "Projectile damage taken"
+            }
+          ]
+        },
+        {
+          "Id": "expert-a",
+          "DisplayName": "Second Wind",
+          "Description": "Recovery training improves all healing received.",
+          "Cost": 5,
+          "MaxRank": 2,
+          "RequiredClassLevel": 25,
+          "RequiredPointsSpent": 15,
+          "Requires": [
+            "path-a"
+          ],
+          "RequiresAny": [],
+          "Column": 0,
+          "Row": 3,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "HealingEffectiveness",
+              "ValuePerRank": 0.05,
+              "Stat": "Healing received"
+            }
+          ]
+        },
+        {
+          "Id": "expert-b",
+          "DisplayName": "Unstoppable",
+          "Description": "Below 35% health, incoming damage is reduced further.",
+          "Cost": 5,
+          "MaxRank": 2,
+          "RequiredClassLevel": 25,
+          "RequiredPointsSpent": 15,
+          "Requires": [
+            "path-b"
+          ],
+          "RequiresAny": [],
+          "Column": 2,
+          "Row": 3,
+          "Capstone": false,
+          "Effects": [
+            {
+              "Type": "LowHealthDamageReduction",
+              "ValuePerRank": 0.05,
+              "Stat": "Damage taken below 35% health"
+            }
+          ]
+        },
+        {
+          "Id": "capstone",
+          "DisplayName": "Tank Grandmaster",
+          "Description": "The final tank mastery reward. Unlocks the exclusive tank grandmaster recipe.",
+          "Cost": 8,
+          "MaxRank": 1,
+          "RequiredClassLevel": 40,
+          "RequiredPointsSpent": 28,
+          "Requires": [],
+          "RequiresAny": [
+            "expert-a",
+            "expert-b"
+          ],
+          "Column": 1,
+          "Row": 4,
+          "Capstone": true,
+          "Effects": [
+            {
+              "Type": "UnlockRecipe",
+              "ValuePerRank": 0,
+              "Code": "apprentice:armorpaddingkit"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,759 @@
+{
+  "textureWidth": 16,
+  "textureHeight": 16,
+  "textureSizes": {
+    "race": [
+      16,
+      16
+    ]
+  },
+  "textures": {
+    "race": "apprentice:entity/humanoid/races/orc",
+    "bone": "apprentice:entity/humanoid/races/bone"
+  },
+  "elements": [
+    {
+      "name": "orc-face-root",
+      "stepParentName": "Head",
+      "from": [
+        0,
+        2.4,
+        2.5
+      ],
+      "to": [
+        0,
+        2.4,
+        2.5
+      ],
+      "rotationOrigin": [
+        0,
+        2.4,
+        2.5
+      ],
+      "faces": {},
+      "children": [
+        {
+          "name": "orc-ear-left-base",
+          "from": [
+            -0.35,
+            -0.05,
+            1.95
+          ],
+          "to": [
+            0.55,
+            0.95,
+            3.2
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            0,
+            0.35,
+            2.05
+          ],
+          "rotationX": -10,
+          "faces": {
+            "north": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "east": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "south": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "west": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "up": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "down": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            }
+          }
+        },
+        {
+          "name": "orc-ear-left-tip",
+          "from": [
+            -0.25,
+            0.25,
+            3.1
+          ],
+          "to": [
+            0.45,
+            0.75,
+            4.35
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            0,
+            0.45,
+            3.1
+          ],
+          "rotationX": -12,
+          "faces": {
+            "north": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "east": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "south": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "west": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "up": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "down": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            }
+          }
+        },
+        {
+          "name": "orc-ear-right-base",
+          "from": [
+            -0.35,
+            -0.05,
+            -3.2
+          ],
+          "to": [
+            0.55,
+            0.95,
+            -1.95
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            0,
+            0.35,
+            -2.05
+          ],
+          "rotationX": 10,
+          "faces": {
+            "north": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "east": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "south": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "west": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "up": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "down": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            }
+          }
+        },
+        {
+          "name": "orc-ear-right-tip",
+          "from": [
+            -0.25,
+            0.25,
+            -4.35
+          ],
+          "to": [
+            0.45,
+            0.75,
+            -3.1
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            0,
+            0.45,
+            -3.1
+          ],
+          "rotationX": 12,
+          "faces": {
+            "north": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "east": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "south": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "west": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "up": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "down": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            }
+          }
+        },
+        {
+          "name": "orc-heavy-brow",
+          "from": [
+            -0.02,
+            0.42,
+            -2.1
+          ],
+          "to": [
+            0.48,
+            0.92,
+            2.1
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -0.02,
+            0.42,
+            -2.1
+          ],
+          "faces": {
+            "north": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "east": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "south": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "west": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "up": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "down": {
+              "texture": "#race",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            }
+          }
+        },
+        {
+          "name": "orc-tusk-left-base",
+          "from": [
+            0.05,
+            -1.9,
+            0.78
+          ],
+          "to": [
+            0.66,
+            -0.76,
+            1.28
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            0.34,
+            -1.88,
+            1.03
+          ],
+          "rotationX": -5,
+          "faces": {
+            "north": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "east": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "south": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "west": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "up": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "down": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            }
+          }
+        },
+        {
+          "name": "orc-tusk-left-tip",
+          "from": [
+            0.12,
+            -0.86,
+            0.88
+          ],
+          "to": [
+            0.58,
+            -0.15,
+            1.18
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            0.34,
+            -0.86,
+            1.03
+          ],
+          "rotationX": -5,
+          "faces": {
+            "north": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "east": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "south": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "west": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "up": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "down": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            }
+          }
+        },
+        {
+          "name": "orc-tusk-right-base",
+          "from": [
+            0.05,
+            -1.9,
+            -1.28
+          ],
+          "to": [
+            0.66,
+            -0.76,
+            -0.78
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            0.34,
+            -1.88,
+            -1.03
+          ],
+          "rotationX": 5,
+          "faces": {
+            "north": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "east": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "south": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "west": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "up": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "down": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            }
+          }
+        },
+        {
+          "name": "orc-tusk-right-tip",
+          "from": [
+            0.12,
+            -0.86,
+            -1.18
+          ],
+          "to": [
+            0.58,
+            -0.15,
+            -0.88
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            0.34,
+            -0.86,
+            -1.03
+          ],
+          "rotationX": 5,
+          "faces": {
+            "north": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "east": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "south": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "west": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "up": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            },
+            "down": {
+              "texture": "#bone",
+              "uv": [
+                0,
+                0,
+                16,
+                16
+              ]
+            }
+          }
+        }
+      ],
+      "attachmentpoints": [
+        {
+          "code": "Apprentice-orc-face",
+          "posX": "0",
+          "posY": "0",
+          "posZ": "0",
+          "rotationX": "0",
+          "rotationY": "0",
+          "rotationZ": "0"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+[
+  {
+    "file": "game:entities/humanoid/player.json",
+    "op": "add",
+    "path": "/attributes/skinnableParts/-",
+    "value": {
+      "code": "apprenticerace",
+      "type": "shape",
+      "hidden": true,
+      "shapeTemplate": {
+        "base": "apprentice:entity/humanoid/races/{code}"
+      },
+      "variants": [
+        { "code": "human" },
+        { "code": "elf" },
+        { "code": "dwarf" },
+        { "code": "gnome" },
+        { "code": "halfling" },
+        { "code": "orc" },
+        { "code": "goliath" },
+        { "code": "dragonborn" },
+        { "code": "tiefling" }
+      ]
+    }
+  }
+]
