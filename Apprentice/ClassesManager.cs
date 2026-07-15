@@ -3,54 +3,54 @@ using Vintagestory.API.Server;
 
 namespace Apprentice
 {
-    /// <summary>
-    /// Initializes progression storage for every class defined in
-    /// class.json. No class ID is hard-coded here.
-    /// </summary>
-    internal sealed class ClassesManager : IDisposable
-    {
-        private readonly ICoreServerAPI serverApi;
-        private readonly ClassConfig classConfig;
+	/// <summary>
+	/// Initializes progression storage for every class defined in
+	/// class.json. No class ID is hard-coded here.
+	/// </summary>
+	internal sealed class ClassesManager : IDisposable
+	{
+		private readonly ICoreServerAPI serverApi;
+		private readonly ClassConfig classConfig;
 
-        public ClassesManager(
-            ICoreServerAPI serverApi,
-            ClassConfig classConfig)
-        {
-            this.serverApi = serverApi
-                ?? throw new ArgumentNullException(
-                    nameof(serverApi)
-                );
+		public ClassesManager(
+			ICoreServerAPI serverApi,
+			ClassConfig classConfig)
+		{
+			this.serverApi = serverApi
+				?? throw new ArgumentNullException(
+					nameof(serverApi)
+				);
 
-            this.classConfig = classConfig
-                ?? throw new ArgumentNullException(
-                    nameof(classConfig)
-                );
+			this.classConfig = classConfig
+				?? throw new ArgumentNullException(
+					nameof(classConfig)
+				);
 
-            serverApi.Event.PlayerJoin += OnPlayerJoin;
-        }
+			serverApi.Event.PlayerJoin += OnPlayerJoin;
+		}
 
-        public void InitializePlayer(IServerPlayer player)
-        {
-            ArgumentNullException.ThrowIfNull(player);
+		public void InitializePlayer(IServerPlayer player)
+		{
+			ArgumentNullException.ThrowIfNull(player);
 
-            foreach (ClassDefinition classDefinition
-                     in classConfig.ClassTypes.Values)
-            {
-                ProgressionData.GetOrCreateClassProgress(
-                    player,
-                    classDefinition.Id
-                );
-            }
-        }
+			foreach (ClassDefinition classDefinition
+					 in classConfig.ClassTypes.Values)
+			{
+				ProgressionData.GetOrCreateClassProgress(
+					player,
+					classDefinition.Id
+				);
+			}
+		}
 
-        private void OnPlayerJoin(IServerPlayer player)
-        {
-            InitializePlayer(player);
-        }
+		private void OnPlayerJoin(IServerPlayer player)
+		{
+			InitializePlayer(player);
+		}
 
-        public void Dispose()
-        {
-            serverApi.Event.PlayerJoin -= OnPlayerJoin;
-        }
-    }
+		public void Dispose()
+		{
+			serverApi.Event.PlayerJoin -= OnPlayerJoin;
+		}
+	}
 }
