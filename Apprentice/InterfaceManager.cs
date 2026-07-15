@@ -1,236 +1,334 @@
-﻿using System;
-using System.Collections.Generic;
-
+using System;
 using Vintagestory.API.Client;
-using Vintagestory.API.MathTools;
-
-using Cairo;
+using Vintagestory.API.Common;
 
 namespace Apprentice
 {
-	internal class SkillTreeBranch
-	{
-		public Vec2d Position;
-		public Vec2d Direction;
-		public float Length;
+    internal sealed class SkillTreeDialog :
+        GuiDialog
+    {
+        // A fixed 1280 x 780 content area preserves the 1120 x 682 design
+        // aspect ratio while making the complete interface visibly larger.
+        // These dimensions are Apprentice-dialog units; they are not derived
+        // from the game window or render-frame size.
+        private const double DialogContentWidth = 1280;
+        private const double DialogContentHeight = 780;
 
-		public SkillTreeBranch? Parent = null;
-		public List<SkillTreeBranch> Children = [];
+        private readonly GuiElementSkillTreeCanvas
+            canvas;
 
-		public Vec2d End => Position + Direction * Length;
+        public override string?
+            ToggleKeyCombinationCode =>
+                null;
 
-		public SkillTreeBranch(Vec2d position, Vec2d direction, float length, SkillTreeBranch? parent = null)
-		{
-			Position = position;
-			Direction = direction;
-			Length = length;
-			Parent = parent;
-		}
-	}
+        public SkillTreeDialog(
+            ICoreClientAPI api,
+            ClassConfig classConfig,
+            SkillTreeConfig skillConfig,
+            IClientNetworkChannel channel)
+            : base(api)
+        {
+            _ =
+                classConfig ??
+                throw new ArgumentNullException(
+                    nameof(classConfig)
+                );
 
-	internal class SkillTree
-	{
-		private Random Rand = new();
+            // Use the exact root/background sizing pattern proven stable
+            // by the working Compact GUI 2.0.4.
+            ElementBounds dialogBounds =
+                ElementStdBounds
+                    .AutosizedMainDialog
+                    .WithAlignment(
+                        EnumDialogArea.CenterMiddle
+                    );
 
-		private List<SkillTreeBranch> Branches = [];
-		private List<Vec2d> Attractors = [];
+            // Keep the Apprentice dialog independent of the game-window size.
+            // This bounds object sizes the complete usable content area and is
+            // deliberately not shared with the canvas element. The larger
+            // fixed bounds make the entire UI grow together; they do not turn
+            // the tabs into a full-width tab strip.
+            ElementBounds contentBounds =
+                ElementBounds.Fixed(
+                    0,
+                    40,
+                    DialogContentWidth,
+                    DialogContentHeight
+                );
 
-		public SkillTree()
-		{
-			AddBaseBranches(8);
-			AddRandomAttractors(400);
+            // The canvas consumes the complete Apprentice content area while
+            // the title bar remains owned by the dialog shell.
+            ElementBounds canvasBounds =
+                ElementBounds.Fixed(
+                    0,
+                    40,
+                    DialogContentWidth,
+                    DialogContentHeight
+                );
 
-			GrowTree();
-		}
+            // The shaded background already paints its own frame. Additional
+            // composer padding produced the broad brown strip visible at the
+            // right and bottom of the enlarged dialog, so let the Apprentice
+            // canvas consume the complete framed content area.
+            ElementBounds backgroundBounds =
+                ElementBounds.Fill
+                    .WithFixedPadding(0);
 
-		public void AddBaseBranches(uint numBranches)
-		{
-			double step = Math.Tau / numBranches;
+            backgroundBounds.BothSizing =
+                ElementSizing.FitToChildren;
 
-			for (uint i = 0; i < numBranches; i++)
-			{
-				double radius = 100;
-				double angle = i * step;
-				double x = Math.Sin(angle) * radius;
-				double y = Math.Cos(angle) * radius;
+            backgroundBounds.WithChildren(
+                contentBounds
+            );
 
-				Vec2d position = new(x, y);
-				Vec2d dir = (new Vec2d(0, 0) - position).Normalize();
+            api.Logger.Notification(
+                "[Apprentice] Interactive skill-tree GUI: " +
+                "creating canvas object."
+            );
 
-				Branches.Add(new SkillTreeBranch(position, dir, 10));
-			}
-		}
-		public void AddRandomAttractors(uint numAttractors)
-		{
-			for (uint i = 0; i < numAttractors; i++)
-			{
-				double radius = Rand.NextDouble() * 500;
-				double angle = Rand.NextDouble() * Math.Tau;
-				double x = Math.Cos(angle) * radius;
-				double y = Math.Sin(angle) * radius;
+            canvas =
+                new GuiElementSkillTreeCanvas(
+                    api,
+                    canvasBounds,
+                    skillConfig,
+                    channel
+                );
 
-				Attractors.Add(new Vec2d(x, y));
-			}
-		}
+            api.Logger.Notification(
+                "[Apprentice] Interactive skill-tree GUI: " +
+                "canvas object ready."
+            );
 
-		public void GrowTree()
-		{
-			while (Attractors.Count > 0)
-			{
-				List<SkillTreeBranch> newBranches = [];
+            api.Logger.Notification(
+                "[Apprentice] Interactive skill-tree GUI: " +
+                "creating composer."
+            );
 
-				foreach (SkillTreeBranch branch in Branches)
-				{
-					// Compute growth based on near attractors
-					Vec2d growth = new();
-					foreach (Vec2d attractor in Attractors)
-					{
-						Vec2d dir = attractor - branch.End;
+            GuiComposer composer =
+                api.Gui.CreateCompo(
+                    "apprentice-interactive-skilltree",
+                    dialogBounds
+                );
 
-						if (dir.Length() < 100)
-						{
-							growth += dir.Normalize();
-						}
-					}
+            api.Logger.Notification(
+                "[Apprentice] Interactive skill-tree GUI: " +
+                "composer created."
+            );
 
-					if (growth.Length() > 0)
-					{
-						Vec2d dir = growth.Normalize();
+            composer.AddShadedDialogBG(
+                backgroundBounds
+            );
 
-						newBranches.Add(new SkillTreeBranch(branch.End, dir, 10, branch));
-					}
-				}
+            api.Logger.Notification(
+                "[Apprentice] Interactive skill-tree GUI: " +
+                "background added."
+            );
 
-				// Link new branches
-				foreach (SkillTreeBranch branch in newBranches)
-				{
-					branch.Parent?.Children.Add(branch);
-					Branches.Add(branch);
-				}
+            composer.AddDialogTitleBar(
+                "Apprentice Mastery and Skill Trees",
+                OnClose
+            );
 
-				// Remove all attractors near branches
-				Attractors.RemoveAll(attractor =>
-				{
-					foreach (SkillTreeBranch branch in Branches)
-					{
-						Vec2d dir = attractor - branch.End;
+            api.Logger.Notification(
+                "[Apprentice] Interactive skill-tree GUI: " +
+                "title bar added."
+            );
 
-						if (dir.Length() < 100)
-						{
-							return true;
-						}
-					}
+            composer.AddInteractiveElement(
+                canvas,
+                "apprentice-skilltree-canvas"
+            );
 
-					return false;
-				});
-			}
-		}
-		public void DrawTree(Context ctx, double x, double y)
-		{
-			foreach (SkillTreeBranch branch in Branches)
-			{
-				DrawTreeRecursive(ctx, x, y, branch);
-			}
+            api.Logger.Notification(
+                "[Apprentice] Interactive skill-tree GUI: " +
+                "canvas element added."
+            );
 
-			foreach (Vec2d attractor in Attractors)
-			{
-				ctx.LineWidth = 1;
+            api.Logger.Notification(
+                "[Apprentice] Interactive skill-tree GUI: " +
+                "composer Compose begin."
+            );
 
-				ctx.SetSourceRGBA(0, 1, 0, 1);
-				ctx.Arc(x + attractor.X, y + attractor.Y, 2, 0, Math.Tau);
-				ctx.Fill();
-			}
-		}
+            SingleComposer =
+                composer.Compose(
+                    focusFirstElement: false
+                );
 
-		private void DrawTreeRecursive(Context ctx, double x, double y, SkillTreeBranch branch)
-		{
-			ctx.LineWidth = 1;
+            api.Logger.Notification(
+                "[Apprentice] Interactive skill-tree GUI: " +
+                "composer Compose complete."
+            );
+        }
 
-			ctx.SetSourceRGBA(1, 0, 0, 1);
-			ctx.MoveTo(x + branch.Position.X, y + branch.Position.Y);
-			ctx.LineTo(x + branch.End.X, y + branch.End.Y);
-			ctx.Stroke();
+        private void OnClose()
+        {
+            TryClose();
+        }
 
-			foreach (SkillTreeBranch child in branch.Children)
-			{
-				DrawTreeRecursive(ctx, x, y, child);
-			}
-		}
-	}
+        public void Refresh(
+            string? message = null)
+        {
+            canvas.Refresh(
+                message
+            );
+        }
 
-	internal class GuiElementSkillTree : GuiElement
-	{
-		private SkillTree skillTree = new SkillTree();
+        public void ApplyPurchaseResult(
+            SkillPurchaseResultPacket packet)
+        {
+            canvas.ApplyPurchaseResult(packet);
+        }
+    }
 
-		public GuiElementSkillTree(ICoreClientAPI capi, ElementBounds bounds) : base(capi, bounds)
-		{
+    internal sealed class InterfaceManager :
+        IDisposable
+    {
+        private readonly ICoreClientAPI api;
+        private readonly ClassConfig classConfig;
+        private readonly SkillTreeConfig skillConfig;
+        private readonly IClientNetworkChannel channel;
 
-		}
+        private SkillTreeDialog? dialog;
 
-		public override void ComposeElements(Context ctx, ImageSurface surface)
-		{
-			base.ComposeElements(ctx, surface);
+        public InterfaceManager(
+            ICoreClientAPI api,
+            ClassConfig classConfig,
+            SkillTreeConfig skillConfig,
+            IClientNetworkChannel channel)
+        {
+            this.api =
+                api ??
+                throw new ArgumentNullException(
+                    nameof(api)
+                );
 
-			double centerX = Bounds.OuterWidth / 2;
-			double centerY = Bounds.OuterHeight / 2;
+            this.classConfig =
+                classConfig ??
+                throw new ArgumentNullException(
+                    nameof(classConfig)
+                );
 
-			skillTree.DrawTree(ctx, centerX, centerY);
-		}
+            this.skillConfig =
+                skillConfig ??
+                throw new ArgumentNullException(
+                    nameof(skillConfig)
+                );
 
-		// private void DrawNode(Context ctx, double x, double y, double radius)
-		// {
-		// 	ctx.LineWidth = 2;
-		// 
-		// 	ctx.SetSourceRGBA(1, 0, 0, 1);
-		// 	ctx.Arc(x, y, radius, 0, Math.Tau);
-		// 	ctx.Stroke();
-		// }
-	}
+            this.channel =
+                channel ??
+                throw new ArgumentNullException(
+                    nameof(channel)
+                );
 
-	internal class SkillTreeDialog : GuiDialog
-	{
-		public override string ToggleKeyCombinationCode => "skill_tree";
-		public override bool PrefersUngrabbedMouse => false;
-		public override bool Focusable => true;
+            api.Input.RegisterHotKey(
+                ApprenticeConstants
+                    .ExperienceDialogHotKey,
+                "Apprentice mastery and skill trees",
+                GlKeys.U,
+                HotkeyType.GUIOrOtherControls
+            );
 
-		public SkillTreeDialog(ICoreClientAPI capi) : base(capi)
-		{
+            api.Input.SetHotKeyHandler(
+                ApprenticeConstants
+                    .ExperienceDialogHotKey,
+                OnToggle
+            );
+        }
 
-		}
+        public void RefreshIfOpen(
+            string? message = null)
+        {
+            if (dialog?.IsOpened() ==
+                true)
+            {
+                dialog.Refresh(
+                    message
+                );
+            }
+        }
 
-		public override void OnGuiOpened()
-		{
-			base.OnGuiOpened();
+        public void ApplyPurchaseResult(
+            SkillPurchaseResultPacket packet)
+        {
+            dialog?.ApplyPurchaseResult(packet);
+        }
 
-			ElementBounds bounds = ElementBounds.Fill.WithFixedPadding(0);
+        private bool OnToggle(
+            KeyCombination combination)
+        {
+            api.Logger.Notification(
+                "[Apprentice] Interactive skill-tree GUI: " +
+                "U hotkey received."
+            );
 
-			SingleComposer = capi.Gui.CreateCompo("Skill Tree", bounds)
-				.AddStaticElement(new GuiElementSkillTree(capi, bounds))
-				.Compose();
-		}
-	}
+            try
+            {
+                if (dialog == null)
+                {
+                    api.Logger.Notification(
+                        "[Apprentice] Interactive skill-tree GUI: " +
+                        "creating dialog."
+                    );
 
-	internal class InterfaceManager
-	{
-		private readonly ICoreClientAPI? capi = null;
-		private readonly GuiDialog? dialog = null;
+                    dialog =
+                        new SkillTreeDialog(
+                            api,
+                            classConfig,
+                            skillConfig,
+                            channel
+                        );
+                }
 
-		public InterfaceManager(ICoreClientAPI capi)
-		{
-			this.capi = capi;
+                if (dialog.IsOpened())
+                {
+                    api.Logger.Notification(
+                        "[Apprentice] Interactive skill-tree GUI: " +
+                        "closing dialog."
+                    );
 
-			dialog = new SkillTreeDialog(capi);
+                    dialog.TryClose();
+                }
+                else
+                {
+                    api.Logger.Notification(
+                        "[Apprentice] Interactive skill-tree GUI: " +
+                        "opening dialog."
+                    );
 
-			capi.Input.RegisterHotKey("skill_tree", "", GlKeys.U, HotkeyType.GUIOrOtherControls);
-			capi.Input.SetHotKeyHandler("skill_tree", OnToggleExperienceDialog);
-		}
+                    bool opened =
+                        dialog.TryOpen();
 
-		private bool OnToggleExperienceDialog(KeyCombination comb)
-		{
-			if (dialog == null) return true;
-			if (dialog.IsOpened()) dialog.TryClose();
-			else dialog.TryOpen();
-			return true;
-		}
-	}
+                    api.Logger.Notification(
+                        "[Apprentice] Interactive skill-tree GUI: " +
+                        $"TryOpen returned {opened}."
+                    );
+                }
+            }
+            catch (Exception exception)
+            {
+                api.Logger.Error(
+                    "[Apprentice] Interactive skill-tree GUI " +
+                    "failed with a managed exception."
+                );
+
+                api.Logger.Error(
+                    exception
+                );
+
+                api.ShowChatMessage(
+                    "Apprentice: interactive skill-tree GUI failed. " +
+                    "Check client-main.log."
+                );
+            }
+
+            return true;
+        }
+
+        public void Dispose()
+        {
+            dialog?.TryClose();
+            dialog?.Dispose();
+            dialog = null;
+        }
+    }
 }
