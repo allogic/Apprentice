@@ -1,8 +1,0 @@
-Validated class.json: 15 classes.
-Validated: no class IDs are hard-coded in C#.
-Validated: no global exp key, recipe-match blocker, or broken chat command.
-Validated longest-match example: bituminous coal -> Miner 0.5 XP.
-Validated ExpEquation constants and initial thresholds are finite.
-Validated balanced braces in all C# source files.
-Validated client hotfix: HUD uses inherited null toggle key.
-Validated client hotfix: only one progression-dialog hotkey owner.

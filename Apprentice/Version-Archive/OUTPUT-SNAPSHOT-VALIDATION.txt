@@ -1,8 +1,0 @@
-CompletionEvents-Hotfix 1.2.1 statisch geprüft.
-- Der ungültige benannte Parameter 'code' wurde entfernt.
-- Der ungültige benannte Parameter 'stackSize' wurde entfernt.
-- OutputSnapshot wird mit positionsbasierten Argumenten erzeugt.
-- Projektversion und Startmarkierung wurden auf 1.2.1 aktualisiert.
-- Alle C#-Klammern sind ausgeglichen.
-
-Ein lokaler Compile mit den Vintage-Story-Assemblies ist weiterhin erforderlich.

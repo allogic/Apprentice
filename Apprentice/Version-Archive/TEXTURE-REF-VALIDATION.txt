@@ -1,9 +1,0 @@
-Interactive SkillTree 2.1.2 static validation passed.
-- canvasTexture is no longer readonly.
-- generateTexture can legally receive it by ref.
-- Cairo reference and Format.ARGB32 remain.
-- Interactive GUI, skill purchases, mastery and passive HUD remain.
-- Project XML and JSON parse successfully.
-- C# braces are balanced.
-
-A real compile against Vintage Story 1.22.3 is still required.

@@ -1,9 +1,0 @@
-Native events namespace hotfix 1.1.2 passed static validation.
-- Vintagestory.API.Common is imported.
-- Vintagestory.API.Common.Entities is imported.
-- Entity, EntityPlayer and DamageSource references are present.
-- Player/projectile kill attribution remains unchanged.
-- Project version and startup marker are updated to 1.1.2.
-- C# braces are balanced.
-
-A local Vintage Story compile is still required.

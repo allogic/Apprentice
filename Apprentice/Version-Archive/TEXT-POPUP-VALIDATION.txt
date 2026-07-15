@@ -1,9 +1,0 @@
-Text popup Phase 1 static validation passed.
-- Project version is 1.0.3.
-- Old ExperienceNotificationHud source removed.
-- No AddStatbar or GetStatbar calls remain.
-- No popup OnRenderGUI override exists.
-- Popup is constructed lazily from OverlayManager.Enqueue().
-- Game-tick listener is explicitly unregistered.
-- Chat fallback remains available after popup failure.
-- C# braces are balanced.
