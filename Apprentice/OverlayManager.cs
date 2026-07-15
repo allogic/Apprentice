@@ -1,90 +1,234 @@
-﻿#pragma warning disable CS8602
-
+using System;
+using System.Collections.Generic;
 using Vintagestory.API.Client;
-using Vintagestory.API.Common;
-using Vintagestory.API.MathTools;
 
 namespace Apprentice
 {
-	internal class ExpBarRenderer : IRenderer
-	{
-		public double RenderOrder { get { return 0; } }
-		public int RenderRange { get { return 10; } }
+    /// <summary>
+    /// Routes notifications on the client main thread:
+    ///
+    /// - level-up packets use the vanilla discovery message;
+    /// - normal packets use one top-left GuiDialog with text bars;
+    /// - all simultaneously rewarded skills are shown together.
+    /// </summary>
+    internal sealed class OverlayManager : IDisposable
+    {
+        private const int LevelUpDiscoveryDurationMs =
+            3500;
 
-		private readonly ICoreClientAPI? api = null;
-		private readonly MeshRef whiteRectangleRef;
-		private readonly MeshRef progressQuadRef;
-		private readonly Matrixf mvMatrix = new();
+        private readonly ICoreClientAPI api;
+        private readonly BaseConfig config;
+        private readonly Queue<ExperienceNotificationPacket>
+            levelUpQueue = new();
 
-		public ExpBarRenderer(ICoreClientAPI api)
-		{
-			this.api = api;
+        private ExperienceProgressDialog? progressDialog;
+        private bool progressDialogFailed;
+        private bool levelUpDiscoveryActive;
+        private bool disposed;
 
-			whiteRectangleRef = api.Render.UploadMesh(LineMeshUtil.GetRectangle(ColorUtil.WhiteArgb));
-			progressQuadRef = api.Render.UploadMesh(QuadMeshUtil.GetQuad());
-		}
+        public OverlayManager(
+            ICoreClientAPI api,
+            BaseConfig config,
+            ClassConfig classConfig)
+        {
+            this.api = api
+                ?? throw new ArgumentNullException(nameof(api));
 
-		public void OnRenderFrame(float deltaTime, EnumRenderStage stage)
-		{
-			IShaderProgram currShader = api.Render.CurrentActiveShader;
+            this.config = config
+                ?? throw new ArgumentNullException(nameof(config));
 
-			Vec4f color = new(1, 1, 1, 1);
+            ArgumentNullException.ThrowIfNull(classConfig);
+        }
 
-			currShader.Uniform("rgbaIn", color);
-			currShader.Uniform("extraGlow", 0);
-			currShader.Uniform("applyColor", 0);
-			currShader.Uniform("tex2d", 0);
-			currShader.Uniform("noTexture", 1f);
+        public void Enqueue(
+            ExperienceNotificationPacket packet)
+        {
+            ArgumentNullException.ThrowIfNull(packet);
 
-			mvMatrix.Set(api.Render.CurrentModelviewMatrix)
-				.Translate(10, 10, 50)
-				.Scale(1000, 20, 0)
-				.Translate(0.5f, 0.5f, 0)
-				.Scale(0.5f, 0.5f, 0);
+            if (disposed ||
+                !config.EnableExperienceNotifications)
+            {
+                return;
+            }
 
-			currShader.UniformMatrix("projectionMatrix", api.Render.CurrentProjectionMatrix);
-			currShader.UniformMatrix("modelViewMatrix", mvMatrix.Values);
+            if (packet.NewLevel >
+                packet.PreviousLevel)
+            {
+                progressDialog?.RemoveSkill(
+                    packet.ClassId
+                );
 
-			api.Render.RenderMesh(whiteRectangleRef);
+                levelUpQueue.Enqueue(packet);
+                TryShowNextLevelUp();
+                return;
+            }
 
-			EntityPlayer playerEntity = api.World.Player.Entity;
+            if (progressDialogFailed)
+            {
+                ShowChatFallback(packet);
+                return;
+            }
 
-			// TODO: introduce proper bounds..
-			float exp = (float)playerEntity.WatchedAttributes.GetDouble("exp");
-			float width = (exp * 100.0f) % 1000;
+            try
+            {
+                progressDialog ??=
+                    new ExperienceProgressDialog(
+                        api,
+                        config
+                    );
 
-			mvMatrix.Set(api.Render.CurrentModelviewMatrix)
-				.Translate(10, 10, 50)
-				.Scale(width, 20, 0)
-				.Translate(0.5f, 0.5f, 0)
-				.Scale(0.5f, 0.5f, 0)
-			;
+                progressDialog.ShowGain(packet);
 
-			currShader.UniformMatrix("projectionMatrix", api.Render.CurrentProjectionMatrix);
-			currShader.UniformMatrix("modelViewMatrix", mvMatrix.Values);
+                if (progressDialog.HasFailed)
+                {
+                    progressDialogFailed = true;
+                    ShowChatFallback(packet);
+                }
+            }
+            catch (Exception exception)
+            {
+                progressDialogFailed = true;
 
-			api.Render.RenderMesh(progressQuadRef);
-		}
+                api.Logger.Error(
+                    "[Apprentice] Text progress dialog failed. " +
+                    "Using chat fallback."
+                );
 
-		public void Dispose()
-		{
-			api.Render.DeleteMesh(whiteRectangleRef);
-			api.Render.DeleteMesh(progressQuadRef);
-		}
-	}
+                api.Logger.Error(exception);
 
-	internal class OverlayManager
-	{
-		private readonly ICoreClientAPI? api = null;
-		private readonly ExpBarRenderer? expBarRenderer = null;
+                try
+                {
+                    progressDialog?.TryClose();
+                    progressDialog?.Dispose();
+                }
+                catch (Exception disposeException)
+                {
+                    api.Logger.Error(disposeException);
+                }
 
-		public OverlayManager(ICoreClientAPI api)
-		{
-			this.api = api;
+                progressDialog = null;
+                ShowChatFallback(packet);
+            }
+        }
 
-			expBarRenderer = new ExpBarRenderer(api);
+        public void Dispose()
+        {
+            if (disposed)
+            {
+                return;
+            }
 
-			api.Event.RegisterRenderer(expBarRenderer, EnumRenderStage.Ortho);
-		}
-	}
+            disposed = true;
+            levelUpQueue.Clear();
+
+            progressDialog?.TryClose();
+            progressDialog?.Dispose();
+            progressDialog = null;
+        }
+
+        private void TryShowNextLevelUp()
+        {
+            if (disposed ||
+                levelUpDiscoveryActive ||
+                levelUpQueue.Count == 0)
+            {
+                return;
+            }
+
+            ExperienceNotificationPacket packet =
+                levelUpQueue.Dequeue();
+
+            levelUpDiscoveryActive = true;
+
+            string displayName =
+                ResolveDisplayName(packet);
+
+            string message =
+                $"Level up {displayName} to {packet.NewLevel}";
+
+            try
+            {
+                api.TriggerIngameDiscovery(
+                    this,
+                    "apprentice-levelup-" +
+                    packet.ClassId +
+                    "-" +
+                    api.ElapsedMilliseconds,
+                    message
+                );
+            }
+            catch (Exception exception)
+            {
+                api.Logger.Error(
+                    "[Apprentice] Level-up discovery failed."
+                );
+
+                api.Logger.Error(exception);
+                ShowChatFallback(packet);
+            }
+
+            api.Event.RegisterCallback(
+                _ =>
+                {
+                    if (disposed)
+                    {
+                        return;
+                    }
+
+                    levelUpDiscoveryActive = false;
+                    TryShowNextLevelUp();
+                },
+                LevelUpDiscoveryDurationMs,
+                permittedWhilePaused: true
+            );
+        }
+
+        private void ShowChatFallback(
+            ExperienceNotificationPacket packet)
+        {
+            string displayName =
+                ResolveDisplayName(packet);
+
+            if (packet.NewLevel >
+                packet.PreviousLevel)
+            {
+                api.ShowChatMessage(
+                    $"[Apprentice] {displayName} — LEVEL UP! " +
+                    $"{packet.PreviousLevel} → {packet.NewLevel}"
+                );
+
+                return;
+            }
+
+            int level =
+                ExpMath.GetLevel(
+                    packet.NewTotalExperience
+                );
+
+            double intoLevel =
+                ExpMath.GetExperienceIntoLevel(
+                    packet.NewTotalExperience
+                );
+
+            double cost =
+                ExpMath.GetExperienceSpanForLevel(
+                    level
+                );
+
+            api.ShowChatMessage(
+                $"[Apprentice] {displayName} — Level {level}: " +
+                $"+{packet.GainedExperience:0.###} XP " +
+                $"({intoLevel:0.##}/{cost:0.##})"
+            );
+        }
+
+        private static string ResolveDisplayName(
+            ExperienceNotificationPacket packet)
+        {
+            return string.IsNullOrWhiteSpace(
+                packet.ClassDisplayName)
+                ? packet.ClassId
+                : packet.ClassDisplayName;
+        }
+    }
 }
