@@ -1,4 +1,5 @@
 using System;
+
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Server;
@@ -7,20 +8,19 @@ namespace Apprentice
 {
 	public sealed class ApprenticeModSystem : ModSystem
 	{
-		private ClassConfig? classConfig;
-		private SkillTreeConfig? skillTreeConfig;
+		private ICoreServerAPI? sapi = null;
+		private ICoreClientAPI? capi = null;
 
-		private IServerNetworkChannel? serverNetworkChannel;
-		private IClientNetworkChannel? clientNetworkChannel;
+		private IServerNetworkChannel? serverNetworkChannel = null;
+		private IClientNetworkChannel? clientNetworkChannel = null;
 
-		private ClassesManager? classesManager;
-		private ExperienceManager? experienceManager;
-		private SkillTreeManager? skillTreeManager;
-		private InteractionEventBridge? interactionEventBridge;
+		private ClassConfig? classConfig = null;
+		private SkillTreeConfig? skillTreeConfig = null;
 
-		private InterfaceManager? interfaceManager;
-		private OverlayManager? overlayManager;
-		private ICoreClientAPI? apiForClientLogging;
+		private ClassesManager? classesManager = null;
+		private ExperienceManager? experienceManager = null;
+		private SkillTreeManager? skillTreeManager = null;
+		private InteractionEventBridge? interactionEventBridge = null;
 
 		private InterfaceManager? interfaceManager = null;
 		private OverlayManager? overlayManager = null;
@@ -31,193 +31,50 @@ namespace Apprentice
 		{
 			if (api.Side == EnumAppSide.Server)
 			{
-				ICoreServerAPI serverApi =
-					(ICoreServerAPI)api;
+				sapi = (ICoreServerAPI)api;
 
-				serverNetworkChannel =
-					serverApi.Network
-						.RegisterChannel(
-							ApprenticeConstants.NetworkChannel
-						)
-						.RegisterMessageType<
-							ExperienceNotificationPacket
-						>()
-						.RegisterMessageType<
-							SkillPurchaseRequestPacket
-						>()
-						.RegisterMessageType<
-							SkillPurchaseResultPacket
-						>();
+				serverNetworkChannel = sapi.Network.RegisterChannel(ApprenticeConstants.NetworkChannel)
+					.RegisterMessageType<ExperienceNotificationPacket>()
+					.RegisterMessageType<SkillPurchaseRequestPacket>()
+					.RegisterMessageType<SkillPurchaseResultPacket>();
 			}
 			else
 			{
-				ICoreClientAPI clientApi =
-					(ICoreClientAPI)api;
+				capi = (ICoreClientAPI)api;
 
-				clientNetworkChannel =
-					clientApi.Network
-						.RegisterChannel(
-							ApprenticeConstants.NetworkChannel
-						)
-						.RegisterMessageType<
-							ExperienceNotificationPacket
-						>()
-						.RegisterMessageType<
-							SkillPurchaseRequestPacket
-						>()
-						.RegisterMessageType<
-							SkillPurchaseResultPacket
-						>();
+				clientNetworkChannel = capi.Network.RegisterChannel(ApprenticeConstants.NetworkChannel)
+					.RegisterMessageType<ExperienceNotificationPacket>()
+					.RegisterMessageType<SkillPurchaseRequestPacket>()
+					.RegisterMessageType<SkillPurchaseResultPacket>();
 			}
 		}
-
 		public override void AssetsLoaded(ICoreAPI api)
 		{
-			classConfig =
-				ClassConfigLoader.Load(api);
-
-			skillTreeConfig =
-				SkillTreeConfigLoader.Load(api);
-
-			ConfigConsistencyValidator.Validate(
-				classConfig,
-				skillTreeConfig
-			);
+			classConfig = ClassConfigLoader.Load(api);
+			skillTreeConfig = SkillTreeConfigLoader.Load(api);
 		}
-
-		public override void StartServerSide(
-			ICoreServerAPI api)
+		public override void StartServerSide(ICoreServerAPI api)
 		{
-			ClassConfig loadedClassConfig =
-				classConfig
-				?? throw new InvalidOperationException(
-					"class.json was not loaded before " +
-					"server startup."
-				);
+			ClassConfig loadedClassConfig = classConfig ?? throw new InvalidOperationException("class.json was not loaded before server startup.");
+			SkillTreeConfig loadedSkillTreeConfig = skillTreeConfig ?? throw new InvalidOperationException("skilltrees.json was not loaded before server startup.");
 
-			SkillTreeConfig loadedSkillTreeConfig =
-				skillTreeConfig
-				?? throw new InvalidOperationException(
-					"skilltrees.json was not loaded before server startup."
-				);
+			IServerNetworkChannel networkChannel = serverNetworkChannel ?? throw new InvalidOperationException("The Apprentice server network channel was not registered.");
 
-			IServerNetworkChannel networkChannel =
-				serverNetworkChannel
-				?? throw new InvalidOperationException(
-					"The Apprentice server network channel " +
-					"was not registered."
-				);
+			BaseConfig baseConfig = BaseConfigLoader.Load(api);
 
-			BaseConfig baseConfig =
-				BaseConfigLoader.Load(api);
-
-			classesManager =
-				new ClassesManager(
-					api,
-					loadedClassConfig
-				);
-
-			skillTreeManager =
-				new SkillTreeManager(
-					api,
-					loadedClassConfig,
-					loadedSkillTreeConfig,
-					networkChannel
-				);
-
-			experienceManager =
-				new ExperienceManager(
-					api,
-					networkChannel,
-					loadedClassConfig,
-					baseConfig,
-					skillTreeManager
-				);
-
-			interactionEventBridge =
-				new InteractionEventBridge(
-					api,
-					experienceManager
-				);
+			classesManager = new ClassesManager(api, loadedClassConfig);
+			skillTreeManager = new SkillTreeManager(api, loadedClassConfig, loadedSkillTreeConfig, networkChannel);
+			experienceManager = new ExperienceManager(api, networkChannel, loadedClassConfig, baseConfig, skillTreeManager);
+			interactionEventBridge = new InteractionEventBridge(api, experienceManager);
 		}
-
-		public override void StartClientSide(
-			ICoreClientAPI api)
+		public override void StartClientSide(ICoreClientAPI api)
 		{
-			apiForClientLogging = api;
-			api.Logger.Notification(
-				"[Apprentice] Client startup: begin."
-			);
+			ClassConfig loadedClassConfig = classConfig ?? throw new InvalidOperationException("class.json was not loaded before client startup.");
+			SkillTreeConfig loadedSkillTreeConfig = skillTreeConfig ?? throw new InvalidOperationException("skilltrees.json was not loaded before client startup.");
 
-			try
-			{
-				ClassConfig loadedClassConfig =
-					classConfig
-					?? throw new InvalidOperationException(
-						"class.json was not loaded before " +
-						"client startup."
-					);
+			IClientNetworkChannel networkChannel = clientNetworkChannel ?? throw new InvalidOperationException("The Apprentice client network channel was not registered.");
 
-				api.Logger.Notification(
-					"[Apprentice] Client startup: class config ready."
-				);
-
-				SkillTreeConfig loadedSkillTreeConfig =
-					skillTreeConfig
-					?? throw new InvalidOperationException(
-						"skilltrees.json was not loaded before client startup."
-					);
-
-				api.Logger.Notification(
-					"[Apprentice] Client startup: skill trees ready."
-				);
-
-				IClientNetworkChannel networkChannel =
-					clientNetworkChannel
-					?? throw new InvalidOperationException(
-						"The Apprentice client network channel " +
-						"was not registered."
-					);
-
-				api.Logger.Notification(
-					"[Apprentice] Client startup: network ready."
-				);
-
-				BaseConfig baseConfig =
-					BaseConfigLoader.Load(api);
-
-				api.Logger.Notification(
-					"[Apprentice] Client startup: base config ready."
-				);
-
-				// These managers now register lightweight handlers only.
-				// They do not compose a GUI during connection.
-				interfaceManager =
-					new InterfaceManager(
-						api,
-						loadedClassConfig,
-						loadedSkillTreeConfig,
-						networkChannel
-					);
-
-				api.Logger.Notification(
-					"[Apprentice] Client startup: hotkey ready."
-				);
-
-				overlayManager =
-					new OverlayManager(
-						api,
-						baseConfig,
-						loadedClassConfig
-					);
-
-				api.Logger.Notification(
-					"[Apprentice] Client startup: lazy HUD ready."
-				);
-
-				networkChannel.SetMessageHandler<
-					ExperienceNotificationPacket
-				>(OnExperienceNotification);
+			BaseConfig baseConfig = BaseConfigLoader.Load(api);
 
 			interfaceManager = new InterfaceManager(api, loadedClassConfig, loadedSkillTreeConfig, networkChannel);
 			overlayManager = new OverlayManager(api, baseConfig, loadedClassConfig);
@@ -243,81 +100,34 @@ namespace Apprentice
 			overlayManager = null;
 			healthBarRenderer = null;
 
-			if (api == null)
-			{
-				return;
-			}
-
-			try
-			{
-				// Network packet callbacks are not a safe place to create
-				// or update GUI elements. Always transfer the work to the
-				// client main thread first.
-				api.Event.EnqueueMainThreadTask(
-					() =>
-					{
-						try
-						{
-							overlayManager?.Enqueue(packet);
-							interfaceManager?.RefreshIfOpen();
-						}
-						catch (Exception exception)
-						{
-							api.Logger.Error(
-								"[Apprentice] Main-thread XP " +
-								"notification handling failed."
-							);
-
-							api.Logger.Error(exception);
-						}
-					},
-					"apprentice-xp-notification"
-				);
-			}
-			catch (Exception exception)
-			{
-				api.Logger.Error(
-					"[Apprentice] Could not enqueue the XP " +
-					"notification on the client main thread."
-				);
-
-				api.Logger.Error(exception);
-			}
+			base.Dispose();
 		}
+		#endregion
 
-		private void OnSkillPurchaseResult(
-			SkillPurchaseResultPacket packet)
+		#region Event Handler
+		private void OnExperienceNotification(ExperienceNotificationPacket packet)
 		{
-			ICoreClientAPI? api = apiForClientLogging;
-			if (api == null) return;
-
-			api.Event.EnqueueMainThreadTask(
-				() =>
-				{
-					interfaceManager?.ApplyPurchaseResult(packet);
-				},
+			// Network packet callbacks are not a safe place to create
+			// or update GUI elements. Always transfer the work to the
+			// client main thread first.
+			capi?.Event.EnqueueMainThreadTask(() =>
+			{
+				overlayManager?.Enqueue(packet);
+				interfaceManager?.RefreshIfOpen();
+			},
+				"apprentice-xp-notification"
+			);
+		}
+		private void OnSkillPurchaseResult(SkillPurchaseResultPacket packet)
+		{
+			// I've got no idea what this could be...
+			capi?.Event.EnqueueMainThreadTask(() =>
+			{
+				interfaceManager?.ApplyPurchaseResult(packet);
+			},
 				"apprentice-skill-purchase-result"
 			);
 		}
-
-		public override void Dispose()
-		{
-			interactionEventBridge?.Dispose();
-			skillTreeManager?.Dispose();
-			classesManager?.Dispose();
-
-			interfaceManager?.Dispose();
-			overlayManager?.Dispose();
-
-			interactionEventBridge = null;
-			experienceManager = null;
-			skillTreeManager = null;
-			classesManager = null;
-			interfaceManager = null;
-			overlayManager = null;
-			apiForClientLogging = null;
-
-			base.Dispose();
-		}
+		#endregion
 	}
 }
