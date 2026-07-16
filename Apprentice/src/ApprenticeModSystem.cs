@@ -24,8 +24,9 @@ namespace Apprentice
 
 		private InterfaceManager? interfaceManager = null;
 		private OverlayManager? overlayManager = null;
+		private HealthBarRenderer? healthBarRenderer = null;
 
-		#region Overrides
+		#region ModSystem Impl
 		public override void Start(ICoreAPI api)
 		{
 			if (api.Side == EnumAppSide.Server)
@@ -77,6 +78,7 @@ namespace Apprentice
 
 			interfaceManager = new InterfaceManager(api, loadedClassConfig, loadedSkillTreeConfig, networkChannel);
 			overlayManager = new OverlayManager(api, baseConfig, loadedClassConfig);
+			healthBarRenderer = new HealthBarRenderer(api);
 
 			networkChannel.SetMessageHandler<ExperienceNotificationPacket>(OnExperienceNotification);
 			networkChannel.SetMessageHandler<SkillPurchaseResultPacket>(OnSkillPurchaseResult);
@@ -87,8 +89,8 @@ namespace Apprentice
 			skillTreeManager?.Dispose();
 			classesManager?.Dispose();
 
-			interfaceManager?.Dispose();
 			overlayManager?.Dispose();
+			interfaceManager?.Dispose();
 
 			interactionEventBridge = null;
 			experienceManager = null;
@@ -96,6 +98,7 @@ namespace Apprentice
 			classesManager = null;
 			interfaceManager = null;
 			overlayManager = null;
+			healthBarRenderer = null;
 
 			base.Dispose();
 		}
