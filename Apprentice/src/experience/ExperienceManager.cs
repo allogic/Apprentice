@@ -33,21 +33,31 @@ namespace Apprentice
 			}
 
 			public ClassDefinition Definition { get; }
+		}
 
-			public Dictionary<
-				string,
-				List<CompiledPattern>
-			> Interactions
-			{ get; } =
-				new(StringComparer.OrdinalIgnoreCase);
+		private sealed class CompiledInteraction
+		{
+			public CompiledInteraction(
+				CompiledClass compiledClass,
+				List<CompiledPattern> patterns)
+			{
+				CompiledClass = compiledClass;
+				Patterns = patterns;
+			}
+
+			public CompiledClass CompiledClass { get; }
+			public List<CompiledPattern> Patterns { get; }
 		}
 
 		private readonly ICoreServerAPI serverApi;
 		private readonly IServerNetworkChannel networkChannel;
 		private readonly BaseConfig baseConfig;
 		private readonly SkillTreeManager skillTreeManager;
-		private readonly List<CompiledClass> compiledClasses =
-			new();
+		private readonly Dictionary<
+			string,
+			List<CompiledInteraction>
+		> compiledInteractions =
+			new(StringComparer.OrdinalIgnoreCase);
 
 		public ExperienceManager(
 			ICoreServerAPI serverApi,
@@ -157,21 +167,24 @@ namespace Apprentice
 			string target =
 				$"{targetCode.Domain}:{targetCode.Path}";
 
+			if (!compiledInteractions.TryGetValue(
+				interaction,
+				out List<CompiledInteraction>? candidates))
+			{
+				return 0;
+			}
+
 			int awardedClasses = 0;
 
-			foreach (CompiledClass compiledClass
-					 in compiledClasses)
+			foreach (CompiledInteraction candidate
+					 in candidates)
 			{
-				if (!compiledClass.Interactions.TryGetValue(
-					interaction,
-					out List<CompiledPattern>? patterns))
-				{
-					continue;
-				}
+				CompiledClass compiledClass =
+					candidate.CompiledClass;
 
 				CompiledPattern? bestPattern =
 					FindLongestMatch(
-						patterns,
+						candidate.Patterns,
 						target
 					);
 
@@ -320,12 +333,24 @@ namespace Apprentice
 						);
 					}
 
-					compiledClass.Interactions[
-						interactionEntry.Key
-					] = compiledPatterns;
-				}
+					if (!compiledInteractions.TryGetValue(
+						interactionEntry.Key,
+						out List<CompiledInteraction>? candidates))
+					{
+						candidates = new List<CompiledInteraction>();
+						compiledInteractions.Add(
+							interactionEntry.Key,
+							candidates
+						);
+					}
 
-				compiledClasses.Add(compiledClass);
+					candidates.Add(
+						new CompiledInteraction(
+							compiledClass,
+							compiledPatterns
+						)
+					);
+				}
 			}
 		}
 

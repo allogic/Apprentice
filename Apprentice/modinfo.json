@@ -4,10 +4,11 @@
     "modid": "apprentice",
     "name": "Apprentice",
     "authors": [
-        "Unknown"
+        "Kanista"
     ],
     "description": "Character progression, race-first creation, scalable bodies, and fantasy race appearance options.",
-  "version": "2.2.3-n",
+    "website": "https://github.com/allogic/Apprentice",
+    "version": "2.2.4",
     "dependencies": {
         "game": "1.22.3"
     }
