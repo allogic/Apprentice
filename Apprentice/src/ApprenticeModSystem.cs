@@ -91,6 +91,7 @@ namespace Apprentice
 
 			overlayManager?.Dispose();
 			interfaceManager?.Dispose();
+			healthBarRenderer?.Dispose();
 
 			interactionEventBridge = null;
 			experienceManager = null;
