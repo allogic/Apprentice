@@ -1,0 +1,358 @@
+{
+  "textureWidth": 16,
+  "textureHeight": 16,
+  "textureSizes": {
+    "dragon": [
+      16,
+      16
+    ],
+    "bone": [
+      16,
+      16
+    ]
+  },
+  "textures": {
+    "dragon": "apprentice:entity/humanoid/races/dragonborn",
+    "bone": "apprentice:entity/humanoid/races/bone"
+  },
+  "elements": [
+    {
+      "name": "option-sabers-dragon-teeth-root",
+      "stepParentName": "Head",
+      "from": [
+        0,
+        2.4,
+        2.5
+      ],
+      "to": [
+        0,
+        2.4,
+        2.5
+      ],
+      "rotationOrigin": [
+        0,
+        2.4,
+        2.5
+      ],
+      "faces": {},
+      "children": [
+        {
+          "name": "option-dragon-saber-left",
+          "from": [
+            -1.88,
+            -1.36,
+            0.79
+          ],
+          "to": [
+            -1.43,
+            -0.38,
+            1.16
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -1.66,
+            -1.28,
+            0.98
+          ],
+          "rotationZ": -7,
+          "faces": {
+            "north": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "east": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "south": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "west": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "up": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "down": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            }
+          }
+        },
+        {
+          "name": "option-dragon-saber-right",
+          "from": [
+            -1.88,
+            -1.36,
+            -1.16
+          ],
+          "to": [
+            -1.43,
+            -0.38,
+            -0.79
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -1.66,
+            -1.28,
+            -0.98
+          ],
+          "rotationZ": 7,
+          "faces": {
+            "north": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "east": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "south": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "west": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "up": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "down": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            }
+          }
+        },
+        {
+          "name": "option-dragon-saber-inner-left",
+          "from": [
+            -1.82,
+            -1.13,
+            0.31
+          ],
+          "to": [
+            -1.49,
+            -0.54,
+            0.56
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -1.66,
+            -1.08,
+            0.44
+          ],
+          "rotationZ": -3,
+          "faces": {
+            "north": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "east": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "south": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "west": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "up": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "down": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            }
+          }
+        },
+        {
+          "name": "option-dragon-saber-inner-right",
+          "from": [
+            -1.82,
+            -1.13,
+            -0.56
+          ],
+          "to": [
+            -1.49,
+            -0.54,
+            -0.31
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -1.66,
+            -1.08,
+            -0.44
+          ],
+          "rotationZ": 3,
+          "faces": {
+            "north": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "east": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "south": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "west": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "up": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "down": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

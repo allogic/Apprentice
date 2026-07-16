@@ -1,0 +1,358 @@
+{
+  "textureWidth": 16,
+  "textureHeight": 16,
+  "textureSizes": {
+    "dragon": [
+      16,
+      16
+    ],
+    "hornbone": [
+      16,
+      16
+    ]
+  },
+  "textures": {
+    "dragon": "apprentice:entity/humanoid/races/dragonborn",
+    "hornbone": "apprentice:entity/humanoid/races/bone"
+  },
+  "elements": [
+    {
+      "name": "option-quad-crown-dragonborn-root",
+      "stepParentName": "Head",
+      "from": [
+        0,
+        2.4,
+        2.5
+      ],
+      "to": [
+        0,
+        2.4,
+        2.5
+      ],
+      "rotationOrigin": [
+        0,
+        2.4,
+        2.5
+      ],
+      "faces": {},
+      "children": [
+        {
+          "name": "option-quad-front-left",
+          "from": [
+            -0.78,
+            0.36,
+            1.2
+          ],
+          "to": [
+            -0.08,
+            2.85,
+            1.9
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -0.43,
+            0.44,
+            1.5499999999999998
+          ],
+          "rotationZ": -6,
+          "faces": {
+            "north": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "east": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "south": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "west": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "up": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "down": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            }
+          }
+        },
+        {
+          "name": "option-quad-front-right",
+          "from": [
+            -0.78,
+            0.36,
+            -1.9
+          ],
+          "to": [
+            -0.08,
+            2.85,
+            -1.2
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -0.43,
+            0.44,
+            -1.5499999999999998
+          ],
+          "rotationZ": 6,
+          "faces": {
+            "north": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "east": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "south": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "west": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "up": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "down": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            }
+          }
+        },
+        {
+          "name": "option-quad-rear-left",
+          "from": [
+            -0.42,
+            0.3,
+            2.02
+          ],
+          "to": [
+            0.24,
+            2.45,
+            2.7
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -0.09,
+            0.38,
+            2.3600000000000003
+          ],
+          "rotationZ": -4,
+          "faces": {
+            "north": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "east": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "south": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "west": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "up": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "down": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            }
+          }
+        },
+        {
+          "name": "option-quad-rear-right",
+          "from": [
+            -0.42,
+            0.3,
+            -2.7
+          ],
+          "to": [
+            0.24,
+            2.45,
+            -2.02
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -0.09,
+            0.38,
+            -2.3600000000000003
+          ],
+          "rotationZ": 4,
+          "faces": {
+            "north": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "east": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "south": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "west": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "up": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "down": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

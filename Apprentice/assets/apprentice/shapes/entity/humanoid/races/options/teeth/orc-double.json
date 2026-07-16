@@ -1,0 +1,362 @@
+{
+  "textureWidth": 16,
+  "textureHeight": 16,
+  "textureSizes": {
+    "race": [
+      16,
+      16
+    ],
+    "bone": [
+      16,
+      16
+    ]
+  },
+  "textures": {
+    "race": "apprentice:entity/humanoid/races/orc",
+    "bone": "apprentice:entity/humanoid/races/bone"
+  },
+  "elements": [
+    {
+      "name": "option-double-orc-teeth-root",
+      "stepParentName": "Head",
+      "from": [
+        0,
+        2.4,
+        2.5
+      ],
+      "to": [
+        0,
+        2.4,
+        2.5
+      ],
+      "rotationOrigin": [
+        0,
+        2.4,
+        2.5
+      ],
+      "faces": {},
+      "children": [
+        {
+          "name": "option-double-orc-outer-left",
+          "from": [
+            -0.46,
+            -1.52,
+            0.84
+          ],
+          "to": [
+            -0.08,
+            -0.5,
+            1.18
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -0.27,
+            -1.43,
+            1.01
+          ],
+          "rotationX": -9,
+          "rotationZ": -6,
+          "faces": {
+            "north": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "east": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "south": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "west": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "up": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "down": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            }
+          }
+        },
+        {
+          "name": "option-double-orc-inner-left",
+          "from": [
+            -0.43,
+            -1.42,
+            0.36
+          ],
+          "to": [
+            -0.1,
+            -0.66,
+            0.64
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -0.27,
+            -1.34,
+            0.5
+          ],
+          "rotationX": -3,
+          "rotationZ": -3,
+          "faces": {
+            "north": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "east": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "south": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "west": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "up": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "down": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            }
+          }
+        },
+        {
+          "name": "option-double-orc-inner-right",
+          "from": [
+            -0.43,
+            -1.42,
+            -0.64
+          ],
+          "to": [
+            -0.1,
+            -0.66,
+            -0.36
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -0.27,
+            -1.34,
+            -0.5
+          ],
+          "rotationX": 3,
+          "rotationZ": 3,
+          "faces": {
+            "north": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "east": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "south": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "west": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "up": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "down": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            }
+          }
+        },
+        {
+          "name": "option-double-orc-outer-right",
+          "from": [
+            -0.46,
+            -1.52,
+            -1.18
+          ],
+          "to": [
+            -0.08,
+            -0.5,
+            -0.84
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -0.27,
+            -1.43,
+            -1.01
+          ],
+          "rotationX": 9,
+          "rotationZ": 6,
+          "faces": {
+            "north": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "east": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "south": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "west": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "up": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "down": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

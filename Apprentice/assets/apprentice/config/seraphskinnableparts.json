@@ -4,6 +4,7 @@
     "variants": [
       { "code": "apprentice-dragonborn", "texture": "apprentice:entity/humanoid/races/skins/dragonborn" },
       { "code": "apprentice-dwarf", "texture": "apprentice:entity/humanoid/races/skins/dwarf" },
+      { "code": "apprentice-drow-black", "texture": "apprentice:entity/humanoid/races/skins/drow-black" },
       { "code": "apprentice-elf", "texture": "apprentice:entity/humanoid/races/skins/elf" },
       { "code": "apprentice-gnome", "texture": "apprentice:entity/humanoid/races/skins/gnome" },
       { "code": "apprentice-goliath", "texture": "apprentice:entity/humanoid/races/skins/goliath" },

@@ -1,0 +1,512 @@
+{
+  "textureWidth": 16,
+  "textureHeight": 16,
+  "textureSizes": {
+    "dragon": [
+      16,
+      16
+    ],
+    "bone": [
+      16,
+      16
+    ]
+  },
+  "textures": {
+    "dragon": "apprentice:entity/humanoid/races/dragonborn",
+    "bone": "apprentice:entity/humanoid/races/bone"
+  },
+  "elements": [
+    {
+      "name": "option-mixed-dragon-teeth-root",
+      "stepParentName": "Head",
+      "from": [
+        0,
+        2.4,
+        2.5
+      ],
+      "to": [
+        0,
+        2.4,
+        2.5
+      ],
+      "rotationOrigin": [
+        0,
+        2.4,
+        2.5
+      ],
+      "faces": {},
+      "children": [
+        {
+          "name": "option-dragon-mixed-fang-left",
+          "from": [
+            -1.86,
+            -1.28,
+            0.82
+          ],
+          "to": [
+            -1.43,
+            -0.4,
+            1.16
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -1.65,
+            -1.2,
+            0.98
+          ],
+          "rotationZ": -5,
+          "faces": {
+            "north": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "east": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "south": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "west": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "up": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "down": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            }
+          }
+        },
+        {
+          "name": "option-dragon-mixed-small-left",
+          "from": [
+            -1.81,
+            -1.04,
+            0.3
+          ],
+          "to": [
+            -1.49,
+            -0.52,
+            0.6
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -1.65,
+            -0.98,
+            0.45
+          ],
+          "faces": {
+            "north": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "east": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "south": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "west": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "up": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "down": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            }
+          }
+        },
+        {
+          "name": "option-dragon-mixed-center-left",
+          "from": [
+            -1.81,
+            -0.98,
+            0.02
+          ],
+          "to": [
+            -1.49,
+            -0.5,
+            0.27
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -1.65,
+            -0.92,
+            0.14
+          ],
+          "faces": {
+            "north": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "east": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "south": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "west": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "up": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "down": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            }
+          }
+        },
+        {
+          "name": "option-dragon-mixed-center-right",
+          "from": [
+            -1.81,
+            -0.98,
+            -0.27
+          ],
+          "to": [
+            -1.49,
+            -0.5,
+            -0.02
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -1.65,
+            -0.92,
+            -0.14
+          ],
+          "faces": {
+            "north": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "east": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "south": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "west": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "up": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "down": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            }
+          }
+        },
+        {
+          "name": "option-dragon-mixed-small-right",
+          "from": [
+            -1.81,
+            -1.04,
+            -0.6
+          ],
+          "to": [
+            -1.49,
+            -0.52,
+            -0.3
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -1.65,
+            -0.98,
+            -0.45
+          ],
+          "faces": {
+            "north": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "east": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "south": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "west": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "up": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "down": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            }
+          }
+        },
+        {
+          "name": "option-dragon-mixed-fang-right",
+          "from": [
+            -1.86,
+            -1.28,
+            -1.16
+          ],
+          "to": [
+            -1.43,
+            -0.4,
+            -0.82
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -1.65,
+            -1.2,
+            -0.98
+          ],
+          "rotationZ": 5,
+          "faces": {
+            "north": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "east": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "south": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "west": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "up": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "down": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
