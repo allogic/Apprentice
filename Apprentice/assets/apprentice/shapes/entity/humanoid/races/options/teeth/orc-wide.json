@@ -1,0 +1,202 @@
+{
+  "textureWidth": 16,
+  "textureHeight": 16,
+  "textureSizes": {
+    "race": [
+      16,
+      16
+    ],
+    "bone": [
+      16,
+      16
+    ]
+  },
+  "textures": {
+    "race": "apprentice:entity/humanoid/races/orc",
+    "bone": "apprentice:entity/humanoid/races/bone"
+  },
+  "elements": [
+    {
+      "name": "option-wide-orc-teeth-root",
+      "stepParentName": "Head",
+      "from": [
+        0,
+        2.4,
+        2.5
+      ],
+      "to": [
+        0,
+        2.4,
+        2.5
+      ],
+      "rotationOrigin": [
+        0,
+        2.4,
+        2.5
+      ],
+      "faces": {},
+      "children": [
+        {
+          "name": "option-wide-orc-tusk-left",
+          "from": [
+            -0.48,
+            -1.48,
+            0.68
+          ],
+          "to": [
+            -0.05,
+            -0.5,
+            1.18
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -0.26,
+            -1.38,
+            0.93
+          ],
+          "rotationX": -4,
+          "rotationZ": -5,
+          "faces": {
+            "north": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "east": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "south": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "west": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "up": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "down": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            }
+          }
+        },
+        {
+          "name": "option-wide-orc-tusk-right",
+          "from": [
+            -0.48,
+            -1.48,
+            -1.18
+          ],
+          "to": [
+            -0.05,
+            -0.5,
+            -0.68
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -0.26,
+            -1.38,
+            -0.93
+          ],
+          "rotationX": 4,
+          "rotationZ": 5,
+          "faces": {
+            "north": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "east": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "south": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "west": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "up": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "down": {
+              "texture": "#bone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

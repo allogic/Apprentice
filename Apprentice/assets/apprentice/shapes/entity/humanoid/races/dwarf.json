@@ -9,11 +9,16 @@
     "seraph": [
       32,
       76
+    ],
+    "hair": [
+      48,
+      48
     ]
   },
   "textures": {
     "race": "apprentice:entity/humanoid/races/dwarf",
-    "seraph": "entity/humanoid/seraph-naked"
+    "seraph": "entity/humanoid/seraph-naked",
+    "hair": "entity/humanoid/seraphskinparts/hair/eerieblack"
   },
   "elements": [
     {
@@ -467,7 +472,7 @@
           ],
           "faces": {
             "north": {
-              "texture": "#race",
+              "texture": "#hair",
               "uv": [
                 0,
                 0,
@@ -476,7 +481,7 @@
               ]
             },
             "east": {
-              "texture": "#race",
+              "texture": "#hair",
               "uv": [
                 0,
                 0,
@@ -485,7 +490,7 @@
               ]
             },
             "south": {
-              "texture": "#race",
+              "texture": "#hair",
               "uv": [
                 0,
                 0,
@@ -494,7 +499,7 @@
               ]
             },
             "west": {
-              "texture": "#race",
+              "texture": "#hair",
               "uv": [
                 0,
                 0,
@@ -503,7 +508,7 @@
               ]
             },
             "up": {
-              "texture": "#race",
+              "texture": "#hair",
               "uv": [
                 0,
                 0,
@@ -512,7 +517,7 @@
               ]
             },
             "down": {
-              "texture": "#race",
+              "texture": "#hair",
               "uv": [
                 0,
                 0,

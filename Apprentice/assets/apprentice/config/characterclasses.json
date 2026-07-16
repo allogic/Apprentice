@@ -4,6 +4,7 @@
     "code": "apprentice-race-dragonborn",
     "traits": [
       "apprentice-race-dragonborn-blood",
+      "apprentice-race-body-build",
       "apprentice-race-dragonborn-burden"
     ],
     "gear": [
@@ -19,6 +20,7 @@
     "code": "apprentice-race-dwarf",
     "traits": [
       "apprentice-race-dwarf-stoneborn",
+      "apprentice-race-body-build",
       "apprentice-race-dwarf-stocky"
     ],
     "gear": [
@@ -34,6 +36,7 @@
     "code": "apprentice-race-elf",
     "traits": [
       "apprentice-race-elf-keen",
+      "apprentice-race-body-build",
       "apprentice-race-elf-delicate"
     ],
     "gear": [
@@ -49,6 +52,7 @@
     "code": "apprentice-race-gnome",
     "traits": [
       "apprentice-race-gnome-cunning",
+      "apprentice-race-body-build",
       "apprentice-race-gnome-small"
     ],
     "gear": [
@@ -64,6 +68,7 @@
     "code": "apprentice-race-goliath",
     "traits": [
       "apprentice-race-goliath-giantkin",
+      "apprentice-race-body-build",
       "apprentice-race-goliath-appetite"
     ],
     "gear": [
@@ -79,6 +84,7 @@
     "code": "apprentice-race-halfling",
     "traits": [
       "apprentice-race-halfling-lucky",
+      "apprentice-race-body-build",
       "apprentice-race-halfling-small"
     ],
     "gear": [
@@ -94,6 +100,7 @@
     "code": "apprentice-race-human",
     "traits": [
       "apprentice-race-human-versatile",
+      "apprentice-race-body-build",
       "apprentice-race-human-mortal"
     ],
     "gear": [
@@ -109,6 +116,7 @@
     "code": "apprentice-race-orc",
     "traits": [
       "apprentice-race-orc-relentless",
+      "apprentice-race-body-build",
       "apprentice-race-orc-appetite"
     ],
     "gear": [
@@ -124,6 +132,7 @@
     "code": "apprentice-race-tiefling",
     "traits": [
       "apprentice-race-tiefling-legacy",
+      "apprentice-race-body-build",
       "apprentice-race-tiefling-unsettling"
     ],
     "gear": [

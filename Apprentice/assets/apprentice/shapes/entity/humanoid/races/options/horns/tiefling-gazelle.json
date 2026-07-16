@@ -1,0 +1,671 @@
+{
+  "textureWidth": 16,
+  "textureHeight": 16,
+  "textureSizes": {
+    "race": [
+      16,
+      16
+    ],
+    "seraph": [
+      32,
+      76
+    ],
+    "hornbone": [
+      16,
+      16
+    ]
+  },
+  "textures": {
+    "race": "apprentice:entity/humanoid/races/tiefling",
+    "seraph": "entity/humanoid/seraph-naked",
+    "hornbone": "apprentice:entity/humanoid/races/bone"
+  },
+  "elements": [
+    {
+      "name": "option-gazelle-tiefling-root",
+      "stepParentName": "Head",
+      "from": [
+        3,
+        3.5,
+        2.5
+      ],
+      "to": [
+        3,
+        3.5,
+        2.5
+      ],
+      "rotationOrigin": [
+        3,
+        3.5,
+        2.5
+      ],
+      "faces": {},
+      "children": [
+        {
+          "name": "option-gazelle-left-1",
+          "from": [
+            -0.7,
+            -0.58,
+            1.46
+          ],
+          "to": [
+            0.48,
+            1.38,
+            2.78
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -0.10999999999999999,
+            -0.49999999999999994,
+            2.12
+          ],
+          "faces": {
+            "north": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "east": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "south": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "west": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "up": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "down": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            }
+          }
+        },
+        {
+          "name": "option-gazelle-left-2",
+          "from": [
+            -0.62,
+            0.92,
+            2.3
+          ],
+          "to": [
+            0.42,
+            2.78,
+            3.34
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -0.1,
+            1,
+            2.82
+          ],
+          "faces": {
+            "north": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "east": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "south": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "west": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "up": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "down": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            }
+          }
+        },
+        {
+          "name": "option-gazelle-left-3",
+          "from": [
+            -0.5,
+            2.34,
+            2.88
+          ],
+          "to": [
+            0.34,
+            4.12,
+            3.72
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -0.07999999999999999,
+            2.42,
+            3.3
+          ],
+          "faces": {
+            "north": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "east": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "south": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "west": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "up": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "down": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            }
+          }
+        },
+        {
+          "name": "option-gazelle-left-4",
+          "from": [
+            -0.34,
+            3.68,
+            3.34
+          ],
+          "to": [
+            0.24,
+            5.2,
+            3.98
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -0.05000000000000002,
+            3.7600000000000002,
+            3.66
+          ],
+          "faces": {
+            "north": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "east": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "south": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "west": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "up": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "down": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            }
+          }
+        },
+        {
+          "name": "option-gazelle-right-1",
+          "from": [
+            -0.7,
+            -0.58,
+            -2.78
+          ],
+          "to": [
+            0.48,
+            1.38,
+            -1.46
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -0.10999999999999999,
+            -0.49999999999999994,
+            -2.12
+          ],
+          "faces": {
+            "north": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "east": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "south": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "west": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "up": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "down": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            }
+          }
+        },
+        {
+          "name": "option-gazelle-right-2",
+          "from": [
+            -0.62,
+            0.92,
+            -3.34
+          ],
+          "to": [
+            0.42,
+            2.78,
+            -2.3
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -0.1,
+            1,
+            -2.82
+          ],
+          "faces": {
+            "north": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "east": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "south": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "west": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "up": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "down": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            }
+          }
+        },
+        {
+          "name": "option-gazelle-right-3",
+          "from": [
+            -0.5,
+            2.34,
+            -3.72
+          ],
+          "to": [
+            0.34,
+            4.12,
+            -2.88
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -0.07999999999999999,
+            2.42,
+            -3.3
+          ],
+          "faces": {
+            "north": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "east": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "south": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "west": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "up": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "down": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            }
+          }
+        },
+        {
+          "name": "option-gazelle-right-4",
+          "from": [
+            -0.34,
+            3.68,
+            -3.98
+          ],
+          "to": [
+            0.24,
+            5.2,
+            -3.34
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -0.05000000000000002,
+            3.7600000000000002,
+            -3.66
+          ],
+          "faces": {
+            "north": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "east": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "south": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "west": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "up": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "down": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

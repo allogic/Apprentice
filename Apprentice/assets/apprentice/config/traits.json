@@ -1,5 +1,10 @@
 [
   {
+    "code": "apprentice-race-body-build",
+    "type": "mixed",
+    "attributes": {}
+  },
+  {
     "code": "apprentice-race-dragonborn-blood",
     "type": "positive",
     "attributes": {

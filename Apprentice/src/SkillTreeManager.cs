@@ -190,7 +190,11 @@ namespace Apprentice
 					}
 				}
 			}
-			return Math.Max(0.1, 1 + bonus);
+			return Math.Max(
+				0.1,
+				(1 + bonus) * RaceAppearanceSystem
+					.GetProfessionExperienceMultiplier(player.Entity, classId)
+			);
 		}
 
 		public double GetWoodMiningMultiplier(IPlayer player)

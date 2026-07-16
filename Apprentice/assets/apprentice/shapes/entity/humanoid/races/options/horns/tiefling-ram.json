@@ -1,0 +1,827 @@
+{
+  "textureWidth": 16,
+  "textureHeight": 16,
+  "textureSizes": {
+    "race": [
+      16,
+      16
+    ],
+    "seraph": [
+      32,
+      76
+    ],
+    "hornbone": [
+      16,
+      16
+    ]
+  },
+  "textures": {
+    "race": "apprentice:entity/humanoid/races/tiefling",
+    "seraph": "entity/humanoid/seraph-naked",
+    "hornbone": "apprentice:entity/humanoid/races/bone"
+  },
+  "elements": [
+    {
+      "name": "option-ram-tiefling-root",
+      "stepParentName": "Head",
+      "from": [
+        3,
+        3.5,
+        2.5
+      ],
+      "to": [
+        3,
+        3.5,
+        2.5
+      ],
+      "rotationOrigin": [
+        3,
+        3.5,
+        2.5
+      ],
+      "faces": {},
+      "children": [
+        {
+          "name": "option-ram-left-1",
+          "from": [
+            -0.74,
+            -0.62,
+            1.42
+          ],
+          "to": [
+            0.5,
+            1.38,
+            2.82
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -0.12,
+            -0.54,
+            2.12
+          ],
+          "faces": {
+            "north": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "east": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "south": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "west": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "up": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "down": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            }
+          }
+        },
+        {
+          "name": "option-ram-left-2",
+          "from": [
+            -0.7,
+            0.88,
+            2.26
+          ],
+          "to": [
+            0.46,
+            2.4,
+            3.62
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -0.11999999999999997,
+            0.96,
+            2.94
+          ],
+          "faces": {
+            "north": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "east": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "south": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "west": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "up": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "down": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            }
+          }
+        },
+        {
+          "name": "option-ram-left-3",
+          "from": [
+            -0.66,
+            1.82,
+            3.1
+          ],
+          "to": [
+            0.42,
+            2.82,
+            4.02
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -0.12000000000000002,
+            1.9000000000000001,
+            3.5599999999999996
+          ],
+          "faces": {
+            "north": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "east": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "south": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "west": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "up": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "down": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            }
+          }
+        },
+        {
+          "name": "option-ram-left-4",
+          "from": [
+            -0.58,
+            0.76,
+            3.42
+          ],
+          "to": [
+            0.36,
+            2.24,
+            4.18
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -0.10999999999999999,
+            0.84,
+            3.8
+          ],
+          "faces": {
+            "north": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "east": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "south": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "west": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "up": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "down": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            }
+          }
+        },
+        {
+          "name": "option-ram-left-5",
+          "from": [
+            -0.48,
+            0.18,
+            2.82
+          ],
+          "to": [
+            0.3,
+            1.18,
+            3.74
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -0.09,
+            0.26,
+            3.2800000000000002
+          ],
+          "faces": {
+            "north": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "east": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "south": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "west": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "up": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "down": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            }
+          }
+        },
+        {
+          "name": "option-ram-right-1",
+          "from": [
+            -0.74,
+            -0.62,
+            -2.82
+          ],
+          "to": [
+            0.5,
+            1.38,
+            -1.42
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -0.12,
+            -0.54,
+            -2.12
+          ],
+          "faces": {
+            "north": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "east": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "south": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "west": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "up": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "down": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            }
+          }
+        },
+        {
+          "name": "option-ram-right-2",
+          "from": [
+            -0.7,
+            0.88,
+            -3.62
+          ],
+          "to": [
+            0.46,
+            2.4,
+            -2.26
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -0.11999999999999997,
+            0.96,
+            -2.94
+          ],
+          "faces": {
+            "north": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "east": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "south": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "west": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "up": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "down": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            }
+          }
+        },
+        {
+          "name": "option-ram-right-3",
+          "from": [
+            -0.66,
+            1.82,
+            -4.02
+          ],
+          "to": [
+            0.42,
+            2.82,
+            -3.1
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -0.12000000000000002,
+            1.9000000000000001,
+            -3.5599999999999996
+          ],
+          "faces": {
+            "north": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "east": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "south": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "west": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "up": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "down": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            }
+          }
+        },
+        {
+          "name": "option-ram-right-4",
+          "from": [
+            -0.58,
+            0.76,
+            -4.18
+          ],
+          "to": [
+            0.36,
+            2.24,
+            -3.42
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -0.10999999999999999,
+            0.84,
+            -3.8
+          ],
+          "faces": {
+            "north": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "east": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "south": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "west": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "up": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "down": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            }
+          }
+        },
+        {
+          "name": "option-ram-right-5",
+          "from": [
+            -0.48,
+            0.18,
+            -3.74
+          ],
+          "to": [
+            0.3,
+            1.18,
+            -2.82
+          ],
+          "uv": [
+            0,
+            0
+          ],
+          "rotationOrigin": [
+            -0.09,
+            0.26,
+            -3.2800000000000002
+          ],
+          "faces": {
+            "north": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "east": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "south": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "west": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "up": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            },
+            "down": {
+              "texture": "#hornbone",
+              "uv": [
+                8,
+                8,
+                9,
+                9
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

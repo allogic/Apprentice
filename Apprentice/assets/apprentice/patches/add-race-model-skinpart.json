@@ -1,5 +1,17 @@
 [
   {
+    "file": "game:shapes/entity/humanoid/seraph-faceless.json",
+    "op": "add",
+    "path": "/textureSizes/hornbone",
+    "value": [16, 16]
+  },
+  {
+    "file": "game:shapes/entity/humanoid/seraph-faceless.json",
+    "op": "add",
+    "path": "/textureSizes/skinpart-hornbone",
+    "value": [16, 16]
+  },
+  {
     "file": "game:entities/humanoid/player.json",
     "op": "add",
     "path": "/attributes/skinnableParts/-",
@@ -20,6 +32,101 @@
         { "code": "goliath" },
         { "code": "dragonborn" },
         { "code": "tiefling" }
+      ]
+    }
+  },
+  {
+    "file": "game:entities/humanoid/player.json",
+    "op": "add",
+    "path": "/attributes/skinnableParts/-",
+    "value": {
+      "code": "apprenticehorns",
+      "type": "shape",
+      "hidden": true,
+      "disableElements": [
+        "dragonborn-horn-left-root",
+        "dragonborn-horn-left-mid",
+        "dragonborn-horn-left-tip",
+        "dragonborn-horn-right-root",
+        "dragonborn-horn-right-mid",
+        "dragonborn-horn-right-tip",
+        "tiefling-horn-left-1",
+        "tiefling-horn-left-2",
+        "tiefling-horn-left-3",
+        "tiefling-horn-right-1",
+        "tiefling-horn-right-2",
+        "tiefling-horn-right-3",
+        "tiefling-horn-right-4"
+      ],
+      "shapeTemplate": {
+        "base": "apprentice:entity/humanoid/races/options/horns/{code}"
+      },
+      "variants": [
+        { "code": "none" },
+        { "code": "dragon-crown" },
+        { "code": "dragon-back-swept" },
+        { "code": "dragon-short-spikes" },
+        { "code": "dragon-quad-crown" },
+        { "code": "dragon-asym-left" },
+        { "code": "dragon-asym-right" },
+        { "code": "tiefling-curved" },
+        { "code": "tiefling-ram" },
+        { "code": "tiefling-straight" },
+        { "code": "tiefling-gazelle" },
+        { "code": "tiefling-asym-left" },
+        { "code": "tiefling-asym-right" }
+      ]
+    }
+  },
+  {
+    "file": "game:entities/humanoid/player.json",
+    "op": "add",
+    "path": "/attributes/skinnableParts/-",
+    "value": {
+      "code": "apprenticehorncolor",
+      "type": "texture",
+      "hidden": true,
+      "textureTarget": "hornbone",
+      "variants": [
+        { "code": "dark-gray", "texture": "apprentice:entity/humanoid/races/horns/dark-gray" },
+        { "code": "light-gray", "texture": "apprentice:entity/humanoid/races/horns/light-gray" },
+        { "code": "white", "texture": "apprentice:entity/humanoid/races/horns/white" },
+        { "code": "light-pink", "texture": "apprentice:entity/humanoid/races/horns/light-pink" },
+        { "code": "yellowish-white", "texture": "apprentice:entity/humanoid/races/horns/yellowish-white" }
+      ]
+    }
+  },
+  {
+    "file": "game:entities/humanoid/player.json",
+    "op": "add",
+    "path": "/attributes/skinnableParts/-",
+    "value": {
+      "code": "apprenticeteeth",
+      "type": "shape",
+      "hidden": true,
+      "disableElements": [
+        "orc-tusk-left-base",
+        "orc-tusk-left-tip",
+        "orc-tusk-right-base",
+        "orc-tusk-right-tip"
+      ],
+      "shapeTemplate": {
+        "base": "apprentice:entity/humanoid/races/options/teeth/{code}"
+      },
+      "variants": [
+        { "code": "none" },
+        { "code": "orc-short" },
+        { "code": "orc-long" },
+        { "code": "orc-wide" },
+        { "code": "orc-outward" },
+        { "code": "orc-double" },
+        { "code": "orc-broken-left" },
+        { "code": "orc-broken-right" },
+        { "code": "dragon-fangs" },
+        { "code": "dragon-saw" },
+        { "code": "dragon-sabers" },
+        { "code": "dragon-crushing" },
+        { "code": "dragon-mixed" }
       ]
     }
   }
