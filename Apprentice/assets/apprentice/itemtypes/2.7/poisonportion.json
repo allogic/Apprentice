@@ -1,0 +1,49 @@
+{
+  "code": "poisonportion",
+  "class": "ApprenticePoisonPortion",
+  "variantgroups": [
+    { "code": "poison", "states": ["mild", "standard", "potent", "grandmaster"] }
+  ],
+  "matterState": "liquid",
+  "tags": ["apprentice-content", "apprentice-poison-liquid"],
+  "attributes": {
+    "handbook": {
+      "groupBy": ["poisonportion-*"],
+      "ignoreCreativeInvStacks": true
+    },
+    "waterTightContainerProps": {
+      "containable": true,
+      "itemsPerLitre": 10,
+      "textureByType": {
+        "*-mild": { "base": "apprentice:item/2.7/poison-fluid-mild", "alpha": 185 },
+        "*-standard": { "base": "apprentice:item/2.7/poison-fluid-standard", "alpha": 195 },
+        "*-potent": { "base": "apprentice:item/2.7/poison-fluid-potent", "alpha": 205 },
+        "*-grandmaster": { "base": "apprentice:item/2.7/poison-fluid-grandmaster", "alpha": 215 }
+      },
+      "isOpaqueByType": { "*": false },
+      "allowSpill": true,
+      "whenSpilled": {
+        "action": "DropContents",
+        "stack": { "type": "item", "code": "apprentice:poisonportion-{poison}" }
+      }
+    },
+    "fictionalPoison": true,
+    "notFood": true
+  },
+  "shape": { "base": "game:item/liquid" },
+  "textureByType": {
+    "*-mild": { "base": "apprentice:item/2.7/poison-fluid-mild", "alpha": 195 },
+    "*-standard": { "base": "apprentice:item/2.7/poison-fluid-standard", "alpha": 205 },
+    "*-potent": { "base": "apprentice:item/2.7/poison-fluid-potent", "alpha": 215 },
+    "*-grandmaster": { "base": "apprentice:item/2.7/poison-fluid-grandmaster", "alpha": 225 }
+  },
+  "maxstacksize": 5000,
+  "materialDensity": 1050,
+  "storageFlags": 256,
+  "guiTransform": {
+    "translation": { "x": 0, "y": 1, "z": 0 },
+    "rotation": { "x": 123, "y": -33, "z": -13 },
+    "origin": { "x": 0.5, "y": 0, "z": 0.5 },
+    "scale": 1.4
+  }
+}

@@ -1,6 +1,7 @@
 using System;
 using Vintagestory.API.Client;
 using Vintagestory.API.Config;
+using Vintagestory.API.MathTools;
 
 namespace Apprentice
 {
@@ -17,6 +18,17 @@ namespace Apprentice
         private readonly int dialogHeight;
         private bool composing;
         private string currentHornColor;
+        private double optionsLeft;
+        private double optionsTop;
+
+        private static readonly int[] SwatchColors =
+        {
+            ColorUtil.ToRgba(255, 60, 65, 70),
+            ColorUtil.ToRgba(255, 167, 173, 178),
+            ColorUtil.ToRgba(255, 231, 230, 224),
+            ColorUtil.ToRgba(255, 231, 177, 188),
+            ColorUtil.ToRgba(255, 227, 215, 172)
+        };
 
         public override string? ToggleKeyCombinationCode => null;
         public override EnumDialogType DialogType => EnumDialogType.HUD;
@@ -29,10 +41,14 @@ namespace Apprentice
         public HornColorDialog(
             ICoreClientAPI api,
             int dialogHeight,
+            double optionsLeft,
+            double optionsTop,
             Action<string> changed)
             : base(api)
         {
             this.dialogHeight = dialogHeight;
+            this.optionsLeft = optionsLeft;
+            this.optionsTop = optionsTop;
             this.changed = changed;
             currentHornColor = RaceAppearanceSystem.GetHornColorChoice(
                 capi.World.Player.Entity
@@ -45,14 +61,21 @@ namespace Apprentice
         public override bool CaptureAllInputs() => false;
         public override bool CaptureRawMouse() => false;
 
-        public void Refresh()
+        public void Refresh(double nextLeft, double nextTop)
         {
             string selected = RaceAppearanceSystem.GetHornColorChoice(
                 capi.World.Player.Entity
             );
-            if (selected == currentHornColor) return;
+            if (selected == currentHornColor &&
+                Math.Abs(optionsLeft - nextLeft) < 0.5 &&
+                Math.Abs(optionsTop - nextTop) < 0.5)
+            {
+                return;
+            }
 
             currentHornColor = selected;
+            optionsLeft = nextLeft;
+            optionsTop = nextTop;
             ComposeControls();
         }
 
@@ -65,10 +88,8 @@ namespace Apprentice
             int colorIndex = Math.Max(0, Array.IndexOf(colorCodes, currentHornColor));
 
             const int fullDialogWidth = 757;
-            const int optionsLeft = 500;
-            const int optionsTop = 390;
             const int optionsWidth = 215;
-            const int optionsHeight = 65;
+            const int optionsHeight = 60;
             double xOffset = optionsLeft + optionsWidth / 2d - fullDialogWidth / 2d;
             double yOffset = optionsTop + optionsHeight / 2d - (dialogHeight + 40) / 2d;
 
@@ -81,31 +102,41 @@ namespace Apprentice
             );
 
             SingleComposer?.Dispose();
-            SingleComposer = capi.Gui
+            GuiComposer composer = capi.Gui
                 .CreateCompo("apprentice-skin-horn-color", dialogBounds)
                 .AddStaticText(
                     Lang.Get("apprentice:race-horn-color"),
                     CairoFont.WhiteSmallText(),
                     ElementBounds.Fixed(0, 0, optionsWidth, 25)
                 )
-                .AddDropDown(
-                    colorCodes,
-                    colorNames,
-                    colorIndex,
+                .AddColorListPicker(
+                    SwatchColors,
                     OnHornColorChanged,
-                    ElementBounds.Fixed(0, 25, optionsWidth, 30),
+                    ElementBounds.Fixed(0, 27, 24, 24),
+                    180,
                     HornColorKey
-                )
-                .Compose();
+                );
+
+            SingleComposer = composer.Compose();
+            for (int index = 0; index < colorCodes.Length; index++)
+            {
+                GuiElementColorListPicker picker = SingleComposer.GetColorListPicker(
+                    HornColorKey + "-" + index
+                );
+                picker.ShowToolTip = true;
+                picker.TooltipText = colorNames[index];
+            }
+            SingleComposer.ColorListPickerSetValue(HornColorKey, colorIndex);
 
             composing = false;
         }
 
-        private void OnHornColorChanged(string code, bool selected)
+        private void OnHornColorChanged(int index)
         {
-            if (!selected || composing) return;
-            currentHornColor = code;
-            changed(code);
+            string[] colorCodes = RaceAppearanceSystem.GetHornColorCodes();
+            if (composing || index < 0 || index >= colorCodes.Length) return;
+            currentHornColor = colorCodes[index];
+            changed(currentHornColor);
         }
     }
 }

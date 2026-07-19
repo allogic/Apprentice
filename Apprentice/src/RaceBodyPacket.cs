@@ -32,5 +32,24 @@ namespace Apprentice
 
         [ProtoMember(9)]
         public Dictionary<string, string> AppearanceParts { get; set; } = new();
+
+        [ProtoMember(10)]
+        public int SchemaVersion { get; set; } = 2;
+
+        [ProtoMember(11)]
+        public long RequestId { get; set; }
+    }
+
+    [ProtoContract]
+    public sealed class RaceSaveResultPacket
+    {
+        [ProtoMember(1)]
+        public long RequestId { get; set; }
+
+        [ProtoMember(2)]
+        public bool Success { get; set; }
+
+        [ProtoMember(3)]
+        public string Error { get; set; } = "";
     }
 }

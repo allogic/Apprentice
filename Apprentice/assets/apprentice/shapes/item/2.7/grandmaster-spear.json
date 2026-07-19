@@ -1,0 +1,15 @@
+{
+  "textureWidth":16, "textureHeight":16,
+  "textures": {
+    "shaft": "apprentice:item/2.7/arrow-shaft",
+    "head": "apprentice:item/2.7/arrow-poison-grandmaster-material",
+    "binding": "apprentice:item/2.7/arrow-feather"
+  },
+  "elements":[
+    {"name":"shaft","from":[7.5,0,7.5],"to":[8.5,13,8.5],"faces":{"north":{"texture":"#shaft"},"east":{"texture":"#shaft"},"south":{"texture":"#shaft"},"west":{"texture":"#shaft"},"up":{"texture":"#shaft"},"down":{"texture":"#shaft"}}},
+    {"name":"binding","from":[7.15,11.5,7.15],"to":[8.85,13,8.85],"faces":{"north":{"texture":"#binding"},"east":{"texture":"#binding"},"south":{"texture":"#binding"},"west":{"texture":"#binding"},"up":{"texture":"#binding"},"down":{"texture":"#binding"}}},
+    {"name":"head-base","from":[6.5,13,6.5],"to":[9.5,14.5,9.5],"faces":{"north":{"texture":"#head"},"east":{"texture":"#head"},"south":{"texture":"#head"},"west":{"texture":"#head"},"up":{"texture":"#head"},"down":{"texture":"#head"}}},
+    {"name":"head-mid","from":[7,14.5,7],"to":[9,15.5,9],"faces":{"north":{"texture":"#head"},"east":{"texture":"#head"},"south":{"texture":"#head"},"west":{"texture":"#head"},"up":{"texture":"#head"},"down":{"texture":"#head"}}},
+    {"name":"tip","from":[7.5,15.5,7.5],"to":[8.5,16,8.5],"faces":{"north":{"texture":"#head"},"east":{"texture":"#head"},"south":{"texture":"#head"},"west":{"texture":"#head"},"up":{"texture":"#head"},"down":{"texture":"#head"}}}
+  ]
+}

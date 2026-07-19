@@ -1,0 +1,13 @@
+{
+  "textureWidth":128,"textureHeight":128,
+  "textureSizes":{"base":[128,128],"case":[16,16]},
+  "textures":{"case":"apprentice:block/2.7/starsteel"},
+  "elements":[
+    {"name":"case","from":[2,3,5],"to":[14,12,11],"faces":{"north":{"texture":"#case"},"east":{"texture":"#case"},"south":{"texture":"#case"},"west":{"texture":"#case"},"up":{"texture":"#case"},"down":{"texture":"#case"}}},
+    {"name":"handle-left","from":[4,12,6.5],"to":[6,15,9.5],"faces":{"north":{"texture":"#case"},"east":{"texture":"#case"},"south":{"texture":"#case"},"west":{"texture":"#case"},"up":{"texture":"#case"},"down":{"texture":"#case"}}},
+    {"name":"handle-right","from":[10,12,6.5],"to":[12,15,9.5],"faces":{"north":{"texture":"#case"},"east":{"texture":"#case"},"south":{"texture":"#case"},"west":{"texture":"#case"},"up":{"texture":"#case"},"down":{"texture":"#case"}}},
+    {"name":"handle-top","from":[5,14,6.5],"to":[11,15.5,9.5],"faces":{"north":{"texture":"#case"},"east":{"texture":"#case"},"south":{"texture":"#case"},"west":{"texture":"#case"},"up":{"texture":"#case"},"down":{"texture":"#case"}}},
+    {"name":"badge-front","from":[3,4,4.9],"to":[13,11,5.05],"faces":{"north":{"texture":"#base","uv":[8,8,120,120],"autoUv":false}}},
+    {"name":"badge-back","from":[3,4,10.95],"to":[13,11,11.1],"faces":{"south":{"texture":"#base","uv":[120,8,8,120],"autoUv":false}}}
+  ]
+}

@@ -1,0 +1,73 @@
+[
+  {
+    "ingredientPattern": "FCF,CIC,FCF",
+    "ingredients": {
+      "F": { "type": "item", "code": "game:clay-fire" },
+      "C": { "type": "item", "code": "game:burnedbrick-fire" },
+      "I": { "type": "item", "code": "game:ingot-iron" }
+    },
+    "width": 3, "height": 3,
+    "output": { "type": "item", "code": "apprentice:grandmaster-refractory", "quantity": 2 }
+  },
+  {
+    "ingredientPattern": "SRS,RGR,SRS",
+    "ingredients": {
+      "S": { "type": "item", "code": "apprentice:plate-starsteel" },
+      "R": { "type": "item", "code": "apprentice:grandmaster-refractory" },
+      "G": { "type": "item", "code": "game:gear-rusty" }
+    },
+    "width": 3, "height": 3,
+    "output": { "type": "item", "code": "apprentice:upgraded-refractory", "quantity": 2 }
+  },
+  {
+    "ingredientPattern": "B B,BRB,BBB",
+    "ingredients": {
+      "B": { "type": "item", "code": "game:burnedbrick-fire" },
+      "R": { "type": "item", "code": "apprentice:grandmaster-refractory" }
+    },
+    "width": 3, "height": 3,
+    "output": { "type": "block", "code": "apprentice:cementationfurnace", "quantity": 1 }
+  },
+  {
+    "ingredientPattern": "III, I ,III",
+    "ingredients": {
+      "I": { "type": "item", "code": "game:ingot-starsteel" }
+    },
+    "width": 3, "height": 3,
+    "output": { "type": "block", "code": "apprentice:anvil-starsteel", "quantity": 1 }
+  },
+  {
+    "ingredientPattern": " I ,IHI, I ",
+    "ingredients": {
+      "I": { "type": "item", "code": "game:ingot-starsteel" },
+      "H": { "type": "item", "code": "game:hammer-*", "isTool": true, "toolDurabilityCost": 1 }
+    },
+    "width": 3, "height": 3,
+    "output": { "type": "item", "code": "apprentice:plate-starsteel", "quantity": 1 }
+  },
+  {
+    "ingredientPattern": " I ,IHI, I ",
+    "ingredients": {
+      "I": { "type": "item", "code": "game:ingot-aethersteel" },
+      "H": { "type": "item", "code": "game:hammer-*", "isTool": true, "toolDurabilityCost": 1 }
+    },
+    "width": 3, "height": 3,
+    "output": { "type": "item", "code": "apprentice:plate-aethersteel", "quantity": 1 }
+  },
+  {
+    "ingredientPattern": "I I, I ,I I",
+    "ingredients": {
+      "I": { "type": "item", "code": "game:ingot-starsteel" }
+    },
+    "width": 3, "height": 3,
+    "output": { "type": "item", "code": "apprentice:chain-starsteel", "quantity": 4 }
+  },
+  {
+    "ingredientPattern": "III,I I,III",
+    "ingredients": {
+      "I": { "type": "item", "code": "game:ingot-aethersteel" }
+    },
+    "width": 3, "height": 3,
+    "output": { "type": "item", "code": "apprentice:scales-aethersteel", "quantity": 8 }
+  }
+]

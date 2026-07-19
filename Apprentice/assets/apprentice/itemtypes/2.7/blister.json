@@ -1,0 +1,65 @@
+{
+  "code": "blister",
+  "class": "ApprenticeCementationBlister",
+  "variantgroups": [
+    { "code": "metal", "states": ["starsteel", "aethersteel"] }
+  ],
+  "tags": ["apprentice-content"],
+  "maxstacksize": 16,
+  "storageFlags": 5,
+  "shape": { "base": "apprentice:item/2.7/icon-flat" },
+  "texturesByType": {
+    "blister-starsteel": {
+      "base": { "base": "apprentice:item/2.7/blister-starsteel" }
+    },
+    "blister-aethersteel": {
+      "base": { "base": "apprentice:item/2.7/blister-aethersteel" }
+    }
+  },
+  "creativeinventory": {
+    "general": ["*"],
+    "items": ["*"]
+  },
+  "guiTransform": {
+    "rotation": { "x": 0, "y": 0, "z": 0 },
+    "scale": 1
+  },
+  "groundTransform": { "scale": 0.8 },
+  "tpHandTransform": { "scale": 0.6 },
+  "attributesByType": {
+    "blister-starsteel": {
+      "requiresAnvilTier": 5,
+      "workableTemperature": 900,
+      "forgable": true,
+      "requiresTongs": true,
+      "tongOpening": 0.15,
+      "onTongTransform": {
+        "translation": { "x": -0.2, "y": 0.05, "z": -0.1 },
+        "rotation": { "x": 0, "y": 90, "z": 0 },
+        "scale": 0.9
+      },
+      "onMetalTongTransform": {
+        "translation": { "x": -0.2, "y": 0.05, "z": -0.1 },
+        "rotation": { "x": 0, "y": 90, "z": 0 },
+        "scale": 0.9
+      }
+    },
+    "blister-aethersteel": {
+      "requiresAnvilTier": 6,
+      "workableTemperature": 980,
+      "forgable": true,
+      "requiresTongs": true,
+      "tongOpening": 0.15,
+      "onTongTransform": {
+        "translation": { "x": -0.2, "y": 0.05, "z": -0.1 },
+        "rotation": { "x": 0, "y": 90, "z": 0 },
+        "scale": 0.9
+      },
+      "onMetalTongTransform": {
+        "translation": { "x": -0.2, "y": 0.05, "z": -0.1 },
+        "rotation": { "x": 0, "y": 90, "z": 0 },
+        "scale": 0.9
+      }
+    }
+  }
+}

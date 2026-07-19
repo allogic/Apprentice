@@ -6,9 +6,9 @@
     "authors": [
         "Kanista"
     ],
-    "description": "Character progression, race-first creation, scalable bodies, and fantasy race appearance options.",
+    "description": "Character progression, race-first creation, Grandmaster discoveries, advanced metals, arrow poison, and danger regions.",
     "website": "https://github.com/allogic/Apprentice",
-    "version": "2.2.4",
+    "version": "2.7.0-rc.27",
     "dependencies": {
         "game": "1.22.3"
     }

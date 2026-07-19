@@ -7,17 +7,68 @@ using Vintagestory.API.Server;
 
 namespace Apprentice
 {
-    internal sealed record HiddenClassDefinition(
-        string Id,
-        string DisplayName,
-        string Description,
-        IReadOnlyList<string> RequiredClasses,
-        IReadOnlyList<SkillEffectDefinition> Effects
-    );
+    internal sealed class HiddenClassDefinition
+    {
+        public HiddenClassDefinition()
+        {
+        }
+
+        public HiddenClassDefinition(
+            string id,
+            string displayName,
+            string description,
+            IReadOnlyList<string> requiredClasses,
+            IReadOnlyList<SkillEffectDefinition> effects)
+        {
+            Id = id;
+            DisplayName = displayName;
+            Description = description;
+            RequiredClasses = requiredClasses.ToList();
+            Effects = effects.ToList();
+        }
+
+        public int SchemaVersion { get; set; } = 1;
+        public bool Enabled { get; set; } = true;
+        public string Id { get; set; } = string.Empty;
+        public string DisplayName { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public List<string> RequiredClasses { get; set; } = new();
+        public string? RequiredProfession { get; set; }
+        public List<string> AllowedRaces { get; set; } = new();
+        public List<string> AllowedSubraces { get; set; } = new();
+        public int MinimumCapstones { get; set; }
+        public List<SkillEffectDefinition> Effects { get; set; } = new();
+
+        public void Normalize()
+        {
+            Id = Id.Trim().ToLowerInvariant();
+            DisplayName = DisplayName.Trim();
+            Description = Description.Trim();
+            RequiredClasses = RequiredClasses
+                .Where(value => !string.IsNullOrWhiteSpace(value))
+                .Select(value => value.Trim().ToLowerInvariant())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+            RequiredProfession = string.IsNullOrWhiteSpace(RequiredProfession)
+                ? null
+                : RequiredProfession.Trim().ToLowerInvariant();
+            AllowedRaces = AllowedRaces
+                .Where(value => !string.IsNullOrWhiteSpace(value))
+                .Select(value => value.Trim().ToLowerInvariant())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+            AllowedSubraces = AllowedSubraces
+                .Where(value => !string.IsNullOrWhiteSpace(value))
+                .Select(value => value.Trim().ToLowerInvariant())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+            Effects ??= new();
+        }
+    }
 
     internal static class HiddenClassCatalog
     {
-        public static readonly IReadOnlyList<HiddenClassDefinition> All =
+        private static IReadOnlyList<HiddenClassDefinition> all =
             new[]
             {
                 new HiddenClassDefinition(
@@ -106,6 +157,21 @@ namespace Apprentice
                 )
             };
 
+        public static IReadOnlyList<HiddenClassDefinition> All => all;
+
+        public static void Configure(IReadOnlyList<HiddenClassDefinition> definitions)
+        {
+            if (definitions == null || definitions.Count == 0)
+            {
+                return;
+            }
+
+            // The data registry is authoritative for 2.7 discoveries. Keeping
+            // the old in-code list above is an intentional recovery fallback
+            // for a missing or unreadable registry asset.
+            all = definitions.ToArray();
+        }
+
         private static SkillEffectDefinition Effect(
             string type,
             double value,
@@ -129,6 +195,7 @@ namespace Apprentice
     internal static class HiddenClassData
     {
         private const string HiddenClassesKey = "hiddenclasses";
+        private const string HiddenClassSchemasKey = "hiddenclassschemas";
         private const string LastBerserkHourKey = "berserkLastHour";
 
         public static bool IsUnlocked(Entity entity, string hiddenClassId)
@@ -145,9 +212,46 @@ namespace Apprentice
                 .GetOrAddTreeAttribute(ApprenticeConstants.ProgressionRootKey);
             ITreeAttribute hidden = root.GetOrAddTreeAttribute(HiddenClassesKey);
             hidden.SetBool(hiddenClassId, true);
+            ITreeAttribute schemas = root.GetOrAddTreeAttribute(HiddenClassSchemasKey);
+            int schema = HiddenClassCatalog.Get(hiddenClassId)?.SchemaVersion ?? 1;
+            schemas.SetInt(hiddenClassId, schema);
             player.Entity.WatchedAttributes.MarkPathDirty(
                 $"{ApprenticeConstants.ProgressionRootKey}/{HiddenClassesKey}/{hiddenClassId}"
             );
+            player.Entity.WatchedAttributes.MarkPathDirty(
+                $"{ApprenticeConstants.ProgressionRootKey}/{HiddenClassSchemasKey}/{hiddenClassId}"
+            );
+        }
+
+        /// <summary>
+        /// Adds schema markers to legitimate pre-2.7 unlocks without removing
+        /// or reevaluating them.  This migration is deliberately idempotent.
+        /// </summary>
+        public static int MigrateUnlockedSchemas(IServerPlayer player)
+        {
+            ITreeAttribute? root = player.Entity.WatchedAttributes
+                .GetTreeAttribute(ApprenticeConstants.ProgressionRootKey);
+            ITreeAttribute? hidden = root?.GetTreeAttribute(HiddenClassesKey);
+            if (root == null || hidden == null) return 0;
+
+            ITreeAttribute schemas = root.GetOrAddTreeAttribute(HiddenClassSchemasKey);
+            int migrated = 0;
+            foreach (HiddenClassDefinition definition in HiddenClassCatalog.All)
+            {
+                if (!hidden.GetBool(definition.Id, false) ||
+                    schemas.GetInt(definition.Id, 0) >= definition.SchemaVersion)
+                {
+                    continue;
+                }
+
+                schemas.SetInt(definition.Id, definition.SchemaVersion);
+                player.Entity.WatchedAttributes.MarkPathDirty(
+                    $"{ApprenticeConstants.ProgressionRootKey}/{HiddenClassSchemasKey}/{definition.Id}"
+                );
+                migrated++;
+            }
+
+            return migrated;
         }
 
         public static double GetLastBerserkHour(Entity entity)

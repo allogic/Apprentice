@@ -1,0 +1,56 @@
+{
+  "code": "towershield",
+  "class": "ItemShield",
+  "tags": [
+    "apprentice-content"
+  ],
+  "maxstacksize": 1,
+  "storageFlags": 5,
+  "shape": {
+    "base": "apprentice:item/2.7/icon-flat"
+  },
+  "textures": {
+    "base": {
+      "base": "apprentice:item/2.7/towershield"
+    }
+  },
+  "creativeinventory": {
+    "general": [
+      "*"
+    ],
+    "items": [
+      "*"
+    ]
+  },
+  "guiTransform": {
+    "rotation": {
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "scale": 1
+  },
+  "groundTransform": {
+    "scale": 0.8
+  },
+  "tpHandTransform": {
+    "scale": 0.6
+  },
+  "durability": 1800,
+  "attributes": {
+    "apprenticeFeature": "towershield",
+    "shield": {
+      "protectionChance": {
+        "active": 0.95,
+        "passive": 0.45,
+        "active-projectile": 0.9,
+        "passive-projectile": 0.35
+      },
+      "damageAbsorption": 6,
+      "projectileDamageAbsorption": 8,
+      "blockSoundLight": "game:held/shieldblock-wood-light",
+      "blockSoundHeavy": "game:held/shieldblock-wood-heavy"
+    },
+    "walkSpeedPenalty": 0.16
+  }
+}

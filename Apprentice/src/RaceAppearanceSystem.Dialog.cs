@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -19,6 +20,38 @@ namespace Apprentice
 {
     public sealed partial class RaceAppearanceSystem
     {
+        private const string HornColorPickerKey = "apprentice-horn-color";
+
+        private static readonly int[] HornSwatchColors =
+        {
+            ColorUtil.ToRgba(255, 60, 65, 70),
+            ColorUtil.ToRgba(255, 167, 173, 178),
+            ColorUtil.ToRgba(255, 231, 230, 224),
+            ColorUtil.ToRgba(255, 231, 177, 188),
+            ColorUtil.ToRgba(255, 227, 215, 172)
+        };
+
+        private sealed class CharacterComposeState
+        {
+            public FieldInfo? ModSystemField { get; set; }
+            public object? ModSystem { get; set; }
+            public bool Modified { get; set; }
+
+            public void Restore(object dialog)
+            {
+                if (!Modified) return;
+                ModSystemField?.SetValue(dialog, ModSystem);
+            }
+        }
+
+        private sealed class CharacterDialogLayoutState
+        {
+            public Dictionary<SkinnablePart, bool> HiddenParts { get; } = new();
+        }
+
+        private static readonly Dictionary<object, CharacterDialogLayoutState>
+            CharacterDialogLayouts = new();
+
         private static void BeforeHorizontalTabsConstructed(ref GuiTab[] tabs)
         {
             if (tabs.Length != 2 ||
@@ -38,29 +71,101 @@ namespace Apprentice
         }
 
         private static bool BeforeCharacterSkinButtonAdded(
-            GuiComposer composer,
-            string text,
+            GuiComposer __0,
+            string __1,
             ref GuiComposer __result)
         {
             if (activeCharacterDialog == null ||
-                !ReferenceEquals(GetCharacterComposer(activeCharacterDialog), composer))
+                GetDialogTab(activeCharacterDialog) != 0 ||
+                !ReferenceEquals(GetCharacterComposer(activeCharacterDialog), __0) ||
+                (__1 != Lang.Get("Randomize") &&
+                 __1 != Lang.Get("Last selection")))
             {
                 return true;
             }
 
-            bool unnecessarySkinAction =
-                text == Lang.Get("Randomize") ||
-                text == Lang.Get("Last selection");
-            if (!unnecessarySkinAction) return true;
-
-            // Keep the fluent composer chain intact while omitting both buttons.
-            __result = composer;
+            __result = __0;
             return false;
+        }
+
+        private static void BeforeDialogOpened(object __instance)
+        {
+            activeCharacterDialog = __instance;
+            HookCharacterBeforeCompose(__instance);
+        }
+
+        private static void HookCharacterBeforeCompose(object dialog)
+        {
+            if (CharacterDialogLayouts.ContainsKey(dialog)) return;
+
+            FieldInfo? field = AccessTools.Field(dialog.GetType(), "onBeforeCompose");
+            if (field == null) return;
+
+            CharacterDialogLayoutState state = new();
+            if (clientApi?.World.Player?.Entity.GetBehavior("skinnableplayer")
+                    is EntityBehaviorExtraSkinnable skin)
+            {
+                foreach (string partCode in new[] { "haircolor" })
+                {
+                    if (!skin.AvailableSkinPartsByCode.TryGetValue(
+                            partCode,
+                            out SkinnablePart? part))
+                    {
+                        continue;
+                    }
+                    state.HiddenParts[part] = part.Hidden;
+                    part.Hidden = true;
+                }
+            }
+
+            Action<GuiComposer>? original = field.GetValue(dialog) as Action<GuiComposer>;
+            field.SetValue(
+                dialog,
+                (Action<GuiComposer>)(composer =>
+                {
+                    original?.Invoke(composer);
+                    ComposeSkinColumnControls(composer);
+                })
+            );
+            CharacterDialogLayouts[dialog] = state;
+        }
+
+        private static void RestoreCharacterDialogLayout(object dialog)
+        {
+            if (!CharacterDialogLayouts.Remove(
+                    dialog,
+                    out CharacterDialogLayoutState? state))
+            {
+                return;
+            }
+            foreach (KeyValuePair<SkinnablePart, bool> entry in state.HiddenParts)
+            {
+                entry.Key.Hidden = entry.Value;
+            }
+        }
+
+        private static void RestoreAllCharacterDialogLayouts()
+        {
+            foreach (CharacterDialogLayoutState state in CharacterDialogLayouts.Values)
+            {
+                foreach (KeyValuePair<SkinnablePart, bool> entry in state.HiddenParts)
+                {
+                    entry.Key.Hidden = entry.Value;
+                }
+            }
+            CharacterDialogLayouts.Clear();
         }
 
         private static void AfterDialogOpened(object __instance)
         {
+            if (!ReferenceEquals(activeCharacterDialog, __instance))
+            {
+                pendingSkinConfirmDialog = null;
+                pendingSkinConfirmRequestId = 0;
+                skinCloseRequested = false;
+            }
             activeCharacterDialog = __instance;
+            HookCharacterBeforeCompose(__instance);
             ConfirmedRaceDialogs.Remove(__instance);
             SetDialogTab(__instance, 1);
             ResetDialogZoom(__instance);
@@ -70,18 +175,20 @@ namespace Apprentice
 
         private static void AfterDialogClosed(object __instance)
         {
-            RestoreNaturalPalette();
+            RestoreCharacterDialogLayout(__instance);
             ConfirmedRaceDialogs.Remove(__instance);
             if (ReferenceEquals(pendingSkinConfirmDialog, __instance))
             {
                 pendingSkinConfirmDialog = null;
+                pendingSkinConfirmRequestId = 0;
+                skinCloseRequested = false;
             }
             if (ReferenceEquals(activeCharacterDialog, __instance))
             {
+                RestoreNaturalPalette();
                 activeCharacterDialog = null;
+                DestroyOptionsDialog();
             }
-            DestroyOptionsDialog();
-            DestroyHornColorDialog();
         }
 
         private static void AfterRaceChanged(object __instance)
@@ -95,6 +202,8 @@ namespace Apprentice
 
         private static bool BeforeTabClicked(object __instance, int tabid)
         {
+            // GuiElementHorizontalTabs.SetValue already translates the visual
+            // array index to GuiTab.DataInt before invoking this callback.
             if (tabid == 0 && !ConfirmedRaceDialogs.Contains(__instance))
             {
                 clientApi?.TriggerIngameError(
@@ -110,7 +219,6 @@ namespace Apprentice
         private static void AfterTabClicked(object __instance)
         {
             activeCharacterDialog = __instance;
-            FixActiveTab(__instance);
             RefreshOptionsDialog(__instance);
         }
 
@@ -124,41 +232,204 @@ namespace Apprentice
                 return true;
             }
 
-            // The stock Skin button calls OnNext() from inside the dialog's
-            // OnMouseDown handler. Closing synchronously here disposes its GUI
-            // composer while that handler is still using it. Finish on the next
-            // client frame, after the mouse event has returned.
-            if (!ReferenceEquals(pendingSkinConfirmDialog, __instance))
+            if (!skinCloseRequested ||
+                !ReferenceEquals(pendingSkinConfirmDialog, __instance))
             {
-                EntityPlayer? player = clientApi?.World.Player?.Entity;
-                if (player != null)
-                {
-                    SendBodyPacket(player);
-                }
-
                 object dialog = __instance;
                 pendingSkinConfirmDialog = dialog;
+                pendingSkinConfirmRequestId = 0;
+                skinCloseRequested = true;
                 clientApi?.Event.EnqueueMainThreadTask(
                     () =>
                     {
-                        if (ReferenceEquals(pendingSkinConfirmDialog, dialog))
-                        {
-                            pendingSkinConfirmDialog = null;
-                        }
                         if (!ReferenceEquals(activeCharacterDialog, dialog) ||
+                            !ReferenceEquals(pendingSkinConfirmDialog, dialog) ||
                             GetDialogTab(dialog) != 0 ||
                             !ConfirmedRaceDialogs.Contains(dialog))
                         {
                             return;
                         }
-                        AccessTools.Method(dialog.GetType(), "OnConfirm")
-                            ?.Invoke(dialog, null);
+
+                        EntityPlayer? player = clientApi?.World.Player?.Entity;
+                        long requestId = player == null ? 0 : SendBodyPacket(player);
+                        if (requestId <= 0)
+                        {
+                            AbortPendingSkinConfirmation(
+                                dialog,
+                                Lang.Get("apprentice:race-save-unavailable")
+                            );
+                            return;
+                        }
+
+                        pendingSkinConfirmRequestId = requestId;
+                        clientApi?.Event.RegisterCallback(
+                            _ =>
+                            {
+                                if (ReferenceEquals(pendingSkinConfirmDialog, dialog) &&
+                                    pendingSkinConfirmRequestId == requestId)
+                                {
+                                    AbortPendingSkinConfirmation(
+                                        dialog,
+                                        Lang.Get("apprentice:race-save-timeout")
+                                    );
+                                }
+                            },
+                            8000
+                        );
                     },
                     "apprentice-confirm-skin"
                 );
             }
             __result = true;
             return false;
+        }
+
+        private static void OnRaceSaveResult(RaceSaveResultPacket result)
+        {
+            clientApi?.Event.EnqueueMainThreadTask(
+                () => HandleRaceSaveResult(result),
+                "apprentice-handle-race-save-result"
+            );
+        }
+
+        private static void HandleRaceSaveResult(RaceSaveResultPacket result)
+        {
+            object? dialog = pendingSkinConfirmDialog;
+            if (dialog == null ||
+                result.RequestId <= 0 ||
+                result.RequestId != pendingSkinConfirmRequestId)
+            {
+                return;
+            }
+
+            if (!result.Success)
+            {
+                string message = string.IsNullOrWhiteSpace(result.Error)
+                    ? Lang.Get("apprentice:race-save-rejected")
+                    : result.Error;
+                AbortPendingSkinConfirmation(dialog, message);
+                return;
+            }
+
+            CompletePendingSkinConfirmation(dialog, result.RequestId);
+        }
+
+        private static void CompletePendingSkinConfirmation(
+            object dialog,
+            long requestId)
+        {
+            if (!ReferenceEquals(activeCharacterDialog, dialog) ||
+                !ReferenceEquals(pendingSkinConfirmDialog, dialog) ||
+                pendingSkinConfirmRequestId != requestId ||
+                !skinCloseRequested)
+            {
+                return;
+            }
+
+            AccessTools.Field(dialog.GetType(), "didSelect")?.SetValue(dialog, true);
+            if (dialog is not GuiDialog guiDialog)
+            {
+                AfterDialogClosed(dialog);
+                return;
+            }
+
+            bool wasOpened = guiDialog.IsOpened();
+            bool closed = !wasOpened || guiDialog.TryClose();
+            if (!closed)
+            {
+                clientApi?.Logger.Warning(
+                    "[Apprentice] Character customization was saved, but TryClose() refused; forcing the close lifecycle and deregistration."
+                );
+                guiDialog.OnGuiClosed();
+            }
+
+            ForceReleaseCharacterDialog(guiDialog);
+            AfterDialogClosed(dialog);
+        }
+
+        private static void ForceReleaseCharacterDialog(GuiDialog dialog)
+        {
+            dialog.UnFocus();
+            foreach (GuiComposer composer in dialog.Composers.Values)
+            {
+                composer.UnfocusOwnElements();
+            }
+
+            object? world = clientApi?.World;
+            MethodInfo? unregister = world == null
+                ? null
+                : AccessTools.Method(
+                    world.GetType(),
+                    "UnregisterDialog",
+                    new[] { typeof(GuiDialog) }
+                );
+            unregister?.Invoke(world, new object[] { dialog });
+
+            // The public GUI lists are the authoritative input/render chains.
+            // Remove directly as well so cleanup does not depend on a private
+            // ClientMain method name or a dialog's close-state bookkeeping.
+            clientApi?.Gui.LoadedGuis.Remove(dialog);
+            clientApi?.Gui.OpenedGuis.Remove(dialog);
+
+            dialog.ClearComposers();
+            dialog.Dispose();
+        }
+
+        private static void BeforeEscapeMenuOpened()
+        {
+            ICoreClientAPI? capi = clientApi;
+            if (capi == null) return;
+
+            GuiDialog[] staleDialogs = capi.Gui.LoadedGuis
+                .Where(dialog =>
+                {
+                    string name = dialog.GetType().Name;
+                    return name == "GuiDialogCreateCharacter" ||
+                        name == "RaceOptionsDialog" ||
+                        name == "HornColorDialog";
+                })
+                .ToArray();
+
+            foreach (GuiDialog dialog in staleDialogs)
+            {
+                if (!capi.Gui.LoadedGuis.Contains(dialog) &&
+                    !capi.Gui.OpenedGuis.Contains(dialog))
+                {
+                    continue;
+                }
+                if (dialog.IsOpened()) dialog.TryClose();
+                ForceReleaseCharacterDialog(dialog);
+            }
+
+            if (staleDialogs.Length > 0)
+            {
+                activeCharacterDialog = null;
+                pendingSkinConfirmDialog = null;
+                pendingSkinConfirmRequestId = 0;
+                skinCloseRequested = false;
+                optionsDialog = null;
+                clientApi.Logger.Warning(
+                    "[Apprentice] Removed {0} stale character dialog(s) before opening the pause menu.",
+                    staleDialogs.Length
+                );
+            }
+        }
+
+        private static void AbortPendingSkinConfirmation(
+            object dialog,
+            string message)
+        {
+            if (!ReferenceEquals(pendingSkinConfirmDialog, dialog)) return;
+
+            pendingSkinConfirmDialog = null;
+            pendingSkinConfirmRequestId = 0;
+            skinCloseRequested = false;
+            DestroyOptionsDialog();
+            clientApi?.TriggerIngameError(
+                typeof(RaceAppearanceSystem),
+                "race-save-failed",
+                message
+            );
         }
 
         private static bool BeforeDialogConfirm(object __instance, ref bool __result)
@@ -203,12 +474,31 @@ namespace Apprentice
             return false;
         }
 
-        private static void BeforeComposeGuis(object __instance)
+        private static void BeforeComposeGuis(
+            object __instance,
+            out CharacterComposeState __state)
         {
             activeCharacterDialog = __instance;
+            __state = new CharacterComposeState();
             if (GetDialogTab(__instance) == 0)
             {
                 ApplyNaturalPalette();
+
+                // Vanilla gates both utility buttons on modSys != null. Hide it
+                // only for the synchronous Skin & Voice composition, then
+                // restore it immediately in the postfix.
+                FieldInfo? modSystemField = AccessTools.Field(
+                    __instance.GetType(),
+                    "modSys"
+                );
+                object? modSystem = modSystemField?.GetValue(__instance);
+                __state = new CharacterComposeState
+                {
+                    ModSystemField = modSystemField,
+                    ModSystem = modSystem,
+                    Modified = true
+                };
+                modSystemField?.SetValue(__instance, null);
             }
             else
             {
@@ -216,11 +506,260 @@ namespace Apprentice
             }
         }
 
-        private static void AfterComposeGuis(object __instance)
+        private static void AfterComposeGuis(
+            object __instance,
+            CharacterComposeState __state)
         {
+            __state.Restore(__instance);
             FixActiveTab(__instance);
             UpdateBodyTrait(__instance);
             RefreshOptionsDialog(__instance);
+        }
+
+        private static Exception? FinalizeComposeGuis(
+            object __instance,
+            CharacterComposeState __state,
+            Exception? __exception)
+        {
+            __state?.Restore(__instance);
+            return __exception;
+        }
+
+        private static void ComposeSkinColumnControls(GuiComposer composer)
+        {
+            object? dialog = activeCharacterDialog;
+            EntityPlayer? player = clientApi?.World.Player?.Entity;
+            if (dialog == null ||
+                player == null ||
+                GetDialogTab(dialog) != 0 ||
+                !ConfirmedRaceDialogs.Contains(dialog) ||
+                player.GetBehavior("skinnableplayer")
+                    is not EntityBehaviorExtraSkinnable skin ||
+                !skin.AvailableSkinPartsByCode.TryGetValue(
+                    "eyecolor",
+                    out SkinnablePart? eyePart) ||
+                !skin.AvailableSkinPartsByCode.TryGetValue(
+                    "haircolor",
+                    out SkinnablePart? hairPart) ||
+                !TryGetPickerAnchor(
+                    composer,
+                    "picker-eyecolor",
+                    eyePart.Variants.Length,
+                    out double left,
+                    out double eyeBottom))
+            {
+                return;
+            }
+
+            SkinnablePartVariant[] hairVariants = hairPart.Variants.ToArray();
+            if (hairVariants.Length == 0) return;
+
+            double nextY = eyeBottom + 8;
+            RaceProfile profile = GetProfile(player);
+            bool hasHornColor = profile.HornCodes.Any(code => code != "none");
+            ShiftVanillaSkinColumn(
+                composer,
+                left,
+                eyeBottom,
+                hasHornColor ? 120 : 60
+            );
+
+            string selectedHair = GetAppliedSkinPartCode(
+                skin,
+                "haircolor",
+                hairVariants[0].Code
+            );
+            int hairIndex = Math.Max(
+                0,
+                Array.FindIndex(
+                    hairVariants,
+                    variant => variant.Code == selectedHair
+                )
+            );
+            ElementBounds hairLabel = ElementBounds.Fixed(left, nextY, 210, 22);
+            ElementBounds hairPicker = hairLabel.BelowCopy().WithFixedSize(22, 22);
+            composer
+                .AddRichtext(
+                    Lang.Get("skinpart-haircolor"),
+                    CairoFont.WhiteSmallText(),
+                    hairLabel,
+                    "apprentice-hair-color-label"
+                )
+                .AddColorListPicker(
+                    hairVariants.Select(variant => variant.Color).ToArray(),
+                    index => OnCustomSkinColorChanged(
+                        skin,
+                        "haircolor",
+                        hairVariants,
+                        index
+                    ),
+                    hairPicker,
+                    180,
+                    "picker-haircolor"
+                );
+            AddColorTooltips(composer, "picker-haircolor", hairVariants);
+            composer.ColorListPickerSetValue("picker-haircolor", hairIndex);
+            nextY = hairPicker.fixedY + hairPicker.fixedHeight + 8;
+
+            if (hasHornColor)
+            {
+                string[] hornCodes = GetHornColorCodes();
+                string[] hornNames = GetHornColorNames();
+                int hornIndex = Math.Max(
+                    0,
+                    Array.IndexOf(hornCodes, GetHornColorChoice(player))
+                );
+                ElementBounds hornLabel = ElementBounds.Fixed(left, nextY, 210, 22);
+                ElementBounds hornPicker = hornLabel.BelowCopy().WithFixedSize(22, 22);
+                composer
+                    .AddRichtext(
+                        Lang.Get("apprentice:race-horn-color"),
+                        CairoFont.WhiteSmallText(),
+                        hornLabel,
+                        "apprentice-horn-color-label"
+                    )
+                    .AddColorListPicker(
+                        HornSwatchColors,
+                        OnHornColorPickerChanged,
+                        hornPicker,
+                        180,
+                        HornColorPickerKey
+                    );
+                for (int index = 0; index < hornCodes.Length; index++)
+                {
+                    GuiElementColorListPicker picker = composer.GetColorListPicker(
+                        HornColorPickerKey + "-" + index
+                    );
+                    picker.ShowToolTip = true;
+                    picker.TooltipText = hornNames[index];
+                }
+                composer.ColorListPickerSetValue(HornColorPickerKey, hornIndex);
+            }
+        }
+
+        private static void ShiftVanillaSkinColumn(
+            GuiComposer composer,
+            double left,
+            double eyeBottom,
+            double offset)
+        {
+            HashSet<GuiElement> shifted = new();
+            foreach (GuiElement element in EnumerateComposerElements(composer))
+            {
+                if (!shifted.Add(element) ||
+                    (element is not GuiElementRichtext &&
+                     element is not GuiElementDropDown))
+                {
+                    continue;
+                }
+
+                ElementBounds bounds = element.Bounds;
+                if (bounds.fixedX < left - 2 ||
+                    bounds.fixedX > left + 210 ||
+                    bounds.fixedY <= eyeBottom + 1 ||
+                    bounds.fixedY >= 430)
+                {
+                    continue;
+                }
+                bounds.fixedY += offset;
+            }
+        }
+
+        private static IEnumerable<GuiElement> EnumerateComposerElements(
+            GuiComposer composer)
+        {
+            foreach (string fieldName in new[]
+            {
+                "staticElements", "interactiveElements"
+            })
+            {
+                object? collection = AccessTools.Field(
+                    composer.GetType(),
+                    fieldName
+                )?.GetValue(composer);
+                if (collection is not IEnumerable enumerable) continue;
+
+                foreach (object? item in enumerable)
+                {
+                    if (item is GuiElement element)
+                    {
+                        yield return element;
+                        continue;
+                    }
+                    object? value = item == null
+                        ? null
+                        : AccessTools.Property(item.GetType(), "Value")
+                            ?.GetValue(item);
+                    if (value is GuiElement keyedElement)
+                    {
+                        yield return keyedElement;
+                    }
+                }
+            }
+        }
+
+        private static void AddColorTooltips(
+            GuiComposer composer,
+            string key,
+            SkinnablePartVariant[] variants)
+        {
+            for (int index = 0; index < variants.Length; index++)
+            {
+                GuiElementColorListPicker picker = composer.GetColorListPicker(
+                    key + "-" + index
+                );
+                picker.ShowToolTip = true;
+                picker.TooltipText = Lang.Get("color-" + variants[index].Code);
+            }
+        }
+
+        private static void OnCustomSkinColorChanged(
+            EntityBehaviorExtraSkinnable skin,
+            string partCode,
+            SkinnablePartVariant[] variants,
+            int index)
+        {
+            if (index < 0 || index >= variants.Length) return;
+            selectSkinPartMethod?.Invoke(
+                skin,
+                new object[] { partCode, variants[index].Code, true, false }
+            );
+        }
+
+        private static bool TryGetPickerAnchor(
+            GuiComposer composer,
+            string key,
+            int count,
+            out double left,
+            out double bottom)
+        {
+            left = 0;
+            bottom = 0;
+            bool found = false;
+            for (int index = 0; index < count; index++)
+            {
+                GuiElementColorListPicker? picker = composer.GetColorListPicker(
+                    key + "-" + index
+                );
+                if (picker == null) continue;
+                if (!found)
+                {
+                    left = picker.Bounds.fixedX;
+                    found = true;
+                }
+                bottom = Math.Max(
+                    bottom,
+                    picker.Bounds.fixedY + picker.Bounds.fixedHeight
+                );
+            }
+            return found;
+        }
+
+        private static void OnHornColorPickerChanged(int index)
+        {
+            string[] codes = GetHornColorCodes();
+            if (index < 0 || index >= codes.Length) return;
+            OnSkinHornColorChanged(codes[index]);
         }
 
         private static GuiComposer? GetCharacterComposer(object dialog)
@@ -267,8 +806,6 @@ namespace Apprentice
 
         private static void RefreshOptionsDialog(object dialog)
         {
-            RefreshHornColorDialog(dialog);
-
             ICoreClientAPI? capi = clientApi;
             EntityPlayer? player = capi?.World.Player?.Entity;
             if (capi == null || player == null || GetDialogTab(dialog) != 1)
@@ -280,6 +817,7 @@ namespace Apprentice
             RaceProfile profile = GetProfile(player);
             FieldInfo? heightField = AccessTools.Field(dialog.GetType(), "dlgHeight");
             int dialogHeight = heightField?.GetValue(dialog) is int value ? value : 500;
+            double traitBottom = GetTraitBottom(dialog);
 
             if (optionsDialog == null)
             {
@@ -287,18 +825,34 @@ namespace Apprentice
                     capi,
                     dialogHeight,
                     profile,
+                    traitBottom,
                     OnBodyOptionsChanged
                 );
             }
             else
             {
-                optionsDialog.Refresh(profile);
+                optionsDialog.Refresh(profile, traitBottom);
             }
 
             if (!optionsDialog.IsOpened())
             {
                 optionsDialog.TryOpen();
             }
+        }
+
+        private static double GetTraitBottom(object dialog)
+        {
+            if (GetCharacterComposer(dialog)?.GetRichtext("characterDesc")
+                    is not GuiElementRichtext richtext)
+            {
+                return 190;
+            }
+
+            double height = Math.Max(
+                richtext.Bounds.fixedHeight,
+                richtext.TotalHeight
+            );
+            return richtext.Bounds.fixedY + height;
         }
 
         private static void HideOptionsDialog()
@@ -311,62 +865,12 @@ namespace Apprentice
 
         private static void DestroyOptionsDialog()
         {
-            HideOptionsDialog();
-            optionsDialog?.Dispose();
+            if (optionsDialog != null)
+            {
+                if (optionsDialog.IsOpened()) optionsDialog.TryClose();
+                ForceReleaseCharacterDialog(optionsDialog);
+            }
             optionsDialog = null;
-        }
-
-        private static void RefreshHornColorDialog(object dialog)
-        {
-            ICoreClientAPI? capi = clientApi;
-            EntityPlayer? player = capi?.World.Player?.Entity;
-            RaceProfile? profile = player == null ? null : GetProfile(player);
-            bool hasHorns = profile?.HornCodes.Any(code => code != "none") == true;
-            if (capi == null ||
-                player == null ||
-                GetDialogTab(dialog) != 0 ||
-                !ConfirmedRaceDialogs.Contains(dialog) ||
-                !hasHorns)
-            {
-                HideHornColorDialog();
-                return;
-            }
-
-            FieldInfo? heightField = AccessTools.Field(dialog.GetType(), "dlgHeight");
-            int dialogHeight = heightField?.GetValue(dialog) is int value ? value : 500;
-
-            if (hornColorDialog == null)
-            {
-                hornColorDialog = new HornColorDialog(
-                    capi,
-                    dialogHeight,
-                    OnSkinHornColorChanged
-                );
-            }
-            else
-            {
-                hornColorDialog.Refresh();
-            }
-
-            if (!hornColorDialog.IsOpened())
-            {
-                hornColorDialog.TryOpen();
-            }
-        }
-
-        private static void HideHornColorDialog()
-        {
-            if (hornColorDialog?.IsOpened() == true)
-            {
-                hornColorDialog.TryClose();
-            }
-        }
-
-        private static void DestroyHornColorDialog()
-        {
-            HideHornColorDialog();
-            hornColorDialog?.Dispose();
-            hornColorDialog = null;
         }
 
         private static void OnSkinHornColorChanged(string hornColor)
@@ -386,8 +890,8 @@ namespace Apprentice
                 GetProfessionChoice(player),
                 hornColor
             );
+            player.WatchedAttributes.MarkAllDirty();
             ApplyRaceAppearance(player, GetClassCode(player));
-            SendBodyPacket(player);
         }
 
         private static void OnBodyOptionsChanged(
@@ -413,6 +917,7 @@ namespace Apprentice
                 profession,
                 GetHornColorChoice(player)
             );
+            player.WatchedAttributes.MarkAllDirty();
             ApplyRaceAppearance(player, GetClassCode(player));
             ApplyBodyStats(player, profile);
             if (activeCharacterDialog != null)
@@ -420,8 +925,8 @@ namespace Apprentice
                 ConfirmedRaceDialogs.Remove(activeCharacterDialog);
                 ResetDialogZoom(activeCharacterDialog);
                 UpdateBodyTrait(activeCharacterDialog);
+                RefreshOptionsDialog(activeCharacterDialog);
             }
-            SendBodyPacket(player);
         }
 
         private static bool BeforeGuiComposerMouseWheel(MouseWheelEventArgs __0)

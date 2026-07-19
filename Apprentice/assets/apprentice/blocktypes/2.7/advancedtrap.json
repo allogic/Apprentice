@@ -1,0 +1,14 @@
+{
+  "code":"advancedtrap", "class":"ApprenticeAdvancedTrap", "entityClass":"ApprenticeAdvancedTrap", "drawtype":"json",
+  "variantgroups":[{"code":"state","states":["armed","opening1","opening2","triggered"]}],
+  "shape":{"base":"apprentice:block/2.7/advancedtrap-{state}"},
+  "textures":{"metal":{"base":"apprentice:block/2.7/starsteel"}},
+  "blockmaterial":"Metal", "resistance":5, "replaceable":0,
+  "sideopaque":{"all":false},
+  "sidesolid":{"all":false},
+  "lightAbsorption":0,
+  "collisionBoxes":null,
+  "selectionBox":{"x1":0.08,"y1":0,"z1":0.08,"x2":0.92,"y2":0.18,"z2":0.92},
+  "drops":[{"type":"item","code":"apprentice:advancedtrapkit","quantity":{"avg":1}}],
+  "sounds":{"place":"game:block/anvil","break":"game:block/anvil","hit":"game:block/anvil"}
+}

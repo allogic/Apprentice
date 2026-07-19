@@ -1,0 +1,63 @@
+{
+  "code": "atlatl",
+  "class": "ItemSpear",
+  "damagedby": ["attacking"],
+  "tool": "spear",
+  "attackRange": 3.5,
+  "attackpower": 8.5,
+  "heldTpIdleAnimation": "spearidle",
+  "heldRightReadyAnimation": "spearidle",
+  "heldTpHitAnimation": "spearhit",
+  "behaviors": [
+    { "name": "AnimationAuthoritative" }
+  ],
+  "tags": [
+    "apprentice-content"
+  ],
+  "maxstacksize": 1,
+  "storageFlags": 5,
+  "shape": { "base": "game:item/tool/spear/copper" },
+  "textures": {
+    "material": { "base": "game:block/metal/ingot/copper" }
+  },
+  "creativeinventory": {
+    "general": [
+      "*"
+    ],
+    "items": [
+      "*"
+    ]
+  },
+  "durability": 850,
+  "attributes": {
+    "apprenticeFeature": "atlatl",
+    "attackPower": 8.5,
+    "attackRange": 3.5,
+    "damage": 8.5,
+    "damageTier": 5,
+    "spearEntityCode": "spear-generic-copper",
+    "spearEntityCodeByType": { "*": "spear-generic-copper" },
+    "heldItemPitchFollow": 1
+  },
+  "guiTransform": {
+    "rotation": { "x": 33, "y": 0, "z": -127 },
+    "origin": { "x": 1.39, "y": 0.05, "z": 0.52 },
+    "scale": 2.26
+  },
+  "tpHandTransform": {
+    "translation": { "x": -1.29, "y": 0.03, "z": -0.57 },
+    "rotation": { "x": -90, "y": 0, "z": 0 },
+    "origin": { "x": 0.6, "y": 0, "z": 0.5 },
+    "scale": 0.8
+  },
+  "fpHandTransform": {
+    "translation": { "x": 0.1, "y": 0.4, "z": 0.16 },
+    "rotation": { "x": -82, "y": 180, "z": 96 },
+    "scale": 2.45
+  },
+  "groundTransform": {
+    "rotation": { "x": 90, "y": 0, "z": 0 },
+    "origin": { "x": 0.5, "y": 0.5, "z": 0.5 },
+    "scale": 3.4
+  }
+}

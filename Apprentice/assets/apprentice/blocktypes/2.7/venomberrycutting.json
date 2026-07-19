@@ -1,0 +1,83 @@
+{
+  "code": "venomberrycutting",
+  "class": "BlockRequireFertileGround",
+  "entityClass": "Generic",
+  "behaviors": [
+    { "name": "FruitingBushCutting" },
+    { "name": "Unstable" }
+  ],
+  "entityBehaviors": [
+    { "name": "FruitingBushCutting" }
+  ],
+  "attributes": {
+    "maturedBlockCode": "game:fruitingbush-grown-venomberry-free",
+    "matureTotalMonthsMin": 2,
+    "matureTotalMonthsMax": 4
+  },
+  "variantgroups": [
+    { "code": "cover", "states": ["free", "snow"] }
+  ],
+  "shape": { "base": "game:block/plant/flower/1patch-cross-16x16" },
+  "textures": {
+    "north1": { "base": "game:block/plant/berrybush/young/blueberry-stem1" },
+    "south1": { "base": "game:block/plant/berrybush/young/blueberry-stem2" },
+    "northTinted1": { "base": "game:block/plant/berrybush/young/blueberry-leaves1" },
+    "southTinted1": { "base": "game:block/plant/berrybush/young/blueberry-leaves2" }
+  },
+  "drawtypeByType": {
+    "*-free": "JSON",
+    "*": "JSONAndSnowLayer"
+  },
+  "sideopaqueByType": {
+    "*-free": { "all": false },
+    "*": { "all": false, "down": true }
+  },
+  "sidesolid": { "all": false },
+  "blockmaterialByType": {
+    "*-free": "Plant",
+    "*": "Snow"
+  },
+  "faceCullModeByType": {
+    "*-free": "Default",
+    "*": "MergeSnowLayer"
+  },
+  "climateColorMap": "climatePlantTint",
+  "seasonColorMap": "seasonalBirch",
+  "creativeinventory": {
+    "general": ["*-free"],
+    "flora": ["*-free"],
+    "apprentice": ["*-free"]
+  },
+  "randomizeRotations": true,
+  "renderpass": "OpaqueNoCull",
+  "renderAlphaTest": 0.4,
+  "replaceable": 5200,
+  "lightAbsorption": 0,
+  "resistance": 1,
+  "collisionbox": null,
+  "selectionbox": { "x1": 0.25, "y1": 0, "z1": 0.25, "x2": 0.75, "y2": 0.5, "z2": 0.75 },
+  "sounds": {
+    "place": "game:block/plant",
+    "break": "game:block/plant",
+    "hit": "game:block/plant"
+  },
+  "drops": [
+    { "type": "block", "code": "apprentice:venomberrycutting-free", "quantity": { "avg": 1, "var": 0 } }
+  ],
+  "rainPermeable": true,
+  "frostable": true,
+  "materialDensity": 200,
+  "combustibleProps": {
+    "burnTemperature": 600,
+    "burnDuration": 2
+  },
+  "transitionableProps": [
+    {
+      "type": "Perish",
+      "freshHours": { "avg": 360 },
+      "transitionHours": { "avg": 1 },
+      "transitionedStack": { "type": "item", "code": "game:stick" },
+      "transitionRatio": 0.25
+    }
+  ]
+}

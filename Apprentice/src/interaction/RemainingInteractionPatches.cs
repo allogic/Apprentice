@@ -1044,6 +1044,7 @@ namespace Apprentice
 				);
 
 			if (player == null ||
+				mashSlot == null ||
 				mash?.Collectible?.Code == null ||
 				double.IsNaN(juiceLeft) ||
 				juiceLeft >= 0.01)
@@ -1057,6 +1058,10 @@ namespace Apprentice
 					"getJuiceableProps",
 					mash
 				);
+			if (juiceableProps == null)
+			{
+				return;
+			}
 
 			ItemStack? liquidStack =
 				ResolveItemStack(

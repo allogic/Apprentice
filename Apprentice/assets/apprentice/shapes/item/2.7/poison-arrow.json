@@ -1,0 +1,44 @@
+{
+  "textureWidth": 16,
+  "textureHeight": 16,
+  "textures": {
+    "shaft": "apprentice:item/2.7/arrow-shaft",
+    "metal": "apprentice:item/2.7/arrow-metal",
+    "poison": "apprentice:item/2.7/arrow-poison-mild-material",
+    "feather": "apprentice:item/2.7/arrow-feather"
+  },
+  "elements": [
+    {
+      "name": "shaft",
+      "from": [7.55, 1, 7.55],
+      "to": [8.45, 14, 8.45],
+      "faces":{"north":{"texture":"#shaft"},"east":{"texture":"#shaft"},"south":{"texture":"#shaft"},"west":{"texture":"#shaft"},"up":{"texture":"#shaft"},"down":{"texture":"#shaft"}}
+    },
+    {
+      "name": "head",
+      "from": [7.25, 13.1, 7.25],
+      "to": [8.75, 15.65, 8.75],
+      "rotationOrigin": [8, 14, 8],
+      "faces":{"north":{"texture":"#metal"},"east":{"texture":"#metal"},"south":{"texture":"#metal"},"west":{"texture":"#metal"},"up":{"texture":"#metal"},"down":{"texture":"#metal"}}
+    },
+    {
+      "name": "poison-coating",
+      "from": [7.12, 13.8, 7.12],
+      "to": [8.88, 14.2, 8.88],
+      "rotationOrigin": [8, 14, 8],
+      "faces":{"north":{"texture":"#poison"},"east":{"texture":"#poison"},"south":{"texture":"#poison"},"west":{"texture":"#poison"},"up":{"texture":"#poison"},"down":{"texture":"#poison"}}
+    },
+    {
+      "name": "fletching-x",
+      "from": [6.75, 1, 7.72],
+      "to": [9.25, 3.8, 8.28],
+      "faces":{"north":{"texture":"#feather"},"east":{"texture":"#feather"},"south":{"texture":"#feather"},"west":{"texture":"#feather"},"up":{"texture":"#feather"},"down":{"texture":"#feather"}}
+    },
+    {
+      "name": "fletching-z",
+      "from": [7.72, 1, 6.75],
+      "to": [8.28, 3.8, 9.25],
+      "faces":{"north":{"texture":"#feather"},"east":{"texture":"#feather"},"south":{"texture":"#feather"},"west":{"texture":"#feather"},"up":{"texture":"#feather"},"down":{"texture":"#feather"}}
+    }
+  ]
+}

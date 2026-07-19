@@ -1,0 +1,58 @@
+{
+  "textureWidth": 32,
+  "textureHeight": 32,
+  "textures": {
+    "leavescenter1": "game:block/plant/berrybush/blueberry/leaves/leavescenter1",
+    "leavescenter2": "game:block/plant/berrybush/blueberry/leaves/leavescenter2",
+    "leavescenter3": "game:block/plant/berrybush/blueberry/leaves/leavescenter3",
+    "stemcenter1": "game:block/plant/berrybush/blueberry/stem/stemcenter1",
+    "stemcenter2": "game:block/plant/berrybush/blueberry/stem/stemcenter2",
+    "flowerberrycenter1": "game:block/plant/berrybush/blueberry/berries/bountiful/ripecenter1",
+    "flowerberrycenter2": "game:block/plant/berrybush/blueberry/berries/bountiful/ripecenter2"
+  },
+  "elements": [
+    {
+      "name": "foliage-ns", "from": [0,0,7.95], "to": [16,16,8.05], "shade": false,
+      "faces": {
+        "north":{"texture":"#leavescenter1","uv":[0,0,32,32],"windMode":[0,1,1,0],"windData":[0,1,1,0]},
+        "south":{"texture":"#leavescenter1","uv":[0,0,32,32],"windMode":[0,1,1,0],"windData":[0,1,1,0]}
+      }
+    },
+    {
+      "name": "foliage-ew", "from": [7.95,0,0], "to": [8.05,16,16], "shade": false,
+      "faces": {
+        "east":{"texture":"#leavescenter2","uv":[0,0,32,32],"windMode":[0,1,1,0],"windData":[0,1,1,0]},
+        "west":{"texture":"#leavescenter2","uv":[0,0,32,32],"windMode":[0,1,1,0],"windData":[0,1,1,0]}
+      }
+    },
+    {
+      "name": "foliage-diagonal", "from": [0,0,7.95], "to": [16,16,8.05], "rotationOrigin": [8,8,8], "rotationY": 45, "shade": false,
+      "faces": {
+        "north":{"texture":"#leavescenter3","uv":[0,0,32,32],"windMode":[0,1,1,0],"windData":[0,1,1,0]},
+        "south":{"texture":"#leavescenter3","uv":[0,0,32,32],"windMode":[0,1,1,0],"windData":[0,1,1,0]}
+      }
+    },
+    {
+      "name": "stems-ns", "from": [0,0,7.9], "to": [16,16,8.1], "shade": false,
+      "faces": {"north":{"texture":"#stemcenter1","uv":[0,0,32,32]},"south":{"texture":"#stemcenter1","uv":[0,0,32,32]}}
+    },
+    {
+      "name": "stems-ew", "from": [7.9,0,0], "to": [8.1,16,16], "shade": false,
+      "faces": {"east":{"texture":"#stemcenter2","uv":[0,0,32,32]},"west":{"texture":"#stemcenter2","uv":[0,0,32,32]}}
+    },
+    {
+      "name": "berries-ns", "from": [0,0,7.85], "to": [16,16,8.15], "shade": false,
+      "faces": {
+        "north":{"texture":"#flowerberrycenter1","uv":[0,0,32,32],"windMode":[0,1,1,0],"windData":[0,1,1,0]},
+        "south":{"texture":"#flowerberrycenter1","uv":[0,0,32,32],"windMode":[0,1,1,0],"windData":[0,1,1,0]}
+      }
+    },
+    {
+      "name": "berries-ew", "from": [7.85,0,0], "to": [8.15,16,16], "shade": false,
+      "faces": {
+        "east":{"texture":"#flowerberrycenter2","uv":[0,0,32,32],"windMode":[0,1,1,0],"windData":[0,1,1,0]},
+        "west":{"texture":"#flowerberrycenter2","uv":[0,0,32,32],"windMode":[0,1,1,0],"windData":[0,1,1,0]}
+      }
+    }
+  ]
+}

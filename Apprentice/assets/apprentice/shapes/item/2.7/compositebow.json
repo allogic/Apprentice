@@ -1,0 +1,13 @@
+{
+  "textureWidth": 16, "textureHeight": 16,
+  "elements": [
+    { "name":"tip-top", "from":[3,14,7.5], "to":[5,16,8.5], "faces":{"north":{"texture":"#base"},"east":{"texture":"#base"},"south":{"texture":"#base"},"west":{"texture":"#base"},"up":{"texture":"#base"},"down":{"texture":"#base"}} },
+    { "name":"upper-outer", "from":[4,11,7.4], "to":[6,15,8.6], "faces":{"north":{"texture":"#base"},"east":{"texture":"#base"},"south":{"texture":"#base"},"west":{"texture":"#base"},"up":{"texture":"#base"},"down":{"texture":"#base"}} },
+    { "name":"upper-inner", "from":[5,8,7.3], "to":[8,12,8.7], "faces":{"north":{"texture":"#base"},"east":{"texture":"#base"},"south":{"texture":"#base"},"west":{"texture":"#base"},"up":{"texture":"#base"},"down":{"texture":"#base"}} },
+    { "name":"grip", "from":[7.25,6,7.15], "to":[8.75,10,8.85], "faces":{"north":{"texture":"#base"},"east":{"texture":"#base"},"south":{"texture":"#base"},"west":{"texture":"#base"},"up":{"texture":"#base"},"down":{"texture":"#base"}} },
+    { "name":"lower-inner", "from":[5,4,7.3], "to":[8,8,8.7], "faces":{"north":{"texture":"#base"},"east":{"texture":"#base"},"south":{"texture":"#base"},"west":{"texture":"#base"},"up":{"texture":"#base"},"down":{"texture":"#base"}} },
+    { "name":"lower-outer", "from":[4,1,7.4], "to":[6,5,8.6], "faces":{"north":{"texture":"#base"},"east":{"texture":"#base"},"south":{"texture":"#base"},"west":{"texture":"#base"},"up":{"texture":"#base"},"down":{"texture":"#base"}} },
+    { "name":"tip-bottom", "from":[3,0,7.5], "to":[5,2,8.5], "faces":{"north":{"texture":"#base"},"east":{"texture":"#base"},"south":{"texture":"#base"},"west":{"texture":"#base"},"up":{"texture":"#base"},"down":{"texture":"#base"}} },
+    { "name":"string", "from":[3.8,1,7.9], "to":[4.05,15,8.1], "faces":{"north":{"texture":"#base"},"east":{"texture":"#base"},"south":{"texture":"#base"},"west":{"texture":"#base"},"up":{"texture":"#base"},"down":{"texture":"#base"}} }
+  ]
+}

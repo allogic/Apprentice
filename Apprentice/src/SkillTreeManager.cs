@@ -101,6 +101,11 @@ namespace Apprentice
 			return HiddenClassData.IsUnlocked(entity, hiddenClassId);
 		}
 
+		public static void ReevaluateDiscoveries(IServerPlayer player)
+		{
+			Manager?.DiscoverHiddenClasses(player);
+		}
+
 		public static bool CanCraftLockedRecipe(
 			IPlayer player,
 			AssetLocation outputCode,
@@ -519,6 +524,15 @@ namespace Apprentice
 
 		private void OnPlayerJoin(IServerPlayer player)
 		{
+			int migrated = HiddenClassData.MigrateUnlockedSchemas(player);
+			if (migrated > 0)
+			{
+				serverApi.Logger.Notification(
+					"[Apprentice] Migrated {0} discovery schema marker(s) for {1}.",
+					migrated,
+					player.PlayerName
+				);
+			}
 			DiscoverHiddenClasses(player);
 			ApplyPlayerStats(player);
 		}
@@ -793,13 +807,12 @@ namespace Apprentice
 			return true;
 		}
 
-		private void DiscoverHiddenClasses(IServerPlayer player)
+		internal void DiscoverHiddenClasses(IServerPlayer player)
 		{
 			foreach (HiddenClassDefinition definition in HiddenClassCatalog.All)
 			{
 				if (HiddenClassData.IsUnlocked(player.Entity, definition.Id) ||
-					!definition.RequiredClasses.All(classId =>
-						IsCapstoneUnlocked(player.Entity, classId)))
+					!MeetsDiscoveryRequirements(player.Entity, definition))
 				{
 					continue;
 				}
@@ -817,6 +830,79 @@ namespace Apprentice
 					$"'{definition.DisplayName}' ({definition.Id})."
 				);
 			}
+		}
+
+		private bool MeetsDiscoveryRequirements(
+			Entity entity,
+			HiddenClassDefinition definition)
+		{
+			if (!definition.RequiredClasses.All(classId =>
+				IsCapstoneUnlocked(entity, classId)))
+			{
+				return false;
+			}
+
+			string profession = entity.WatchedAttributes
+				.GetString("apprenticeProfession", "select")
+				.Trim()
+				.ToLowerInvariant();
+			if (definition.RequiredProfession != null &&
+				!profession.Equals(
+					definition.RequiredProfession,
+					StringComparison.OrdinalIgnoreCase))
+			{
+				return false;
+			}
+
+			string race = entity.WatchedAttributes
+				.GetString("characterClass", string.Empty)
+				.Trim()
+				.ToLowerInvariant();
+			const string racePrefix = "apprentice-race-";
+			if (race.StartsWith(racePrefix, StringComparison.Ordinal))
+			{
+				race = race[racePrefix.Length..];
+			}
+
+			if (definition.AllowedRaces.Count > 0 &&
+				!definition.AllowedRaces.Contains(
+					race,
+					StringComparer.OrdinalIgnoreCase))
+			{
+				return false;
+			}
+
+			string subrace = entity.WatchedAttributes
+				.GetString("apprenticeRaceSubclass", "select")
+				.Trim()
+				.ToLowerInvariant();
+			if (definition.AllowedSubraces.Count > 0 &&
+				!definition.AllowedSubraces.Contains(
+					subrace,
+					StringComparer.OrdinalIgnoreCase))
+			{
+				return false;
+			}
+
+			if (definition.MinimumCapstones > 0)
+			{
+				// "Any profession plus N other Grandmasters" still requires
+				// the selected profession to be one of the mastered trees.
+				if (profession == "select" ||
+					!IsCapstoneUnlocked(entity, profession))
+				{
+					return false;
+				}
+
+				int capstones = skillConfig.Trees.Keys.Count(classId =>
+					IsCapstoneUnlocked(entity, classId));
+				if (capstones < definition.MinimumCapstones)
+				{
+					return false;
+				}
+			}
+
+			return true;
 		}
 
 		private bool IsCapstoneUnlocked(Entity entity, string classId)

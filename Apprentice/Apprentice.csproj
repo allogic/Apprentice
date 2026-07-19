@@ -67,4 +67,17 @@
   </Content>
 </ItemGroup>
 
+<Target Name="RejectLegacyCharacterClassOverride" BeforeTargets="PrepareForBuild">
+  <Error
+    Condition="Exists('assets\game\config\characterclasses.json')"
+    Text="Remove Apprentice/assets/game/config/characterclasses.json. It is a stale pre-2.2.4 override that deletes vanilla classes; current releases patch them disabled instead. Extract the source into a new directory instead of overlaying an older checkout."
+  />
+</Target>
+
+<Target Name="CleanStaleDebugAssets" BeforeTargets="CopyFilesToOutputDirectory">
+  <!-- Content copy is additive. Remove only the generated mod asset tree so
+       deleted source assets cannot survive between Visual Studio test runs. -->
+  <RemoveDir Directories="$(OutputPath)assets" />
+</Target>
+
 </Project>

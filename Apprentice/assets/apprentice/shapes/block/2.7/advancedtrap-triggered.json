@@ -1,0 +1,14 @@
+{
+  "textureWidth":16,"textureHeight":16,"textures":{"metal":"#metal"},
+  "elements":[
+    {"name":"frame-n","from":[1,0,1],"to":[15,1.3,3],"faces":{"north":{"texture":"#metal"},"east":{"texture":"#metal"},"south":{"texture":"#metal"},"west":{"texture":"#metal"},"up":{"texture":"#metal"},"down":{"texture":"#metal"}}},
+    {"name":"frame-s","from":[1,0,13],"to":[15,1.3,15],"faces":{"north":{"texture":"#metal"},"east":{"texture":"#metal"},"south":{"texture":"#metal"},"west":{"texture":"#metal"},"up":{"texture":"#metal"},"down":{"texture":"#metal"}}},
+    {"name":"frame-w","from":[1,0,3],"to":[3,1.3,13],"faces":{"north":{"texture":"#metal"},"east":{"texture":"#metal"},"south":{"texture":"#metal"},"west":{"texture":"#metal"},"up":{"texture":"#metal"},"down":{"texture":"#metal"}}},
+    {"name":"frame-e","from":[13,0,3],"to":[15,1.3,13],"faces":{"north":{"texture":"#metal"},"east":{"texture":"#metal"},"south":{"texture":"#metal"},"west":{"texture":"#metal"},"up":{"texture":"#metal"},"down":{"texture":"#metal"}}},
+    {"name":"pressure","from":[5,0.4,5],"to":[11,1.05,11],"faces":{"north":{"texture":"#metal"},"east":{"texture":"#metal"},"south":{"texture":"#metal"},"west":{"texture":"#metal"},"up":{"texture":"#metal"},"down":{"texture":"#metal"}}},
+    {"name":"jaw-n","from":[2,1,3],"to":[14,2.15,5],"rotationOrigin":[8,1,3],"rotationX":68,"faces":{"north":{"texture":"#metal"},"east":{"texture":"#metal"},"south":{"texture":"#metal"},"west":{"texture":"#metal"},"up":{"texture":"#metal"},"down":{"texture":"#metal"}}},
+    {"name":"jaw-s","from":[2,1,11],"to":[14,2.15,13],"rotationOrigin":[8,1,13],"rotationX":-68,"faces":{"north":{"texture":"#metal"},"east":{"texture":"#metal"},"south":{"texture":"#metal"},"west":{"texture":"#metal"},"up":{"texture":"#metal"},"down":{"texture":"#metal"}}},
+    {"name":"spring-w","from":[3,0.8,7],"to":[5,1.65,9],"faces":{"north":{"texture":"#metal"},"east":{"texture":"#metal"},"south":{"texture":"#metal"},"west":{"texture":"#metal"},"up":{"texture":"#metal"},"down":{"texture":"#metal"}}},
+    {"name":"spring-e","from":[11,0.8,7],"to":[13,1.65,9],"faces":{"north":{"texture":"#metal"},"east":{"texture":"#metal"},"south":{"texture":"#metal"},"west":{"texture":"#metal"},"up":{"texture":"#metal"},"down":{"texture":"#metal"}}}
+  ]
+}

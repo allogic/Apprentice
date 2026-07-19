@@ -1,0 +1,39 @@
+{
+  "code": "ore",
+  "class": "BlockOre",
+  "variantgroups": [
+    { "code":"grade", "states":["poor","medium","rich","bountiful"] },
+    { "code":"metal", "states":["starsteel","aethersteel"] },
+    { "code":"rock", "states":["andesite","basalt","bauxite","chalk","chert","claystone","conglomerate","granite","kimberlite","limestone","marble","peridotite","phyllite","sandstone","shale","slate","suevite"] }
+  ],
+  "drawtype": "cube",
+  "blockmaterial": "Ore",
+  "creativeinventory": { "general":["*"] },
+  "textures": {
+    "all": {
+      "base": "game:block/stone/rock/{rock}1",
+      "blendedOverlays": [
+        { "base":"apprentice:block/2.7/ore-{metal}-{grade}", "blendMode":"Normal" }
+      ]
+    }
+  },
+  "texturesByType": {
+    "ore-*-*-marble": {
+      "all": {
+        "base": "game:block/stone/rock/whitemarble1",
+        "blendedOverlays": [
+          { "base":"apprentice:block/2.7/ore-{metal}-{grade}", "blendMode":"Normal" }
+        ]
+      }
+    }
+  },
+  "resistance": 3.5,
+  "requiredMiningTier": 4,
+  "sounds": { "place":"game:block/stone", "break":"game:block/stone", "hit":"game:block/stone" },
+  "dropsByType": {
+    "ore-poor-*-*": [{"type":"item","code":"game:metalbit-{metal}","quantity":{"avg":2,"var":1}}],
+    "ore-medium-*-*": [{"type":"item","code":"game:metalbit-{metal}","quantity":{"avg":4,"var":1}}],
+    "ore-rich-*-*": [{"type":"item","code":"game:metalbit-{metal}","quantity":{"avg":6,"var":1}}],
+    "ore-bountiful-*-*": [{"type":"item","code":"game:metalbit-{metal}","quantity":{"avg":9,"var":2}}]
+  }
+}

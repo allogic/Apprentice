@@ -12,5 +12,11 @@
       { "code": "apprentice-orc", "texture": "apprentice:entity/humanoid/races/skins/orc" },
       { "code": "apprentice-tiefling", "texture": "apprentice:entity/humanoid/races/skins/tiefling" }
     ]
+  },
+  {
+    "code": "eyecolor",
+    "variants": [
+      { "code": "ruby", "texture": "game:entity/humanoid/seraphskinparts/eyes/ruby" }
+    ]
   }
 ]

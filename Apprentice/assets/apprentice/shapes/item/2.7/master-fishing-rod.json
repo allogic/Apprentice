@@ -1,0 +1,66 @@
+{
+  "textureWidth": 16,
+  "textureHeight": 16,
+  "textures": {
+    "wood": "game:block/wood/planks/oak1",
+    "metal": "game:block/metal/ingot/copper"
+  },
+  "elements": [
+    {
+      "name": "grip",
+      "from": [7.35, 0, 7.35],
+      "to": [8.65, 5.5, 8.65],
+      "rotationOrigin": [8, 5.5, 8],
+      "rotationZ": -8,
+      "faces": {
+        "north": { "texture": "#wood" }, "east": { "texture": "#wood" },
+        "south": { "texture": "#wood" }, "west": { "texture": "#wood" },
+        "up": { "texture": "#wood" }, "down": { "texture": "#wood" }
+      }
+    },
+    {
+      "name": "rod-lower",
+      "from": [7.55, 5, 7.55],
+      "to": [8.45, 12, 8.45],
+      "rotationOrigin": [8, 5, 8],
+      "rotationZ": -16,
+      "faces": {
+        "north": { "texture": "#wood" }, "east": { "texture": "#wood" },
+        "south": { "texture": "#wood" }, "west": { "texture": "#wood" },
+        "up": { "texture": "#wood" }, "down": { "texture": "#wood" }
+      }
+    },
+    {
+      "name": "rod-tip",
+      "from": [7.7, 11, 7.7],
+      "to": [8.3, 16, 8.3],
+      "rotationOrigin": [8, 11, 8],
+      "rotationZ": -24,
+      "faces": {
+        "north": { "texture": "#wood" }, "east": { "texture": "#wood" },
+        "south": { "texture": "#wood" }, "west": { "texture": "#wood" },
+        "up": { "texture": "#wood" }, "down": { "texture": "#wood" }
+      }
+    },
+    {
+      "name": "reel",
+      "from": [6.2, 3.2, 6.5],
+      "to": [9.8, 6.8, 9.5],
+      "faces": {
+        "north": { "texture": "#metal" }, "east": { "texture": "#metal" },
+        "south": { "texture": "#metal" }, "west": { "texture": "#metal" },
+        "up": { "texture": "#metal" }, "down": { "texture": "#metal" }
+      }
+    },
+    {
+      "name": "reel-hub",
+      "from": [5.6, 4.25, 7.25],
+      "to": [10.4, 5.75, 8.75],
+      "faces": {
+        "north": { "texture": "#metal" }, "east": { "texture": "#metal" },
+        "south": { "texture": "#metal" }, "west": { "texture": "#metal" },
+        "up": { "texture": "#metal" }, "down": { "texture": "#metal" }
+      }
+    }
+  ]
+}

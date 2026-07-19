@@ -1,0 +1,44 @@
+{
+  "code": "graftingkit",
+  "class": "Item",
+  "tags": [
+    "apprentice-content"
+  ],
+  "maxstacksize": 1,
+  "storageFlags": 5,
+  "shape": {
+    "base": "apprentice:item/2.7/icon-flat"
+  },
+  "textures": {
+    "base": {
+      "base": "apprentice:item/2.7/graftingkit"
+    }
+  },
+  "creativeinventory": {
+    "general": [
+      "*"
+    ],
+    "items": [
+      "*"
+    ]
+  },
+  "guiTransform": {
+    "rotation": {
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "scale": 1
+  },
+  "groundTransform": {
+    "scale": 0.8
+  },
+  "tpHandTransform": {
+    "scale": 0.6
+  },
+  "durability": 600,
+  "attributes": {
+    "apprenticeFeature": "grafting",
+    "noConsumeOnCrafting": true
+  }
+}

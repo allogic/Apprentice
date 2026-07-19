@@ -77,7 +77,8 @@ namespace Apprentice
 
 			if (damagedEntity == null ||
 				damagedEntity.World.Side !=
-					EnumAppSide.Server)
+					EnumAppSide.Server ||
+				damageSource == null)
 			{
 				return;
 			}
@@ -88,17 +89,22 @@ namespace Apprentice
 					"Health"
 				);
 
-			if (!float.IsFinite(healthBefore))
-			{
-				return;
-			}
+			// Several creature health behaviors do not expose a public Health
+			// member.  Combat attribution still has to be captured for them.
+			if (!float.IsFinite(healthBefore)) healthBefore = 0;
 
 			Entity? damagingEntity =
-				damageSource?.GetCauseEntity() ??
-				damageSource?.SourceEntity;
+				damageSource.GetCauseEntity() ??
+				damageSource.SourceEntity;
 
 			bool wasEntityDamage =
 				damagingEntity != null;
+
+			if (wasEntityDamage && damage > 0)
+			{
+				damage *= (float)DangerTierRuntime
+					.GetDamageMultiplier(damagingEntity);
+			}
 
 			EntityPlayer? attacker =
 				damagingEntity as EntityPlayer;
@@ -187,6 +193,9 @@ namespace Apprentice
 					CaptureShield(
 						damagedPlayer?
 							.RightHandItemSlot
+					),
+					PoisonRuntime.CaptureProjectileHit(
+						damageSource
 					)
 				);
 		}
@@ -200,6 +209,15 @@ namespace Apprentice
 			{
 				return;
 			}
+
+			// Projectile identification is captured in the prefix while the
+			// projectile entity and its stack still exist.  Apply poison here
+			// independently of the reflected health value; some creature health
+			// behaviors expose no readable Health member even though the hit lands.
+			PoisonRuntime.ApplyConfirmedProjectileHit(
+				__state.DamagedEntity,
+				__state.PoisonHit
+			);
 
 			float healthAfter =
 				ReadFloatMember(
@@ -990,6 +1008,10 @@ namespace Apprentice
 					"SelectedRecipe",
 					"selectedRecipe"
 				);
+			if (selectedRecipe == null)
+			{
+				return;
+			}
 
 			ItemStack? outputStack =
 				ResolveItemStack(
@@ -1002,8 +1024,7 @@ namespace Apprentice
 			AssetLocation? outputCode =
 				outputStack?.Collectible?.Code;
 
-			if (selectedRecipe == null ||
-				outputCode == null)
+			if (outputCode == null)
 			{
 				return;
 			}
@@ -1276,9 +1297,9 @@ namespace Apprentice
 			ItemStack? outputStack =
 				outputSlot?.Itemstack;
 
-			if (!DidOutputIncrease(
-				__state,
-				outputStack))
+			if (outputStack == null || !DidOutputIncrease(
+					__state,
+					outputStack))
 			{
 				return;
 			}
@@ -1971,7 +1992,8 @@ namespace Apprentice
 			string? AttackerPlayerUid,
 			string? WeaponCode,
 			ShieldSnapshot? LeftShield,
-			ShieldSnapshot? RightShield
+			ShieldSnapshot? RightShield,
+			PoisonProjectileHit? PoisonHit
 		);
 
 		internal sealed record TreeBlockSnapshot(

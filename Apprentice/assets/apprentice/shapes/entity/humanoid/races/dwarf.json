@@ -2,23 +2,18 @@
   "textureWidth": 16,
   "textureHeight": 16,
   "textureSizes": {
-    "race": [
-      16,
-      16
-    ],
-    "seraph": [
-      32,
-      76
-    ],
     "hair": [
       48,
       48
+    ],
+    "raceskin": [
+      32,
+      76
     ]
   },
   "textures": {
-    "race": "apprentice:entity/humanoid/races/dwarf",
-    "seraph": "entity/humanoid/seraph-naked",
-    "hair": "entity/humanoid/seraphskinparts/hair/eerieblack"
+    "hair": "entity/humanoid/seraphskinparts/hair/eerieblack",
+    "raceskin": "apprentice:entity/humanoid/races/skins/dwarf"
   },
   "elements": [
     {
@@ -70,12 +65,12 @@
           "rotationZ": 10,
           "faces": {
             "north": {
-              "texture": "#seraph",
+              "texture": "#raceskin",
               "uv": [
-                25,
-                7,
-                26,
-                8.5
+                8,
+                8,
+                9,
+                9
               ],
               "windMode": [
                 -1,
@@ -85,39 +80,39 @@
               ]
             },
             "east": {
-              "texture": "#seraph",
+              "texture": "#raceskin",
               "uv": [
-                26,
-                7,
-                26.5,
-                8.5
+                8,
+                8,
+                9,
+                9
               ]
             },
             "south": {
-              "texture": "#seraph",
+              "texture": "#raceskin",
               "uv": [
-                26.5,
-                7,
-                27.5,
-                8.5
+                8,
+                8,
+                9,
+                9
               ]
             },
             "up": {
-              "texture": "#seraph",
+              "texture": "#raceskin",
               "uv": [
-                25,
-                6.5,
-                26,
-                7
+                8,
+                8,
+                9,
+                9
               ]
             },
             "down": {
-              "texture": "#seraph",
+              "texture": "#raceskin",
               "uv": [
-                26,
-                6.5,
-                27,
-                7
+                8,
+                8,
+                9,
+                9
               ]
             }
           }
@@ -147,12 +142,12 @@
           "rotationZ": 10,
           "faces": {
             "north": {
-              "texture": "#seraph",
+              "texture": "#raceskin",
               "uv": [
-                25,
-                10.5,
-                26,
-                12
+                8,
+                8,
+                9,
+                9
               ],
               "windMode": [
                 -1,
@@ -162,21 +157,21 @@
               ]
             },
             "east": {
-              "texture": "#seraph",
+              "texture": "#raceskin",
               "uv": [
-                26,
-                10.5,
-                26.5,
-                12
+                8,
+                8,
+                9,
+                9
               ]
             },
             "south": {
-              "texture": "#seraph",
+              "texture": "#raceskin",
               "uv": [
-                26.5,
-                10.5,
-                27.5,
-                12
+                8,
+                8,
+                9,
+                9
               ],
               "windMode": [
                 -1,
@@ -186,21 +181,21 @@
               ]
             },
             "up": {
-              "texture": "#seraph",
+              "texture": "#raceskin",
               "uv": [
-                25,
-                10,
-                26,
-                10.5
+                8,
+                8,
+                9,
+                9
               ]
             },
             "down": {
-              "texture": "#seraph",
+              "texture": "#raceskin",
               "uv": [
-                26,
-                10,
-                27,
-                10.5
+                8,
+                8,
+                9,
+                9
               ]
             }
           }
@@ -255,30 +250,30 @@
           "rotationZ": -30,
           "faces": {
             "north": {
-              "texture": "#seraph",
+              "texture": "#raceskin",
               "uv": [
-                3.5,
-                12.5,
-                4,
-                13
+                8,
+                8,
+                9,
+                9
               ]
             },
             "south": {
-              "texture": "#seraph",
+              "texture": "#raceskin",
               "uv": [
-                4,
-                12.5,
-                4.5,
-                13
+                8,
+                8,
+                9,
+                9
               ]
             },
             "west": {
-              "texture": "#seraph",
+              "texture": "#raceskin",
               "uv": [
-                4.5,
-                12.5,
-                5,
-                13
+                8,
+                8,
+                9,
+                9
               ]
             }
           },
@@ -307,48 +302,48 @@
               "rotationZ": 14,
               "faces": {
                 "north": {
-                  "texture": "#seraph",
+                  "texture": "#raceskin",
                   "uv": [
-                    3.5,
-                    14,
-                    4,
-                    14.5
+                    8,
+                    8,
+                    9,
+                    9
                   ]
                 },
                 "south": {
-                  "texture": "#seraph",
+                  "texture": "#raceskin",
                   "uv": [
-                    4,
-                    14,
-                    4.5,
-                    14.5
+                    8,
+                    8,
+                    9,
+                    9
                   ]
                 },
                 "west": {
-                  "texture": "#seraph",
+                  "texture": "#raceskin",
                   "uv": [
-                    4.5,
-                    14,
-                    5,
-                    14.5
+                    8,
+                    8,
+                    9,
+                    9
                   ]
                 },
                 "up": {
-                  "texture": "#seraph",
+                  "texture": "#raceskin",
                   "uv": [
-                    3.5,
-                    13.5,
-                    4,
-                    14
+                    8,
+                    8,
+                    9,
+                    9
                   ]
                 },
                 "down": {
-                  "texture": "#seraph",
+                  "texture": "#raceskin",
                   "uv": [
-                    4,
-                    13.5,
-                    4.5,
-                    14
+                    8,
+                    8,
+                    9,
+                    9
                   ]
                 }
               },
@@ -377,48 +372,48 @@
                   "rotationZ": 28,
                   "faces": {
                     "north": {
-                      "texture": "#seraph",
+                      "texture": "#raceskin",
                       "uv": [
-                        3.5,
-                        15.5,
-                        4,
-                        16
+                        8,
+                        8,
+                        9,
+                        9
                       ]
                     },
                     "south": {
-                      "texture": "#seraph",
+                      "texture": "#raceskin",
                       "uv": [
-                        4,
-                        15.5,
-                        4.5,
-                        16
+                        8,
+                        8,
+                        9,
+                        9
                       ]
                     },
                     "west": {
-                      "texture": "#seraph",
+                      "texture": "#raceskin",
                       "uv": [
-                        4.5,
-                        15.5,
-                        5,
-                        16
+                        8,
+                        8,
+                        9,
+                        9
                       ]
                     },
                     "up": {
-                      "texture": "#seraph",
+                      "texture": "#raceskin",
                       "uv": [
-                        3.5,
-                        15,
-                        4,
-                        15.5
+                        8,
+                        8,
+                        9,
+                        9
                       ]
                     },
                     "down": {
-                      "texture": "#seraph",
+                      "texture": "#raceskin",
                       "uv": [
-                        4,
-                        15,
-                        4.5,
-                        15.5
+                        8,
+                        8,
+                        9,
+                        9
                       ]
                     }
                   }
@@ -550,57 +545,57 @@
           ],
           "faces": {
             "north": {
-              "texture": "#race",
+              "texture": "#raceskin",
               "uv": [
-                0,
-                0,
-                16,
-                16
+                8,
+                8,
+                9,
+                9
               ]
             },
             "east": {
-              "texture": "#race",
+              "texture": "#raceskin",
               "uv": [
-                0,
-                0,
-                16,
-                16
+                8,
+                8,
+                9,
+                9
               ]
             },
             "south": {
-              "texture": "#race",
+              "texture": "#raceskin",
               "uv": [
-                0,
-                0,
-                16,
-                16
+                8,
+                8,
+                9,
+                9
               ]
             },
             "west": {
-              "texture": "#race",
+              "texture": "#raceskin",
               "uv": [
-                0,
-                0,
-                16,
-                16
+                8,
+                8,
+                9,
+                9
               ]
             },
             "up": {
-              "texture": "#race",
+              "texture": "#raceskin",
               "uv": [
-                0,
-                0,
-                16,
-                16
+                8,
+                8,
+                9,
+                9
               ]
             },
             "down": {
-              "texture": "#race",
+              "texture": "#raceskin",
               "uv": [
-                0,
-                0,
-                16,
-                16
+                8,
+                8,
+                9,
+                9
               ]
             }
           }

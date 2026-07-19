@@ -19,6 +19,29 @@ namespace Apprentice
 {
     public sealed partial class RaceAppearanceSystem
     {
+        private sealed class EyeHeightScaleState
+        {
+            public EyeHeightScaleState(
+                EntityProperties properties,
+                double eyeHeight,
+                float collisionHeight)
+            {
+                Properties = properties;
+                EyeHeight = eyeHeight;
+                CollisionHeight = collisionHeight;
+            }
+
+            public EntityProperties Properties { get; }
+            public double EyeHeight { get; }
+            public float CollisionHeight { get; }
+
+            public void Restore()
+            {
+                Properties.EyeHeight = EyeHeight;
+                Properties.CollisionBoxSize.Y = CollisionHeight;
+            }
+        }
+
         internal static void ApplyRaceAppearance(EntityPlayer player, string classCode)
         {
             RaceProfile profile = GetProfile(classCode);
@@ -33,8 +56,11 @@ namespace Apprentice
                 new[] { typeof(string), typeof(string), typeof(bool), typeof(bool) }
             );
 
-            ApplyRaceSkin(player, skin, profile);
-            ApplyFacialIdentity(player, skin, profile);
+            if (!RestoreInProgress.Contains(player))
+            {
+                ApplyRaceSkin(player, skin, profile);
+                ApplyFacialIdentity(player, skin, profile);
+            }
             RefreshHiddenRaceParts(player, profile);
         }
 
@@ -51,6 +77,11 @@ namespace Apprentice
                 new[] { typeof(string), typeof(string), typeof(bool), typeof(bool) }
             );
             string hornColor = GetHornColorChoice(player);
+            SelectHiddenPart(
+                skin,
+                FaceSkinPartCode,
+                GetAppliedSkinPartCode(skin, "baseskin", "skin4")
+            );
             SelectHiddenPart(skin, HornColorPartCode, hornColor);
             SelectHiddenPart(skin, HornPartCode, GetHornChoice(player, profile));
             SelectHiddenPart(skin, TeethPartCode, GetTeethChoice(player, profile));
@@ -116,6 +147,20 @@ namespace Apprentice
                 skin,
                 new object[] { partCode, variantCode, true, false }
             );
+        }
+
+        private static string GetAppliedSkinPartCode(
+            EntityBehavior skin,
+            string partCode,
+            string fallback)
+        {
+            if (skin is EntityBehaviorExtraSkinnable extra)
+            {
+                string? selected = extra.AppliedSkinParts
+                    .FirstOrDefault(part => part.PartCode == partCode)?.Code;
+                if (!string.IsNullOrEmpty(selected)) return selected;
+            }
+            return fallback;
         }
 
         private static void ApplyFacialIdentity(
@@ -350,6 +395,48 @@ namespace Apprentice
             player.LocalEyePos.Y = 1.7 * height;
         }
 
+        private static void BeforePlayerEyeHeightUpdate(
+            EntityPlayer __instance,
+            out EyeHeightScaleState? __state)
+        {
+            __state = null;
+            EntityPlayer? localPlayer = clientApi?.World.Player?.Entity;
+            if (!ReferenceEquals(localPlayer, __instance)) return;
+
+            float heightScale = GetEffectiveHeight(
+                GetProfile(__instance),
+                GetHeightChoice(__instance)
+            );
+            if (!float.IsFinite(heightScale) ||
+                heightScale <= 0f ||
+                Math.Abs(heightScale - 1f) < 0.0001f)
+            {
+                return;
+            }
+
+            EntityProperties properties = __instance.Properties;
+            __state = new EyeHeightScaleState(
+                properties,
+                properties.EyeHeight,
+                properties.CollisionBoxSize.Y
+            );
+
+            // EntityPlayer.updateEyeHeight normally eases these fixed player
+            // dimensions toward 1.7/1.85 every frame. Present scaled base
+            // dimensions only for that calculation so all vanilla pose,
+            // mount and head-bobbing adjustments remain intact.
+            properties.EyeHeight *= heightScale;
+            properties.CollisionBoxSize.Y *= heightScale;
+        }
+
+        private static Exception? FinalizePlayerEyeHeightUpdate(
+            EyeHeightScaleState? __state,
+            Exception? __exception)
+        {
+            __state?.Restore();
+            return __exception;
+        }
+
         private static float GetEffectiveHeight(RaceProfile profile, float choice) =>
             profile.Height * Lerp(
                 profile.MinHeightScale,
@@ -432,7 +519,7 @@ namespace Apprentice
             }
             RestoreNaturalPalette();
             DestroyOptionsDialog();
-            DestroyHornColorDialog();
+            RestoreAllCharacterDialogLayouts();
             harmony?.UnpatchAll(HarmonyId);
             harmony = null;
             clientApi = null;
@@ -440,7 +527,11 @@ namespace Apprentice
             clientChannel = null;
             serverChannel = null;
             activeCharacterDialog = null;
+            pendingSkinConfirmDialog = null;
+            pendingSkinConfirmRequestId = 0;
+            skinCloseRequested = false;
             ConfirmedRaceDialogs.Clear();
+            RestoreInProgress.Clear();
             PaletteSnapshots.Clear();
             base.Dispose();
         }

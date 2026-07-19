@@ -24,6 +24,7 @@ namespace Apprentice
         private readonly Action<float, float, string, string, string, string> changed;
         private readonly int dialogHeight;
         private RaceAppearanceSystem.RaceProfile profile;
+        private double traitBottom;
         private bool composing;
         private float currentHeight;
         private float currentThickness;
@@ -44,11 +45,13 @@ namespace Apprentice
             ICoreClientAPI api,
             int dialogHeight,
             RaceAppearanceSystem.RaceProfile profile,
+            double traitBottom,
             Action<float, float, string, string, string, string> changed)
             : base(api)
         {
             this.dialogHeight = dialogHeight;
             this.profile = profile;
+            this.traitBottom = traitBottom;
             this.changed = changed;
             ComposeControls();
         }
@@ -58,10 +61,34 @@ namespace Apprentice
         public override bool CaptureAllInputs() => false;
         public override bool CaptureRawMouse() => false;
 
-        public void Refresh(RaceAppearanceSystem.RaceProfile nextProfile)
+        public void Refresh(
+            RaceAppearanceSystem.RaceProfile nextProfile,
+            double nextTraitBottom)
         {
-            if (ReferenceEquals(profile, nextProfile)) return;
+            bool choicesChanged =
+                Math.Abs(currentHeight - RaceAppearanceSystem.GetHeightChoice(
+                    capi.World.Player.Entity)) > 0.0001f ||
+                Math.Abs(currentThickness - RaceAppearanceSystem.GetThicknessChoice(
+                    capi.World.Player.Entity)) > 0.0001f ||
+                currentSubclass != RaceAppearanceSystem.GetSubclassChoice(
+                    capi.World.Player.Entity,
+                    nextProfile) ||
+                currentProfession != RaceAppearanceSystem.GetProfessionChoice(
+                    capi.World.Player.Entity) ||
+                currentHorns != RaceAppearanceSystem.GetHornChoice(
+                    capi.World.Player.Entity,
+                    nextProfile) ||
+                currentTeeth != RaceAppearanceSystem.GetTeethChoice(
+                    capi.World.Player.Entity,
+                    nextProfile);
+            if (ReferenceEquals(profile, nextProfile) &&
+                Math.Abs(traitBottom - nextTraitBottom) < 0.5 &&
+                !choicesChanged)
+            {
+                return;
+            }
             profile = nextProfile;
+            traitBottom = nextTraitBottom;
             ComposeControls();
         }
 
@@ -106,15 +133,13 @@ namespace Apprentice
             // confirmation button from receiving clicks.
             const int fullDialogWidth = 757;
             const int optionsLeft = 240;
-            // Keep the entire options block clear of the stock Confirm Race
-            // button, including races that show subclass, horns and teeth.
-            // The trait panel is rendered with the same compact font for every
-            // race, so this fixed top edge is now safe for every profile.
-            const int optionsTop = 260;
             const int optionsWidth = 475;
             int professionTop = hasSubclass ? 58 : 23;
             int bodyTop = hasSubclass ? 95 : 60;
-            int optionsHeight = bodyTop + (showHorns || showTeeth ? 100 : 65);
+            int optionsHeight = CalculateOptionsHeight(profile);
+            double optionsTop = Math.Max(190, traitBottom + 12);
+            double maximumTop = dialogHeight - 45 - optionsHeight;
+            optionsTop = Math.Min(optionsTop, maximumTop);
             double xOffset = optionsLeft + optionsWidth / 2d - fullDialogWidth / 2d;
             double yOffset = optionsTop + optionsHeight / 2d - (dialogHeight + 40) / 2d;
 
@@ -289,6 +314,16 @@ namespace Apprentice
             );
 
             composing = false;
+        }
+
+        internal static int CalculateOptionsHeight(
+            RaceAppearanceSystem.RaceProfile profile)
+        {
+            bool hasSubclass = RaceAppearanceSystem.HasSubclasses(profile);
+            bool showsFaceOptions = profile.HornCodes.Any(code => code != "none") ||
+                profile.TeethCodes.Any(code => code != "none");
+            int bodyTop = hasSubclass ? 95 : 60;
+            return bodyTop + (showsFaceOptions ? 100 : 65);
         }
 
         private bool OnHeightChanged(int value)

@@ -173,10 +173,32 @@ namespace Apprentice
                 CompactTraitText(
                     InsertSubclassTrait(ReplaceBodyTrait(traitText, player), player)
                 );
-            // Use the compact Human-sized trait text for every race and
-            // subclass. This keeps long subclass/body lines above the options.
             CairoFont font = CairoFont.WhiteDetailText();
-            richtext.SetNewText(updated, font, null);
+            FieldInfo? heightField = AccessTools.Field(dialog.GetType(), "dlgHeight");
+            int dialogHeight = heightField?.GetValue(dialog) is int value ? value : 500;
+            RaceProfile profile = GetProfile(player);
+            int optionsHeight = RaceOptionsDialog.CalculateOptionsHeight(profile);
+            double maximumTraitBottom = dialogHeight - 45 - optionsHeight - 12;
+
+            // The concise text is preferred. At small windows or large GUI
+            // scales, reduce only this detail font in bounded one-point steps.
+            while (true)
+            {
+                richtext.SetNewText(updated, font, null);
+                double renderedBottom = richtext.Bounds.fixedY + Math.Max(
+                    richtext.Bounds.fixedHeight,
+                    richtext.TotalHeight
+                );
+                if (renderedBottom <= maximumTraitBottom ||
+                    font.UnscaledFontsize <= 10)
+                {
+                    break;
+                }
+
+                font = CairoFont.WhiteDetailText().WithFontSize(
+                    (float)Math.Max(10, font.UnscaledFontsize - 1)
+                );
+            }
         }
 
         private static string Signed(float value, int decimals) =>
