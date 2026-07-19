@@ -60,6 +60,12 @@ namespace Apprentice
 			backgroundRectRef = capi.Render.UploadMesh(QuadMeshUtil.GetQuad());
 			healthRectRef = capi.Render.UploadMesh(QuadMeshUtil.GetQuad());
 
+			program = capi.Shader.NewShaderProgram();
+
+			capi.Shader.RegisterFileShaderProgram("healthbar", program);
+
+			program.Compile();
+
 			capi.Event.RegisterRenderer(this, EnumRenderStage.Opaque);
 		}
 
