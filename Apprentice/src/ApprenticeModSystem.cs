@@ -1,4 +1,4 @@
-using Apprentice.src.weapons;
+using Apprentice.Weapon;
 using HarmonyLib;
 using System;
 using System.Linq;
