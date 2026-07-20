@@ -63,8 +63,7 @@ namespace Apprentice
 
 		private ClassConfig? classConfig = null;
 		private SkillTreeConfig? skillTreeConfig = null;
-		private ApprenticeContentRegistry contentRegistry =
-			ApprenticeContentRegistry.Empty;
+		private ApprenticeContentRegistry contentRegistry = ApprenticeContentRegistry.Empty;
 
 		private ClassesManager? classesManager = null;
 		private ExperienceManager? experienceManager = null;
@@ -491,11 +490,7 @@ namespace Apprentice
 				api.Logger.Error(exception);
 			}
 
-			if (capi != null)
-			{
-				Entity playerEntity = capi.World.Player.Entity;
-				playerEntity.AddBehavior(new UchigatanaDashBehaviour(capi, playerEntity));
-			}
+			capi?.Event.PlayerJoin += OnPlayerJoin;
 		}
 
 		private void CheckMasterFishingRodAnimation(float deltaTime)
@@ -569,6 +564,14 @@ namespace Apprentice
 		#endregion
 
 		#region Event Handler
+		private void OnPlayerJoin(IClientPlayer byPlayer)
+		{
+			if (capi != null)
+			{
+				// Entity playerEntity = capi.World.Player.Entity;
+				byPlayer.Entity.AddBehavior(new UchigatanaDashBehaviour(capi, byPlayer.Entity));
+			}
+		}
 		private void OnExperienceNotification(ExperienceNotificationPacket packet)
 		{
 			// Network packet callbacks are not a safe place to create

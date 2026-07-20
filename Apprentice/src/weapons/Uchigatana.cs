@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
+using Vintagestory.API.MathTools;
 using Vintagestory.GameContent;
 
 namespace Apprentice.src.weapons
@@ -55,7 +56,12 @@ namespace Apprentice.src.weapons
 		private bool Init { get; set; }
 		private bool Playing { get; set; }
 
-		private float DeltaAcc { get; set; }
+		private float Duration { get; set; } = 1.0F;
+		private float Attenuator { get; set; } = 50.0F;
+		private float Dampening { get; set; } = 1.0F;
+		private float EngageAngle { get; set; } = 0.01745329251994329547F * 30.0F;
+
+		private Vec3f Velocity { get; set; } = new();
 
 		public UchigatanaDashBehaviour(ICoreClientAPI capi, Entity entity) : base(entity)
 		{
@@ -73,30 +79,40 @@ namespace Apprentice.src.weapons
 		{
 			if (entityPlayer == null) return;
 
+			EntityPos position = entityPlayer.Pos;
+
+			float initalAngle = 0.0F;
+
 			if (Playing)
 			{
 				if (Init)
 				{
 					Init = false;
 
+					initalAngle = position.Pitch;
+
 					// entity.StartAnimation(""); // TODO
 					// entity.StopAnimation..
 				}
 
-				DeltaAcc += deltaTime;
+				Vec3f forward = position.GetViewVector();
 
-				EntityPos position = entityPlayer.Pos;
+				Velocity += forward * Attenuator * deltaTime;
 
-				position.Y += (float)Math.Sin(DeltaAcc) * 10.0F;
+				position.Add(Velocity);
 
-				if (DeltaAcc > Math.Tau)
+				if (Velocity.Length() > 0.001F)
 				{
+					position.SetAngles(position.Roll, position.Yaw, initalAngle - EngageAngle);
+
+					Velocity -= Velocity * Dampening;
+
 					Playing = false;
 					Init = true;
-					DeltaAcc = 0.0F;
 				}
 
-				entityPlayer.Pos.SetPos(position.X, position.Y, position.Z);
+				position.SetPos(position.X, position.Y, position.Z);
+				position.SetAngles(position.Roll, position.Yaw, initalAngle + EngageAngle);
 			}
 
 			// entity.ApplyGravity
