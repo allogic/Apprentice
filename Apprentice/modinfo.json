@@ -8,7 +8,7 @@
     ],
     "description": "Character progression, race-first creation, Grandmaster discoveries, advanced metals, arrow poison, and danger regions.",
     "website": "https://github.com/allogic/Apprentice",
-  "version": "2.7.0-dev.20260720.19",
+  "version": "2.7.0-dev.20260720.20",
     "dependencies": {
         "game": "1.22.3"
     }

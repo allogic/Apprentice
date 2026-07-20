@@ -1298,7 +1298,7 @@ def validate_content_27(validation: Validation) -> None:
             "x": 0.5, "y": 0.5, "z": 0.609375
         }
         and shield_offhand.get("translation") == {
-            "x": -0.67, "y": 0.0, "z": -0.78
+            "x": -0.67, "y": -0.6, "z": -0.78
         }
         and shield_offhand.get("rotation") == {
             "x": -4, "y": 173, "z": 90
@@ -1307,6 +1307,9 @@ def validate_content_27(validation: Validation) -> None:
             "x": 0.5, "y": 0.5, "z": 0.609375
         }
         and shield_offhand.get("scale") == 0.82
+        and shield_hand.get("rotation") == {
+            "x": -4, "y": 4, "z": 90
+        }
         and shield_hand.get("origin") == {
             "x": 0.5, "y": 0.5, "z": 0.609375
         }
@@ -2032,11 +2035,13 @@ def validate_content_27(validation: Validation) -> None:
         ),
     )
     validation.check(
-        spear.get("tpHandTransform", {}).get("rotation", {}).get("z") == 180
-        and spear.get("guiTransform", {}).get("rotation", {}).get("z") == -174,
+        spear.get("guiTransform", {}).get("origin") == {
+            "x": 1.125, "y": 0.5, "z": 0.5
+        }
+        and spear.get("guiTransform", {}).get("scale") == 0.67,
         (
-            "Grandmaster Spear must point its head away from the player in "
-            "third person and toward the upper-right in the inventory."
+            "Grandmaster Spear inventory transform must use the custom "
+            "Sunlance centre and fit the complete model inside a fixed slot."
         ),
     )
     spear_entity_path = (
