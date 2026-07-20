@@ -531,6 +531,27 @@ def validate_language_keys(validation: Validation) -> None:
         used <= set(lang),
         f"en.json is missing direct language keys: {sorted(used - set(lang))}.",
     )
+    metal_language_keys = {
+        "game:item-metalplate-starsteel",
+        "game:item-metalplate-aethersteel",
+        "game:block-metalsheet-starsteel-down",
+        "game:block-metalsheet-aethersteel-down",
+        "game:block-metalblock-new-plain-starsteel",
+        "game:block-metalblock-corroded-plain-starsteel",
+        "game:block-metalblock-new-riveted-starsteel",
+        "game:block-metalblock-corroded-riveted-starsteel",
+        "game:block-metalblock-new-plain-aethersteel",
+        "game:block-metalblock-corroded-plain-aethersteel",
+        "game:block-metalblock-new-riveted-aethersteel",
+        "game:block-metalblock-corroded-riveted-aethersteel",
+    }
+    validation.check(
+        metal_language_keys <= set(lang),
+        (
+            "en.json is missing Vintage Story metal variant keys: "
+            f"{sorted(metal_language_keys - set(lang))}."
+        ),
+    )
 
     for kind, directory in (
         ("item", ASSET_ROOT / "itemtypes"),
@@ -1277,7 +1298,7 @@ def validate_content_27(validation: Validation) -> None:
             "x": 0.5, "y": 0.5, "z": 0.609375
         }
         and shield_offhand.get("translation") == {
-            "x": -0.67, "y": -0.6, "z": -0.78
+            "x": -0.67, "y": 0.0, "z": -0.78
         }
         and shield_offhand.get("rotation") == {
             "x": -4, "y": 173, "z": 90
@@ -1300,17 +1321,13 @@ def validate_content_27(validation: Validation) -> None:
     shield_grip = (8, 8, 9.75)
     validation.check(
         points_close(
-            transformed_model_point(shield_grip, shield_offhand),
-            NATIVE_HELD_GRIP_TARGET,
-        )
-        and points_close(
             transformed_model_point(shield_grip, shield_hand),
             NATIVE_HELD_GRIP_TARGET,
         ),
         (
             "Tower Shield rear-grip centre must land on the same hand-space "
-            "point as the approved Composite Bow grip in both hands. The "
-            "named rear grip, not the model bounds, is the held-item pivot."
+            "point as the approved Composite Bow grip in the main hand. The "
+            "off-hand pose must use its raised shield-specific anchor."
         ),
     )
     shield_chances = shield_stats.get("protectionChance", {})
@@ -1356,6 +1373,13 @@ def validate_content_27(validation: Validation) -> None:
             (
                 f"{relative(production_path)} must exactly match its "
                 "approved production model source."
+            ),
+        )
+        validation.check(
+            "game:block/stone/granite" not in json.dumps(reviewed_document),
+            (
+                f"{relative(reviewed_path)} retains the invalid granite "
+                "texture alias that causes client startup warnings."
             ),
         )
 
@@ -1955,20 +1979,43 @@ def validate_content_27(validation: Validation) -> None:
         validation.load_json(fishing_path),
         fishing_path,
     )
+    fishing_source_path = PROJECT_ROOT / "src" / "ItemMasterFishingRod.cs"
+    try:
+        fishing_source = fishing_source_path.read_text(encoding="utf-8-sig")
+    except (OSError, UnicodeError) as error:
+        validation.errors.append(f"{relative(fishing_source_path)}: {error}")
+        fishing_source = ""
     validation.check(
-        fishing.get("class") == "ItemFishingPole"
+        fishing.get("class") == "ApprenticeMasterFishingRod"
         and fishing.get("shape", {}).get("base") ==
             "apprentice:item/2.7/master-fishing-rod"
         and fishing.get("attributes", {}).get("ropelessShape", {}).get(
             "base"
         ) == "apprentice:item/2.7/master-fishing-rod"
         and bool(fishing.get("fpHandTransform"))
-        and bool(fishing.get("tpHandTransform")),
+        and bool(fishing.get("tpHandTransform"))
+        and "ItemMasterFishingRod : ItemFishingPole" in fishing_source
+        and "StopFishingAnimations" in fishing_source
+        and '"ApprenticeMasterFishingRod"' in mod_system_source,
         (
-            "Master Fishing Rod must use the native fishing-pole behavior "
-            "with visible first- and third-person 3D transforms."
+            "Master Fishing Rod must extend the native fishing-pole behavior, "
+            "release stale fishing animations and retain visible first- and "
+            "third-person 3D transforms."
         ),
     )
+
+    for item_code in ("mastercookbook", "mastersurveykit", "sewingkit"):
+        item_path = ASSET_ROOT / "itemtypes" / "2.7" / f"{item_code}.json"
+        item = require_mapping(
+            validation,
+            validation.load_json(item_path),
+            item_path,
+        )
+        gui_z = item.get("guiTransform", {}).get("rotation", {}).get("z")
+        validation.check(
+            isinstance(gui_z, (int, float)) and -90 <= gui_z <= 90,
+            f"{item_code} GUI transform must keep its functional top upright.",
+        )
 
     spear_path = ASSET_ROOT / "itemtypes" / "2.7" / "atlatl.json"
     spear = require_mapping(validation, validation.load_json(spear_path), spear_path)
@@ -1982,6 +2029,14 @@ def validate_content_27(validation: Validation) -> None:
         (
             "Grandmaster Spear must use the guarded native spear lifecycle "
             "and resolve one exact Apprentice projectile entity."
+        ),
+    )
+    validation.check(
+        spear.get("tpHandTransform", {}).get("rotation", {}).get("z") == 180
+        and spear.get("guiTransform", {}).get("rotation", {}).get("z") == -174,
+        (
+            "Grandmaster Spear must point its head away from the player in "
+            "third person and toward the upper-right in the inventory."
         ),
     )
     spear_entity_path = (
@@ -2256,24 +2311,14 @@ def validate_repository_layout(validation: Validation) -> None:
         ),
     )
 
-    class_patch_path = (
-        ASSET_ROOT / "patches" / "replace-vanilla-characterclasses.json"
+    class_patch_path = ASSET_ROOT / "patches" / (
+        "replace-vanilla-characterclasses.json"
     )
-    class_patches = validation.load_json(class_patch_path)
-    expected_class_patches = [
-        {
-            "file": "game:config/characterclasses.json",
-            "op": "replace",
-            "path": f"/{index}/enabled",
-            "value": False,
-        }
-        for index in range(6)
-    ]
     validation.check(
-        class_patches == expected_class_patches,
+        not class_patch_path.exists(),
         (
-            "The class-list patch must disable exactly the six vanilla base "
-            "classes without replacing the full array."
+            "Apprentice must not disable or replace vanilla classes. Filter "
+            "them only from the Race selection dialog."
         ),
     )
 
@@ -2343,9 +2388,23 @@ def validate_repository_layout(validation: Validation) -> None:
             "every close route remains blocked until Race and Skin are confirmed."
         ),
     )
+    validation.check(
+        "FilterCharacterDialogRaceClasses(dialog, state);" in race_dialog_source
+        and "RestoreCharacterDialogClassList(state);" in race_dialog_source
+        and "RaceByClass.ContainsKey(code)" in race_dialog_source
+        and 'AccessTools.Field(characterSystem.GetType(), "characterClasses")'
+            in race_dialog_source
+        and "classesField.SetValue(characterSystem, raceClasses);"
+            in race_dialog_source
+        and "state.CharacterClassesField.SetValue(" in race_dialog_source,
+        (
+            "The Race dialog must temporarily show only Apprentice races and "
+            "restore Vintage Story's complete class list when it closes."
+        ),
+    )
 
 
-def validate_installed_game_patch_targets(validation: Validation) -> bool:
+def validate_installed_game_class_roster(validation: Validation) -> bool:
     game_install = os.environ.get("VINTAGE_STORY", "").strip()
     if not game_install:
         return False
@@ -2380,9 +2439,9 @@ def validate_installed_game_patch_targets(validation: Validation) -> bool:
     validation.check(
         actual_codes == expected_codes,
         (
-            "replace-vanilla-characterclasses.json no longer targets the "
+            "The installed Vintage Story class roster differs from the "
             f"expected vanilla entries. Expected {expected_codes}, found "
-            f"{actual_codes}."
+            f"{actual_codes}; update the Race dialog filter compatibility."
         ),
     )
     return True
@@ -2399,7 +2458,7 @@ def main() -> int:
     validate_pngs(validation)
     validate_level_table(validation)
     validate_repository_layout(validation)
-    checked_game_install = validate_installed_game_patch_targets(validation)
+    checked_game_install = validate_installed_game_class_roster(validation)
 
     if validation.errors:
         print(f"Validation failed with {len(validation.errors)} error(s):", file=sys.stderr)
@@ -2413,9 +2472,9 @@ def main() -> int:
         f"{validation.png_count} PNG files, progression references, "
         "skinpart assets, language keys, metadata, and level table; "
         + (
-            "installed game patch targets checked."
+            "installed game class roster checked."
             if checked_game_install
-            else "installed game patch targets skipped (VINTAGE_STORY not set)."
+            else "installed game class roster skipped (VINTAGE_STORY not set)."
         )
     )
     return 0

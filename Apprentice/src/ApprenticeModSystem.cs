@@ -14,7 +14,7 @@ namespace Apprentice
 {
 	public sealed class ApprenticeModSystem : ModSystem
 	{
-		private const string PlaytestVersion = "2.7.0-dev.20260720.16";
+		private const string PlaytestVersion = "2.7.0-dev.20260720.19";
 		private const string BowAssetFingerprint = "BOW-DARKWOOD-OXBLOOD-C-AXIS2-EDIT1-UV1-DRAW5";
 		private const string ReviewedAssetFingerprint = "ITEMS-RUNEBOUND5-GILDED2-SUNLANCE2-KITS-D-TRAP-C5";
 		private static readonly string[] ExpectedBowShapeCodes =
@@ -79,6 +79,8 @@ namespace Apprentice
 		private HealthBarRenderer? healthBarRenderer = null;
 		private Harmony? poisonInfoHarmony = null;
 		private Harmony? durabilityUpgradeHarmony = null;
+		private long fishingAnimationGuardListenerId = 0L;
+		private bool localPlayerHeldMasterFishingRod = false;
 
 		#region ModSystem Impl
 		public override void Start(ICoreAPI api)
@@ -123,6 +125,10 @@ namespace Apprentice
 			api.RegisterItemClass(
 				"ApprenticeFirstAidKit",
 				typeof(ItemFirstAidKit)
+			);
+			api.RegisterItemClass(
+				"ApprenticeMasterFishingRod",
+				typeof(ItemMasterFishingRod)
 			);
 			api.RegisterBlockClass(
 				"ApprenticeAdvancedTrap",
@@ -402,6 +408,11 @@ namespace Apprentice
 		}
 		public override void StartClientSide(ICoreClientAPI api)
 		{
+			fishingAnimationGuardListenerId =
+				api.Event.RegisterGameTickListener(
+					CheckMasterFishingRodAnimation,
+					100
+				);
 			// Heatmap state is gameplay-owned and must not depend on optional
 			// client HUD construction succeeding later in this method.
 			if (clientNetworkChannel != null)
@@ -486,8 +497,43 @@ namespace Apprentice
 				playerEntity.AddBehavior(new UchigatanaDashBehaviour(capi, playerEntity));
 			}
 		}
+
+		private void CheckMasterFishingRodAnimation(float deltaTime)
+		{
+			EntityPlayer? playerEntity = capi?.World?.Player?.Entity;
+			if (playerEntity == null)
+			{
+				localPlayerHeldMasterFishingRod = false;
+				return;
+			}
+
+			ItemStack? stack = playerEntity.ActiveHandItemSlot?.Itemstack;
+			bool holdsMasterRod = stack?.Collectible is ItemMasterFishingRod;
+
+			if (localPlayerHeldMasterFishingRod && !holdsMasterRod)
+			{
+				playerEntity.AnimManager.StopAnimation("bowaimlong");
+				playerEntity.AnimManager.StopAnimation("fishingpole-idle");
+			}
+			else if (holdsMasterRod && stack != null &&
+				!stack.Attributes.GetBool("fishing") &&
+				stack.Attributes.GetLong("fishingEntityId", 0L) == 0L &&
+				stack.Attributes.GetLong("bobberEntityId", 0L) == 0L)
+			{
+				playerEntity.AnimManager.StopAnimation("fishingpole-idle");
+			}
+
+			localPlayerHeldMasterFishingRod = holdsMasterRod;
+		}
 		public override void Dispose()
 		{
+			if (fishingAnimationGuardListenerId != 0L)
+			{
+				capi?.Event.UnregisterGameTickListener(
+					fishingAnimationGuardListenerId
+				);
+				fishingAnimationGuardListenerId = 0L;
+			}
 			durabilityUpgradeHarmony?.UnpatchAll(
 				"apprentice.item-upgrades"
 			);

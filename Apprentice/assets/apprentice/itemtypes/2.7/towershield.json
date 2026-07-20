@@ -42,7 +42,7 @@
     "scale": 0.82
   },
   "tpOffHandTransform": {
-    "translation": { "x": -0.67, "y": -0.6, "z": -0.78 },
+    "translation": { "x": -0.67, "y": 0.0, "z": -0.78 },
     "rotation": { "x": -4, "y": 173, "z": 90 },
     "origin": { "x": 0.5, "y": 0.5, "z": 0.609375 },
     "scale": 0.82

@@ -67,10 +67,14 @@
   </Content>
 </ItemGroup>
 
-<Target Name="RejectLegacyCharacterClassOverride" BeforeTargets="PrepareForBuild">
+<Target Name="RejectLegacyCharacterClassOverrides" BeforeTargets="PrepareForBuild">
   <Error
     Condition="Exists('assets\game\config\characterclasses.json')"
-    Text="Remove Apprentice/assets/game/config/characterclasses.json. It is a stale pre-2.2.4 override that deletes vanilla classes; current releases patch them disabled instead. Extract the source into a new directory instead of overlaying an older checkout."
+    Text="Remove Apprentice/assets/game/config/characterclasses.json. Apprentice retains the engine class roster and filters only its Race dialog. Extract the source into a new directory instead of overlaying an older checkout."
+  />
+  <Error
+    Condition="Exists('assets\apprentice\patches\replace-vanilla-characterclasses.json')"
+    Text="Remove the stale replace-vanilla-characterclasses.json patch. Apprentice must retain vanilla classes for engine and mod compatibility."
   />
 </Target>
 
