@@ -1,4 +1,3 @@
-using Apprentice.src.weapons;
 using System;
 using System.Linq;
 using System.Reflection;
@@ -14,7 +13,7 @@ namespace Apprentice
 {
 	public sealed class ApprenticeModSystem : ModSystem
 	{
-		private const string PlaytestVersion = "2.7.0-dev.20260720.19";
+		private const string PlaytestVersion = "2.7.0-dev.20260720.20";
 		private const string BowAssetFingerprint = "BOW-DARKWOOD-OXBLOOD-C-AXIS2-EDIT1-UV1-DRAW5";
 		private const string ReviewedAssetFingerprint = "ITEMS-RUNEBOUND5-GILDED2-SUNLANCE2-KITS-D-TRAP-C5";
 		private static readonly string[] ExpectedBowShapeCodes =
@@ -489,12 +488,6 @@ namespace Apprentice
 					"[Apprentice] Client-side startup failed. Server progression can continue, but the UI may be unavailable."
 				);
 				api.Logger.Error(exception);
-			}
-
-			if (capi != null)
-			{
-				Entity playerEntity = capi.World.Player.Entity;
-				playerEntity.AddBehavior(new UchigatanaDashBehaviour(capi, playerEntity));
 			}
 		}
 
