@@ -1,6 +1,6 @@
 {
   "code": "masterfishingrod",
-  "class": "ItemFishingPole",
+  "class": "ApprenticeMasterFishingRod",
   "tags": [
     "apprentice-content"
   ],

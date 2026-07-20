@@ -47,6 +47,9 @@ namespace Apprentice
         private sealed class CharacterDialogLayoutState
         {
             public Dictionary<SkinnablePart, bool> HiddenParts { get; } = new();
+            public object? CharacterSystem { get; set; }
+            public FieldInfo? CharacterClassesField { get; set; }
+            public object? CharacterClasses { get; set; }
         }
 
         private static readonly Dictionary<object, CharacterDialogLayoutState>
@@ -170,6 +173,8 @@ namespace Apprentice
                 }
             }
 
+            FilterCharacterDialogRaceClasses(dialog, state);
+
             Action<GuiComposer>? original = field.GetValue(dialog) as Action<GuiComposer>;
             field.SetValue(
                 dialog,
@@ -194,6 +199,7 @@ namespace Apprentice
             {
                 entry.Key.Hidden = entry.Value;
             }
+            RestoreCharacterDialogClassList(state);
         }
 
         private static void RestoreAllCharacterDialogLayouts()
@@ -204,8 +210,77 @@ namespace Apprentice
                 {
                     entry.Key.Hidden = entry.Value;
                 }
+                RestoreCharacterDialogClassList(state);
             }
             CharacterDialogLayouts.Clear();
+        }
+
+        private static void FilterCharacterDialogRaceClasses(
+            object dialog,
+            CharacterDialogLayoutState state)
+        {
+            object? characterSystem = AccessTools.Field(
+                dialog.GetType(),
+                "modSys"
+            )?.GetValue(dialog);
+            FieldInfo? classesField = characterSystem == null
+                ? null
+                : AccessTools.Field(characterSystem.GetType(), "characterClasses");
+            if (characterSystem == null || classesField?.GetValue(characterSystem)
+                    is not IList originalClasses ||
+                Activator.CreateInstance(originalClasses.GetType())
+                    is not IList raceClasses)
+            {
+                return;
+            }
+
+            HashSet<string> foundCodes = new(StringComparer.Ordinal);
+            foreach (object? characterClass in originalClasses)
+            {
+                string? code = characterClass == null
+                    ? null
+                    : AccessTools.Field(characterClass.GetType(), "Code")
+                        ?.GetValue(characterClass) as string;
+                if (code == null || !RaceByClass.ContainsKey(code))
+                {
+                    continue;
+                }
+                raceClasses.Add(characterClass);
+                foundCodes.Add(code);
+            }
+
+            if (foundCodes.Count != RaceByClass.Count)
+            {
+                clientApi?.Logger.Error(
+                    "[Apprentice] Race selection filter found {0} of {1} configured races; retaining the engine class list.",
+                    foundCodes.Count,
+                    RaceByClass.Count
+                );
+                return;
+            }
+
+            state.CharacterSystem = characterSystem;
+            state.CharacterClassesField = classesField;
+            state.CharacterClasses = originalClasses;
+            classesField.SetValue(characterSystem, raceClasses);
+        }
+
+        private static void RestoreCharacterDialogClassList(
+            CharacterDialogLayoutState state)
+        {
+            if (state.CharacterSystem == null ||
+                state.CharacterClassesField == null ||
+                state.CharacterClasses == null)
+            {
+                return;
+            }
+            state.CharacterClassesField.SetValue(
+                state.CharacterSystem,
+                state.CharacterClasses
+            );
+            state.CharacterSystem = null;
+            state.CharacterClassesField = null;
+            state.CharacterClasses = null;
         }
 
         private static void AfterDialogOpened(object __instance)
