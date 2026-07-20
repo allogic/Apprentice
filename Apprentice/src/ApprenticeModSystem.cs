@@ -1,15 +1,17 @@
+using Apprentice.src.weapons;
 using System;
 
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
+using Vintagestory.API.Common.Entities;
 using Vintagestory.API.Server;
 
 namespace Apprentice
 {
 	public sealed class ApprenticeModSystem : ModSystem
 	{
-		private ICoreServerAPI? sapi = null;
-		private ICoreClientAPI? capi = null;
+		private ICoreServerAPI sapi = null;
+		private ICoreClientAPI capi = null;
 
 		private IServerNetworkChannel? serverNetworkChannel = null;
 		private IClientNetworkChannel? clientNetworkChannel = null;
@@ -82,6 +84,12 @@ namespace Apprentice
 
 			networkChannel.SetMessageHandler<ExperienceNotificationPacket>(OnExperienceNotification);
 			networkChannel.SetMessageHandler<SkillPurchaseResultPacket>(OnSkillPurchaseResult);
+
+			if (capi != null)
+			{
+				Entity playerEntity = capi.World.Player.Entity;
+				playerEntity.AddBehavior(new UchigatanaDashBehaviour(capi, playerEntity));
+			}
 		}
 		public override void Dispose()
 		{
