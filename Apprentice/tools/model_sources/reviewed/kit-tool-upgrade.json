@@ -1,0 +1,713 @@
+{
+  "editor": {
+    "allAngles": true
+  },
+  "textureWidth": 32,
+  "textureHeight": 32,
+  "textures": {
+    "oak": "game:block/wood/planks/oak1",
+    "walnut": "game:block/wood/planks/walnut1",
+    "iron": "game:block/metal/ingot/iron",
+    "copper": "game:block/metal/ingot/copper",
+    "gold": "game:block/metal/ingot/gold",
+    "leather": "game:block/leather/plain",
+    "cloth": "game:block/creature/bone",
+    "stone": "game:block/stone/granite",
+    "red": "game:block/leather/plain",
+    "blue": "game:block/leather/plain",
+    "green": "game:block/leather/plain",
+    "black": "game:block/wood/planks/walnut1"
+  },
+  "elements": [
+    {
+      "name": "toolupgradekit-body",
+      "from": [
+        2.0,
+        2.0,
+        6.0
+      ],
+      "to": [
+        14.0,
+        8.5,
+        10.0
+      ],
+      "faces": {
+        "north": {
+          "texture": "#walnut"
+        },
+        "east": {
+          "texture": "#walnut"
+        },
+        "south": {
+          "texture": "#walnut"
+        },
+        "west": {
+          "texture": "#walnut"
+        },
+        "up": {
+          "texture": "#walnut"
+        },
+        "down": {
+          "texture": "#walnut"
+        }
+      }
+    },
+    {
+      "name": "toolupgradekit-lid",
+      "from": [
+        1.85,
+        7.2,
+        5.85
+      ],
+      "to": [
+        14.15,
+        8.65,
+        10.15
+      ],
+      "faces": {
+        "north": {
+          "texture": "#walnut"
+        },
+        "east": {
+          "texture": "#walnut"
+        },
+        "south": {
+          "texture": "#walnut"
+        },
+        "west": {
+          "texture": "#walnut"
+        },
+        "up": {
+          "texture": "#walnut"
+        },
+        "down": {
+          "texture": "#walnut"
+        }
+      }
+    },
+    {
+      "name": "toolupgradekit-seam",
+      "from": [
+        1.75,
+        6.95,
+        5.75
+      ],
+      "to": [
+        14.25,
+        7.35,
+        10.25
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "toolupgradekit-handle-left",
+      "from": [
+        5.0,
+        8.5,
+        7.0
+      ],
+      "to": [
+        6.0,
+        11.5,
+        8.0
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "toolupgradekit-handle-right",
+      "from": [
+        10.0,
+        8.5,
+        7.0
+      ],
+      "to": [
+        11.0,
+        11.5,
+        8.0
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "toolupgradekit-handle-grip",
+      "from": [
+        5.0,
+        10.9,
+        6.8
+      ],
+      "to": [
+        11.0,
+        11.9,
+        8.2
+      ],
+      "faces": {
+        "north": {
+          "texture": "#leather"
+        },
+        "east": {
+          "texture": "#leather"
+        },
+        "south": {
+          "texture": "#leather"
+        },
+        "west": {
+          "texture": "#leather"
+        },
+        "up": {
+          "texture": "#leather"
+        },
+        "down": {
+          "texture": "#leather"
+        }
+      }
+    },
+    {
+      "name": "toolupgradekit-latch-left",
+      "from": [
+        4.6,
+        6.5,
+        5.35
+      ],
+      "to": [
+        5.8,
+        7.9,
+        6.0
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "toolupgradekit-latch-right",
+      "from": [
+        10.2,
+        6.5,
+        5.35
+      ],
+      "to": [
+        11.4,
+        7.9,
+        6.0
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "toolupgradekit-silver-front-plate",
+      "from": [
+        4.25,
+        3.05,
+        5.18
+      ],
+      "to": [
+        11.75,
+        7.55,
+        5.72
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "toolupgradekit-plate-rivet-tl",
+      "from": [
+        4.55,
+        7.15,
+        4.86
+      ],
+      "to": [
+        5.05,
+        7.55,
+        5.22
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      }
+    },
+    {
+      "name": "toolupgradekit-plate-rivet-tr",
+      "from": [
+        10.95,
+        7.15,
+        4.86
+      ],
+      "to": [
+        11.45,
+        7.55,
+        5.22
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      }
+    },
+    {
+      "name": "toolupgradekit-plate-rivet-bl",
+      "from": [
+        4.55,
+        3.05,
+        4.86
+      ],
+      "to": [
+        5.05,
+        3.45,
+        5.22
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      }
+    },
+    {
+      "name": "toolupgradekit-plate-rivet-br",
+      "from": [
+        10.95,
+        3.05,
+        4.86
+      ],
+      "to": [
+        11.45,
+        3.45,
+        5.22
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      }
+    },
+    {
+      "name": "gold-pickaxe-shaft",
+      "from": [
+        5.31,
+        3.65,
+        4.41
+      ],
+      "to": [
+        5.79,
+        9.25802995712398,
+        5.029999999999999
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      },
+      "rotationZ": -58.861027563021146,
+      "rotationOrigin": [
+        5.55,
+        3.65,
+        4.72
+      ]
+    },
+    {
+      "name": "gold-hammer-shaft",
+      "from": [
+        10.209999999999999,
+        3.65,
+        4.41
+      ],
+      "to": [
+        10.69,
+        9.077936993002037,
+        5.029999999999999
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      },
+      "rotationZ": 58.94572888364721,
+      "rotationOrigin": [
+        10.45,
+        3.65,
+        4.72
+      ]
+    },
+    {
+      "name": "gold-pickaxe-head-left",
+      "from": [
+        9.11,
+        6.25,
+        4.3500000000000005
+      ],
+      "to": [
+        9.59,
+        7.840880259479009,
+        4.97
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      },
+      "rotationZ": -70.53998756471391,
+      "rotationOrigin": [
+        9.35,
+        6.25,
+        4.66
+      ]
+    },
+    {
+      "name": "gold-pickaxe-head-right",
+      "from": [
+        9.959999999999999,
+        6.78,
+        4.3500000000000005
+      ],
+      "to": [
+        10.44,
+        7.9036102527122125,
+        4.97
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      },
+      "rotationZ": -122.27564431457762,
+      "rotationOrigin": [
+        10.2,
+        6.78,
+        4.66
+      ]
+    },
+    {
+      "name": "gold-hammer-head",
+      "from": [
+        4.489999999999999,
+        6.1,
+        4.33
+      ],
+      "to": [
+        5.21,
+        8.060867155112758,
+        4.949999999999999
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      },
+      "rotationZ": -70.64100582430528,
+      "rotationOrigin": [
+        4.85,
+        6.1,
+        4.64
+      ]
+    },
+    {
+      "name": "gold-pickaxe-pommel",
+      "from": [
+        5.05,
+        3.3,
+        4.42
+      ],
+      "to": [
+        5.7,
+        3.9,
+        5.04
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      }
+    },
+    {
+      "name": "gold-hammer-pommel",
+      "from": [
+        10.25,
+        3.3,
+        4.42
+      ],
+      "to": [
+        10.9,
+        3.9,
+        5.04
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      }
+    }
+  ]
+}

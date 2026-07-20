@@ -31,5 +31,8 @@ namespace Apprentice
 
 		[ProtoMember(9)]
 		public int NewLevel { get; set; }
+
+		[ProtoMember(10)]
+		public bool IsPenalty { get; set; }
 	}
 }

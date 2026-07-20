@@ -48,6 +48,11 @@ namespace Apprentice
 
         private static void OnRaceBodyPacket(IServerPlayer fromPlayer, RaceBodyPacket packet)
         {
+            serverApi?.Logger.Notification(
+                "[Apprentice] Received character save request {0} from {1}.",
+                packet.RequestId,
+                fromPlayer.PlayerName
+            );
             RaceSaveResultPacket result = new()
             {
                 RequestId = packet.RequestId
@@ -91,6 +96,12 @@ namespace Apprentice
             }
 
             serverChannel?.SendPacket(result, fromPlayer);
+            serverApi?.Logger.Notification(
+                "[Apprentice] Character save request {0} for {1}: {2}.",
+                packet.RequestId,
+                fromPlayer.PlayerName,
+                result.Success ? "approved" : "rejected"
+            );
         }
 
         private static void OnRaceSnapshotReceived(RaceBodyPacket packet)

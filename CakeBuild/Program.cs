@@ -8,8 +8,10 @@ using Cake.Frosting;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 
 namespace CakeBuild
 {
@@ -87,12 +89,14 @@ namespace CakeBuild
 		public string Version { get; }
 		public string Name { get; }
 		public bool SkipJsonValidation { get; }
+		public bool StrictAssetValidation { get; }
 
 		public BuildContext(ICakeContext context)
 			: base(context)
 		{
 			BuildConfiguration = context.Argument("configuration", "Release");
 			SkipJsonValidation = context.Argument("skipJsonValidation", false);
+			StrictAssetValidation = context.Argument("strictAssetValidation", false);
 
 			string modInfoPath = $"../{ProjectName}/modinfo.json";
 			JObject modInfo = JObject.Parse(File.ReadAllText(modInfoPath));
@@ -167,6 +171,11 @@ namespace CakeBuild
 	[IsDependentOn(typeof(ValidateJsonTask))]
 	public sealed class ValidateAssetsTask : FrostingTask<BuildContext>
 	{
+		private sealed record PythonInvocation(
+			string FileName,
+			IReadOnlyList<string> PrefixArguments
+		);
+
 		public override void Run(BuildContext context)
 		{
 			if (context.SkipJsonValidation)
@@ -174,19 +183,40 @@ namespace CakeBuild
 				return;
 			}
 
-			string python = Environment.GetEnvironmentVariable("PYTHON")?.Trim()
-				?? (OperatingSystem.IsWindows() ? "python" : "python3");
+			PythonInvocation? python = FindPython();
+			if (python == null)
+			{
+				const string message =
+					"Python 3 was not found. The extended Apprentice asset " +
+					"validator did not run; the built-in JSON validation did run. " +
+					"Install Python 3, set PYTHON to its executable path, or use " +
+					"--strictAssetValidation=true to require it for a release check.";
+				if (context.StrictAssetValidation)
+				{
+					throw new InvalidOperationException(message);
+				}
+
+				Console.ForegroundColor = ConsoleColor.Yellow;
+				Console.WriteLine($"Warning: {message}");
+				Console.ResetColor();
+				return;
+			}
+
 			string validator = Path.GetFullPath("../tools/validate_assets.py");
 			ProcessStartInfo startInfo = new()
 			{
-				FileName = python,
+				FileName = python.FileName,
 				UseShellExecute = false,
 				WorkingDirectory = Path.GetFullPath("..")
 			};
+			foreach (string argument in python.PrefixArguments)
+			{
+				startInfo.ArgumentList.Add(argument);
+			}
 			startInfo.ArgumentList.Add(validator);
 			using Process process = Process.Start(startInfo)
 				?? throw new InvalidOperationException(
-				$"Could not start '{python}' for the Apprentice asset validator."
+				$"Could not start '{python.FileName}' for the Apprentice asset validator."
 			);
 			process.WaitForExit();
 			if (process.ExitCode != 0)
@@ -195,6 +225,76 @@ namespace CakeBuild
 					$"The Apprentice asset validator failed with exit code {process.ExitCode}."
 				);
 			}
+		}
+
+		private static PythonInvocation? FindPython()
+		{
+			List<PythonInvocation> candidates = new();
+			string configured = Environment.GetEnvironmentVariable("PYTHON")?
+				.Trim()
+				.Trim('"') ?? string.Empty;
+			if (!string.IsNullOrWhiteSpace(configured))
+			{
+				candidates.Add(new PythonInvocation(configured, Array.Empty<string>()));
+			}
+
+			if (OperatingSystem.IsWindows())
+			{
+				candidates.Add(new PythonInvocation("py", new[] { "-3" }));
+				candidates.Add(new PythonInvocation("python3", Array.Empty<string>()));
+				candidates.Add(new PythonInvocation("python", Array.Empty<string>()));
+			}
+			else
+			{
+				candidates.Add(new PythonInvocation("python3", Array.Empty<string>()));
+				candidates.Add(new PythonInvocation("python", Array.Empty<string>()));
+			}
+
+			HashSet<string> attempted = new(StringComparer.OrdinalIgnoreCase);
+			foreach (PythonInvocation candidate in candidates)
+			{
+				string signature = string.Join("\0", new[] { candidate.FileName }
+					.Concat(candidate.PrefixArguments));
+				if (!attempted.Add(signature))
+				{
+					continue;
+				}
+
+				try
+				{
+					ProcessStartInfo probeInfo = new()
+					{
+						FileName = candidate.FileName,
+						UseShellExecute = false,
+						CreateNoWindow = true,
+						RedirectStandardOutput = true,
+						RedirectStandardError = true
+					};
+					foreach (string argument in candidate.PrefixArguments)
+					{
+						probeInfo.ArgumentList.Add(argument);
+					}
+					probeInfo.ArgumentList.Add("--version");
+
+					using Process? probe = Process.Start(probeInfo);
+					if (probe == null)
+					{
+						continue;
+					}
+
+					probe.WaitForExit();
+					if (probe.ExitCode == 0)
+					{
+						return candidate;
+					}
+				}
+				catch (System.ComponentModel.Win32Exception)
+				{
+					// Candidate is not installed or cannot be executed.
+				}
+			}
+
+			return null;
 		}
 	}
 
@@ -226,6 +326,19 @@ namespace CakeBuild
 			{
 				context.CopyDirectory($"../{BuildContext.ProjectName}/assets", $"../Releases/{context.Name}/assets");
 			}
+			int sourceAssetCount = context
+				.GetFiles($"../{BuildContext.ProjectName}/assets/**/*")
+				.Count();
+			int stagedAssetCount = context
+				.GetFiles($"{stagingDirectory}/assets/**/*")
+				.Count();
+			if (sourceAssetCount == 0 || stagedAssetCount != sourceAssetCount)
+			{
+				throw new InvalidOperationException(
+					$"The release staging directory contains {stagedAssetCount} of " +
+					$"{sourceAssetCount} source assets; refusing to package a partial mod."
+				);
+			}
 			context.CopyFile($"../{BuildContext.ProjectName}/modinfo.json", $"../Releases/{context.Name}/modinfo.json");
 			if (context.FileExists($"../{BuildContext.ProjectName}/modicon.png"))
 			{
@@ -236,7 +349,31 @@ namespace CakeBuild
 			{
 				$"{stagingDirectory}/{BuildContext.ProjectName}.dll",
 				$"{stagingDirectory}/modinfo.json",
+				$"{stagingDirectory}/assets/apprentice/config/class.json",
 				$"{stagingDirectory}/assets/apprentice/config/content-2.7.json",
+				$"{stagingDirectory}/assets/apprentice/itemtypes/2.7/compositebow.json",
+				$"{stagingDirectory}/assets/apprentice/itemtypes/2.7/towershield.json",
+				$"{stagingDirectory}/assets/apprentice/itemtypes/2.7/advancedtrapkit.json",
+				$"{stagingDirectory}/assets/apprentice/blocktypes/2.7/advancedtrap.json",
+				$"{stagingDirectory}/assets/apprentice/shapes/block/2.7/advancedtrap-opening3.json",
+				$"{stagingDirectory}/assets/apprentice/shapes/block/2.7/advancedtrap-opening4.json",
+				$"{stagingDirectory}/assets/apprentice/entities/2.7/atlatl.json",
+				$"{stagingDirectory}/assets/apprentice/shapes/item/2.7/grandmaster-spear.json",
+				$"{stagingDirectory}/assets/apprentice/shapes/item/2.7/tower-shield.json",
+				$"{stagingDirectory}/assets/apprentice/shapes/item/2.7/master-fishing-rod.json",
+				$"{stagingDirectory}/assets/apprentice/shapes/item/2.7/kit-trap.json",
+				$"{stagingDirectory}/assets/apprentice/shapes/item/2.7/kit-armor-upgrade.json",
+				$"{stagingDirectory}/assets/apprentice/shapes/item/2.7/kit-weapon-upgrade.json",
+				$"{stagingDirectory}/assets/apprentice/shapes/item/2.7/kit-tool-upgrade.json",
+				$"{stagingDirectory}/assets/apprentice/shapes/item/2.7/kit-first-aid.json",
+				$"{stagingDirectory}/assets/apprentice/shapes/item/2.7/composite-bow.json",
+				$"{stagingDirectory}/assets/apprentice/shapes/item/2.7/composite-bow-charge1.json",
+				$"{stagingDirectory}/assets/apprentice/shapes/item/2.7/composite-bow-charge2.json",
+				$"{stagingDirectory}/assets/apprentice/shapes/item/2.7/composite-bow-charge3.json",
+				$"{stagingDirectory}/assets/apprentice/shapes/item/2.7/composite-bow-charge4.json",
+				$"{stagingDirectory}/assets/apprentice/shapes/item/2.7/composite-bow-charge5.json",
+				$"{stagingDirectory}/assets/apprentice/textures/item/2.7/compositebow-material.png",
+				$"{stagingDirectory}/assets/apprentice/textures/item/2.7/compositebow-grip-wrap.png",
 				// The two ingots are deliberately vanilla metal variants now. Their
 				// definitions come from the game's generic ingot itemtype, while these
 				// textures and metal patches provide the Apprentice-specific material.

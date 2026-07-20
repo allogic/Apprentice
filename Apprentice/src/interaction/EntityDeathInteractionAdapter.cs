@@ -46,6 +46,14 @@ namespace Apprentice
 		{
 			try
 			{
+				if (deadEntity is EntityPlayer deadPlayerEntity &&
+					deadPlayerEntity.Player is
+					IServerPlayer deadPlayer)
+				{
+					experienceManager
+						.LoseCurrentLevelProgress(deadPlayer);
+				}
+
 				if (deadEntity?.Code == null ||
 					damageSource == null)
 				{

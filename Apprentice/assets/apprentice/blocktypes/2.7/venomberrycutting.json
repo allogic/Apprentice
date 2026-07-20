@@ -10,7 +10,7 @@
     { "name": "FruitingBushCutting" }
   ],
   "attributes": {
-    "maturedBlockCode": "game:fruitingbush-grown-venomberry-free",
+    "maturedBlockCode": "apprentice:venomberryplant",
     "matureTotalMonthsMin": 2,
     "matureTotalMonthsMax": 4
   },

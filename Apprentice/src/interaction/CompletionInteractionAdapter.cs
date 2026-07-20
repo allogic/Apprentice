@@ -687,6 +687,7 @@ namespace Apprentice
 			// Declared-only lookup prevents duplicate base-method patches.
 			string[] harvestBlockTypes =
 			[
+				"Apprentice.BlockVenomberryBush",
 				"Vintagestory.GameContent.BlockBerryBush",
 				"Vintagestory.GameContent.BlockSkep"
 			];

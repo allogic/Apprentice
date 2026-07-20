@@ -22,7 +22,7 @@
     }
   },
   {
-    "code": "apprentice:poison-mild-5",
+    "code": "apprentice:poison-mild-1",
     "sealHours": 24,
     "ingredients": [
       {
@@ -50,7 +50,7 @@
     }
   },
   {
-    "code": "apprentice:poison-mild-6",
+    "code": "apprentice:poison-mild-2",
     "sealHours": 24,
     "ingredients": [
       {
@@ -99,7 +99,7 @@
     }
   },
   {
-    "code": "apprentice:poison-standard-0-5",
+    "code": "apprentice:poison-standard-0-1",
     "sealHours": 36,
     "ingredients": [
       {
@@ -152,7 +152,7 @@
     }
   },
   {
-    "code": "apprentice:poison-potent-0-4",
+    "code": "apprentice:poison-potent-0-1",
     "sealHours": 48,
     "ingredients": [
       {
@@ -183,7 +183,7 @@
     }
   },
   {
-    "code": "apprentice:poison-potent-0-5",
+    "code": "apprentice:poison-potent-0-2",
     "sealHours": 48,
     "ingredients": [
       {
@@ -210,7 +210,7 @@
     }
   },
   {
-    "code": "apprentice:poison-grandmaster-0",
+    "code": "apprentice:poison-grandmaster-0-0",
     "sealHours": 72,
     "ingredients": [
       {
@@ -223,11 +223,45 @@
         "type": "item",
         "code": "apprentice:dangerous-tissue",
         "quantity": 1
+      }
+    ],
+    "output": {
+      "type": "item",
+      "code": "apprentice:poisonportion-grandmaster",
+      "litres": 1
+    }
+  },
+  {
+    "code": "apprentice:poison-grandmaster-0-1",
+    "sealHours": 72,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:alcoholportion",
+        "litres": 1,
+        "consumeLitres": 1
       },
       {
         "type": "item",
         "code": "apprentice:venomberry",
         "quantity": 5
+      }
+    ],
+    "output": {
+      "type": "item",
+      "code": "apprentice:poisonportion-grandmaster",
+      "litres": 1
+    }
+  },
+  {
+    "code": "apprentice:poison-grandmaster-0-2",
+    "sealHours": 72,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:alcoholportion",
+        "litres": 1,
+        "consumeLitres": 1
       },
       {
         "type": "item",

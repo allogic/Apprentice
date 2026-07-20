@@ -183,6 +183,19 @@ namespace Apprentice
                 return false;
             }
 
+            // Intermediate trap frames are replicated implementation state,
+            // not placeable creative content. Exposing them lets players
+            // bypass the kit and create permanently half-animated traps.
+			if (collectible.Code.Path == "advancedtrap-opening1" ||
+				collectible.Code.Path == "advancedtrap-opening2" ||
+				collectible.Code.Path == "advancedtrap-opening3" ||
+				collectible.Code.Path == "advancedtrap-opening4" ||
+				collectible.Code.Path == "advancedtrap-triggered")
+            {
+                collectible.CreativeInventoryTabs = Array.Empty<string>();
+                return false;
+            }
+
             string[] existing = collectible.CreativeInventoryTabs
                 ?? Array.Empty<string>();
             collectible.CreativeInventoryTabs = existing

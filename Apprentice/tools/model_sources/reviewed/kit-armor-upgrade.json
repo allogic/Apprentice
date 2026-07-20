@@ -1,0 +1,584 @@
+{
+  "editor": {
+    "allAngles": true
+  },
+  "textureWidth": 32,
+  "textureHeight": 32,
+  "textures": {
+    "oak": "game:block/wood/planks/oak1",
+    "walnut": "game:block/wood/planks/walnut1",
+    "iron": "game:block/metal/ingot/iron",
+    "copper": "game:block/metal/ingot/copper",
+    "gold": "game:block/metal/ingot/gold",
+    "leather": "game:block/leather/plain",
+    "cloth": "game:block/creature/bone",
+    "stone": "game:block/stone/granite",
+    "red": "game:block/leather/plain",
+    "blue": "game:block/leather/plain",
+    "green": "game:block/leather/plain",
+    "black": "game:block/wood/planks/walnut1"
+  },
+  "elements": [
+    {
+      "name": "armorupgradekit-body",
+      "from": [
+        2.0,
+        2.0,
+        6.0
+      ],
+      "to": [
+        14.0,
+        8.5,
+        10.0
+      ],
+      "faces": {
+        "north": {
+          "texture": "#walnut"
+        },
+        "east": {
+          "texture": "#walnut"
+        },
+        "south": {
+          "texture": "#walnut"
+        },
+        "west": {
+          "texture": "#walnut"
+        },
+        "up": {
+          "texture": "#walnut"
+        },
+        "down": {
+          "texture": "#walnut"
+        }
+      }
+    },
+    {
+      "name": "armorupgradekit-lid",
+      "from": [
+        1.85,
+        7.2,
+        5.85
+      ],
+      "to": [
+        14.15,
+        8.65,
+        10.15
+      ],
+      "faces": {
+        "north": {
+          "texture": "#walnut"
+        },
+        "east": {
+          "texture": "#walnut"
+        },
+        "south": {
+          "texture": "#walnut"
+        },
+        "west": {
+          "texture": "#walnut"
+        },
+        "up": {
+          "texture": "#walnut"
+        },
+        "down": {
+          "texture": "#walnut"
+        }
+      }
+    },
+    {
+      "name": "armorupgradekit-seam",
+      "from": [
+        1.75,
+        6.95,
+        5.75
+      ],
+      "to": [
+        14.25,
+        7.35,
+        10.25
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "armorupgradekit-handle-left",
+      "from": [
+        5.0,
+        8.5,
+        7.0
+      ],
+      "to": [
+        6.0,
+        11.5,
+        8.0
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "armorupgradekit-handle-right",
+      "from": [
+        10.0,
+        8.5,
+        7.0
+      ],
+      "to": [
+        11.0,
+        11.5,
+        8.0
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "armorupgradekit-handle-grip",
+      "from": [
+        5.0,
+        10.9,
+        6.8
+      ],
+      "to": [
+        11.0,
+        11.9,
+        8.2
+      ],
+      "faces": {
+        "north": {
+          "texture": "#leather"
+        },
+        "east": {
+          "texture": "#leather"
+        },
+        "south": {
+          "texture": "#leather"
+        },
+        "west": {
+          "texture": "#leather"
+        },
+        "up": {
+          "texture": "#leather"
+        },
+        "down": {
+          "texture": "#leather"
+        }
+      }
+    },
+    {
+      "name": "armorupgradekit-latch-left",
+      "from": [
+        4.6,
+        6.5,
+        5.35
+      ],
+      "to": [
+        5.8,
+        7.9,
+        6.0
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "armorupgradekit-latch-right",
+      "from": [
+        10.2,
+        6.5,
+        5.35
+      ],
+      "to": [
+        11.4,
+        7.9,
+        6.0
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "armorupgradekit-silver-front-plate",
+      "from": [
+        4.25,
+        3.05,
+        5.18
+      ],
+      "to": [
+        11.75,
+        7.55,
+        5.72
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "armorupgradekit-plate-rivet-tl",
+      "from": [
+        4.55,
+        7.15,
+        4.86
+      ],
+      "to": [
+        5.05,
+        7.55,
+        5.22
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      }
+    },
+    {
+      "name": "armorupgradekit-plate-rivet-tr",
+      "from": [
+        10.95,
+        7.15,
+        4.86
+      ],
+      "to": [
+        11.45,
+        7.55,
+        5.22
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      }
+    },
+    {
+      "name": "armorupgradekit-plate-rivet-bl",
+      "from": [
+        4.55,
+        3.05,
+        4.86
+      ],
+      "to": [
+        5.05,
+        3.45,
+        5.22
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      }
+    },
+    {
+      "name": "armorupgradekit-plate-rivet-br",
+      "from": [
+        10.95,
+        3.05,
+        4.86
+      ],
+      "to": [
+        11.45,
+        3.45,
+        5.22
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      }
+    },
+    {
+      "name": "gold-shield-crown",
+      "from": [
+        6.0,
+        6.25,
+        4.5
+      ],
+      "to": [
+        10.0,
+        6.95,
+        5.12
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      }
+    },
+    {
+      "name": "gold-shield-upper",
+      "from": [
+        6.35,
+        4.95,
+        4.5
+      ],
+      "to": [
+        9.65,
+        6.3,
+        5.12
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      }
+    },
+    {
+      "name": "gold-shield-lower",
+      "from": [
+        6.9,
+        3.95,
+        4.5
+      ],
+      "to": [
+        9.1,
+        5.0,
+        5.12
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      }
+    },
+    {
+      "name": "gold-shield-tip",
+      "from": [
+        7.55,
+        3.45,
+        4.5
+      ],
+      "to": [
+        8.45,
+        4.0,
+        5.12
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      }
+    }
+  ]
+}

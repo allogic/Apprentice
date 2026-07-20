@@ -73,19 +73,71 @@ namespace Apprentice
         private static bool BeforeCharacterSkinButtonAdded(
             GuiComposer __0,
             string __1,
+            ref ActionConsumable __2,
             ref GuiComposer __result)
         {
             if (activeCharacterDialog == null ||
-                GetDialogTab(activeCharacterDialog) != 0 ||
-                !ReferenceEquals(GetCharacterComposer(activeCharacterDialog), __0) ||
-                (__1 != Lang.Get("Randomize") &&
-                 __1 != Lang.Get("Last selection")))
+                !ReferenceEquals(GetCharacterComposer(activeCharacterDialog), __0))
             {
                 return true;
             }
 
-            __result = __0;
-            return false;
+            object dialog = activeCharacterDialog;
+            int tab = GetDialogTab(dialog);
+            if (tab == 1)
+            {
+                if (__1 == Lang.Get("Confirm Race") ||
+                    string.Equals(__1, "Confirm Race", StringComparison.Ordinal))
+                {
+                    NativeFinalCharacterConfirmCallbacks[dialog] = __2;
+                    clientApi?.Logger.Debug(
+                        "[Apprentice] Captured the native final character-confirm callback."
+                    );
+                }
+                return true;
+            }
+
+            if (tab != 0) return true;
+
+            if (__1 == Lang.Get("Randomize") ||
+                __1 == Lang.Get("Last selection"))
+            {
+                __result = __0;
+                return false;
+            }
+
+            if (__1 == Lang.Get("Confirm Skin") ||
+                string.Equals(__1, "Confirm Skin", StringComparison.Ordinal))
+            {
+                __2 = () => OnCharacterSkinConfirmClicked(dialog);
+                clientApi?.Logger.Debug(
+                    "[Apprentice] Replaced the native next-tab Skin callback with the final Apprentice confirmation."
+                );
+            }
+
+            return true;
+        }
+
+        private static bool OnCharacterSkinConfirmClicked(object dialog)
+        {
+            if (!ReferenceEquals(activeCharacterDialog, dialog))
+            {
+                return true;
+            }
+
+            if (GetDialogTab(dialog) != 0 ||
+                !ConfirmedRaceDialogs.Contains(dialog))
+            {
+                clientApi?.TriggerIngameError(
+                    typeof(RaceAppearanceSystem),
+                    "race-first",
+                    Lang.Get("apprentice:confirm-race-first")
+                );
+                return true;
+            }
+
+            BeginSkinConfirmation(dialog);
+            return true;
         }
 
         private static void BeforeDialogOpened(object __instance)
@@ -167,6 +219,8 @@ namespace Apprentice
             activeCharacterDialog = __instance;
             HookCharacterBeforeCompose(__instance);
             ConfirmedRaceDialogs.Remove(__instance);
+            ApprovedCharacterDialogClosures.Remove(__instance);
+            NativeFinalCharacterConfirmCallbacks.Remove(__instance);
             SetDialogTab(__instance, 1);
             ResetDialogZoom(__instance);
             AccessTools.Method(__instance.GetType(), "ComposeGuis")?.Invoke(__instance, null);
@@ -177,6 +231,8 @@ namespace Apprentice
         {
             RestoreCharacterDialogLayout(__instance);
             ConfirmedRaceDialogs.Remove(__instance);
+            ApprovedCharacterDialogClosures.Remove(__instance);
+            NativeFinalCharacterConfirmCallbacks.Remove(__instance);
             if (ReferenceEquals(pendingSkinConfirmDialog, __instance))
             {
                 pendingSkinConfirmDialog = null;
@@ -226,62 +282,62 @@ namespace Apprentice
             object __instance,
             ref bool __result)
         {
+            if (ApprovedCharacterDialogClosures.Contains(__instance))
+            {
+                return true;
+            }
+
             if (GetDialogTab(__instance) != 0 ||
                 !ConfirmedRaceDialogs.Contains(__instance))
             {
                 return true;
             }
 
+            BeginSkinConfirmation(__instance);
+            __result = true;
+            return false;
+        }
+
+        private static void BeginSkinConfirmation(object dialog)
+        {
             if (!skinCloseRequested ||
-                !ReferenceEquals(pendingSkinConfirmDialog, __instance))
+                !ReferenceEquals(pendingSkinConfirmDialog, dialog))
             {
-                object dialog = __instance;
                 pendingSkinConfirmDialog = dialog;
                 pendingSkinConfirmRequestId = 0;
                 skinCloseRequested = true;
-                clientApi?.Event.EnqueueMainThreadTask(
-                    () =>
-                    {
-                        if (!ReferenceEquals(activeCharacterDialog, dialog) ||
-                            !ReferenceEquals(pendingSkinConfirmDialog, dialog) ||
-                            GetDialogTab(dialog) != 0 ||
-                            !ConfirmedRaceDialogs.Contains(dialog))
-                        {
-                            return;
-                        }
-
-                        EntityPlayer? player = clientApi?.World.Player?.Entity;
-                        long requestId = player == null ? 0 : SendBodyPacket(player);
-                        if (requestId <= 0)
-                        {
-                            AbortPendingSkinConfirmation(
-                                dialog,
-                                Lang.Get("apprentice:race-save-unavailable")
-                            );
-                            return;
-                        }
-
-                        pendingSkinConfirmRequestId = requestId;
-                        clientApi?.Event.RegisterCallback(
-                            _ =>
-                            {
-                                if (ReferenceEquals(pendingSkinConfirmDialog, dialog) &&
-                                    pendingSkinConfirmRequestId == requestId)
-                                {
-                                    AbortPendingSkinConfirmation(
-                                        dialog,
-                                        Lang.Get("apprentice:race-save-timeout")
-                                    );
-                                }
-                            },
-                            8000
-                        );
-                    },
-                    "apprentice-confirm-skin"
+                clientApi?.Logger.Notification(
+                    "[Apprentice] Confirm Skin clicked; queueing the character save before native completion."
                 );
+                if (!ReferenceEquals(activeCharacterDialog, dialog) ||
+                    GetDialogTab(dialog) != 0 ||
+                    !ConfirmedRaceDialogs.Contains(dialog))
+                {
+                    AbortPendingSkinConfirmation(
+                        dialog,
+                        Lang.Get("apprentice:confirm-race-first")
+                    );
+                    return;
+                }
+
+                EntityPlayer? player = clientApi?.World.Player?.Entity;
+                long requestId = player == null ? 0 : SendBodyPacket(player);
+                if (requestId <= 0)
+                {
+                    AbortPendingSkinConfirmation(
+                        dialog,
+                        Lang.Get("apprentice:race-save-unavailable")
+                    );
+                    return;
+                }
+
+                pendingSkinConfirmRequestId = requestId;
+                clientApi?.Logger.Notification(
+                    "[Apprentice] Queued character save request {0}; completing the native character dialog.",
+                    requestId
+                );
+                CompletePendingSkinConfirmation(dialog, requestId);
             }
-            __result = true;
-            return false;
         }
 
         private static void OnRaceSaveResult(RaceSaveResultPacket result)
@@ -294,11 +350,28 @@ namespace Apprentice
 
         private static void HandleRaceSaveResult(RaceSaveResultPacket result)
         {
+            if (result.RequestId <= 0) return;
+
+            clientApi?.Logger.Notification(
+                "[Apprentice] Character save request {0} was {1} by the resumed server.",
+                result.RequestId,
+                result.Success ? "approved" : "rejected"
+            );
+
             object? dialog = pendingSkinConfirmDialog;
             if (dialog == null ||
-                result.RequestId <= 0 ||
                 result.RequestId != pendingSkinConfirmRequestId)
             {
+                if (!result.Success)
+                {
+                    clientApi?.TriggerIngameError(
+                        typeof(RaceAppearanceSystem),
+                        "race-save-failed",
+                        string.IsNullOrWhiteSpace(result.Error)
+                            ? Lang.Get("apprentice:race-save-rejected")
+                            : result.Error
+                    );
+                }
                 return;
             }
 
@@ -326,25 +399,72 @@ namespace Apprentice
                 return;
             }
 
-            AccessTools.Field(dialog.GetType(), "didSelect")?.SetValue(dialog, true);
-            if (dialog is not GuiDialog guiDialog)
-            {
-                AfterDialogClosed(dialog);
-                return;
-            }
+            pendingSkinConfirmDialog = null;
+            pendingSkinConfirmRequestId = 0;
+            skinCloseRequested = false;
+            ApprovedCharacterDialogClosures.Add(dialog);
 
-            bool wasOpened = guiDialog.IsOpened();
-            bool closed = !wasOpened || guiDialog.TryClose();
-            if (!closed)
+            try
             {
-                clientApi?.Logger.Warning(
-                    "[Apprentice] Character customization was saved, but TryClose() refused; forcing the close lifecycle and deregistration."
+                SetDialogTab(dialog, 1);
+                if (NativeFinalCharacterConfirmCallbacks.TryGetValue(
+                        dialog,
+                        out ActionConsumable? nativeConfirm))
+                {
+                    clientApi?.Logger.Notification(
+                        "[Apprentice] Executing the native final character-confirm callback."
+                    );
+                    nativeConfirm();
+                    return;
+                }
+
+                MethodInfo? onConfirm = AccessTools.Method(dialog.GetType(), "OnConfirm");
+                if (onConfirm == null)
+                {
+                    throw new MissingMethodException(
+                        dialog.GetType().FullName,
+                        "OnConfirm"
+                    );
+                }
+
+                onConfirm.Invoke(dialog, null);
+            }
+            catch (Exception exception)
+            {
+                ApprovedCharacterDialogClosures.Remove(dialog);
+                clientApi?.Logger.Error(
+                    "[Apprentice] Could not complete native character confirmation: {0}",
+                    exception.GetBaseException()
                 );
-                guiDialog.OnGuiClosed();
+                clientApi?.TriggerIngameError(
+                    typeof(RaceAppearanceSystem),
+                    "race-save-failed",
+                    Lang.Get("apprentice:race-save-rejected")
+                );
+            }
+        }
+
+        private static bool BeforeCharacterDialogTryClose(
+            GuiDialog __instance,
+            ref bool __result)
+        {
+            if (!ReferenceEquals(activeCharacterDialog, __instance) ||
+                ApprovedCharacterDialogClosures.Contains(__instance))
+            {
+                return true;
             }
 
-            ForceReleaseCharacterDialog(guiDialog);
-            AfterDialogClosed(dialog);
+            __instance.Focus();
+            string message = ConfirmedRaceDialogs.Contains(__instance)
+                ? Lang.Get("apprentice:confirm-skin-first")
+                : Lang.Get("apprentice:confirm-race-first");
+            clientApi?.TriggerIngameError(
+                typeof(RaceAppearanceSystem),
+                "character-confirmation-required",
+                message
+            );
+            __result = false;
+            return false;
         }
 
         private static void ForceReleaseCharacterDialog(GuiDialog dialog)
@@ -375,46 +495,6 @@ namespace Apprentice
             dialog.Dispose();
         }
 
-        private static void BeforeEscapeMenuOpened()
-        {
-            ICoreClientAPI? capi = clientApi;
-            if (capi == null) return;
-
-            GuiDialog[] staleDialogs = capi.Gui.LoadedGuis
-                .Where(dialog =>
-                {
-                    string name = dialog.GetType().Name;
-                    return name == "GuiDialogCreateCharacter" ||
-                        name == "RaceOptionsDialog" ||
-                        name == "HornColorDialog";
-                })
-                .ToArray();
-
-            foreach (GuiDialog dialog in staleDialogs)
-            {
-                if (!capi.Gui.LoadedGuis.Contains(dialog) &&
-                    !capi.Gui.OpenedGuis.Contains(dialog))
-                {
-                    continue;
-                }
-                if (dialog.IsOpened()) dialog.TryClose();
-                ForceReleaseCharacterDialog(dialog);
-            }
-
-            if (staleDialogs.Length > 0)
-            {
-                activeCharacterDialog = null;
-                pendingSkinConfirmDialog = null;
-                pendingSkinConfirmRequestId = 0;
-                skinCloseRequested = false;
-                optionsDialog = null;
-                clientApi.Logger.Warning(
-                    "[Apprentice] Removed {0} stale character dialog(s) before opening the pause menu.",
-                    staleDialogs.Length
-                );
-            }
-        }
-
         private static void AbortPendingSkinConfirmation(
             object dialog,
             string message)
@@ -434,6 +514,7 @@ namespace Apprentice
 
         private static bool BeforeDialogConfirm(object __instance, ref bool __result)
         {
+            if (ApprovedCharacterDialogClosures.Contains(__instance)) return true;
             if (GetDialogTab(__instance) != 1) return true;
 
             EntityPlayer? player = clientApi?.World.Player?.Entity;

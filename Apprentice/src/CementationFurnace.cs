@@ -95,10 +95,8 @@ namespace Apprentice
             }
 
             ItemStack? held = activeSlot.Itemstack;
-            string heldCode = CanonicalCode(held?.Collectible?.Code);
-
             if (player.Entity.Controls.ShiftKey &&
-                heldCode.Equals("apprentice:masterforgeplans", StringComparison.OrdinalIgnoreCase))
+                held?.Collectible?.Tool == EnumTool.Hammer)
             {
                 TrySeal(serverPlayer, activeSlot);
                 return true;
@@ -172,8 +170,14 @@ namespace Apprentice
             Send(player, $"Added {moved}x {stack.GetName()} ({inputs[required.Code]}/{required.Quantity}).");
         }
 
-        private void TrySeal(IServerPlayer player, ItemSlot plansSlot)
+        private void TrySeal(IServerPlayer player, ItemSlot hammerSlot)
         {
+            if (!SkillTreeRuntime.HasCapstone(player, "blacksmith"))
+            {
+                Send(player, "Sealing a cementation charge requires the Blacksmith Grandmaster skill.");
+                return;
+            }
+
             CementationChargeDefinition? definition = Definition;
             if (definition == null)
             {
@@ -223,11 +227,16 @@ namespace Apprentice
                 return;
             }
 
-            // Plans are a durable authorization tool. Refractory components
-            // are the consumable station cost and are consumed only after all
-            // authorization/charge checks pass.
-            plansSlot.Itemstack?.Collectible.DamageItem(Api.World, player.Entity, plansSlot, 1);
-            plansSlot.MarkDirty();
+            // Grandmaster authorization comes from the server-owned skill
+            // tree. The hammer is only the physical sealing tool; refractory
+            // components are consumed after every validation check passes.
+            hammerSlot.Itemstack?.Collectible.DamageItem(
+                Api.World,
+                player.Entity,
+                hammerSlot,
+                1
+            );
+            hammerSlot.MarkDirty();
             ConsumeInventory(
                 player,
                 definition.RefractoryCode,
@@ -420,7 +429,7 @@ namespace Apprentice
 
             string contents = string.Join(", ", definition.Inputs.Select(required =>
                 $"{required.Code} {inputs.GetValueOrDefault(required.Code)}/{required.Quantity}"));
-            return $"{definition.Id} charge (unsealed): {contents}. Sneak-right-click with Master Forge Plans to seal; sneak-right-click empty-handed to refund.";
+            return $"{definition.Id} charge (unsealed): {contents}. Sneak-right-click with a hammer to seal; sneak-right-click empty-handed to refund.";
         }
 
         private static void Send(IServerPlayer player, string message)

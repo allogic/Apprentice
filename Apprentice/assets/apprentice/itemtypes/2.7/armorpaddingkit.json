@@ -1,13 +1,13 @@
 {
   "code": "armorpaddingkit",
-  "class": "Item",
+  "class": "ApprenticeUpgradeKit",
   "tags": [
     "apprentice-content"
   ],
   "maxstacksize": 1,
   "storageFlags": 5,
   "shape": {
-    "base": "apprentice:item/2.7/icon-flat"
+    "base": "apprentice:item/2.7/kit-armor-upgrade"
   },
   "textures": {
     "base": {
@@ -24,21 +24,29 @@
   },
   "guiTransform": {
     "rotation": {
-      "x": 0,
-      "y": 0,
+      "x": -20,
+      "y": 200,
       "z": 0
     },
-    "scale": 1
+    "scale": 1.6
+  },
+  "fpHandTransform": {
+    "translation": { "x": 0.05, "y": -0.2, "z": 0.1 },
+    "rotation": { "x": 0, "y": 90, "z": 0 },
+    "scale": 1.0
   },
   "groundTransform": {
-    "scale": 0.8
+    "rotation": { "x": 90, "y": 0, "z": 0 },
+    "scale": 1
   },
   "tpHandTransform": {
-    "scale": 0.6
+    "translation": { "x": -0.5, "y": -0.35, "z": -0.55 },
+    "rotation": { "x": 0, "y": 90, "z": -8 },
+    "origin": { "x": 0.5, "y": 0.75, "z": 0.5 },
+    "scale": 0.72
   },
-  "durability": 900,
   "attributes": {
-    "apprenticeFeature": "armorpadding",
-    "noConsumeOnCrafting": true
+    "apprenticeFeature": "armorupgrade",
+    "upgradeCategory": "armor"
   }
 }

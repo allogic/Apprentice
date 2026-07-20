@@ -5,10 +5,9 @@ using Vintagestory.API.Util;
 namespace Apprentice
 {
     /// <summary>
-    /// Compatibility behavior for bushes placed by pre-fruiting-bush builds.
-    /// New world generation uses the native game fruiting-bush variant.
-    /// Interacting with a legacy bush harvests it and migrates the position to
-    /// that native implementation so subsequent growth is engine-owned.
+    /// Stable Apprentice-owned venomberry bush behavior. Keeping the plant in
+    /// this asset domain avoids fragile patches into vanilla fruiting-bush
+    /// variant and runtime texture tables.
     /// </summary>
     public sealed class BlockVenomberryBush : Block
     {
@@ -29,26 +28,55 @@ namespace Apprentice
             if (blockSel == null) return false;
             if (world.Side != EnumAppSide.Server) return true;
 
+            Block current = world.BlockAccessor.GetBlock(
+                blockSel.Position
+            );
             Item? berry = world.GetItem(
                 new AssetLocation("apprentice", "venomberry")
             );
-            if (berry != null)
-            {
-                world.SpawnItemEntity(
-                    new ItemStack(berry, 4),
-                    blockSel.Position.ToVec3d().Add(0.5, 0.5, 0.5)
-                );
-            }
-
-            Block? nativeBush = world.GetBlock(
+            Block? regrowingBush = world.GetBlock(
                 new AssetLocation(
-                    "game",
-                    "fruitingbush-wild-venomberry-free"
+                    "apprentice",
+                    "venomberrycutting-free"
                 )
             );
-            if (nativeBush != null && nativeBush.Id != 0)
+
+            if (current.Id != Id ||
+                berry == null ||
+                regrowingBush == null)
             {
-                world.BlockAccessor.SetBlock(nativeBush.Id, blockSel.Position);
+                return false;
+            }
+
+            // Consume the ripe state before granting any output. Server
+            // interactions are sequential, so a repeated/stale click now
+            // observes the cutting instead of this harvestable block. The
+            // existing FruitingBushCutting behavior matures it again after
+            // its configured two-to-four-month regrowth period.
+            world.BlockAccessor.SetBlock(
+                regrowingBush.Id,
+                blockSel.Position
+            );
+
+            if (world.BlockAccessor.GetBlock(blockSel.Position).Id !=
+                regrowingBush.Id)
+            {
+                return false;
+            }
+
+            ItemStack harvest = new(berry, 4);
+            bool completelyGiven =
+                byPlayer.InventoryManager.TryGiveItemstack(
+                    harvest,
+                    slotNotifyEffect: true
+                );
+
+            if (!completelyGiven && harvest.StackSize > 0)
+            {
+                world.SpawnItemEntity(
+                    harvest,
+                    blockSel.Position.ToVec3d().Add(0.5, 0.5, 0.5)
+                );
             }
 
             return true;

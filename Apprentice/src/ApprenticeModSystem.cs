@@ -12,6 +12,47 @@ namespace Apprentice
 {
 	public sealed class ApprenticeModSystem : ModSystem
 	{
+		private const string PlaytestVersion = "2.7.0-dev.20260720.16";
+		private const string BowAssetFingerprint = "BOW-DARKWOOD-OXBLOOD-C-AXIS2-EDIT1-UV1-DRAW5";
+		private const string ReviewedAssetFingerprint = "ITEMS-RUNEBOUND5-GILDED2-SUNLANCE2-KITS-D-TRAP-C5";
+		private static readonly string[] ExpectedBowShapeCodes =
+		{
+			"apprentice:item/2.7/composite-bow",
+			"apprentice:item/2.7/composite-bow-charge1",
+			"apprentice:item/2.7/composite-bow-charge2",
+			"apprentice:item/2.7/composite-bow-charge3",
+			"apprentice:item/2.7/composite-bow-charge4",
+			"apprentice:item/2.7/composite-bow-charge5"
+		};
+		private static readonly string[] ExpectedBowAssetPaths =
+		{
+			"shapes/item/2.7/composite-bow.json",
+			"shapes/item/2.7/composite-bow-charge1.json",
+			"shapes/item/2.7/composite-bow-charge2.json",
+			"shapes/item/2.7/composite-bow-charge3.json",
+			"shapes/item/2.7/composite-bow-charge4.json",
+			"shapes/item/2.7/composite-bow-charge5.json",
+			"textures/item/2.7/compositebow-material.png",
+			"textures/item/2.7/compositebow-grip-wrap.png"
+		};
+		private static readonly string[] ExpectedReviewedAssetPaths =
+		{
+			"shapes/item/2.7/tower-shield.json",
+			"shapes/item/2.7/master-fishing-rod.json",
+			"shapes/item/2.7/grandmaster-spear.json",
+			"shapes/item/2.7/kit-trap.json",
+			"shapes/item/2.7/kit-armor-upgrade.json",
+			"shapes/item/2.7/kit-weapon-upgrade.json",
+			"shapes/item/2.7/kit-tool-upgrade.json",
+			"shapes/item/2.7/kit-first-aid.json",
+			"shapes/block/2.7/advancedtrap-triggered.json",
+			"shapes/block/2.7/advancedtrap-opening1.json",
+			"shapes/block/2.7/advancedtrap-opening2.json",
+			"shapes/block/2.7/advancedtrap-opening3.json",
+			"shapes/block/2.7/advancedtrap-opening4.json",
+			"shapes/block/2.7/advancedtrap-armed.json"
+		};
+
 		private ICoreServerAPI? sapi = null;
 		private ICoreClientAPI? capi = null;
 
@@ -35,12 +76,14 @@ namespace Apprentice
 		private OverlayManager? overlayManager = null;
 		private HealthBarRenderer? healthBarRenderer = null;
 		private Harmony? poisonInfoHarmony = null;
+		private Harmony? durabilityUpgradeHarmony = null;
 
 		#region ModSystem Impl
 		public override void Start(ICoreAPI api)
 		{
 			api.Logger.Notification(
-				"[Apprentice] Loading verified build 2.7.0-rc.27 ({0}).",
+				"[Apprentice] Loading playtest build {0} ({1}).",
+				PlaytestVersion,
 				api.Side
 			);
 
@@ -63,9 +106,29 @@ namespace Apprentice
 				"ApprenticePoisonArrow",
 				typeof(ItemApprenticePoisonArrow)
 			);
+			api.RegisterItemClass(
+				"ApprenticeGrandmasterSpear",
+				typeof(ItemGrandmasterSpear)
+			);
+			api.RegisterItemClass(
+				"ApprenticeCompositeBow",
+				typeof(ItemCompositeBow)
+			);
+			api.RegisterItemClass(
+				"ApprenticeUpgradeKit",
+				typeof(ItemUpgradeKit)
+			);
+			api.RegisterItemClass(
+				"ApprenticeFirstAidKit",
+				typeof(ItemFirstAidKit)
+			);
 			api.RegisterBlockClass(
 				"ApprenticeAdvancedTrap",
 				typeof(BlockAdvancedTrap)
+			);
+			api.RegisterBlockClass(
+				"ApprenticeLegacyAdvancedTrap",
+				typeof(BlockLegacyAdvancedTrap)
 			);
 			api.RegisterBlockClass(
 				"ApprenticeVenomberryBush",
@@ -83,6 +146,40 @@ namespace Apprentice
 				"ApprenticeCementationFurnace",
 				typeof(BlockEntityCementationFurnace)
 			);
+
+			durabilityUpgradeHarmony = new Harmony(
+				"apprentice.item-upgrades"
+			);
+			try
+			{
+				MethodInfo getMaxDurability = typeof(CollectibleObject)
+					.GetMethod(
+						nameof(CollectibleObject.GetMaxDurability),
+						BindingFlags.Instance | BindingFlags.Public,
+						binder: null,
+						types: new[] { typeof(ItemStack) },
+						modifiers: null
+					) ?? throw new MissingMethodException(
+						"CollectibleObject.GetMaxDurability(ItemStack)"
+					);
+				durabilityUpgradeHarmony.Patch(
+					getMaxDurability,
+					postfix: new HarmonyMethod(
+						typeof(DurabilityUpgradeRuntime),
+						nameof(
+							DurabilityUpgradeRuntime
+								.GetMaxDurabilityPostfix
+						)
+					)
+				);
+			}
+			catch (Exception exception)
+			{
+				api.Logger.Error(
+					"[Apprentice] Durability upgrade integration failed: {0}",
+					exception.Message
+				);
+			}
 
 			try
 			{
@@ -190,7 +287,8 @@ namespace Apprentice
 			int creativeCollectibles =
 				ApprenticeContentRegistry.EnsureCreativeInventoryPresence(api);
 			api.Logger.Notification(
-				"[Apprentice] 2.7.0-rc.27 exposed {0} collectibles in the creative inventory.",
+				"[Apprentice] {0} exposed {1} collectibles in the creative inventory.",
+				PlaytestVersion,
 				creativeCollectibles
 			);
 			if (creativeCollectibles == 0)
@@ -201,6 +299,80 @@ namespace Apprentice
 			}
 			contentRegistry.ResolveCollectibles(api);
 			CementationRuntime.Registry = contentRegistry;
+			if (api.Side == EnumAppSide.Client)
+			{
+				LogBowAssetFingerprint(api);
+				LogReviewedAssetFingerprint(api);
+			}
+		}
+
+		private static void LogReviewedAssetFingerprint(ICoreAPI api)
+		{
+			string[] missingAssets = ExpectedReviewedAssetPaths
+				.Where(
+					path => api.Assets.TryGet(
+						new AssetLocation("apprentice", path)
+					) == null
+				)
+				.ToArray();
+
+			api.Logger.Notification(
+				"[Apprentice] Reviewed item asset fingerprint {0}: missing-files=[{1}].",
+				ReviewedAssetFingerprint,
+				string.Join(", ", missingAssets)
+			);
+			if (missingAssets.Length != 0)
+			{
+				api.Logger.Error(
+					"[Apprentice] Reviewed item assets do not match build {0}. Remove every older Apprentice ZIP/folder and install one clean archive.",
+					PlaytestVersion
+				);
+			}
+		}
+
+		private static void LogBowAssetFingerprint(ICoreAPI api)
+		{
+			Item? bow = api.World.GetItem(
+				new AssetLocation("apprentice", "compositebow")
+			);
+			CompositeShape? configuredShape = bow?.Shape;
+			string[] configuredShapeCodes = configuredShape == null
+				? Array.Empty<string>()
+				: new[]
+					{
+						configuredShape.Base?.ToString() ?? "<missing-base>"
+					}
+					.Concat(
+						configuredShape.Alternates?.Select(
+							alternate => alternate.Base?.ToString()
+								?? "<missing-alternate>"
+						) ?? Enumerable.Empty<string>()
+					)
+					.ToArray();
+
+			string[] missingAssets = ExpectedBowAssetPaths
+				.Where(
+					path => api.Assets.TryGet(
+						new AssetLocation("apprentice", path)
+					) == null
+				)
+				.ToArray();
+			bool correctConfiguration =
+				configuredShapeCodes.SequenceEqual(ExpectedBowShapeCodes);
+
+			api.Logger.Notification(
+				"[Apprentice] Bow asset fingerprint {0}: configured=[{1}]; missing-files=[{2}].",
+				BowAssetFingerprint,
+				string.Join(", ", configuredShapeCodes),
+				string.Join(", ", missingAssets)
+			);
+			if (!correctConfiguration || missingAssets.Length != 0)
+			{
+				api.Logger.Error(
+					"[Apprentice] Composite Bow runtime assets do not match build {0}. Remove every older Apprentice ZIP/folder and rebuild from a clean source extraction.",
+					PlaytestVersion
+				);
+			}
 		}
 		public override void StartServerSide(ICoreServerAPI api)
 		{
@@ -308,6 +480,10 @@ namespace Apprentice
 		}
 		public override void Dispose()
 		{
+			durabilityUpgradeHarmony?.UnpatchAll(
+				"apprentice.item-upgrades"
+			);
+			durabilityUpgradeHarmony = null;
 			poisonInfoHarmony?.UnpatchAll("apprentice.client.runtime");
 			poisonInfoHarmony = null;
 			interactionEventBridge?.Dispose();

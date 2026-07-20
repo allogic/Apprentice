@@ -51,6 +51,13 @@ namespace Apprentice
 				return;
 			}
 
+			if (packet.IsPenalty)
+			{
+				progressDialog?.RemoveSkill(packet.ClassId);
+				ShowChatFallback(packet);
+				return;
+			}
+
 			if (packet.NewLevel >
 				packet.PreviousLevel)
 			{
@@ -188,6 +195,20 @@ namespace Apprentice
 		{
 			string displayName =
 				ResolveDisplayName(packet);
+
+			if (packet.IsPenalty)
+			{
+				double lostExperience =
+					Math.Abs(packet.GainedExperience);
+
+				api.ShowChatMessage(
+					$"[Apprentice] {displayName} — death " +
+					$"penalty: lost {lostExperience:0.###} XP; " +
+					$"Level {packet.NewLevel} remains."
+				);
+
+				return;
+			}
 
 			if (packet.NewLevel >
 				packet.PreviousLevel)

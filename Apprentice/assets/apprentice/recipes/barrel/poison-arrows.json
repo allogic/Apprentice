@@ -22,33 +22,6 @@
     }
   },
   {
-    "code": "apprentice:coat-arrows-mild-1",
-    "ingredients": [
-      {
-        "type": "item",
-        "code": "apprentice:poisonportion-mild",
-        "litres": 0.1,
-        "consumeLitres": 0.1
-      },
-      {
-        "type": "item",
-        "code": "butchering:arrow-*",
-        "name": "arrow",
-        "quantity": 8
-      }
-    ],
-    "output": {
-      "type": "item",
-      "code": "apprentice:arrow-poison-mild",
-      "stackSize": 8
-    },
-    "dependsOn": [
-      {
-        "modid": "butchering"
-      }
-    ]
-  },
-  {
     "code": "apprentice:coat-arrows-standard-0",
     "ingredients": [
       {
@@ -69,33 +42,6 @@
       "code": "apprentice:arrow-poison-standard",
       "stackSize": 8
     }
-  },
-  {
-    "code": "apprentice:coat-arrows-standard-1",
-    "ingredients": [
-      {
-        "type": "item",
-        "code": "apprentice:poisonportion-standard",
-        "litres": 0.1,
-        "consumeLitres": 0.1
-      },
-      {
-        "type": "item",
-        "code": "butchering:arrow-*",
-        "name": "arrow",
-        "quantity": 8
-      }
-    ],
-    "output": {
-      "type": "item",
-      "code": "apprentice:arrow-poison-standard",
-      "stackSize": 8
-    },
-    "dependsOn": [
-      {
-        "modid": "butchering"
-      }
-    ]
   },
   {
     "code": "apprentice:coat-arrows-potent-0",
@@ -120,33 +66,6 @@
     }
   },
   {
-    "code": "apprentice:coat-arrows-potent-1",
-    "ingredients": [
-      {
-        "type": "item",
-        "code": "apprentice:poisonportion-potent",
-        "litres": 0.1,
-        "consumeLitres": 0.1
-      },
-      {
-        "type": "item",
-        "code": "butchering:arrow-*",
-        "name": "arrow",
-        "quantity": 8
-      }
-    ],
-    "output": {
-      "type": "item",
-      "code": "apprentice:arrow-poison-potent",
-      "stackSize": 8
-    },
-    "dependsOn": [
-      {
-        "modid": "butchering"
-      }
-    ]
-  },
-  {
     "code": "apprentice:coat-arrows-grandmaster-0",
     "ingredients": [
       {
@@ -167,32 +86,5 @@
       "code": "apprentice:arrow-poison-grandmaster",
       "stackSize": 8
     }
-  },
-  {
-    "code": "apprentice:coat-arrows-grandmaster-1",
-    "ingredients": [
-      {
-        "type": "item",
-        "code": "apprentice:poisonportion-grandmaster",
-        "litres": 0.1,
-        "consumeLitres": 0.1
-      },
-      {
-        "type": "item",
-        "code": "butchering:arrow-*",
-        "name": "arrow",
-        "quantity": 8
-      }
-    ],
-    "output": {
-      "type": "item",
-      "code": "apprentice:arrow-poison-grandmaster",
-      "stackSize": 8
-    },
-    "dependsOn": [
-      {
-        "modid": "butchering"
-      }
-    ]
   }
 ]

@@ -7,7 +7,7 @@
   "tags": ["apprentice-content"],
   "maxstacksize": 16,
   "storageFlags": 5,
-  "shape": { "base": "apprentice:item/2.7/icon-flat" },
+  "shape": { "base": "apprentice:item/2.7/material-blister" },
   "texturesByType": {
     "blister-starsteel": {
       "base": { "base": "apprentice:item/2.7/blister-starsteel" }
@@ -21,11 +21,23 @@
     "items": ["*"]
   },
   "guiTransform": {
-    "rotation": { "x": 0, "y": 0, "z": 0 },
+    "rotation": { "x": -25, "y": 35, "z": -15 },
+    "scale": 1.45
+  },
+  "fpHandTransform": {
+    "translation": { "x": 0, "y": -0.1, "z": 0.2 },
+    "rotation": { "x": 15, "y": 100, "z": 5 },
     "scale": 1
   },
-  "groundTransform": { "scale": 0.8 },
-  "tpHandTransform": { "scale": 0.6 },
+  "groundTransform": {
+    "rotation": { "x": 0, "y": 30, "z": 90 },
+    "scale": 1
+  },
+  "tpHandTransform": {
+    "translation": { "x": -0.45, "y": 0, "z": -0.35 },
+    "rotation": { "x": 80, "y": 0, "z": 10 },
+    "scale": 0.65
+  },
   "attributesByType": {
     "blister-starsteel": {
       "requiresAnvilTier": 5,

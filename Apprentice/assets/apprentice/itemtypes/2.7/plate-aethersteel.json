@@ -7,10 +7,10 @@
   "maxstacksize": 64,
   "storageFlags": 5,
   "shape": {
-    "base": "apprentice:item/2.7/icon-flat"
+    "base": "game:item/plate"
   },
   "textures": {
-    "base": {
+    "metal": {
       "base": "apprentice:item/2.7/plate-aethersteel"
     }
   },
@@ -24,10 +24,15 @@
   },
   "guiTransform": {
     "rotation": {
-      "x": 0,
-      "y": 0,
-      "z": 0
+      "x": -60,
+      "y": 25,
+      "z": -25
     },
+    "scale": 2
+  },
+  "fpHandTransform": {
+    "translation": { "x": 0, "y": -0.1, "z": 0.2 },
+    "rotation": { "x": 15, "y": 100, "z": 5 },
     "scale": 1
   },
   "groundTransform": {

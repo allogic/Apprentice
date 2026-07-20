@@ -124,45 +124,11 @@
     }
   },
   {
-    "ingredientPattern": "PIP,LGL,PHP",
+    "ingredientPattern": "CCC,LKL,CHC",
     "ingredients": {
-      "P": {
+      "C": {
         "type": "item",
-        "code": "game:paper-parchment"
-      },
-      "I": {
-        "type": "item",
-        "code": "game:ingot-iron"
-      },
-      "L": {
-        "type": "item",
-        "code": "game:leather-normal-plain"
-      },
-      "G": {
-        "type": "item",
-        "code": "game:gear-rusty"
-      },
-      "H": {
-        "type": "item",
-        "code": "game:hammer-*",
-        "isTool": true,
-        "toolDurabilityCost": 1
-      }
-    },
-    "width": 3,
-    "height": 3,
-    "output": {
-      "type": "item",
-      "code": "apprentice:masterforgeplans",
-      "quantity": 1
-    }
-  },
-  {
-    "ingredientPattern": "PPP,LKL,PHP",
-    "ingredients": {
-      "P": {
-        "type": "item",
-        "code": "game:paper-parchment"
+        "code": "game:ingot-copper"
       },
       "L": {
         "type": "item",
@@ -176,7 +142,7 @@
       },
       "H": {
         "type": "item",
-        "code": "game:inkandquill",
+        "code": "game:hammer-*",
         "isTool": true,
         "toolDurabilityCost": 1
       }

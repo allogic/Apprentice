@@ -11,7 +11,8 @@
   },
   "textures": {
     "wood": { "base": "game:block/wood/planks/oak1" },
-    "metal": { "base": "game:block/metal/ingot/copper" }
+    "metal": { "base": "game:block/metal/ingot/copper" },
+    "leather": { "base": "game:block/leather/plain" }
   },
   "creativeinventory": {
     "general": [
@@ -22,31 +23,34 @@
     ]
   },
   "guiTransform": {
-    "rotation": { "x": 33, "y": 0, "z": -127 },
-    "origin": { "x": 1.2, "y": 0.05, "z": 0.5 },
-    "scale": 2.1
+    "rotation": { "x": -21, "y": 28, "z": -132 },
+    "origin": { "x": 0.5, "y": 0.45, "z": 0.5 },
+    "scale": 0.78
   },
   "groundTransform": {
     "rotation": { "x": 90, "y": 0, "z": 0 },
     "origin": { "x": 0.5, "y": 0.5, "z": 0.5 },
-    "scale": 3.2
+    "scale": 1.9
   },
   "tpHandTransform": {
-    "translation": { "x": -1.15, "y": 0.03, "z": -0.5 },
-    "rotation": { "x": -90, "y": 0, "z": 0 },
-    "origin": { "x": 0.6, "y": 0, "z": 0.5 },
-    "scale": 0.82
+    "translation": { "x": -0.72, "y": 0.02, "z": -0.56 },
+    "rotation": { "x": 103, "y": 10, "z": 8 },
+    "origin": { "x": 0.5, "y": 0.15, "z": 0.5 },
+    "scale": 0.68
   },
   "fpHandTransform": {
-    "translation": { "x": 0.1, "y": 0.4, "z": 0.16 },
-    "rotation": { "x": -82, "y": 180, "z": 96 },
-    "scale": 2.2
+    "translation": { "x": 0.15, "y": 0.42, "z": 0.05 },
+    "rotation": { "x": 2, "y": 1, "z": 82 },
+    "origin": { "x": 0.5, "y": 0.12, "z": 0.5 },
+    "scale": 1.35
   },
   "durability": 900,
   "attributes": {
     "apprenticeFeature": "fishing",
     "noConsumeOnCrafting": true,
     "aimAnimation": "bowaimlong",
+    "offsetToPoleTipFp": { "x": 3.3, "y": -0.05, "z": 0.4 },
+    "offsetToPoleTipTp": { "x": 2.3, "y": 0, "z": 0 },
     "ropelessShape": { "base": "apprentice:item/2.7/master-fishing-rod" }
   }
 }

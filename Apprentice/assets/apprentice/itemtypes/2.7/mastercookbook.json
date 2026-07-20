@@ -7,12 +7,7 @@
   "maxstacksize": 1,
   "storageFlags": 5,
   "shape": {
-    "base": "apprentice:item/2.7/icon-flat"
-  },
-  "textures": {
-    "base": {
-      "base": "apprentice:item/2.7/mastercookbook"
-    }
+    "base": "apprentice:item/2.7/master-cookware"
   },
   "creativeinventory": {
     "general": [
@@ -24,21 +19,29 @@
   },
   "guiTransform": {
     "rotation": {
-      "x": 0,
-      "y": 0,
-      "z": 0
+      "x": -20,
+      "y": 35,
+      "z": -175
     },
-    "scale": 1
+    "scale": 1.6
+  },
+  "fpHandTransform": {
+    "translation": { "x": -0.15, "y": -0.2, "z": 0.25 },
+    "rotation": { "x": 10, "y": 100, "z": 15 },
+    "scale": 1.1
   },
   "groundTransform": {
-    "scale": 0.8
+    "rotation": { "x": 0, "y": 30, "z": 90 },
+    "scale": 1
   },
   "tpHandTransform": {
-    "scale": 0.6
+    "translation": { "x": -0.45, "y": 0, "z": -0.35 },
+    "rotation": { "x": 80, "y": 0, "z": 10 },
+    "scale": 0.65
   },
   "durability": 800,
   "attributes": {
-    "apprenticeFeature": "cookbook",
+    "apprenticeFeature": "mastercookware",
     "noConsumeOnCrafting": true
   }
 }

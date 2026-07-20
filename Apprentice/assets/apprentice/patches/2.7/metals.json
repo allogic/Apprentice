@@ -58,6 +58,28 @@
     }
   },
   {
+    "file": "game:itemtypes/resource/metalbit.json",
+    "op": "add",
+    "path": "/combustiblePropsByType/*-starsteel",
+    "value": {
+      "meltingPoint": 1535,
+      "meltingDuration": 30,
+      "smeltedRatio": 20,
+      "smeltedStack": { "type": "item", "code": "game:ingot-starsteel" }
+    }
+  },
+  {
+    "file": "game:itemtypes/resource/metalbit.json",
+    "op": "add",
+    "path": "/combustiblePropsByType/*-aethersteel",
+    "value": {
+      "meltingPoint": 1620,
+      "meltingDuration": 30,
+      "smeltedRatio": 20,
+      "smeltedStack": { "type": "item", "code": "game:ingot-aethersteel" }
+    }
+  },
+  {
     "file": "game:itemtypes/resource/ingot.json",
     "op": "add",
     "path": "/materialDensityByType/*-starsteel",

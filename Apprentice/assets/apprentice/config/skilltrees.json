@@ -893,7 +893,7 @@
             {
               "Type": "UnlockRecipe",
               "ValuePerRank": 0,
-              "Code": "apprentice:masterforgeplans"
+              "Code": "apprentice:cementationfurnace"
             }
           ]
         }

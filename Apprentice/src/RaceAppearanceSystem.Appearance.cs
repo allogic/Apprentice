@@ -531,6 +531,8 @@ namespace Apprentice
             pendingSkinConfirmRequestId = 0;
             skinCloseRequested = false;
             ConfirmedRaceDialogs.Clear();
+            ApprovedCharacterDialogClosures.Clear();
+            NativeFinalCharacterConfirmCallbacks.Clear();
             RestoreInProgress.Clear();
             PaletteSnapshots.Clear();
             base.Dispose();

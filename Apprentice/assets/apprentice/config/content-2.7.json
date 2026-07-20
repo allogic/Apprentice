@@ -3,22 +3,22 @@
   "GrandmasterArtifacts": [
     { "SchemaVersion": 1, "Code": "apprentice:mastersurveykit", "Profession": "miner", "Kind": "item", "Feature": "Condenses prospecting samples into a vein report." },
     { "SchemaVersion": 1, "Code": "apprentice:joinersbench", "Profession": "woodworker", "Kind": "block", "Feature": "Precision beams, fitted frames and replaceable handles." },
-    { "SchemaVersion": 1, "Code": "apprentice:graftingkit", "Profession": "farmer", "Kind": "item", "Feature": "Fruit-tree and high-tier seed work." },
+    { "SchemaVersion": 1, "Code": "apprentice:graftingkit", "Profession": "farmer", "Kind": "item", "Feature": "One-time 20% maximum-durability upgrade for tools." },
     { "SchemaVersion": 1, "Code": "apprentice:architectstable", "Profession": "builder", "Kind": "block", "Feature": "Arches, structural templates and decorative variants." },
-    { "SchemaVersion": 1, "Code": "apprentice:masterforgeplans", "Profession": "blacksmith", "Kind": "item", "Feature": "Authorizes advanced furnace charges and metal patterns." },
-    { "SchemaVersion": 1, "Code": "apprentice:mastercookbook", "Profession": "cook", "Kind": "item", "Feature": "Complete meals and preserved travel rations." },
+    { "SchemaVersion": 1, "Code": "apprentice:cementationfurnace", "Profession": "blacksmith", "Kind": "block", "Feature": "Processes exact advanced-metal charges for qualified Blacksmith Grandmasters." },
+    { "SchemaVersion": 1, "Code": "apprentice:mastercookbook", "Profession": "cook", "Kind": "item", "Feature": "A master cookware set for complete meals and preserved travel rations." },
     { "SchemaVersion": 1, "Code": "apprentice:masterkiln", "Profession": "potter", "Kind": "block", "Feature": "Refractory liners, crucibles and furnace repair parts." },
     { "SchemaVersion": 1, "Code": "apprentice:saddlersbench", "Profession": "leatherworker", "Kind": "block", "Feature": "Harnesses, reinforced packs and fitted armor straps." },
     { "SchemaVersion": 1, "Code": "apprentice:sewingkit", "Profession": "tailor", "Kind": "item", "Feature": "Liners, padded clothing and repair patches." },
-    { "SchemaVersion": 1, "Code": "apprentice:advancedtrapkit", "Profession": "hunter", "Kind": "item", "Feature": "Recoverable visible traps with server-owned cooldown." },
-    { "SchemaVersion": 1, "Code": "apprentice:masterweaponpatterns", "Profession": "warrior", "Kind": "item", "Feature": "Advanced melee weapon-head patterns." },
+    { "SchemaVersion": 1, "Code": "apprentice:advancedtrapkit", "Profession": "hunter", "Kind": "item", "Feature": "Recoverable bear trap with a five-second visible rearming sequence." },
+    { "SchemaVersion": 1, "Code": "apprentice:masterweaponpatterns", "Profession": "warrior", "Kind": "item", "Feature": "One-time 20% maximum-durability upgrade for weapons." },
     { "SchemaVersion": 1, "Code": "apprentice:compositebow", "Profession": "ranger", "Kind": "item", "Feature": "Repairable bow with replaceable string and limbs." },
     { "SchemaVersion": 1, "Code": "apprentice:masterfishingrod", "Profession": "fisher", "Kind": "item", "Feature": "Repairable rod with line, hook and lure variants." },
-    { "SchemaVersion": 1, "Code": "apprentice:veterinarykit", "Profession": "animalhusbandry", "Kind": "item", "Feature": "Diagnosis and treatment using consumable medicines." },
+    { "SchemaVersion": 1, "Code": "apprentice:veterinarykit", "Profession": "animalhusbandry", "Kind": "item", "Feature": "First aid for any injured living entity." },
     { "SchemaVersion": 1, "Code": "apprentice:framehive", "Profession": "beekeeper", "Kind": "block", "Feature": "Persistent removable-frame colony station." },
-    { "SchemaVersion": 1, "Code": "apprentice:atlatl", "Profession": "spearman", "Kind": "item", "Feature": "Launcher for dedicated darts." },
+    { "SchemaVersion": 1, "Code": "apprentice:atlatl", "Profession": "spearman", "Kind": "item", "Feature": "Reinforced Grandmaster polearm for melee and throwing." },
     { "SchemaVersion": 1, "Code": "apprentice:towershield", "Profession": "shield", "Kind": "item", "Feature": "Strong frontal defense with movement and stamina costs." },
-    { "SchemaVersion": 1, "Code": "apprentice:armorpaddingkit", "Profession": "tank", "Kind": "item", "Feature": "Fitting tool for replaceable armor liners." }
+    { "SchemaVersion": 1, "Code": "apprentice:armorpaddingkit", "Profession": "tank", "Kind": "item", "Feature": "One-time 20% maximum-durability upgrade for armor and shields." }
   ],
   "Discoveries": [
     {
@@ -220,7 +220,7 @@
       "FuelCode": "game:charcoal", "FuelQuantity": 32,
       "RefractoryCode": "apprentice:grandmaster-refractory", "RefractoryQuantity": 1,
       "RequiredDiscoveries": ["mastersmelter"],
-      "RequiredItems": ["apprentice:masterforgeplans", "apprentice:grandmaster-refractory"],
+      "RequiredItems": ["apprentice:grandmaster-refractory"],
       "Inputs": [
         { "Code": "game:ingot-steel", "Quantity": 8 },
         { "Code": "game:ingot-meteoriciron", "Quantity": 4 },
@@ -235,7 +235,7 @@
       "FuelCode": "game:charcoal", "FuelQuantity": 48,
       "RefractoryCode": "apprentice:upgraded-refractory", "RefractoryQuantity": 2,
       "RequiredDiscoveries": ["mastersmelter"],
-      "RequiredItems": ["apprentice:masterforgeplans", "apprentice:upgraded-refractory"],
+      "RequiredItems": ["apprentice:upgraded-refractory"],
       "Inputs": [
         { "Code": "game:ingot-starsteel", "Quantity": 6 },
         { "Code": "game:ingot-meteoriciron", "Quantity": 3 },
@@ -266,7 +266,7 @@
     "Palette": ["#165A2A", "#62B44B", "#3F8F3B", "#2F6F2F", "#B7C83D", "#E5D744", "#F3B33D", "#ED7A2F", "#D94A2D", "#B3232E", "#650F24"]
   },
   "Ecology": [
-    { "SchemaVersion": 1, "Id": "venomberry", "DropCode": "apprentice:venomberry", "MinimumTier": 3, "ChancePerTier": 0.012, "MaximumQuantity": 2, "WorldgenBlockCode": "game:fruitingbush-wild-venomberry-free", "WorldgenChancePerTier": 0.018, "WorldgenAttemptsPerChunk": 2 },
+    { "SchemaVersion": 1, "Id": "venomberry", "DropCode": "apprentice:venomberry", "MinimumTier": 3, "ChancePerTier": 0.012, "MaximumQuantity": 2, "WorldgenBlockCode": "apprentice:venomberryplant", "WorldgenChancePerTier": 0.018, "WorldgenAttemptsPerChunk": 2 },
     { "SchemaVersion": 1, "Id": "gloamcap", "DropCode": "apprentice:gloamcap", "MinimumTier": 5, "ChancePerTier": 0.010, "MaximumQuantity": 2, "WorldgenBlockCode": "apprentice:gloamcapplant", "WorldgenChancePerTier": 0.012, "WorldgenAttemptsPerChunk": 2 },
     { "SchemaVersion": 1, "Id": "dangerous-tissue", "DropCode": "apprentice:dangerous-tissue", "MinimumTier": 4, "ChancePerTier": 0.015, "MaximumQuantity": 3 }
   ]

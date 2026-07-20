@@ -1,0 +1,203 @@
+{
+  "textureWidth": 16,
+  "textureHeight": 16,
+  "textures": {
+    "wood": "game:block/wood/planks/oak1",
+    "darkwood": "game:block/wood/planks/walnut1",
+    "iron": "game:block/metal/ingot/iron",
+    "copper": "game:block/metal/ingot/copper",
+    "leather": "game:block/leather/plain",
+    "bone": "game:block/creature/bone"
+  },
+  "elements": [
+    {
+      "name": "shear-blade-a",
+      "from": [
+        3,
+        5,
+        6.8
+      ],
+      "to": [
+        7,
+        15,
+        8
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationZ": -24,
+      "rotationOrigin": [
+        6,
+        6,
+        8
+      ]
+    },
+    {
+      "name": "shear-blade-b",
+      "from": [
+        9,
+        5,
+        8
+      ],
+      "to": [
+        13,
+        15,
+        9.2
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationZ": 24,
+      "rotationOrigin": [
+        10,
+        6,
+        8
+      ]
+    },
+    {
+      "name": "pivot",
+      "from": [
+        7,
+        6,
+        6.5
+      ],
+      "to": [
+        9,
+        8,
+        9.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#copper"
+        },
+        "east": {
+          "texture": "#copper"
+        },
+        "south": {
+          "texture": "#copper"
+        },
+        "west": {
+          "texture": "#copper"
+        },
+        "up": {
+          "texture": "#copper"
+        },
+        "down": {
+          "texture": "#copper"
+        }
+      }
+    },
+    {
+      "name": "grip-a",
+      "from": [
+        2,
+        1,
+        6
+      ],
+      "to": [
+        6,
+        7,
+        8
+      ],
+      "faces": {
+        "north": {
+          "texture": "#wood"
+        },
+        "east": {
+          "texture": "#wood"
+        },
+        "south": {
+          "texture": "#wood"
+        },
+        "west": {
+          "texture": "#wood"
+        },
+        "up": {
+          "texture": "#wood"
+        },
+        "down": {
+          "texture": "#wood"
+        }
+      },
+      "rotationZ": 18,
+      "rotationOrigin": [
+        6,
+        7,
+        8
+      ]
+    },
+    {
+      "name": "grip-b",
+      "from": [
+        10,
+        1,
+        8
+      ],
+      "to": [
+        14,
+        7,
+        10
+      ],
+      "faces": {
+        "north": {
+          "texture": "#wood"
+        },
+        "east": {
+          "texture": "#wood"
+        },
+        "south": {
+          "texture": "#wood"
+        },
+        "west": {
+          "texture": "#wood"
+        },
+        "up": {
+          "texture": "#wood"
+        },
+        "down": {
+          "texture": "#wood"
+        }
+      },
+      "rotationZ": -18,
+      "rotationOrigin": [
+        10,
+        7,
+        8
+      ]
+    }
+  ]
+}

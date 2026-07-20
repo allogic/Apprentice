@@ -616,6 +616,9 @@ namespace Apprentice
             .ToArray();
 
         private static readonly HashSet<object> ConfirmedRaceDialogs = new();
+        private static readonly HashSet<object> ApprovedCharacterDialogClosures = new();
+        private static readonly Dictionary<object, ActionConsumable>
+            NativeFinalCharacterConfirmCallbacks = new();
         private static readonly HashSet<EntityPlayer> RestoreInProgress = new();
         private static readonly Dictionary<EntityBehaviorExtraSkinnable, List<PaletteSnapshot>>
             PaletteSnapshots = new();
@@ -917,6 +920,13 @@ namespace Apprentice
                 nameof(FinalizeComposeGuis)
             );
 
+            PatchDialogMethod(
+                typeof(GuiDialog),
+                nameof(GuiDialog.TryClose),
+                nameof(BeforeCharacterDialogTryClose),
+                null
+            );
+
             MethodInfo? composerWheelTarget = AccessTools.Method(
                 typeof(GuiComposer),
                 "OnMouseWheel",
@@ -998,18 +1008,6 @@ namespace Apprentice
                 );
             }
 
-            Type? escapeMenuType = AccessTools.TypeByName(
-                "Vintagestory.Client.NoObf.GuiDialogEscapeMenu"
-            );
-            if (escapeMenuType != null)
-            {
-                PatchDialogMethod(
-                    escapeMenuType,
-                    "OnGuiOpened",
-                    nameof(BeforeEscapeMenuOpened),
-                    null
-                );
-            }
         }
 
         private static void AfterSkinPartSelected(

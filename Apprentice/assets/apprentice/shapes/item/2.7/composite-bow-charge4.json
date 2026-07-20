@@ -1,0 +1,1669 @@
+{
+  "textureWidth": 16,
+  "textureHeight": 16,
+  "textures": {
+    "wood": "game:block/wood/planks/oak1",
+    "darkwood": "game:block/wood/planks/walnut1",
+    "iron": "game:block/metal/ingot/iron",
+    "gold": "game:block/metal/ingot/gold",
+    "copper": "game:block/metal/ingot/copper",
+    "leather": "game:block/leather/plain",
+    "bone": "game:block/creature/bone",
+    "gripwrap": "apprentice:item/2.7/compositebow-grip-wrap",
+    "laminate": "apprentice:item/2.7/compositebow-material",
+    "string": "game:block/leather/plain"
+  },
+  "elements": [
+    {
+      "name": "lower-riser-neck",
+      "from": [
+        6.8,
+        -0.6199999999999992,
+        7.609999999999999
+      ],
+      "to": [
+        8.3,
+        0.6200000000000001,
+        8.39
+      ],
+      "faces": {
+        "north": {
+          "texture": "#laminate"
+        },
+        "east": {
+          "texture": "#laminate"
+        },
+        "south": {
+          "texture": "#laminate"
+        },
+        "west": {
+          "texture": "#laminate"
+        },
+        "up": {
+          "texture": "#laminate"
+        },
+        "down": {
+          "texture": "#laminate"
+        }
+      },
+      "rotationOrigin": [
+        6.8,
+        0.0,
+        8.0
+      ],
+      "rotationY": -180.0
+    },
+    {
+      "name": "upper-riser-neck",
+      "from": [
+        9.17,
+        -0.6199999999999992,
+        7.609999999999999
+      ],
+      "to": [
+        10.793420650394138,
+        0.6200000000000001,
+        8.39
+      ],
+      "faces": {
+        "north": {
+          "texture": "#laminate"
+        },
+        "east": {
+          "texture": "#laminate"
+        },
+        "south": {
+          "texture": "#laminate"
+        },
+        "west": {
+          "texture": "#laminate"
+        },
+        "up": {
+          "texture": "#laminate"
+        },
+        "down": {
+          "texture": "#laminate"
+        }
+      },
+      "rotationOrigin": [
+        9.17,
+        0.0,
+        8.0
+      ],
+      "rotationY": -3.9182
+    },
+    {
+      "name": "leather-grip",
+      "from": [
+        6.5,
+        -0.7799999999999994,
+        7.220000000000001
+      ],
+      "to": [
+        9.5,
+        0.7800000000000002,
+        8.78
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gripwrap",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "rotation": 90
+        },
+        "east": {
+          "texture": "#gripwrap",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#gripwrap",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "rotation": 90
+        },
+        "west": {
+          "texture": "#gripwrap",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "up": {
+          "texture": "#gripwrap",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "rotation": 90
+        },
+        "down": {
+          "texture": "#gripwrap",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "rotation": 90
+        }
+      }
+    },
+    {
+      "name": "lower-grip-band",
+      "from": [
+        6.3999999999999995,
+        -0.8499999999999996,
+        7.15
+      ],
+      "to": [
+        6.6499999999999995,
+        0.8499999999999996,
+        8.85
+      ],
+      "faces": {
+        "north": {
+          "texture": "#copper"
+        },
+        "east": {
+          "texture": "#copper"
+        },
+        "south": {
+          "texture": "#copper"
+        },
+        "west": {
+          "texture": "#copper"
+        },
+        "up": {
+          "texture": "#copper"
+        },
+        "down": {
+          "texture": "#copper"
+        }
+      }
+    },
+    {
+      "name": "upper-grip-band",
+      "from": [
+        9.350000000000001,
+        -0.8499999999999996,
+        7.15
+      ],
+      "to": [
+        9.600000000000001,
+        0.8499999999999996,
+        8.85
+      ],
+      "faces": {
+        "north": {
+          "texture": "#copper"
+        },
+        "east": {
+          "texture": "#copper"
+        },
+        "south": {
+          "texture": "#copper"
+        },
+        "west": {
+          "texture": "#copper"
+        },
+        "up": {
+          "texture": "#copper"
+        },
+        "down": {
+          "texture": "#copper"
+        }
+      }
+    },
+    {
+      "name": "arrow-rest",
+      "from": [
+        9.600000000000001,
+        0.6000000000000005,
+        8.45
+      ],
+      "to": [
+        9.770000000000001,
+        1.25,
+        9.05
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      }
+    },
+    {
+      "name": "upper-limb-1",
+      "from": [
+        10.55,
+        -0.7400000000000002,
+        7.225
+      ],
+      "to": [
+        12.559153249474484,
+        0.7400000000000002,
+        8.975
+      ],
+      "faces": {
+        "north": {
+          "texture": "#laminate"
+        },
+        "east": {
+          "texture": "#laminate"
+        },
+        "south": {
+          "texture": "#laminate"
+        },
+        "west": {
+          "texture": "#laminate"
+        },
+        "up": {
+          "texture": "#laminate"
+        },
+        "down": {
+          "texture": "#laminate"
+        }
+      },
+      "rotationOrigin": [
+        10.55,
+        0.0,
+        8.1
+      ],
+      "rotationY": 29.143
+    },
+    {
+      "name": "upper-horn-facing-1",
+      "from": [
+        10.55,
+        -0.9799999999999986,
+        7.8025
+      ],
+      "to": [
+        12.539153249474484,
+        -0.7400000000000002,
+        8.397499999999999
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      },
+      "rotationOrigin": [
+        10.55,
+        -0.8599999999999994,
+        8.1
+      ],
+      "rotationY": 29.143
+    },
+    {
+      "name": "upper-limb-2",
+      "from": [
+        12.200000000000001,
+        -0.7400000000000002,
+        6.379999999999999
+      ],
+      "to": [
+        14.275427319027735,
+        0.7400000000000002,
+        7.98
+      ],
+      "faces": {
+        "north": {
+          "texture": "#laminate"
+        },
+        "east": {
+          "texture": "#laminate"
+        },
+        "south": {
+          "texture": "#laminate"
+        },
+        "west": {
+          "texture": "#laminate"
+        },
+        "up": {
+          "texture": "#laminate"
+        },
+        "down": {
+          "texture": "#laminate"
+        }
+      },
+      "rotationOrigin": [
+        12.200000000000001,
+        0.0,
+        7.18
+      ],
+      "rotationY": 22.9985
+    },
+    {
+      "name": "upper-horn-facing-2",
+      "from": [
+        12.200000000000001,
+        -0.9799999999999986,
+        6.9079999999999995
+      ],
+      "to": [
+        14.255427319027735,
+        -0.7400000000000002,
+        7.452
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      },
+      "rotationOrigin": [
+        12.200000000000001,
+        -0.8599999999999994,
+        7.18
+      ],
+      "rotationY": 22.9985
+    },
+    {
+      "name": "upper-limb-3",
+      "from": [
+        14.0,
+        -0.7400000000000002,
+        5.7059999999999995
+      ],
+      "to": [
+        16.04480232751314,
+        0.7400000000000002,
+        7.126000000000001
+      ],
+      "faces": {
+        "north": {
+          "texture": "#laminate"
+        },
+        "east": {
+          "texture": "#laminate"
+        },
+        "south": {
+          "texture": "#laminate"
+        },
+        "west": {
+          "texture": "#laminate"
+        },
+        "up": {
+          "texture": "#laminate"
+        },
+        "down": {
+          "texture": "#laminate"
+        }
+      },
+      "rotationOrigin": [
+        14.0,
+        0.0,
+        6.416
+      ],
+      "rotationY": 9.2078
+    },
+    {
+      "name": "upper-horn-facing-3",
+      "from": [
+        14.0,
+        -0.9799999999999986,
+        6.1746
+      ],
+      "to": [
+        16.02480232751314,
+        -0.7400000000000002,
+        6.657400000000001
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      },
+      "rotationOrigin": [
+        14.0,
+        -0.8599999999999994,
+        6.416
+      ],
+      "rotationY": 9.2078
+    },
+    {
+      "name": "upper-limb-4",
+      "from": [
+        15.9,
+        -0.7400000000000002,
+        5.498000000000001
+      ],
+      "to": [
+        17.800091008909376,
+        0.7400000000000002,
+        6.718
+      ],
+      "faces": {
+        "north": {
+          "texture": "#laminate"
+        },
+        "east": {
+          "texture": "#laminate"
+        },
+        "south": {
+          "texture": "#laminate"
+        },
+        "west": {
+          "texture": "#laminate"
+        },
+        "up": {
+          "texture": "#laminate"
+        },
+        "down": {
+          "texture": "#laminate"
+        }
+      },
+      "rotationOrigin": [
+        15.9,
+        0.0,
+        6.1080000000000005
+      ],
+      "rotationY": -22.0405
+    },
+    {
+      "name": "upper-horn-facing-4",
+      "from": [
+        15.9,
+        -0.9799999999999986,
+        5.900600000000001
+      ],
+      "to": [
+        17.780091008909377,
+        -0.7400000000000002,
+        6.3154
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      },
+      "rotationOrigin": [
+        15.9,
+        -0.8599999999999994,
+        6.1080000000000005
+      ],
+      "rotationY": -22.0405
+    },
+    {
+      "name": "upper-limb-5",
+      "from": [
+        17.55,
+        -0.7400000000000002,
+        6.266
+      ],
+      "to": [
+        19.739076122330932,
+        0.7400000000000002,
+        7.286
+      ],
+      "faces": {
+        "north": {
+          "texture": "#laminate"
+        },
+        "east": {
+          "texture": "#laminate"
+        },
+        "south": {
+          "texture": "#laminate"
+        },
+        "west": {
+          "texture": "#laminate"
+        },
+        "up": {
+          "texture": "#laminate"
+        },
+        "down": {
+          "texture": "#laminate"
+        }
+      },
+      "rotationOrigin": [
+        17.55,
+        0.0,
+        6.776
+      ],
+      "rotationY": -45.5091
+    },
+    {
+      "name": "upper-horn-facing-5",
+      "from": [
+        17.55,
+        -0.9799999999999986,
+        6.602599999999999
+      ],
+      "to": [
+        19.719076122330932,
+        -0.7400000000000002,
+        6.949400000000001
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      },
+      "rotationOrigin": [
+        17.55,
+        -0.8599999999999994,
+        6.776
+      ],
+      "rotationY": -45.5091
+    },
+    {
+      "name": "upper-limb-6",
+      "from": [
+        19.0,
+        -0.7400000000000002,
+        7.862
+      ],
+      "to": [
+        21.300000917431,
+        0.7400000000000002,
+        8.642000000000001
+      ],
+      "faces": {
+        "north": {
+          "texture": "#laminate"
+        },
+        "east": {
+          "texture": "#laminate"
+        },
+        "south": {
+          "texture": "#laminate"
+        },
+        "west": {
+          "texture": "#laminate"
+        },
+        "up": {
+          "texture": "#laminate"
+        },
+        "down": {
+          "texture": "#laminate"
+        }
+      },
+      "rotationOrigin": [
+        19.0,
+        0.0,
+        8.252
+      ],
+      "rotationY": -58.1618
+    },
+    {
+      "name": "upper-horn-facing-6",
+      "from": [
+        19.0,
+        -0.9799999999999986,
+        8.082
+      ],
+      "to": [
+        21.280000917431,
+        -0.7400000000000002,
+        8.422
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      },
+      "rotationOrigin": [
+        19.0,
+        -0.8599999999999994,
+        8.252
+      ],
+      "rotationY": -58.1618
+    },
+    {
+      "name": "upper-limb-7",
+      "from": [
+        20.150000000000002,
+        -0.7400000000000002,
+        9.814
+      ],
+      "to": [
+        21.75213494662261,
+        0.7400000000000002,
+        10.394
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      },
+      "rotationOrigin": [
+        20.150000000000002,
+        0.0,
+        10.104
+      ],
+      "rotationY": -63.9882
+    },
+    {
+      "name": "lower-limb-1",
+      "from": [
+        5.6499999999999995,
+        -0.7400000000000002,
+        7.225
+      ],
+      "to": [
+        6.956970934774731,
+        0.7400000000000002,
+        8.975
+      ],
+      "faces": {
+        "north": {
+          "texture": "#laminate"
+        },
+        "east": {
+          "texture": "#laminate"
+        },
+        "south": {
+          "texture": "#laminate"
+        },
+        "west": {
+          "texture": "#laminate"
+        },
+        "up": {
+          "texture": "#laminate"
+        },
+        "down": {
+          "texture": "#laminate"
+        }
+      },
+      "rotationOrigin": [
+        5.6499999999999995,
+        0.0,
+        8.0
+      ],
+      "rotationY": 141.8973
+    },
+    {
+      "name": "lower-horn-facing-1",
+      "from": [
+        5.6499999999999995,
+        -0.9799999999999986,
+        7.885
+      ],
+      "to": [
+        6.826599091083711,
+        -0.7400000000000002,
+        8.479999999999999
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      },
+      "rotationOrigin": [
+        5.6499999999999995,
+        -0.8599999999999994,
+        8.0
+      ],
+      "rotationY": 138.8973
+    },
+    {
+      "name": "lower-limb-2",
+      "from": [
+        4.8999999999999995,
+        -0.7400000000000002,
+        6.379999999999999
+      ],
+      "to": [
+        6.975427319027735,
+        0.7400000000000002,
+        7.98
+      ],
+      "faces": {
+        "north": {
+          "texture": "#laminate"
+        },
+        "east": {
+          "texture": "#laminate"
+        },
+        "south": {
+          "texture": "#laminate"
+        },
+        "west": {
+          "texture": "#laminate"
+        },
+        "up": {
+          "texture": "#laminate"
+        },
+        "down": {
+          "texture": "#laminate"
+        }
+      },
+      "rotationOrigin": [
+        4.8999999999999995,
+        0.0,
+        7.18
+      ],
+      "rotationY": 157.0015
+    },
+    {
+      "name": "lower-horn-facing-2",
+      "from": [
+        4.8999999999999995,
+        -0.9799999999999986,
+        6.9079999999999995
+      ],
+      "to": [
+        6.955427319027734,
+        -0.7400000000000002,
+        7.452
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      },
+      "rotationOrigin": [
+        4.8999999999999995,
+        -0.8599999999999994,
+        7.18
+      ],
+      "rotationY": 157.0015
+    },
+    {
+      "name": "lower-limb-3",
+      "from": [
+        3.1000000000000005,
+        -0.7400000000000002,
+        5.7059999999999995
+      ],
+      "to": [
+        5.1448023275131405,
+        0.7400000000000002,
+        7.126000000000001
+      ],
+      "faces": {
+        "north": {
+          "texture": "#laminate"
+        },
+        "east": {
+          "texture": "#laminate"
+        },
+        "south": {
+          "texture": "#laminate"
+        },
+        "west": {
+          "texture": "#laminate"
+        },
+        "up": {
+          "texture": "#laminate"
+        },
+        "down": {
+          "texture": "#laminate"
+        }
+      },
+      "rotationOrigin": [
+        3.1000000000000005,
+        0.0,
+        6.416
+      ],
+      "rotationY": 170.7922
+    },
+    {
+      "name": "lower-horn-facing-3",
+      "from": [
+        3.1000000000000005,
+        -0.9799999999999986,
+        6.1746
+      ],
+      "to": [
+        5.12480232751314,
+        -0.7400000000000002,
+        6.657400000000001
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      },
+      "rotationOrigin": [
+        3.1000000000000005,
+        -0.8599999999999994,
+        6.416
+      ],
+      "rotationY": 170.7922
+    },
+    {
+      "name": "lower-limb-4",
+      "from": [
+        1.2000000000000004,
+        -0.7400000000000002,
+        5.498000000000001
+      ],
+      "to": [
+        3.1000910089093763,
+        0.7400000000000002,
+        6.718
+      ],
+      "faces": {
+        "north": {
+          "texture": "#laminate"
+        },
+        "east": {
+          "texture": "#laminate"
+        },
+        "south": {
+          "texture": "#laminate"
+        },
+        "west": {
+          "texture": "#laminate"
+        },
+        "up": {
+          "texture": "#laminate"
+        },
+        "down": {
+          "texture": "#laminate"
+        }
+      },
+      "rotationOrigin": [
+        1.2000000000000004,
+        0.0,
+        6.1080000000000005
+      ],
+      "rotationY": -157.9595
+    },
+    {
+      "name": "lower-horn-facing-4",
+      "from": [
+        1.2000000000000004,
+        -0.9799999999999986,
+        5.900600000000001
+      ],
+      "to": [
+        3.0800910089093767,
+        -0.7400000000000002,
+        6.3154
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      },
+      "rotationOrigin": [
+        1.2000000000000004,
+        -0.8599999999999994,
+        6.1080000000000005
+      ],
+      "rotationY": -157.9595
+    },
+    {
+      "name": "lower-limb-5",
+      "from": [
+        -0.44999999999999996,
+        -0.7400000000000002,
+        6.266
+      ],
+      "to": [
+        1.7390761223309308,
+        0.7400000000000002,
+        7.286
+      ],
+      "faces": {
+        "north": {
+          "texture": "#laminate"
+        },
+        "east": {
+          "texture": "#laminate"
+        },
+        "south": {
+          "texture": "#laminate"
+        },
+        "west": {
+          "texture": "#laminate"
+        },
+        "up": {
+          "texture": "#laminate"
+        },
+        "down": {
+          "texture": "#laminate"
+        }
+      },
+      "rotationOrigin": [
+        -0.44999999999999996,
+        0.0,
+        6.776
+      ],
+      "rotationY": -134.4909
+    },
+    {
+      "name": "lower-horn-facing-5",
+      "from": [
+        -0.44999999999999996,
+        -0.9799999999999986,
+        6.602599999999999
+      ],
+      "to": [
+        1.7190761223309308,
+        -0.7400000000000002,
+        6.949400000000001
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      },
+      "rotationOrigin": [
+        -0.44999999999999996,
+        -0.8599999999999994,
+        6.776
+      ],
+      "rotationY": -134.4909
+    },
+    {
+      "name": "lower-limb-6",
+      "from": [
+        -1.8999999999999992,
+        -0.7400000000000002,
+        7.862
+      ],
+      "to": [
+        0.40000091743100097,
+        0.7400000000000002,
+        8.642000000000001
+      ],
+      "faces": {
+        "north": {
+          "texture": "#laminate"
+        },
+        "east": {
+          "texture": "#laminate"
+        },
+        "south": {
+          "texture": "#laminate"
+        },
+        "west": {
+          "texture": "#laminate"
+        },
+        "up": {
+          "texture": "#laminate"
+        },
+        "down": {
+          "texture": "#laminate"
+        }
+      },
+      "rotationOrigin": [
+        -1.8999999999999992,
+        0.0,
+        8.252
+      ],
+      "rotationY": -121.8382
+    },
+    {
+      "name": "lower-horn-facing-6",
+      "from": [
+        -1.8999999999999992,
+        -0.9799999999999986,
+        8.082
+      ],
+      "to": [
+        0.38000091743100095,
+        -0.7400000000000002,
+        8.422
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      },
+      "rotationOrigin": [
+        -1.8999999999999992,
+        -0.8599999999999994,
+        8.252
+      ],
+      "rotationY": -121.8382
+    },
+    {
+      "name": "lower-limb-7",
+      "from": [
+        -3.0500000000000016,
+        -0.7400000000000002,
+        9.814
+      ],
+      "to": [
+        -1.4478650533773945,
+        0.7400000000000002,
+        10.394
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      },
+      "rotationOrigin": [
+        -3.0500000000000016,
+        0.0,
+        10.104
+      ],
+      "rotationY": -116.0118
+    },
+    {
+      "name": "upper-near-gold-point",
+      "from": [
+        13.7,
+        0.7199999999999998,
+        6.116
+      ],
+      "to": [
+        14.3,
+        0.9199999999999999,
+        6.716000000000001
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      },
+      "rotationOrigin": [
+        14.0,
+        0.8200000000000003,
+        6.416
+      ],
+      "rotationY": -45
+    },
+    {
+      "name": "lower-near-gold-point",
+      "from": [
+        2.8000000000000007,
+        0.7199999999999998,
+        6.116
+      ],
+      "to": [
+        3.4000000000000004,
+        0.9199999999999999,
+        6.716000000000001
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      },
+      "rotationOrigin": [
+        3.1000000000000005,
+        0.8200000000000003,
+        6.416
+      ],
+      "rotationY": -45
+    },
+    {
+      "name": "upper-string",
+      "from": [
+        20.8,
+        0.8600000000000003,
+        11.356
+      ],
+      "to": [
+        33.95342160808357,
+        1.04,
+        11.516
+      ],
+      "faces": {
+        "north": {
+          "texture": "#string"
+        },
+        "east": {
+          "texture": "#string"
+        },
+        "south": {
+          "texture": "#string"
+        },
+        "west": {
+          "texture": "#string"
+        },
+        "up": {
+          "texture": "#string"
+        },
+        "down": {
+          "texture": "#string"
+        }
+      },
+      "rotationOrigin": [
+        20.7,
+        1.4500000000000002,
+        11.386
+      ],
+      "rotationY": -144.437
+    },
+    {
+      "name": "lower-string",
+      "from": [
+        -3.7,
+        0.8600000000000003,
+        11.356
+      ],
+      "to": [
+        12.078545560348712,
+        1.04,
+        11.516
+      ],
+      "faces": {
+        "north": {
+          "texture": "#string"
+        },
+        "east": {
+          "texture": "#string"
+        },
+        "south": {
+          "texture": "#string"
+        },
+        "west": {
+          "texture": "#string"
+        },
+        "up": {
+          "texture": "#string"
+        },
+        "down": {
+          "texture": "#string"
+        }
+      },
+      "rotationOrigin": [
+        -3.7,
+        1.4500000000000002,
+        11.136
+      ],
+      "rotationY": -29.0017
+    },
+    {
+      "name": "upper-copper-nock",
+      "from": [
+        20.55,
+        -0.4499999999999993,
+        11.116
+      ],
+      "to": [
+        21.05,
+        1.6500000000000004,
+        11.756
+      ],
+      "faces": {
+        "north": {
+          "texture": "#copper"
+        },
+        "east": {
+          "texture": "#copper"
+        },
+        "south": {
+          "texture": "#copper"
+        },
+        "west": {
+          "texture": "#copper"
+        },
+        "up": {
+          "texture": "#copper"
+        },
+        "down": {
+          "texture": "#copper"
+        }
+      }
+    },
+    {
+      "name": "lower-copper-nock",
+      "from": [
+        -3.95,
+        -0.4499999999999993,
+        11.116
+      ],
+      "to": [
+        -3.45,
+        1.6500000000000004,
+        11.756
+      ],
+      "faces": {
+        "north": {
+          "texture": "#copper"
+        },
+        "east": {
+          "texture": "#copper"
+        },
+        "south": {
+          "texture": "#copper"
+        },
+        "west": {
+          "texture": "#copper"
+        },
+        "up": {
+          "texture": "#copper"
+        },
+        "down": {
+          "texture": "#copper"
+        }
+      }
+    },
+    {
+      "name": "arrow-shaft",
+      "from": [
+        9.760000000000002,
+        0.8100000000000005,
+        5.336
+      ],
+      "to": [
+        10.040000000000003,
+        1.0899999999999999,
+        19.336
+      ],
+      "faces": {
+        "north": {
+          "texture": "#darkwood"
+        },
+        "east": {
+          "texture": "#darkwood"
+        },
+        "south": {
+          "texture": "#darkwood"
+        },
+        "west": {
+          "texture": "#darkwood"
+        },
+        "up": {
+          "texture": "#darkwood"
+        },
+        "down": {
+          "texture": "#darkwood"
+        }
+      }
+    },
+    {
+      "name": "arrowhead-root",
+      "from": [
+        9.450000000000001,
+        0.5,
+        4.786
+      ],
+      "to": [
+        10.350000000000001,
+        1.4000000000000004,
+        5.486000000000001
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "arrowhead-point",
+      "from": [
+        9.72,
+        0.7699999999999996,
+        4.286
+      ],
+      "to": [
+        10.080000000000002,
+        1.13,
+        4.836
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "upper-fletching",
+      "from": [
+        10.030000000000001,
+        0.5,
+        17.536
+      ],
+      "to": [
+        10.450000000000001,
+        1.4000000000000004,
+        18.636
+      ],
+      "faces": {
+        "north": {
+          "texture": "#leather"
+        },
+        "east": {
+          "texture": "#leather"
+        },
+        "south": {
+          "texture": "#leather"
+        },
+        "west": {
+          "texture": "#leather"
+        },
+        "up": {
+          "texture": "#leather"
+        },
+        "down": {
+          "texture": "#leather"
+        }
+      }
+    },
+    {
+      "name": "lower-fletching",
+      "from": [
+        9.350000000000001,
+        0.5,
+        17.536
+      ],
+      "to": [
+        9.770000000000001,
+        1.4000000000000004,
+        18.636
+      ],
+      "faces": {
+        "north": {
+          "texture": "#leather"
+        },
+        "east": {
+          "texture": "#leather"
+        },
+        "south": {
+          "texture": "#leather"
+        },
+        "west": {
+          "texture": "#leather"
+        },
+        "up": {
+          "texture": "#leather"
+        },
+        "down": {
+          "texture": "#leather"
+        }
+      }
+    }
+  ]
+}

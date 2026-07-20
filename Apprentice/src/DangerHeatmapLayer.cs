@@ -50,9 +50,8 @@ namespace Apprentice
             {
                 capi = (ICoreClientAPI)api;
                 DangerHeatmapClientRuntime.Layer = this;
-                // The layer has its own side-tab, but the map API does not
-                // reliably deliver the first tab activation to mod layers.
-                // Start enabled so a received server snapshot is visible.
+                // Start visible on first use.  After that the map tab owns
+                // this flag; never force it back on when the map is reopened.
                 Active = true;
 
                 // Network state can arrive before WorldMapManager creates its
@@ -164,7 +163,12 @@ namespace Apprentice
             }
 
             state = received;
-            Active = received.Enabled;
+            // Enabled is the server feature switch.  Active is the user's
+            // map-tab choice and must remain independently toggleable.
+            if (!received.Enabled)
+            {
+                Active = false;
+            }
             InvalidateViewTexture();
             capi?.Logger.Notification(
                 "[Apprentice] Danger heatmap ready at X={0:0}, Z={1:0} with tiers 0-{2}.",
@@ -176,7 +180,6 @@ namespace Apprentice
 
         public override void OnMapOpenedClient()
         {
-            Active = true;
             DangerHeatmapStatePacket? latest =
                 DangerHeatmapClientRuntime.LatestState;
             if (state == null && latest != null)
@@ -184,7 +187,10 @@ namespace Apprentice
                 ApplyState(latest);
             }
             RequestStateIfMissing(force: true);
-            EnsureTerrainVisible();
+            if (Active)
+            {
+                EnsureTerrainVisible();
+            }
         }
 
         public override void OnTick(float dt)
@@ -335,7 +341,7 @@ namespace Apprentice
                 ApplyState(latest);
             }
 
-            if (capi == null || state?.Enabled != true ||
+            if (!Active || capi == null || state?.Enabled != true ||
                 state.Palette == null || state.Palette.Length == 0)
             {
                 return;

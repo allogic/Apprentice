@@ -145,6 +145,52 @@ namespace Apprentice
 			);
 		}
 
+		public static ExperienceChange SetExperience(
+			IServerPlayer player,
+			string classId,
+			double totalExperience)
+		{
+			ArgumentNullException.ThrowIfNull(player);
+			ValidateClassId(classId);
+
+			if (!double.IsFinite(totalExperience) ||
+				totalExperience < 0)
+			{
+				throw new ArgumentOutOfRangeException(
+					nameof(totalExperience),
+					totalExperience,
+					"Experience must be a finite, " +
+					"non-negative number."
+				);
+			}
+
+			ITreeAttribute classProgress =
+				GetOrCreateClassProgress(
+					player,
+					classId
+				);
+
+			double previousTotal =
+				classProgress.GetDouble(
+					ApprenticeConstants.ExperienceKey,
+					0
+				);
+
+			classProgress.SetDouble(
+				ApprenticeConstants.ExperienceKey,
+				totalExperience
+			);
+
+			player.Entity.WatchedAttributes.MarkPathDirty(
+				GetExperiencePath(classId)
+			);
+
+			return new ExperienceChange(
+				previousTotal,
+				totalExperience
+			);
+		}
+
 		private static string GetClassPath(string classId)
 		{
 			return

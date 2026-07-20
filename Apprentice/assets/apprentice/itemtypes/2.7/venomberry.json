@@ -7,7 +7,7 @@
   "maxstacksize": 64,
   "storageFlags": 5,
   "shape": {
-    "base": "apprentice:item/2.7/icon-flat"
+    "base": "apprentice:item/2.7/berry-cluster"
   },
   "textures": {
     "base": {
@@ -24,10 +24,15 @@
   },
   "guiTransform": {
     "rotation": {
-      "x": 0,
-      "y": 0,
-      "z": 0
+      "x": -15,
+      "y": 30,
+      "z": -10
     },
+    "scale": 1.35
+  },
+  "fpHandTransform": {
+    "translation": { "x": 0, "y": -0.1, "z": 0.2 },
+    "rotation": { "x": 15, "y": 100, "z": 5 },
     "scale": 1
   },
   "groundTransform": {

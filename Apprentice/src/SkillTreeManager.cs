@@ -109,19 +109,26 @@ namespace Apprentice
 		public static bool CanCraftLockedRecipe(
 			IPlayer player,
 			AssetLocation outputCode,
-			out string requiredNode)
+			out string requiredSkill)
 		{
 			if (Manager == null)
 			{
-				requiredNode = string.Empty;
+				requiredSkill = string.Empty;
 				return true;
 			}
 
 			return Manager.CanCraftLockedRecipe(
 				player,
 				outputCode,
-				out requiredNode
+				out requiredSkill
 			);
+		}
+
+		public static bool HasCapstone(
+			IPlayer player,
+			string classId)
+		{
+			return Manager?.HasCapstone(player, classId) == true;
 		}
 	}
 
@@ -134,7 +141,10 @@ namespace Apprentice
 		private readonly ClassConfig classConfig;
 		private readonly SkillTreeConfig skillConfig;
 		private readonly IServerNetworkChannel channel;
-		private readonly Dictionary<string, (string ClassId, string NodeId)>
+		private readonly Dictionary<
+			string,
+			(string ClassId, string NodeId, string DisplayName)
+		>
 			recipeLocks = new(StringComparer.OrdinalIgnoreCase);
 		private readonly Dictionary<string, long>
 			lastTrackingNoticeMs = new(StringComparer.OrdinalIgnoreCase);
@@ -438,20 +448,41 @@ namespace Apprentice
 		public bool CanCraftLockedRecipe(
 			IPlayer player,
 			AssetLocation outputCode,
-			out string requiredNode)
+			out string requiredSkill)
 		{
-			requiredNode = string.Empty;
+			requiredSkill = string.Empty;
 			if (!recipeLocks.TryGetValue(outputCode.ToShortString(), out var requirement))
 			{
 				return true;
 			}
 
-			requiredNode = requirement.NodeId;
+			requiredSkill = requirement.DisplayName;
 			return SkillTreeData.GetNodeRank(
 				player.Entity,
 				requirement.ClassId,
 				requirement.NodeId
 			) > 0;
+		}
+
+		public bool HasCapstone(
+			IPlayer player,
+			string classId)
+		{
+			if (!skillConfig.Trees.TryGetValue(
+				classId,
+				out SkillTreeDefinition? tree))
+			{
+				return false;
+			}
+
+			return tree.Nodes.Any(node =>
+				node.Capstone &&
+				SkillTreeData.GetNodeRank(
+					player.Entity,
+					tree.ClassId,
+					node.Id
+				) > 0
+			);
 		}
 
 		public void ApplyPlayerStats(IServerPlayer player)
@@ -704,7 +735,11 @@ namespace Apprentice
 							continue;
 						}
 
-						recipeLocks[effect.Code] = (tree.ClassId, node.Id);
+						recipeLocks[effect.Code] = (
+							tree.ClassId,
+							node.Id,
+							node.DisplayName
+						);
 					}
 				}
 			}

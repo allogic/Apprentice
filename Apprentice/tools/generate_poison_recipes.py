@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Generate deterministic poison compatibility barrel recipes for 2.7.0.
+"""Generate deterministic core-game poison recipes for Apprentice 2.7.0.
 
-The lists below are intentionally derived from the installed 1.22 mod assets.  We
-match exact variant sets instead of broad berry/mushroom wildcards, so edible
-foods can never silently become poison ingredients.
+Optional-mod recipes are deliberately excluded: barrel recipes do not honor the
+asset dependency field and otherwise emit dead-recipe errors when those mods are
+not installed.
 """
 
 import json
@@ -34,47 +34,27 @@ def food(code, variants=None, kind="item"):
 
 low = [
     food("apprentice:venomberry"),
-    food("wildcraftfruit:fruit-*", ["coralbead", "snowberry", "pokeberry", "ivy", "woodbine", "falsetomato", "elderberry", "biasong", "rowanberry", "pittedchinaberry", "ginkgopulp"]),
-    food("wildcraftfruit:dryfruit-*", ["juniper"]),
-    food("expandedfoods:choppedmushroom-*", ["bitterbolete", "devilstooth", "golddropmilkcap"]),
-    food("expandedfoods:cookedchoppedmushroom-*", ["bitterbolete-partbaked", "devilstooth-partbaked", "golddropmilkcap-partbaked", "bitterbolete-perfect", "devilstooth-perfect", "golddropmilkcap-perfect", "earthball-charred", "elfinsaddle-charred", "jackolantern-charred", "flyagaric-charred", "bitterbolete-charred", "devilstooth-charred", "golddropmilkcap-charred", "sickener-charred"]),
     food("game:mushroom-*-normal", ["bitterbolete", "devilstooth", "golddropmilkcap"], "block"),
     food("game:mushroom-*-normal-north", ["devilstooth"], "block"),
 ]
 
 medium = [
     food("apprentice:gloamcap"),
-    food("wildcraftfruit:fruit-*", ["cashewwhole", "blacknightshadeunripe"]),
-    food("wildcraftfruit:rustyberry-*", ["fractureberry"]),
-    food("expandedfoods:choppedmushroom-*", ["flyagaric", "earthball", "elfinsaddle", "jackolantern", "sickener"]),
-    food("expandedfoods:cookedchoppedmushroom-*", ["flyagaric-partbaked", "earthball-partbaked", "elfinsaddle-partbaked", "jackolantern-partbaked", "devilbolete-partbaked", "laughingjim-partbaked", "sickener-partbaked", "pinkbonnet-partbaked", "flyagaric-perfect", "earthball-perfect", "elfinsaddle-perfect", "jackolantern-perfect", "devilbolete-perfect", "laughingjim-perfect", "sickener-perfect", "pinkbonnet-perfect", "devilbolete-charred", "laughingjim-charred", "foolsconecap-charred", "pinkbonnet-charred"]),
     food("game:mushroom-*-normal", ["flyagaric", "earthball", "elfinsaddle", "jackolantern", "sickener"], "block"),
 ]
 
 high = [
     food("apprentice:dangerous-tissue"),
-    food("wildcraftfruit:fruit-*", ["wolfberry", "belladonna", "bryony", "bitternightshade", "baneberry", "spindle", "crowseye", "seamango", "yew", "chinaberry"]),
-    food("expandedfoods:choppedmushroom-*", ["deathcap", "devilbolete", "laughingjim", "foolsconecap", "funeralbell", "pinkbonnet"]),
-    food("expandedfoods:cookedchoppedmushroom-*", ["deathcap-partbaked", "foolsconecap-partbaked", "funeralbell-partbaked", "deathcap-perfect", "foolsconecap-perfect", "funeralbell-perfect", "deathcap-charred", "funeralbell-charred"]),
     food("game:mushroom-*-normal", ["deathcap", "devilbolete", "laughingjim", "foolsconecap", "funeralbell", "pinkbonnet"], "block"),
     food("game:mushroom-*-normal-north", ["funeralbell", "pinkbonnet"], "block"),
 ]
 
 wines = [
     "game:ciderportion-*",
-    "expandedfoods:strongwineportion-*",
-    "expandedfoods:potentwineportion-*",
-    "wildcraftfruit:ciderportion-*",
-    "wildcraftfruit:flowerwine-*",
-    "wildcraftfruit:fineflowerwine-*",
 ]
 
 spirits = [
     "game:alcoholportion",
-    "expandedfoods:strongspiritportion-*",
-    "expandedfoods:potentspiritportion-*",
-    "wildcraftfruit:spiritportion-*",
-    "wildcraftfruit:finespiritportion-*",
 ]
 
 
@@ -118,22 +98,27 @@ for spirit_index, spirit in enumerate(spirits):
             "output": {"type": "item", "code": "apprentice:poisonportion-potent", "litres": 1},
         }, spirit, code))
 
+grandmaster_catalysts = [
+    ("apprentice:dangerous-tissue", 1),
+    ("apprentice:venomberry", 5),
+    ("apprentice:gloamcap", 5),
+]
+
 for spirit_index, spirit in enumerate(spirits):
-    recipes.append(with_dependencies({
-        "code": f"apprentice:poison-grandmaster-{spirit_index}", "sealHours": 72,
-        "ingredients": [
-            ingredient(spirit, litres=1, variant_name="spirit"),
-            ingredient("apprentice:dangerous-tissue", quantity=1),
-            ingredient("apprentice:venomberry", quantity=5),
-            ingredient("apprentice:gloamcap", quantity=5),
-        ],
-        "output": {"type": "item", "code": "apprentice:poisonportion-grandmaster", "litres": 1},
-    }, spirit))
+    for catalyst_index, (catalyst, quantity) in enumerate(grandmaster_catalysts):
+        recipes.append(with_dependencies({
+            "code": f"apprentice:poison-grandmaster-{spirit_index}-{catalyst_index}", "sealHours": 72,
+            "ingredients": [
+                ingredient(spirit, litres=1, variant_name="spirit"),
+                ingredient(catalyst, quantity=quantity),
+            ],
+            "output": {"type": "item", "code": "apprentice:poisonportion-grandmaster", "litres": 1},
+        }, spirit))
 
 (OUT / "poison-brewing.json").write_text(json.dumps(recipes, indent=2) + "\n", encoding="utf-8")
 
 arrow_recipes = []
-arrow_families = ["game:arrow-*", "butchering:arrow-*"]
+arrow_families = ["game:arrow-*"]
 for tier in ("mild", "standard", "potent", "grandmaster"):
     for index, arrow_code in enumerate(arrow_families):
         arrow_recipes.append(with_dependencies({
