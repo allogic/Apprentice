@@ -103,7 +103,7 @@ namespace Apprentice.src.weapons
 
 				if (Velocity.Length() > 0.001F)
 				{
-					position.SetAngles(position.Roll, position.Yaw, initalAngle - EngageAngle);
+					position.SetAngles(position.Roll, position.Yaw, position.Pitch - EngageAngle);
 
 					Velocity -= Velocity * Dampening;
 
@@ -112,7 +112,7 @@ namespace Apprentice.src.weapons
 				}
 
 				position.SetPos(position.X, position.Y, position.Z);
-				position.SetAngles(position.Roll, position.Yaw, initalAngle + EngageAngle);
+				position.SetAngles(position.Roll, position.Yaw, position.Pitch + EngageAngle);
 			}
 
 			// entity.ApplyGravity

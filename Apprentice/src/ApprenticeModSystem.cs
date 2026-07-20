@@ -490,7 +490,7 @@ namespace Apprentice
 				api.Logger.Error(exception);
 			}
 
-			capi?.World.Player.Entity.AddBehavior(new UchigatanaDashBehaviour(capi, capi.World.Player.Entity));
+			capi?.Event.PlayerJoin += OnPlayerJoin;
 		}
 
 		private void CheckMasterFishingRodAnimation(float deltaTime)
@@ -564,6 +564,14 @@ namespace Apprentice
 		#endregion
 
 		#region Event Handler
+		private void OnPlayerJoin(IClientPlayer byPlayer)
+		{
+			if (capi != null)
+			{
+				// Entity playerEntity = capi.World.Player.Entity;
+				byPlayer.Entity.AddBehavior(new UchigatanaDashBehaviour(capi, byPlayer.Entity));
+			}
+		}
 		private void OnExperienceNotification(ExperienceNotificationPacket packet)
 		{
 			// Network packet callbacks are not a safe place to create
