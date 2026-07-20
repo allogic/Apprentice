@@ -26,6 +26,7 @@ namespace Apprentice
 		Node,
 		Purchase,
 		ResetView,
+		HiddenPage,
 		TreeArea
 	}
 
@@ -143,6 +144,7 @@ namespace Apprentice
 		private double canvasScaleY = 1;
 		private double panX;
 		private double panY;
+		private int hiddenPage;
 
 		private bool draggingTree;
 		private bool textureReady;
@@ -527,6 +529,17 @@ namespace Apprentice
 					statusMessage =
 						"Tree view reset.";
 					break;
+
+				case SkillTreeHitKind.HiddenPage:
+					int pageCount = Math.Max(
+						1,
+						(int)Math.Ceiling(HiddenClassCatalog.All.Count / 8d)
+					);
+					hiddenPage = region.Id == "next"
+						? Math.Min(pageCount - 1, hiddenPage + 1)
+						: Math.Max(0, hiddenPage - 1);
+					statusMessage = $"Hidden discoveries page {hiddenPage + 1} of {pageCount}.";
+					break;
 			}
 
 			RebuildTexture();
@@ -549,6 +562,25 @@ namespace Apprentice
 			ICoreClientAPI api,
 			MouseWheelEventArgs args)
 		{
+			if (activeTab == ApprenticeWindowTab.HiddenClasses)
+			{
+				double hiddenChange = args.deltaPrecise != 0
+					? args.deltaPrecise
+					: args.delta;
+				int pageCount = Math.Max(
+					1,
+					(int)Math.Ceiling(HiddenClassCatalog.All.Count / 8d)
+				);
+				hiddenPage = Math.Clamp(
+					hiddenPage - Math.Sign(hiddenChange),
+					0,
+					pageCount - 1
+				);
+				RebuildTexture();
+				args.SetHandled();
+				return;
+			}
+
 			if (activeTab != ApprenticeWindowTab.SkillTree ||
 				!IsMouseOverTreePanel())
 			{
@@ -862,4 +894,3 @@ namespace Apprentice
 		);
 	}
 }
-

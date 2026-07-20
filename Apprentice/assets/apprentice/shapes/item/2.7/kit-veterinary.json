@@ -1,0 +1,410 @@
+{
+  "textureWidth": 16,
+  "textureHeight": 16,
+  "textures": {
+    "wood": "game:block/wood/planks/oak1",
+    "darkwood": "game:block/wood/planks/walnut1",
+    "iron": "game:block/metal/ingot/iron",
+    "copper": "game:block/metal/ingot/copper",
+    "leather": "game:block/leather/plain",
+    "bone": "game:block/creature/bone"
+  },
+  "elements": [
+    {
+      "name": "leather-case",
+      "from": [
+        3,
+        3,
+        5
+      ],
+      "to": [
+        13,
+        11,
+        11
+      ],
+      "faces": {
+        "north": {
+          "texture": "#leather"
+        },
+        "east": {
+          "texture": "#leather"
+        },
+        "south": {
+          "texture": "#leather"
+        },
+        "west": {
+          "texture": "#leather"
+        },
+        "up": {
+          "texture": "#leather"
+        },
+        "down": {
+          "texture": "#leather"
+        }
+      }
+    },
+    {
+      "name": "case-lid",
+      "from": [
+        3,
+        10,
+        4.7
+      ],
+      "to": [
+        13,
+        13,
+        11.3
+      ],
+      "faces": {
+        "north": {
+          "texture": "#darkwood"
+        },
+        "east": {
+          "texture": "#darkwood"
+        },
+        "south": {
+          "texture": "#darkwood"
+        },
+        "west": {
+          "texture": "#darkwood"
+        },
+        "up": {
+          "texture": "#darkwood"
+        },
+        "down": {
+          "texture": "#darkwood"
+        }
+      }
+    },
+    {
+      "name": "iron-hinge-left",
+      "from": [
+        4,
+        9.5,
+        4.3
+      ],
+      "to": [
+        5.5,
+        11.5,
+        5.2
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "iron-hinge-right",
+      "from": [
+        10.5,
+        9.5,
+        4.3
+      ],
+      "to": [
+        12,
+        11.5,
+        5.2
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "front-clasp",
+      "from": [
+        7,
+        7,
+        4
+      ],
+      "to": [
+        9,
+        10,
+        5.2
+      ],
+      "faces": {
+        "north": {
+          "texture": "#copper"
+        },
+        "east": {
+          "texture": "#copper"
+        },
+        "south": {
+          "texture": "#copper"
+        },
+        "west": {
+          "texture": "#copper"
+        },
+        "up": {
+          "texture": "#copper"
+        },
+        "down": {
+          "texture": "#copper"
+        }
+      }
+    },
+    {
+      "name": "handle-left",
+      "from": [
+        5,
+        12,
+        6.5
+      ],
+      "to": [
+        6,
+        15,
+        8
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "handle-right",
+      "from": [
+        10,
+        12,
+        6.5
+      ],
+      "to": [
+        11,
+        15,
+        8
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "handle-grip",
+      "from": [
+        5,
+        14,
+        6.5
+      ],
+      "to": [
+        11,
+        15.2,
+        8
+      ],
+      "faces": {
+        "north": {
+          "texture": "#leather"
+        },
+        "east": {
+          "texture": "#leather"
+        },
+        "south": {
+          "texture": "#leather"
+        },
+        "west": {
+          "texture": "#leather"
+        },
+        "up": {
+          "texture": "#leather"
+        },
+        "down": {
+          "texture": "#leather"
+        }
+      }
+    },
+    {
+      "name": "medicine-bottle",
+      "from": [
+        4,
+        10.5,
+        3.5
+      ],
+      "to": [
+        7,
+        15,
+        6.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#copper"
+        },
+        "east": {
+          "texture": "#copper"
+        },
+        "south": {
+          "texture": "#copper"
+        },
+        "west": {
+          "texture": "#copper"
+        },
+        "up": {
+          "texture": "#copper"
+        },
+        "down": {
+          "texture": "#copper"
+        }
+      }
+    },
+    {
+      "name": "bandage-roll",
+      "from": [
+        9,
+        11,
+        5
+      ],
+      "to": [
+        13,
+        14,
+        9
+      ],
+      "faces": {
+        "north": {
+          "texture": "#bone"
+        },
+        "east": {
+          "texture": "#bone"
+        },
+        "south": {
+          "texture": "#bone"
+        },
+        "west": {
+          "texture": "#bone"
+        },
+        "up": {
+          "texture": "#bone"
+        },
+        "down": {
+          "texture": "#bone"
+        }
+      }
+    },
+    {
+      "name": "medical-cross-vertical",
+      "from": [
+        7.2,
+        5,
+        4
+      ],
+      "to": [
+        8.8,
+        10,
+        5.2
+      ],
+      "faces": {
+        "north": {
+          "texture": "#bone"
+        },
+        "east": {
+          "texture": "#bone"
+        },
+        "south": {
+          "texture": "#bone"
+        },
+        "west": {
+          "texture": "#bone"
+        },
+        "up": {
+          "texture": "#bone"
+        },
+        "down": {
+          "texture": "#bone"
+        }
+      }
+    },
+    {
+      "name": "medical-cross-horizontal",
+      "from": [
+        5.5,
+        6.7,
+        4
+      ],
+      "to": [
+        10.5,
+        8.3,
+        5.2
+      ],
+      "faces": {
+        "north": {
+          "texture": "#bone"
+        },
+        "east": {
+          "texture": "#bone"
+        },
+        "south": {
+          "texture": "#bone"
+        },
+        "west": {
+          "texture": "#bone"
+        },
+        "up": {
+          "texture": "#bone"
+        },
+        "down": {
+          "texture": "#bone"
+        }
+      }
+    }
+  ]
+}

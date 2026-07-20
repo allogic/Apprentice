@@ -12,6 +12,60 @@
     "value": [16, 16]
   },
   {
+    "file": "game:shapes/entity/humanoid/seraph-faceless.json",
+    "op": "add",
+    "path": "/textureSizes/raceskin",
+    "value": [32, 76]
+  },
+  {
+    "file": "game:shapes/entity/humanoid/seraph-faceless.json",
+    "op": "add",
+    "path": "/textureSizes/skinpart-raceskin",
+    "value": [32, 76]
+  },
+  {
+    "file": "game:entities/humanoid/player.json",
+    "op": "add",
+    "path": "/attributes/skinnableParts/-",
+    "value": {
+      "code": "apprenticefaceskin",
+      "type": "texture",
+      "hidden": true,
+      "textureTarget": "raceskin",
+      "variants": [
+        { "code": "skin1", "texture": "game:entity/humanoid/seraphskinparts/body/skin1" },
+        { "code": "skin2", "texture": "game:entity/humanoid/seraphskinparts/body/skin2" },
+        { "code": "skin3", "texture": "game:entity/humanoid/seraphskinparts/body/skin3" },
+        { "code": "skin4", "texture": "game:entity/humanoid/seraphskinparts/body/skin4" },
+        { "code": "skin5", "texture": "game:entity/humanoid/seraphskinparts/body/skin5" },
+        { "code": "skin6", "texture": "game:entity/humanoid/seraphskinparts/body/skin6" },
+        { "code": "skin7", "texture": "game:entity/humanoid/seraphskinparts/body/skin7" },
+        { "code": "skin8", "texture": "game:entity/humanoid/seraphskinparts/body/skin8" },
+        { "code": "skin9", "texture": "game:entity/humanoid/seraphskinparts/body/skin9" },
+        { "code": "skin10", "texture": "game:entity/humanoid/seraphskinparts/body/skin10" },
+        { "code": "skin11", "texture": "game:entity/humanoid/seraphskinparts/body/skin11" },
+        { "code": "skin12", "texture": "game:entity/humanoid/seraphskinparts/body/skin12" },
+        { "code": "skin13", "texture": "game:entity/humanoid/seraphskinparts/body/skin13" },
+        { "code": "skin14", "texture": "game:entity/humanoid/seraphskinparts/body/skin14" },
+        { "code": "skin15", "texture": "game:entity/humanoid/seraphskinparts/body/skin15" },
+        { "code": "skin16", "texture": "game:entity/humanoid/seraphskinparts/body/skin16" },
+        { "code": "skin17", "texture": "game:entity/humanoid/seraphskinparts/body/skin17" },
+        { "code": "skin18", "texture": "game:entity/humanoid/seraphskinparts/body/skin18" },
+        { "code": "skin19", "texture": "game:entity/humanoid/seraphskinparts/body/skin19" },
+        { "code": "skin20", "texture": "game:entity/humanoid/seraphskinparts/body/skin20" },
+        { "code": "apprentice-dragonborn", "texture": "apprentice:entity/humanoid/races/skins/dragonborn" },
+        { "code": "apprentice-dwarf", "texture": "apprentice:entity/humanoid/races/skins/dwarf" },
+        { "code": "apprentice-drow-black", "texture": "apprentice:entity/humanoid/races/skins/drow-black" },
+        { "code": "apprentice-elf", "texture": "apprentice:entity/humanoid/races/skins/elf" },
+        { "code": "apprentice-gnome", "texture": "apprentice:entity/humanoid/races/skins/gnome" },
+        { "code": "apprentice-goliath", "texture": "apprentice:entity/humanoid/races/skins/goliath" },
+        { "code": "apprentice-halfling", "texture": "apprentice:entity/humanoid/races/skins/halfling" },
+        { "code": "apprentice-orc", "texture": "apprentice:entity/humanoid/races/skins/orc" },
+        { "code": "apprentice-tiefling", "texture": "apprentice:entity/humanoid/races/skins/tiefling" }
+      ]
+    }
+  },
+  {
     "file": "game:entities/humanoid/player.json",
     "op": "add",
     "path": "/attributes/skinnableParts/-",

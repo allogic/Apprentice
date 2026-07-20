@@ -1,0 +1,102 @@
+{
+  "textureWidth": 16,
+  "textureHeight": 16,
+  "textures": {
+    "leather": "game:block/leather/plain",
+    "copper": "game:block/metal/ingot/copper",
+    "iron": "game:block/metal/ingot/iron"
+  },
+  "elements": [
+    {
+      "name": "utensilRoll",
+      "from": [2, 3, 5],
+      "to": [14, 11, 10],
+      "faces": {
+        "north": { "texture": "#leather", "uv": [0, 0, 12, 8] },
+        "east": { "texture": "#leather", "uv": [0, 0, 5, 8] },
+        "south": { "texture": "#leather", "uv": [0, 0, 12, 8] },
+        "west": { "texture": "#leather", "uv": [0, 0, 5, 8] },
+        "up": { "texture": "#leather", "uv": [0, 0, 12, 5] },
+        "down": { "texture": "#leather", "uv": [0, 0, 12, 5] }
+      }
+    },
+    {
+      "name": "rollFlap",
+      "from": [2, 11, 5],
+      "to": [14, 13, 10],
+      "faces": {
+        "north": { "texture": "#leather", "uv": [0, 0, 12, 2] },
+        "east": { "texture": "#leather", "uv": [0, 0, 5, 2] },
+        "south": { "texture": "#leather", "uv": [0, 0, 12, 2] },
+        "west": { "texture": "#leather", "uv": [0, 0, 5, 2] },
+        "up": { "texture": "#leather", "uv": [0, 0, 12, 5] },
+        "down": { "texture": "#leather", "uv": [0, 0, 12, 5] }
+      }
+    },
+    {
+      "name": "ladleHandle",
+      "from": [4, 10, 4],
+      "to": [5, 16, 5],
+      "faces": {
+        "north": { "texture": "#copper", "uv": [0, 0, 2, 12] },
+        "east": { "texture": "#copper", "uv": [0, 0, 2, 12] },
+        "south": { "texture": "#copper", "uv": [0, 0, 2, 12] },
+        "west": { "texture": "#copper", "uv": [0, 0, 2, 12] },
+        "up": { "texture": "#copper", "uv": [0, 0, 2, 2] },
+        "down": { "texture": "#copper", "uv": [0, 0, 2, 2] }
+      }
+    },
+    {
+      "name": "ladleBowl",
+      "from": [3, 14, 3],
+      "to": [6, 16, 5],
+      "faces": {
+        "north": { "texture": "#copper", "uv": [0, 0, 4, 3] },
+        "east": { "texture": "#copper", "uv": [0, 0, 3, 3] },
+        "south": { "texture": "#copper", "uv": [0, 0, 4, 3] },
+        "west": { "texture": "#copper", "uv": [0, 0, 3, 3] },
+        "up": { "texture": "#copper", "uv": [0, 0, 4, 3] },
+        "down": { "texture": "#copper", "uv": [0, 0, 4, 3] }
+      }
+    },
+    {
+      "name": "forkHandle",
+      "from": [7, 10, 4],
+      "to": [8, 16, 5],
+      "faces": {
+        "north": { "texture": "#iron", "uv": [0, 0, 2, 12] },
+        "east": { "texture": "#iron", "uv": [0, 0, 2, 12] },
+        "south": { "texture": "#iron", "uv": [0, 0, 2, 12] },
+        "west": { "texture": "#iron", "uv": [0, 0, 2, 12] },
+        "up": { "texture": "#iron", "uv": [0, 0, 2, 2] },
+        "down": { "texture": "#iron", "uv": [0, 0, 2, 2] }
+      }
+    },
+    {
+      "name": "knife",
+      "from": [10, 9, 4],
+      "to": [12, 16, 5],
+      "faces": {
+        "north": { "texture": "#iron", "uv": [0, 0, 4, 14] },
+        "east": { "texture": "#iron", "uv": [0, 0, 2, 14] },
+        "south": { "texture": "#iron", "uv": [0, 0, 4, 14] },
+        "west": { "texture": "#iron", "uv": [0, 0, 2, 14] },
+        "up": { "texture": "#iron", "uv": [0, 0, 4, 2] },
+        "down": { "texture": "#iron", "uv": [0, 0, 4, 2] }
+      }
+    },
+    {
+      "name": "strap",
+      "from": [7, 3, 4.5],
+      "to": [9, 11, 5.25],
+      "faces": {
+        "north": { "texture": "#leather", "uv": [0, 0, 3, 12] },
+        "east": { "texture": "#leather", "uv": [0, 0, 2, 12] },
+        "south": { "texture": "#leather", "uv": [0, 0, 3, 12] },
+        "west": { "texture": "#leather", "uv": [0, 0, 2, 12] },
+        "up": { "texture": "#leather", "uv": [0, 0, 3, 2] },
+        "down": { "texture": "#leather", "uv": [0, 0, 3, 2] }
+      }
+    }
+  ]
+}

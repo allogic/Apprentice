@@ -9,12 +9,16 @@
     "seraph": [
       32,
       76
+    ],
+    "toothwhite": [
+      16,
+      16
     ]
   },
   "textures": {
     "race": "apprentice:entity/humanoid/races/orc",
     "seraph": "entity/humanoid/seraph-naked",
-    "bone": "apprentice:entity/humanoid/races/bone"
+    "toothwhite": "apprentice:entity/humanoid/races/horns/white"
   },
   "elements": [
     {
@@ -61,7 +65,7 @@
           "rotationX": -3,
           "faces": {
             "north": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -70,7 +74,7 @@
               ]
             },
             "east": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -79,7 +83,7 @@
               ]
             },
             "south": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -88,7 +92,7 @@
               ]
             },
             "west": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -97,7 +101,7 @@
               ]
             },
             "up": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -106,7 +110,7 @@
               ]
             },
             "down": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -140,7 +144,7 @@
           "rotationX": 3,
           "faces": {
             "north": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -149,7 +153,7 @@
               ]
             },
             "east": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -158,7 +162,7 @@
               ]
             },
             "south": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -167,7 +171,7 @@
               ]
             },
             "west": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -176,7 +180,7 @@
               ]
             },
             "up": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -185,7 +189,7 @@
               ]
             },
             "down": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -219,7 +223,7 @@
           "rotationX": 3,
           "faces": {
             "north": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -228,7 +232,7 @@
               ]
             },
             "east": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -237,7 +241,7 @@
               ]
             },
             "south": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -246,7 +250,7 @@
               ]
             },
             "west": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -255,7 +259,7 @@
               ]
             },
             "up": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -264,7 +268,7 @@
               ]
             },
             "down": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,

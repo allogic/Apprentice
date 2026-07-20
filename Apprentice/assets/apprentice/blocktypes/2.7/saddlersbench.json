@@ -1,0 +1,33 @@
+{
+  "code": "saddlersbench",
+  "class": "Block",
+  "drawtype": "cube",
+  "shape": {
+    "base": "game:block/basic/cube"
+  },
+  "textures": {
+    "all": {
+      "base": "apprentice:block/2.7/saddlersbench"
+    }
+  },
+  "blockmaterial": "Wood",
+  "resistance": 3.5,
+  "maxstacksize": 16,
+  "creativeinventory": {
+    "general": [
+      "*"
+    ],
+    "construction": [
+      "*"
+    ]
+  },
+  "sounds": {
+    "hit": "game:block/planks",
+    "break": "game:block/planks",
+    "place": "game:block/planks",
+    "walk": "game:walk/wood"
+  },
+  "heldTpIdleAnimation": "holdbothhandslarge",
+  "heldRightReadyAnimation": "heldblockready",
+  "heldTpUseAnimation": "twohandplaceblock"
+}

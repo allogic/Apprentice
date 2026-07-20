@@ -1,0 +1,114 @@
+{
+  "textureWidth": 16,
+  "textureHeight": 16,
+  "textures": {
+    "wood": "game:block/wood/planks/oak1",
+    "darkwood": "game:block/wood/planks/walnut1",
+    "iron": "game:block/metal/ingot/iron",
+    "gold": "game:block/metal/ingot/gold",
+    "copper": "game:block/metal/ingot/copper",
+    "leather": "game:block/leather/plain",
+    "bone": "game:block/creature/bone"
+  },
+  "elements": [
+    {
+      "name": "stem",
+      "from": [
+        7,
+        2,
+        7
+      ],
+      "to": [
+        9,
+        10,
+        9
+      ],
+      "faces": {
+        "north": {
+          "texture": "#bone"
+        },
+        "east": {
+          "texture": "#bone"
+        },
+        "south": {
+          "texture": "#bone"
+        },
+        "west": {
+          "texture": "#bone"
+        },
+        "up": {
+          "texture": "#bone"
+        },
+        "down": {
+          "texture": "#bone"
+        }
+      }
+    },
+    {
+      "name": "cap-brim",
+      "from": [
+        3,
+        9,
+        4
+      ],
+      "to": [
+        13,
+        11,
+        12
+      ],
+      "faces": {
+        "north": {
+          "texture": "#leather"
+        },
+        "east": {
+          "texture": "#leather"
+        },
+        "south": {
+          "texture": "#leather"
+        },
+        "west": {
+          "texture": "#leather"
+        },
+        "up": {
+          "texture": "#leather"
+        },
+        "down": {
+          "texture": "#leather"
+        }
+      }
+    },
+    {
+      "name": "cap-crown",
+      "from": [
+        5,
+        11,
+        5
+      ],
+      "to": [
+        11,
+        14,
+        11
+      ],
+      "faces": {
+        "north": {
+          "texture": "#darkwood"
+        },
+        "east": {
+          "texture": "#darkwood"
+        },
+        "south": {
+          "texture": "#darkwood"
+        },
+        "west": {
+          "texture": "#darkwood"
+        },
+        "up": {
+          "texture": "#darkwood"
+        },
+        "down": {
+          "texture": "#darkwood"
+        }
+      }
+    }
+  ]
+}

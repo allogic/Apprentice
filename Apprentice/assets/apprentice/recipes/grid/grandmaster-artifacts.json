@@ -1,0 +1,514 @@
+[
+  {
+    "ingredientPattern": "GPG,ICI,PHP",
+    "ingredients": {
+      "G": {
+        "type": "item",
+        "code": "game:gear-rusty"
+      },
+      "P": {
+        "type": "item",
+        "code": "game:paper-parchment"
+      },
+      "I": {
+        "type": "item",
+        "code": "game:ingot-iron"
+      },
+      "C": {
+        "type": "item",
+        "code": "game:clearquartz"
+      },
+      "H": {
+        "type": "item",
+        "code": "game:hammer-*",
+        "isTool": true,
+        "toolDurabilityCost": 1
+      }
+    },
+    "width": 3,
+    "height": 3,
+    "output": {
+      "type": "item",
+      "code": "apprentice:mastersurveykit",
+      "quantity": 1
+    }
+  },
+  {
+    "ingredientPattern": "PPP,NHN,PPP",
+    "ingredients": {
+      "P": {
+        "type": "block",
+        "code": "game:plank-*"
+      },
+      "N": {
+        "type": "item",
+        "code": "game:metalnailsandstrips-*"
+      },
+      "H": {
+        "type": "item",
+        "code": "game:hammer-*",
+        "isTool": true,
+        "toolDurabilityCost": 1
+      }
+    },
+    "width": 3,
+    "height": 3,
+    "output": {
+      "type": "block",
+      "code": "apprentice:joinersbench",
+      "quantity": 1
+    }
+  },
+  {
+    "ingredientPattern": "KSK,LRL,FHF",
+    "ingredients": {
+      "K": {
+        "type": "item",
+        "code": "game:knife-*",
+        "isTool": true,
+        "toolDurabilityCost": 1
+      },
+      "S": {
+        "type": "item",
+        "code": "game:stick"
+      },
+      "L": {
+        "type": "item",
+        "code": "game:leather-normal-plain"
+      },
+      "R": {
+        "type": "item",
+        "code": "game:rope"
+      },
+      "F": {
+        "type": "item",
+        "code": "game:flaxfibers"
+      },
+      "H": {
+        "type": "item",
+        "code": "game:hoe-*",
+        "isTool": true,
+        "toolDurabilityCost": 1
+      }
+    },
+    "width": 3,
+    "height": 3,
+    "output": {
+      "type": "item",
+      "code": "apprentice:graftingkit",
+      "quantity": 1
+    }
+  },
+  {
+    "ingredientPattern": "PPP,NGN,PPP",
+    "ingredients": {
+      "P": {
+        "type": "block",
+        "code": "game:plank-*"
+      },
+      "N": {
+        "type": "item",
+        "code": "game:metalnailsandstrips-*"
+      },
+      "G": {
+        "type": "item",
+        "code": "game:paper-parchment"
+      }
+    },
+    "width": 3,
+    "height": 3,
+    "output": {
+      "type": "block",
+      "code": "apprentice:architectstable",
+      "quantity": 1
+    }
+  },
+  {
+    "ingredientPattern": "CCC,LKL,CHC",
+    "ingredients": {
+      "C": {
+        "type": "item",
+        "code": "game:ingot-copper"
+      },
+      "L": {
+        "type": "item",
+        "code": "game:leather-normal-plain"
+      },
+      "K": {
+        "type": "item",
+        "code": "game:knife-*",
+        "isTool": true,
+        "toolDurabilityCost": 1
+      },
+      "H": {
+        "type": "item",
+        "code": "game:hammer-*",
+        "isTool": true,
+        "toolDurabilityCost": 1
+      }
+    },
+    "width": 3,
+    "height": 3,
+    "output": {
+      "type": "item",
+      "code": "apprentice:mastercookbook",
+      "quantity": 1
+    }
+  },
+  {
+    "ingredientPattern": "FFF,CIC,FFF",
+    "ingredients": {
+      "F": {
+        "type": "item",
+        "code": "game:clay-fire"
+      },
+      "C": {
+        "type": "item",
+        "code": "game:clay-blue"
+      },
+      "I": {
+        "type": "item",
+        "code": "game:ingot-iron"
+      }
+    },
+    "width": 3,
+    "height": 3,
+    "output": {
+      "type": "block",
+      "code": "apprentice:masterkiln",
+      "quantity": 1
+    }
+  },
+  {
+    "ingredientPattern": "LLL,NPN,PPP",
+    "ingredients": {
+      "L": {
+        "type": "item",
+        "code": "game:leather-normal-plain"
+      },
+      "N": {
+        "type": "item",
+        "code": "game:metalnailsandstrips-*"
+      },
+      "P": {
+        "type": "block",
+        "code": "game:plank-*"
+      }
+    },
+    "width": 3,
+    "height": 3,
+    "output": {
+      "type": "block",
+      "code": "apprentice:saddlersbench",
+      "quantity": 1
+    }
+  },
+  {
+    "ingredientPattern": "SFS,LCL,SFS",
+    "ingredients": {
+      "S": {
+        "type": "item",
+        "code": "game:stick"
+      },
+      "F": {
+        "type": "item",
+        "code": "game:flaxfibers"
+      },
+      "L": {
+        "type": "item",
+        "code": "game:leather-normal-plain"
+      },
+      "C": {
+        "type": "item",
+        "code": "game:cloth-plain"
+      }
+    },
+    "width": 3,
+    "height": 3,
+    "output": {
+      "type": "item",
+      "code": "apprentice:sewingkit",
+      "quantity": 1
+    }
+  },
+  {
+    "ingredientPattern": "RNR,IGI,RHR",
+    "ingredients": {
+      "R": {
+        "type": "item",
+        "code": "game:rope"
+      },
+      "N": {
+        "type": "item",
+        "code": "game:metalnailsandstrips-*"
+      },
+      "I": {
+        "type": "item",
+        "code": "game:ingot-iron"
+      },
+      "G": {
+        "type": "item",
+        "code": "game:gear-rusty"
+      },
+      "H": {
+        "type": "item",
+        "code": "game:hammer-*",
+        "isTool": true,
+        "toolDurabilityCost": 1
+      }
+    },
+    "width": 3,
+    "height": 3,
+    "output": {
+      "type": "item",
+      "code": "apprentice:advancedtrapkit",
+      "quantity": 1
+    }
+  },
+  {
+    "ingredientPattern": "PIP,LGL,PHP",
+    "ingredients": {
+      "P": {
+        "type": "item",
+        "code": "game:paper-parchment"
+      },
+      "I": {
+        "type": "item",
+        "code": "game:ingot-iron"
+      },
+      "L": {
+        "type": "item",
+        "code": "game:leather-normal-plain"
+      },
+      "G": {
+        "type": "item",
+        "code": "game:metalplate-iron"
+      },
+      "H": {
+        "type": "item",
+        "code": "game:hammer-*",
+        "isTool": true,
+        "toolDurabilityCost": 1
+      }
+    },
+    "width": 3,
+    "height": 3,
+    "output": {
+      "type": "item",
+      "code": "apprentice:masterweaponpatterns",
+      "quantity": 1
+    }
+  },
+  {
+    "ingredientPattern": "RSR,LWL,RKR",
+    "ingredients": {
+      "R": {
+        "type": "item",
+        "code": "game:rope"
+      },
+      "S": {
+        "type": "item",
+        "code": "game:stick"
+      },
+      "L": {
+        "type": "item",
+        "code": "game:leather-normal-plain"
+      },
+      "W": {
+        "type": "block",
+        "code": "game:plank-*"
+      },
+      "K": {
+        "type": "item",
+        "code": "game:knife-*",
+        "isTool": true,
+        "toolDurabilityCost": 1
+      }
+    },
+    "width": 3,
+    "height": 3,
+    "output": {
+      "type": "item",
+      "code": "apprentice:compositebow",
+      "quantity": 1
+    }
+  },
+  {
+    "ingredientPattern": "  S, SR,SFR",
+    "ingredients": {
+      "S": {
+        "type": "item",
+        "code": "game:stick"
+      },
+      "R": {
+        "type": "item",
+        "code": "game:rope"
+      },
+      "F": {
+        "type": "item",
+        "code": "game:flaxtwine"
+      }
+    },
+    "width": 3,
+    "height": 3,
+    "output": {
+      "type": "item",
+      "code": "apprentice:masterfishingrod",
+      "quantity": 1
+    }
+  },
+  {
+    "ingredientPattern": "BCB,LKL,PHP",
+    "ingredients": {
+      "B": {
+        "type": "item",
+        "code": "game:bowl-*-fired"
+      },
+      "C": {
+        "type": "item",
+        "code": "game:cloth-plain"
+      },
+      "L": {
+        "type": "item",
+        "code": "game:leather-normal-plain"
+      },
+      "K": {
+        "type": "item",
+        "code": "game:knife-*",
+        "isTool": true,
+        "toolDurabilityCost": 1
+      },
+      "P": {
+        "type": "item",
+        "code": "game:paper-parchment"
+      },
+      "H": {
+        "type": "item",
+        "code": "game:honeyportion"
+      }
+    },
+    "width": 3,
+    "height": 3,
+    "output": {
+      "type": "item",
+      "code": "apprentice:veterinarykit",
+      "quantity": 1
+    }
+  },
+  {
+    "ingredientPattern": "PPP,WHW,PPP",
+    "ingredients": {
+      "P": {
+        "type": "block",
+        "code": "game:plank-*"
+      },
+      "W": {
+        "type": "item",
+        "code": "game:beeswax"
+      },
+      "H": {
+        "type": "item",
+        "code": "game:honeyportion"
+      }
+    },
+    "width": 3,
+    "height": 3,
+    "output": {
+      "type": "block",
+      "code": "apprentice:framehive",
+      "quantity": 1
+    }
+  },
+  {
+    "ingredientPattern": "  S, LS,S K",
+    "ingredients": {
+      "S": {
+        "type": "item",
+        "code": "game:stick"
+      },
+      "L": {
+        "type": "item",
+        "code": "game:leather-normal-plain"
+      },
+      "K": {
+        "type": "item",
+        "code": "game:knife-*",
+        "isTool": true,
+        "toolDurabilityCost": 1
+      }
+    },
+    "width": 3,
+    "height": 3,
+    "output": {
+      "type": "item",
+      "code": "apprentice:atlatl",
+      "quantity": 1
+    }
+  },
+  {
+    "ingredientPattern": "NPN,PIP,NHN",
+    "ingredients": {
+      "N": {
+        "type": "item",
+        "code": "game:metalnailsandstrips-*"
+      },
+      "P": {
+        "type": "block",
+        "code": "game:plank-*"
+      },
+      "I": {
+        "type": "item",
+        "code": "game:ingot-iron"
+      },
+      "H": {
+        "type": "item",
+        "code": "game:hammer-*",
+        "isTool": true,
+        "toolDurabilityCost": 1
+      }
+    },
+    "width": 3,
+    "height": 3,
+    "output": {
+      "type": "item",
+      "code": "apprentice:towershield",
+      "quantity": 1
+    }
+  },
+  {
+    "ingredientPattern": "CCC,LFL,SHS",
+    "ingredients": {
+      "C": {
+        "type": "item",
+        "code": "game:cloth-plain"
+      },
+      "L": {
+        "type": "item",
+        "code": "game:leather-normal-plain"
+      },
+      "F": {
+        "type": "item",
+        "code": "game:flaxfibers"
+      },
+      "S": {
+        "type": "item",
+        "code": "game:sewingkit",
+        "isTool": true,
+        "toolDurabilityCost": 1
+      },
+      "H": {
+        "type": "item",
+        "code": "game:hammer-*",
+        "isTool": true,
+        "toolDurabilityCost": 1
+      }
+    },
+    "width": 3,
+    "height": 3,
+    "output": {
+      "type": "item",
+      "code": "apprentice:armorpaddingkit",
+      "quantity": 1
+    }
+  }
+]

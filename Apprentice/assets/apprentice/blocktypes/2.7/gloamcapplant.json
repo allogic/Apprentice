@@ -1,0 +1,26 @@
+{
+  "code": "gloamcapplant",
+  "class": "Block",
+  "drawtype": "json",
+  "renderpass": "OpaqueNoCull",
+  "shape": { "base": "apprentice:block/2.7/gloamcap" },
+  "textures": {
+    "stem": { "base": "apprentice:item/2.7/arrow-shaft" },
+    "cap": { "base": "apprentice:item/2.7/arrow-poison-standard-material" }
+  },
+  "blockmaterial": "Plant",
+  "replaceable": 5200,
+  "lightAbsorption": 0,
+  "resistance": 0.2,
+  "collisionBox": null,
+  "selectionBox": { "x1": 0.21875, "y1": 0, "z1": 0.21875, "x2": 0.78125, "y2": 0.71875, "z2": 0.78125 },
+  "sideopaque": { "all": false },
+  "sidesolid": { "all": false },
+  "rainPermeable": true,
+  "drops": [
+    { "type": "item", "code": "apprentice:gloamcap", "quantity": { "avg": 1.2, "var": 0.2 } }
+  ],
+  "sounds": {
+    "place": "game:block/plant", "break": "game:block/plant", "hit": "game:block/plant"
+  }
+}

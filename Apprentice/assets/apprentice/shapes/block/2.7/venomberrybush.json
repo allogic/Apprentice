@@ -1,0 +1,64 @@
+{
+  "textureWidth": 32,
+  "textureHeight": 32,
+  "textures": {
+    "leaves": "game:block/plant/berrybush/small/leaves/redcurrant1",
+    "berry": "apprentice:item/2.7/arrow-poison-grandmaster-material"
+  },
+  "elements": [
+    {
+      "name": "foliage-ns", "from": [1, 0, 7.85], "to": [15, 14, 8.15],
+      "faces": {
+        "north": { "texture": "#leaves" },
+        "south": { "texture": "#leaves" }
+      }
+    },
+    {
+      "name": "foliage-ew", "from": [7.85, 0, 1], "to": [8.15, 14, 15],
+      "faces": {
+        "east": { "texture": "#leaves" },
+        "west": { "texture": "#leaves" }
+      }
+    },
+    {
+      "name": "foliage-diagonal-a", "from": [1.5, 1, 7.85], "to": [14.5, 13, 8.15],
+      "rotationOrigin": [8, 7, 8], "rotationY": 45,
+      "faces": {
+        "north": { "texture": "#leaves" },
+        "south": { "texture": "#leaves" }
+      }
+    },
+    {
+      "name": "foliage-diagonal-b", "from": [1.5, 1, 7.85], "to": [14.5, 13, 8.15],
+      "rotationOrigin": [8, 7, 8], "rotationY": -45,
+      "faces": {
+        "north": { "texture": "#leaves" },
+        "south": { "texture": "#leaves" }
+      }
+    },
+    {
+      "name": "berry-1", "from": [3, 8, 3], "to": [4, 9, 4],
+      "faces": {"north":{"texture":"#berry"},"east":{"texture":"#berry"},"south":{"texture":"#berry"},"west":{"texture":"#berry"},"up":{"texture":"#berry"},"down":{"texture":"#berry"}}
+    },
+    {
+      "name": "berry-2", "from": [5, 11, 6], "to": [6, 12, 7],
+      "faces": {"north":{"texture":"#berry"},"east":{"texture":"#berry"},"south":{"texture":"#berry"},"west":{"texture":"#berry"},"up":{"texture":"#berry"},"down":{"texture":"#berry"}}
+    },
+    {
+      "name": "berry-3", "from": [10, 9, 4], "to": [11, 10, 5],
+      "faces": {"north":{"texture":"#berry"},"east":{"texture":"#berry"},"south":{"texture":"#berry"},"west":{"texture":"#berry"},"up":{"texture":"#berry"},"down":{"texture":"#berry"}}
+    },
+    {
+      "name": "berry-4", "from": [12, 6, 8], "to": [13, 7, 9],
+      "faces": {"north":{"texture":"#berry"},"east":{"texture":"#berry"},"south":{"texture":"#berry"},"west":{"texture":"#berry"},"up":{"texture":"#berry"},"down":{"texture":"#berry"}}
+    },
+    {
+      "name": "berry-5", "from": [4, 5, 11], "to": [5, 6, 12],
+      "faces": {"north":{"texture":"#berry"},"east":{"texture":"#berry"},"south":{"texture":"#berry"},"west":{"texture":"#berry"},"up":{"texture":"#berry"},"down":{"texture":"#berry"}}
+    },
+    {
+      "name": "berry-6", "from": [8, 12, 10], "to": [9, 13, 11],
+      "faces": {"north":{"texture":"#berry"},"east":{"texture":"#berry"},"south":{"texture":"#berry"},"west":{"texture":"#berry"},"up":{"texture":"#berry"},"down":{"texture":"#berry"}}
+    }
+  ]
+}

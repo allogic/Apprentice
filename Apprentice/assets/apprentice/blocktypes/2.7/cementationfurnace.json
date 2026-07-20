@@ -1,0 +1,34 @@
+{
+  "code": "cementationfurnace",
+  "class": "ApprenticeCementationFurnace",
+  "drawtype": "cube",
+  "shape": {
+    "base": "game:block/basic/cube"
+  },
+  "textures": {
+    "all": {
+      "base": "apprentice:block/2.7/cementationfurnace"
+    }
+  },
+  "blockmaterial": "Stone",
+  "resistance": 8,
+  "maxstacksize": 16,
+  "creativeinventory": {
+    "general": [
+      "*"
+    ],
+    "construction": [
+      "*"
+    ]
+  },
+  "sounds": {
+    "hit": "game:block/stone",
+    "break": "game:block/stone",
+    "place": "game:block/stone",
+    "walk": "game:walk/stone"
+  },
+  "heldTpIdleAnimation": "holdbothhandslarge",
+  "heldRightReadyAnimation": "heldblockready",
+  "heldTpUseAnimation": "twohandplaceblock",
+  "entityClass": "ApprenticeCementationFurnace"
+}

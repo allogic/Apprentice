@@ -1,0 +1,353 @@
+{
+  "editor": {
+    "allAngles": true
+  },
+  "textureWidth": 32,
+  "textureHeight": 32,
+  "textures": {
+    "oak": "game:block/wood/planks/oak1",
+    "walnut": "game:block/wood/planks/walnut1",
+    "iron": "game:block/metal/ingot/iron",
+    "copper": "game:block/metal/ingot/copper",
+    "gold": "game:block/metal/ingot/gold",
+    "leather": "game:block/leather/plain",
+    "cloth": "game:block/creature/bone",
+    "stone": "game:block/stone/granite",
+    "red": "game:block/leather/plain",
+    "blue": "game:block/leather/plain",
+    "green": "game:block/leather/plain",
+    "black": "game:block/wood/planks/walnut1"
+  },
+  "elements": [
+    {
+      "name": "first-aid-body",
+      "from": [
+        2.0,
+        2.0,
+        6.0
+      ],
+      "to": [
+        14.0,
+        9.0,
+        10.0
+      ],
+      "faces": {
+        "north": {
+          "texture": "#leather"
+        },
+        "east": {
+          "texture": "#leather"
+        },
+        "south": {
+          "texture": "#leather"
+        },
+        "west": {
+          "texture": "#leather"
+        },
+        "up": {
+          "texture": "#leather"
+        },
+        "down": {
+          "texture": "#leather"
+        }
+      }
+    },
+    {
+      "name": "first-aid-lid",
+      "from": [
+        1.85,
+        7.7,
+        5.85
+      ],
+      "to": [
+        14.15,
+        9.15,
+        10.15
+      ],
+      "faces": {
+        "north": {
+          "texture": "#leather"
+        },
+        "east": {
+          "texture": "#leather"
+        },
+        "south": {
+          "texture": "#leather"
+        },
+        "west": {
+          "texture": "#leather"
+        },
+        "up": {
+          "texture": "#leather"
+        },
+        "down": {
+          "texture": "#leather"
+        }
+      }
+    },
+    {
+      "name": "first-aid-seam",
+      "from": [
+        1.75,
+        7.45,
+        5.75
+      ],
+      "to": [
+        14.25,
+        7.85,
+        10.25
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "first-aid-handle-left",
+      "from": [
+        5.0,
+        9.0,
+        7.0
+      ],
+      "to": [
+        6.0,
+        12.0,
+        8.0
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "first-aid-handle-right",
+      "from": [
+        10.0,
+        9.0,
+        7.0
+      ],
+      "to": [
+        11.0,
+        12.0,
+        8.0
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "first-aid-handle-grip",
+      "from": [
+        5.0,
+        11.4,
+        6.8
+      ],
+      "to": [
+        11.0,
+        12.4,
+        8.2
+      ],
+      "faces": {
+        "north": {
+          "texture": "#leather"
+        },
+        "east": {
+          "texture": "#leather"
+        },
+        "south": {
+          "texture": "#leather"
+        },
+        "west": {
+          "texture": "#leather"
+        },
+        "up": {
+          "texture": "#leather"
+        },
+        "down": {
+          "texture": "#leather"
+        }
+      }
+    },
+    {
+      "name": "first-aid-latch-left",
+      "from": [
+        4.6,
+        7.0,
+        5.35
+      ],
+      "to": [
+        5.8,
+        8.4,
+        6.0
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "first-aid-latch-right",
+      "from": [
+        10.2,
+        7.0,
+        5.35
+      ],
+      "to": [
+        11.4,
+        8.4,
+        6.0
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "medical-cross-vertical",
+      "from": [
+        7.218,
+        3.3,
+        5.35
+      ],
+      "to": [
+        8.782,
+        7.8999999999999995,
+        5.949999999999999
+      ],
+      "faces": {
+        "north": {
+          "texture": "#cloth"
+        },
+        "east": {
+          "texture": "#cloth"
+        },
+        "south": {
+          "texture": "#cloth"
+        },
+        "west": {
+          "texture": "#cloth"
+        },
+        "up": {
+          "texture": "#cloth"
+        },
+        "down": {
+          "texture": "#cloth"
+        }
+      }
+    },
+    {
+      "name": "medical-cross-horizontal",
+      "from": [
+        5.7,
+        4.818,
+        5.35
+      ],
+      "to": [
+        10.3,
+        6.382,
+        5.949999999999999
+      ],
+      "faces": {
+        "north": {
+          "texture": "#cloth"
+        },
+        "east": {
+          "texture": "#cloth"
+        },
+        "south": {
+          "texture": "#cloth"
+        },
+        "west": {
+          "texture": "#cloth"
+        },
+        "up": {
+          "texture": "#cloth"
+        },
+        "down": {
+          "texture": "#cloth"
+        }
+      }
+    }
+  ]
+}

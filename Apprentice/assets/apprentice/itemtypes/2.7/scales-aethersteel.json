@@ -1,0 +1,48 @@
+{
+  "code": "scales-aethersteel",
+  "class": "Item",
+  "tags": [
+    "apprentice-content"
+  ],
+  "maxstacksize": 64,
+  "storageFlags": 5,
+  "shape": {
+    "base": "game:item/scales"
+  },
+  "textures": {
+    "metal": {
+      "base": "apprentice:item/2.7/scales-aethersteel"
+    }
+  },
+  "creativeinventory": {
+    "general": [
+      "*"
+    ],
+    "items": [
+      "*"
+    ]
+  },
+  "guiTransform": {
+    "rotation": {
+      "x": -25,
+      "y": 30,
+      "z": -15
+    },
+    "scale": 1.25
+  },
+  "fpHandTransform": {
+    "translation": { "x": 0, "y": -0.1, "z": 0.2 },
+    "rotation": { "x": 15, "y": 100, "z": 5 },
+    "scale": 1
+  },
+  "groundTransform": {
+    "scale": 0.8
+  },
+  "tpHandTransform": {
+    "scale": 0.6
+  },
+  "attributes": {
+    "metal": "aethersteel",
+    "toolTier": 7
+  }
+}

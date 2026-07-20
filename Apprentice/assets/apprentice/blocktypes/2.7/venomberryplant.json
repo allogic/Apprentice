@@ -1,0 +1,26 @@
+{
+  "code": "venomberryplant",
+  "class": "ApprenticeVenomberryBush",
+  "drawtype": "json",
+  "renderpass": "OpaqueNoCull",
+  "shape": { "base": "apprentice:block/2.7/venomberrybush" },
+  "textures": {
+    "leaves": { "base": "game:block/plant/berrybush/small/leaves/redcurrant1" },
+    "berry": { "base": "apprentice:item/2.7/arrow-poison-grandmaster-material" }
+  },
+  "blockmaterial": "Plant",
+  "replaceable": 5200,
+  "lightAbsorption": 0,
+  "resistance": 0.25,
+  "collisionBox": null,
+  "selectionBox": { "x1": 0.08, "y1": 0, "z1": 0.08, "x2": 0.92, "y2": 0.88, "z2": 0.92 },
+  "sideopaque": { "all": false },
+  "sidesolid": { "all": false },
+  "rainPermeable": true,
+  "drops": [
+    { "type": "item", "code": "apprentice:venomberry", "quantity": { "avg": 1.5, "var": 0.5 } }
+  ],
+  "sounds": {
+    "place": "game:block/plant", "break": "game:block/plant", "hit": "game:block/plant"
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "code": "towershield",
+  "class": "ItemShield",
+  "tags": [
+    "apprentice-content"
+  ],
+  "maxstacksize": 1,
+  "storageFlags": 257,
+  "shape": {
+    "base": "apprentice:item/2.7/tower-shield"
+  },
+  "creativeinventory": {
+    "general": [
+      "*"
+    ],
+    "items": [
+      "*"
+    ]
+  },
+  "guiTransform": {
+    "translation": { "x": 0, "y": 0, "z": 0 },
+    "rotation": { "x": -18, "y": 208, "z": -168 },
+    "origin": { "x": 0.5, "y": 0.45, "z": 0.5 },
+    "scale": 1.25
+  },
+  "fpHandTransform": {
+    "translation": { "x": -0.45, "y": -0.15, "z": 0.15 },
+    "rotation": { "x": 0, "y": 172, "z": 8 },
+    "origin": { "x": 0.5, "y": 0.5, "z": 0.609375 },
+    "scale": 2.15
+  },
+  "groundTransform": {
+    "translation": { "x": 0, "y": 0.37, "z": 0 },
+    "rotation": { "x": -93, "y": 0, "z": 0 },
+    "origin": { "x": 0.5, "y": 0, "z": 0.43 },
+    "scale": 2.1
+  },
+  "tpHandTransform": {
+    "translation": { "x": -0.67, "y": -0.6, "z": -0.78 },
+    "rotation": { "x": -4, "y": 4, "z": 0 },
+    "origin": { "x": 0.5, "y": 0.5, "z": 0.609375 },
+    "scale": 0.82
+  },
+  "tpOffHandTransform": {
+    "translation": { "x": -0.67, "y": -0.6, "z": -0.78 },
+    "rotation": { "x": -4, "y": 173, "z": 90 },
+    "origin": { "x": 0.5, "y": 0.5, "z": 0.609375 },
+    "scale": 0.82
+  },
+  "durability": 1800,
+  "attributes": {
+    "apprenticeFeature": "towershield",
+    "shield": {
+      "protectionChance": {
+        "active": 0.95,
+        "passive": 0.45,
+        "active-projectile": 1.0,
+        "passive-projectile": 0.35
+      },
+      "damageAbsorption": 6,
+      "projectileDamageAbsorption": 8,
+      "blockSoundLight": "game:held/shieldblock-wood-light",
+      "blockSoundHeavy": "game:held/shieldblock-wood-heavy"
+    },
+    "walkSpeedPenalty": 0.16
+  }
+}

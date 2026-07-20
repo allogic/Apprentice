@@ -1,0 +1,69 @@
+{
+  "code": "compositebow",
+  "class": "ApprenticeCompositeBow",
+  "tool": "bow",
+  "tags": [
+    "apprentice-content"
+  ],
+  "maxstacksize": 1,
+  "storageFlags": 5,
+  "shape": {
+    "base": "apprentice:item/2.7/composite-bow",
+    "alternates": [
+      { "base": "apprentice:item/2.7/composite-bow-charge1" },
+      { "base": "apprentice:item/2.7/composite-bow-charge2" },
+      { "base": "apprentice:item/2.7/composite-bow-charge3" },
+      { "base": "apprentice:item/2.7/composite-bow-charge4" },
+      { "base": "apprentice:item/2.7/composite-bow-charge5" }
+    ]
+  },
+  "textures": {
+    "aged": { "base": "apprentice:item/2.7/compositebow" },
+    "bone": { "base": "apprentice:item/2.7/compositebow-material" },
+    "leather": { "base": "game:block/leather/plain" }
+  },
+  "creativeinventory": {
+    "general": [
+      "*"
+    ],
+    "items": [
+      "*"
+    ]
+  },
+  "durability": 1400,
+  "attributes": {
+    "aimAnimation": "bowaimrecurve",
+    "heldItemPitchFollow": 1,
+    "aimingCancelAnimation": "bowcancel",
+    "aimingReleaseAnimation": "bowhit",
+    "damage": 6.5,
+    "damageTier": 4,
+    "statModifier": { "rangedWeaponsAcc": 0.4 },
+    "ignoreInvFrames": false,
+    "apprenticeFeature": "compositebow"
+  },
+  "guiTransform": {
+    "translation": { "x": 0, "y": 0, "z": 0 },
+    "rotation": { "x": -129, "y": 25, "z": 41 },
+    "origin": { "x": 0.47, "y": 0, "z": 0.55 },
+    "scale": 1.36
+  },
+  "fpHandTransform": {
+    "translation": { "x": 0, "y": 0.5, "z": 0 },
+    "rotation": { "x": 4, "y": 1, "z": 84 },
+    "origin": { "x": 0.5, "y": 0, "z": 0.5 },
+    "scale": 2.42
+  },
+  "tpHandTransform": {
+    "translation": { "x": -0.56, "y": 0.01, "z": -0.54 },
+    "rotation": { "x": 107, "y": 11, "z": 10 },
+    "origin": { "x": 0.5, "y": 0, "z": 0.5 },
+    "scale": 0.98
+  },
+  "groundTransform": {
+    "translation": { "x": 0, "y": 0, "z": 0 },
+    "rotation": { "x": 0, "y": 0, "z": 0 },
+    "origin": { "x": 0.5, "y": 0, "z": 0.5 },
+    "scale": 4.8
+  }
+}

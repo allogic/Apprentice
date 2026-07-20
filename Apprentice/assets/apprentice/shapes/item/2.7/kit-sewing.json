@@ -1,0 +1,186 @@
+{
+  "textureWidth": 16,
+  "textureHeight": 16,
+  "textures": {
+    "wood": "game:block/wood/planks/oak1",
+    "darkwood": "game:block/wood/planks/walnut1",
+    "iron": "game:block/metal/ingot/iron",
+    "gold": "game:block/metal/ingot/gold",
+    "copper": "game:block/metal/ingot/copper",
+    "leather": "game:block/leather/plain",
+    "bone": "game:block/creature/bone"
+  },
+  "elements": [
+    {
+      "name": "thread-spool",
+      "from": [
+        2,
+        4,
+        5
+      ],
+      "to": [
+        7,
+        12,
+        11
+      ],
+      "faces": {
+        "north": {
+          "texture": "#bone"
+        },
+        "east": {
+          "texture": "#bone"
+        },
+        "south": {
+          "texture": "#bone"
+        },
+        "west": {
+          "texture": "#bone"
+        },
+        "up": {
+          "texture": "#bone"
+        },
+        "down": {
+          "texture": "#bone"
+        }
+      }
+    },
+    {
+      "name": "spool-top",
+      "from": [
+        1,
+        11,
+        4
+      ],
+      "to": [
+        8,
+        13,
+        12
+      ],
+      "faces": {
+        "north": {
+          "texture": "#wood"
+        },
+        "east": {
+          "texture": "#wood"
+        },
+        "south": {
+          "texture": "#wood"
+        },
+        "west": {
+          "texture": "#wood"
+        },
+        "up": {
+          "texture": "#wood"
+        },
+        "down": {
+          "texture": "#wood"
+        }
+      }
+    },
+    {
+      "name": "spool-bottom",
+      "from": [
+        1,
+        3,
+        4
+      ],
+      "to": [
+        8,
+        5,
+        12
+      ],
+      "faces": {
+        "north": {
+          "texture": "#wood"
+        },
+        "east": {
+          "texture": "#wood"
+        },
+        "south": {
+          "texture": "#wood"
+        },
+        "west": {
+          "texture": "#wood"
+        },
+        "up": {
+          "texture": "#wood"
+        },
+        "down": {
+          "texture": "#wood"
+        }
+      }
+    },
+    {
+      "name": "large-needle",
+      "from": [
+        10,
+        2,
+        7
+      ],
+      "to": [
+        11,
+        15,
+        8
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationZ": 12,
+      "rotationOrigin": [
+        10.5,
+        8,
+        7.5
+      ]
+    },
+    {
+      "name": "thread-tail",
+      "from": [
+        7,
+        7,
+        7
+      ],
+      "to": [
+        13,
+        8,
+        8
+      ],
+      "faces": {
+        "north": {
+          "texture": "#leather"
+        },
+        "east": {
+          "texture": "#leather"
+        },
+        "south": {
+          "texture": "#leather"
+        },
+        "west": {
+          "texture": "#leather"
+        },
+        "up": {
+          "texture": "#leather"
+        },
+        "down": {
+          "texture": "#leather"
+        }
+      }
+    }
+  ]
+}

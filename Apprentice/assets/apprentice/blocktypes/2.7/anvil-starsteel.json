@@ -1,0 +1,39 @@
+{
+  "code": "anvil-starsteel",
+  "class": "BlockAnvil",
+  "entityClass": "Anvil",
+  "drawtype": "json",
+  "shape": {
+    "base": "apprentice:block/2.7/anvil"
+  },
+  "textures": {
+    "metal": {
+      "base": "apprentice:block/2.7/starsteel"
+    }
+  },
+  "blockmaterial": "Metal",
+  "sideopaque": { "all": false },
+  "sidesolid": { "all": false },
+  "lightAbsorption": 0,
+  "resistance": 15,
+  "maxstacksize": 1,
+  "creativeinventory": {
+    "general": ["*"],
+    "construction": ["*"]
+  },
+  "selectionBoxes": [
+    { "x1": 0.0625, "y1": 0, "z1": 0.0625, "x2": 0.9375, "y2": 0.0625, "z2": 0.9375 },
+    { "x1": 0.0625, "y1": 0, "z1": 0.1875, "x2": 0.9375, "y2": 0.625, "z2": 0.8125 },
+    { "x1": 0.1875, "y1": 0, "z1": 0.0625, "x2": 0.8125, "y2": 0.625, "z2": 0.9375 }
+  ],
+  "collisionBoxes": [
+    { "x1": 0.0625, "y1": 0, "z1": 0.0625, "x2": 0.9375, "y2": 0.0625, "z2": 0.9375 },
+    { "x1": 0.0625, "y1": 0, "z1": 0.1875, "x2": 0.9375, "y2": 0.625, "z2": 0.8125 },
+    { "x1": 0.1875, "y1": 0, "z1": 0.0625, "x2": 0.8125, "y2": 0.625, "z2": 0.9375 }
+  ],
+  "sounds": {
+    "hit": "game:block/anvilhit",
+    "break": "game:block/anvil",
+    "place": "game:block/anvil"
+  }
+}

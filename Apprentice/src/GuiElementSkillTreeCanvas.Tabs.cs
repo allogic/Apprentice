@@ -184,20 +184,31 @@ namespace Apprentice
 				margin + 20, margin + 50);
 
 			Entity? entity = api.World?.Player?.Entity;
-			// Four columns keep all eight discoveries visible in the restored
-			// 1120 x 682 compact window.
+			// The 2.7 registry contains many more discoveries than the original
+			// fixed eight-card view. Page the texture-backed canvas so cards never
+			// render outside the dialog and mouse regions remain deterministic.
 			int columns = width >= 1000 ? 4 : 3;
+			int rows = 2;
+			int pageSize = columns * rows;
+			int pageCount = Math.Max(
+				1,
+				(int)Math.Ceiling(HiddenClassCatalog.All.Count / (double)pageSize)
+			);
+			hiddenPage = Math.Clamp(hiddenPage, 0, pageCount - 1);
 			double gap = 14;
 			double cardWidth = (width - margin * 2 - 40 - gap * (columns - 1)) / columns;
 			double cardHeight = 210;
 			double startX = margin + 20;
 			double startY = margin + 84;
 
-			for (int index = 0; index < HiddenClassCatalog.All.Count; index++)
+			int firstIndex = hiddenPage * pageSize;
+			int lastIndex = Math.Min(HiddenClassCatalog.All.Count, firstIndex + pageSize);
+			for (int index = firstIndex; index < lastIndex; index++)
 			{
 				HiddenClassDefinition definition = HiddenClassCatalog.All[index];
-				int column = index % columns;
-				int row = index / columns;
+				int pageIndex = index - firstIndex;
+				int column = pageIndex % columns;
+				int row = pageIndex / columns;
 				double x = startX + column * (cardWidth + gap);
 				double y = startY + row * (cardHeight + gap);
 				bool unlocked = entity != null && HiddenClassData.IsUnlocked(entity, definition.Id);
@@ -244,10 +255,27 @@ namespace Apprentice
 				cursorY += DrawWrappedText(ctx, smallFont, definition.Description,
 					x + 14, cursorY, cardWidth - 28) + 8;
 
-				string requirements = string.Join(" + ", definition.RequiredClasses.Select(classId =>
+				List<string> requirementParts = definition.RequiredClasses.Select(classId =>
 					skillConfig.Trees.TryGetValue(classId, out SkillTreeDefinition? tree)
 						? tree.DisplayName
-						: classId));
+						: classId).ToList();
+				if (definition.RequiredProfession != null)
+				{
+					requirementParts.Add("Profession: " + definition.RequiredProfession);
+				}
+				if (definition.AllowedRaces.Count > 0)
+				{
+					requirementParts.Add("Race: " + string.Join("/", definition.AllowedRaces));
+				}
+				if (definition.AllowedSubraces.Count > 0)
+				{
+					requirementParts.Add("Heritage: " + string.Join("/", definition.AllowedSubraces));
+				}
+				if (definition.MinimumCapstones > 0)
+				{
+					requirementParts.Add($"{definition.MinimumCapstones} Grandmasters");
+				}
+				string requirements = string.Join(" + ", requirementParts);
 				cursorY += DrawWrappedText(ctx, tinyFont,
 					"Discovered from: " + requirements,
 					x + 14, cursorY, cardWidth - 28) + 8;
@@ -258,6 +286,47 @@ namespace Apprentice
 						"• " + FormatStatEffect(effect, effect.ValuePerRank),
 						x + 14, cursorY, cardWidth - 28) + 5;
 				}
+			}
+
+			if (pageCount > 1)
+			{
+				double buttonY = height - 45;
+				DrawHiddenPageButton(ctx, startX, buttonY, 116, 30, "Previous", "previous", hiddenPage > 0);
+				DrawCenteredText(ctx, smallFont,
+					$"Page {hiddenPage + 1} / {pageCount}",
+					width / 2,
+					buttonY + 7);
+				DrawHiddenPageButton(ctx, width - startX - 116, buttonY, 116, 30, "Next", "next", hiddenPage + 1 < pageCount);
+			}
+		}
+
+		private void DrawHiddenPageButton(
+			Context ctx,
+			double x,
+			double y,
+			double width,
+			double height,
+			string label,
+			string id,
+			bool enabled)
+		{
+			RoundRectangle(ctx, x, y, width, height, 6);
+			SetColor(ctx, enabled ? 0.24 : 0.08, enabled ? 0.16 : 0.08, enabled ? 0.30 : 0.10, 0.98);
+			ctx.FillPreserve();
+			SetColor(ctx, enabled ? 0.75 : 0.25, enabled ? 0.55 : 0.25, enabled ? 0.95 : 0.30, 0.9);
+			ctx.LineWidth = 1.5;
+			ctx.Stroke();
+			DrawCenteredText(ctx, smallFont, label, x + width / 2, y + 6);
+			if (enabled)
+			{
+				hitRegions.Add(new SkillTreeHitRegion(
+					SkillTreeHitKind.HiddenPage,
+					id,
+					x,
+					y,
+					width,
+					height
+				));
 			}
 		}
 
@@ -358,4 +427,3 @@ namespace Apprentice
 		}
 	}
 }
-

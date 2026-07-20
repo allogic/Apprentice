@@ -1,0 +1,213 @@
+{
+  "textureWidth": 16,
+  "textureHeight": 16,
+  "textures": {
+    "wood": "game:block/wood/planks/oak1",
+    "darkwood": "game:block/wood/planks/walnut1",
+    "iron": "game:block/metal/ingot/iron",
+    "gold": "game:block/metal/ingot/gold",
+    "copper": "game:block/metal/ingot/copper",
+    "leather": "game:block/leather/plain",
+    "bone": "game:block/creature/bone"
+  },
+  "elements": [
+    {
+      "name": "base",
+      "from": [
+        3,
+        3,
+        3
+      ],
+      "to": [
+        13,
+        5,
+        13
+      ],
+      "faces": {
+        "north": {
+          "texture": "#bone"
+        },
+        "east": {
+          "texture": "#bone"
+        },
+        "south": {
+          "texture": "#bone"
+        },
+        "west": {
+          "texture": "#bone"
+        },
+        "up": {
+          "texture": "#bone"
+        },
+        "down": {
+          "texture": "#bone"
+        }
+      }
+    },
+    {
+      "name": "north-wall",
+      "from": [
+        3,
+        5,
+        3
+      ],
+      "to": [
+        13,
+        12,
+        5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#bone"
+        },
+        "east": {
+          "texture": "#bone"
+        },
+        "south": {
+          "texture": "#bone"
+        },
+        "west": {
+          "texture": "#bone"
+        },
+        "up": {
+          "texture": "#bone"
+        },
+        "down": {
+          "texture": "#bone"
+        }
+      }
+    },
+    {
+      "name": "south-wall",
+      "from": [
+        3,
+        5,
+        11
+      ],
+      "to": [
+        13,
+        12,
+        13
+      ],
+      "faces": {
+        "north": {
+          "texture": "#bone"
+        },
+        "east": {
+          "texture": "#bone"
+        },
+        "south": {
+          "texture": "#bone"
+        },
+        "west": {
+          "texture": "#bone"
+        },
+        "up": {
+          "texture": "#bone"
+        },
+        "down": {
+          "texture": "#bone"
+        }
+      }
+    },
+    {
+      "name": "west-wall",
+      "from": [
+        3,
+        5,
+        5
+      ],
+      "to": [
+        5,
+        12,
+        11
+      ],
+      "faces": {
+        "north": {
+          "texture": "#bone"
+        },
+        "east": {
+          "texture": "#bone"
+        },
+        "south": {
+          "texture": "#bone"
+        },
+        "west": {
+          "texture": "#bone"
+        },
+        "up": {
+          "texture": "#bone"
+        },
+        "down": {
+          "texture": "#bone"
+        }
+      }
+    },
+    {
+      "name": "east-wall",
+      "from": [
+        11,
+        5,
+        5
+      ],
+      "to": [
+        13,
+        12,
+        11
+      ],
+      "faces": {
+        "north": {
+          "texture": "#bone"
+        },
+        "east": {
+          "texture": "#bone"
+        },
+        "south": {
+          "texture": "#bone"
+        },
+        "west": {
+          "texture": "#bone"
+        },
+        "up": {
+          "texture": "#bone"
+        },
+        "down": {
+          "texture": "#bone"
+        }
+      }
+    },
+    {
+      "name": "iron-band",
+      "from": [
+        2.5,
+        7,
+        2.5
+      ],
+      "to": [
+        13.5,
+        8,
+        13.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    }
+  ]
+}

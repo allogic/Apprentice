@@ -1,0 +1,26 @@
+{
+  "textureWidth": 16,
+  "textureHeight": 16,
+  "elements": [
+    {
+      "name": "ingot-body",
+      "from": [2, 3, 4],
+      "to": [14, 7.5, 12],
+      "faces": {
+        "north": { "texture": "#metal" }, "east": { "texture": "#metal" },
+        "south": { "texture": "#metal" }, "west": { "texture": "#metal" },
+        "up": { "texture": "#metal" }, "down": { "texture": "#metal" }
+      }
+    },
+    {
+      "name": "ingot-crown",
+      "from": [3, 7.5, 5],
+      "to": [13, 9, 11],
+      "faces": {
+        "north": { "texture": "#metal" }, "east": { "texture": "#metal" },
+        "south": { "texture": "#metal" }, "west": { "texture": "#metal" },
+        "up": { "texture": "#metal" }, "down": { "texture": "#metal" }
+      }
+    }
+  ]
+}

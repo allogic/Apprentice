@@ -66,6 +66,8 @@ namespace Apprentice
 
 		private void InstallApiPatches()
 		{
+			InstallPoisonConsumptionPatches();
+
 			MethodInfo? consumeInput =
 				typeof(GridRecipe).GetMethod(
 					nameof(GridRecipe.ConsumeInput),
@@ -274,6 +276,59 @@ namespace Apprentice
 					"EntityAgent.ReceiveSaturation " +
 					"(food satiety bonuses)"
 			);
+		}
+
+		private void InstallPoisonConsumptionPatches()
+		{
+			Type[] signature =
+			[
+				typeof(float), typeof(ItemSlot), typeof(EntityAgent),
+				typeof(BlockSelection), typeof(EntitySelection)
+			];
+			HashSet<MethodInfo> methods = new();
+
+			void AddMethod(Type type)
+			{
+				MethodInfo? method = type.GetMethod(
+					nameof(CollectibleObject.OnHeldInteractStop),
+					BindingFlags.Instance | BindingFlags.Public |
+						BindingFlags.DeclaredOnly,
+					binder: null,
+					types: signature,
+					modifiers: null
+				);
+				// Harmony cannot patch a method merely inherited by a runtime
+				// collectible type, nor an abstract/extern declaration.  Only add
+				// actual implementations; patching the inherited MethodInfo once
+				// per item caused a large startup error wall.
+				if (method != null &&
+					!method.IsAbstract &&
+					method.GetMethodBody() != null)
+				{
+					methods.Add(method);
+				}
+			}
+
+			AddMethod(typeof(CollectibleObject));
+			foreach (Item item in serverApi.World.Items)
+			{
+				if (item != null) AddMethod(item.GetType());
+			}
+			foreach (Block block in serverApi.World.Blocks)
+			{
+				if (block != null) AddMethod(block.GetType());
+			}
+
+			foreach (MethodInfo method in methods)
+			{
+				TryPatch(
+					method,
+					prefixName: nameof(PoisonConsumptionPatches.HeldInteractStopPrefix),
+					postfixName: nameof(PoisonConsumptionPatches.HeldInteractStopPostfix),
+					description: $"{method.DeclaringType?.FullName}.OnHeldInteractStop " +
+						"(poisoned food and drink)"
+				);
+			}
 		}
 
 		private void InstallSurvivalPatches()
@@ -632,10 +687,8 @@ namespace Apprentice
 			// Declared-only lookup prevents duplicate base-method patches.
 			string[] harvestBlockTypes =
 			[
+				"Apprentice.BlockVenomberryBush",
 				"Vintagestory.GameContent.BlockBerryBush",
-				"Vintagestory.GameContent.BlockFruitTreeBranch",
-				"Vintagestory.GameContent.BlockFruitTreeFoliage",
-				"Vintagestory.GameContent.BlockMushroom",
 				"Vintagestory.GameContent.BlockSkep"
 			];
 
@@ -789,6 +842,10 @@ namespace Apprentice
 				) ??
 				AccessTools.Method(
 					typeof(SkillMasteryPatches),
+					methodName
+				) ??
+				AccessTools.Method(
+					typeof(PoisonConsumptionPatches),
 					methodName
 				);
 

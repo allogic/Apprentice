@@ -1,0 +1,38 @@
+[
+  {
+    "code":"apprentice-aethersteel",
+    "triesPerChunk":0.018,
+    "withOreMap":true,
+    "handbookPageCode":"block-apprentice-ore-aethersteel",
+    "generator":"disc-followsealevel",
+    "attributes":{
+      "inblock":{"code":"rock-*","name":"rock","allowedVariants":["andesite","basalt","bauxite","chalk","chert","claystone","conglomerate","granite","kimberlite","limestone","marble","peridotite","phyllite","sandstone","shale","slate","suevite"]},
+      "placeblock": {
+        "code": "apprentice:ore-*-aethersteel-{rock}",
+        "name": "grade",
+        "allowedVariantsByInBlock": {
+          "rock-andesite": ["poor", "medium", "rich", "bountiful"],
+          "rock-basalt": ["poor", "medium", "rich", "bountiful"],
+          "rock-bauxite": ["poor", "medium", "rich", "bountiful"],
+          "rock-chalk": ["poor", "medium", "rich", "bountiful"],
+          "rock-chert": ["poor", "medium", "rich", "bountiful"],
+          "rock-claystone": ["poor", "medium", "rich", "bountiful"],
+          "rock-conglomerate": ["poor", "medium", "rich", "bountiful"],
+          "rock-granite": ["poor", "medium", "rich", "bountiful"],
+          "rock-kimberlite": ["poor", "medium", "rich", "bountiful"],
+          "rock-limestone": ["poor", "medium", "rich", "bountiful"],
+          "rock-marble": ["poor", "medium", "rich", "bountiful"],
+          "rock-peridotite": ["poor", "medium", "rich", "bountiful"],
+          "rock-phyllite": ["poor", "medium", "rich", "bountiful"],
+          "rock-sandstone": ["poor", "medium", "rich", "bountiful"],
+          "rock-shale": ["poor", "medium", "rich", "bountiful"],
+          "rock-slate": ["poor", "medium", "rich", "bountiful"],
+          "rock-suevite": ["poor", "medium", "rich", "bountiful"]
+        }
+      },
+      "radius":{"dist":"gaussian","avg":5,"var":1.5},
+      "yPosRel":{"dist":"uniform","avg":0.1,"var":0.08},
+      "thickness":{"dist":"uniform","avg":0.55,"var":0.2}
+    }
+  }
+]

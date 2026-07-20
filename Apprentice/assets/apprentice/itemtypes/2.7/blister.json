@@ -1,0 +1,77 @@
+{
+  "code": "blister",
+  "class": "ApprenticeCementationBlister",
+  "variantgroups": [
+    { "code": "metal", "states": ["starsteel", "aethersteel"] }
+  ],
+  "tags": ["apprentice-content"],
+  "maxstacksize": 16,
+  "storageFlags": 5,
+  "shape": { "base": "apprentice:item/2.7/material-blister" },
+  "texturesByType": {
+    "blister-starsteel": {
+      "base": { "base": "apprentice:item/2.7/blister-starsteel" }
+    },
+    "blister-aethersteel": {
+      "base": { "base": "apprentice:item/2.7/blister-aethersteel" }
+    }
+  },
+  "creativeinventory": {
+    "general": ["*"],
+    "items": ["*"]
+  },
+  "guiTransform": {
+    "rotation": { "x": -25, "y": 35, "z": -15 },
+    "scale": 1.45
+  },
+  "fpHandTransform": {
+    "translation": { "x": 0, "y": -0.1, "z": 0.2 },
+    "rotation": { "x": 15, "y": 100, "z": 5 },
+    "scale": 1
+  },
+  "groundTransform": {
+    "rotation": { "x": 0, "y": 30, "z": 90 },
+    "scale": 1
+  },
+  "tpHandTransform": {
+    "translation": { "x": -0.45, "y": 0, "z": -0.35 },
+    "rotation": { "x": 80, "y": 0, "z": 10 },
+    "scale": 0.65
+  },
+  "attributesByType": {
+    "blister-starsteel": {
+      "requiresAnvilTier": 5,
+      "workableTemperature": 900,
+      "forgable": true,
+      "requiresTongs": true,
+      "tongOpening": 0.15,
+      "onTongTransform": {
+        "translation": { "x": -0.2, "y": 0.05, "z": -0.1 },
+        "rotation": { "x": 0, "y": 90, "z": 0 },
+        "scale": 0.9
+      },
+      "onMetalTongTransform": {
+        "translation": { "x": -0.2, "y": 0.05, "z": -0.1 },
+        "rotation": { "x": 0, "y": 90, "z": 0 },
+        "scale": 0.9
+      }
+    },
+    "blister-aethersteel": {
+      "requiresAnvilTier": 6,
+      "workableTemperature": 980,
+      "forgable": true,
+      "requiresTongs": true,
+      "tongOpening": 0.15,
+      "onTongTransform": {
+        "translation": { "x": -0.2, "y": 0.05, "z": -0.1 },
+        "rotation": { "x": 0, "y": 90, "z": 0 },
+        "scale": 0.9
+      },
+      "onMetalTongTransform": {
+        "translation": { "x": -0.2, "y": 0.05, "z": -0.1 },
+        "rotation": { "x": 0, "y": 90, "z": 0 },
+        "scale": 0.9
+      }
+    }
+  }
+}

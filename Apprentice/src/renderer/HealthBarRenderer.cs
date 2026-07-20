@@ -28,14 +28,37 @@ namespace Apprentice
 		{
 			this.capi = capi;
 
+			IShaderProgram shader = capi.Shader.NewShaderProgram();
+			shader.AssetDomain = "apprentice";
+			shader.VertexShader = capi.Shader.NewShader(
+				EnumShaderType.VertexShader
+			);
+			shader.FragmentShader = capi.Shader.NewShader(
+				EnumShaderType.FragmentShader
+			);
+
+			try
+			{
+				capi.Shader.RegisterFileShaderProgram(
+					"apprenticehealthbar",
+					shader
+				);
+				if (!shader.Compile())
+				{
+					throw new InvalidOperationException(
+						"The Apprentice health-bar shader did not compile."
+					);
+				}
+			}
+			catch
+			{
+				shader.Dispose();
+				throw;
+			}
+
+			program = shader;
 			backgroundRectRef = capi.Render.UploadMesh(QuadMeshUtil.GetQuad());
 			healthRectRef = capi.Render.UploadMesh(QuadMeshUtil.GetQuad());
-
-			program = capi.Shader.NewShaderProgram();
-
-			capi.Shader.RegisterFileShaderProgram("healthbar", program);
-
-			program.Compile();
 
 			capi.Event.RegisterRenderer(this, EnumRenderStage.Opaque);
 		}
@@ -96,6 +119,11 @@ namespace Apprentice
 		{
 			float health = entity.WatchedAttributes.GetFloat("health");
 			float maxHealth = entity.WatchedAttributes.GetFloat("maxhealth");
+			if (!float.IsFinite(health) || !float.IsFinite(maxHealth) ||
+				maxHealth <= 0)
+			{
+				return;
+			}
 			float percentage = Math.Clamp(health / maxHealth, 0, 1);
 
 			Vec3d position = entity.Pos.XYZ;

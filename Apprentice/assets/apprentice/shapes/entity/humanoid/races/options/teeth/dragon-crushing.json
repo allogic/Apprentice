@@ -6,14 +6,14 @@
       16,
       16
     ],
-    "bone": [
+    "toothwhite": [
       16,
       16
     ]
   },
   "textures": {
     "dragon": "apprentice:entity/humanoid/races/dragonborn",
-    "bone": "apprentice:entity/humanoid/races/bone"
+    "toothwhite": "apprentice:entity/humanoid/races/horns/white"
   },
   "elements": [
     {
@@ -59,7 +59,7 @@
           ],
           "faces": {
             "north": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -68,7 +68,7 @@
               ]
             },
             "east": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -77,7 +77,7 @@
               ]
             },
             "south": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -86,7 +86,7 @@
               ]
             },
             "west": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -95,7 +95,7 @@
               ]
             },
             "up": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -104,7 +104,7 @@
               ]
             },
             "down": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -137,7 +137,7 @@
           ],
           "faces": {
             "north": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -146,7 +146,7 @@
               ]
             },
             "east": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -155,7 +155,7 @@
               ]
             },
             "south": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -164,7 +164,7 @@
               ]
             },
             "west": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -173,7 +173,7 @@
               ]
             },
             "up": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -182,7 +182,7 @@
               ]
             },
             "down": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -215,7 +215,7 @@
           ],
           "faces": {
             "north": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -224,7 +224,7 @@
               ]
             },
             "east": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -233,7 +233,7 @@
               ]
             },
             "south": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -242,7 +242,7 @@
               ]
             },
             "west": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -251,7 +251,7 @@
               ]
             },
             "up": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -260,7 +260,7 @@
               ]
             },
             "down": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -293,7 +293,7 @@
           ],
           "faces": {
             "north": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -302,7 +302,7 @@
               ]
             },
             "east": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -311,7 +311,7 @@
               ]
             },
             "south": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -320,7 +320,7 @@
               ]
             },
             "west": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -329,7 +329,7 @@
               ]
             },
             "up": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -338,7 +338,7 @@
               ]
             },
             "down": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -371,7 +371,7 @@
           ],
           "faces": {
             "north": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -380,7 +380,7 @@
               ]
             },
             "east": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -389,7 +389,7 @@
               ]
             },
             "south": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -398,7 +398,7 @@
               ]
             },
             "west": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -407,7 +407,7 @@
               ]
             },
             "up": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,
@@ -416,7 +416,7 @@
               ]
             },
             "down": {
-              "texture": "#bone",
+              "texture": "#toothwhite",
               "uv": [
                 8,
                 8,

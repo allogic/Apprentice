@@ -1,0 +1,273 @@
+{
+  "SchemaVersion": 1,
+  "GrandmasterArtifacts": [
+    { "SchemaVersion": 1, "Code": "apprentice:mastersurveykit", "Profession": "miner", "Kind": "item", "Feature": "Condenses prospecting samples into a vein report." },
+    { "SchemaVersion": 1, "Code": "apprentice:joinersbench", "Profession": "woodworker", "Kind": "block", "Feature": "Precision beams, fitted frames and replaceable handles." },
+    { "SchemaVersion": 1, "Code": "apprentice:graftingkit", "Profession": "farmer", "Kind": "item", "Feature": "One-time 20% maximum-durability upgrade for tools." },
+    { "SchemaVersion": 1, "Code": "apprentice:architectstable", "Profession": "builder", "Kind": "block", "Feature": "Arches, structural templates and decorative variants." },
+    { "SchemaVersion": 1, "Code": "apprentice:cementationfurnace", "Profession": "blacksmith", "Kind": "block", "Feature": "Processes exact advanced-metal charges for qualified Blacksmith Grandmasters." },
+    { "SchemaVersion": 1, "Code": "apprentice:mastercookbook", "Profession": "cook", "Kind": "item", "Feature": "A master cookware set for complete meals and preserved travel rations." },
+    { "SchemaVersion": 1, "Code": "apprentice:masterkiln", "Profession": "potter", "Kind": "block", "Feature": "Refractory liners, crucibles and furnace repair parts." },
+    { "SchemaVersion": 1, "Code": "apprentice:saddlersbench", "Profession": "leatherworker", "Kind": "block", "Feature": "Harnesses, reinforced packs and fitted armor straps." },
+    { "SchemaVersion": 1, "Code": "apprentice:sewingkit", "Profession": "tailor", "Kind": "item", "Feature": "Liners, padded clothing and repair patches." },
+    { "SchemaVersion": 1, "Code": "apprentice:advancedtrapkit", "Profession": "hunter", "Kind": "item", "Feature": "Recoverable bear trap with a five-second visible rearming sequence." },
+    { "SchemaVersion": 1, "Code": "apprentice:masterweaponpatterns", "Profession": "warrior", "Kind": "item", "Feature": "One-time 20% maximum-durability upgrade for weapons." },
+    { "SchemaVersion": 1, "Code": "apprentice:compositebow", "Profession": "ranger", "Kind": "item", "Feature": "Repairable bow with replaceable string and limbs." },
+    { "SchemaVersion": 1, "Code": "apprentice:masterfishingrod", "Profession": "fisher", "Kind": "item", "Feature": "Repairable rod with line, hook and lure variants." },
+    { "SchemaVersion": 1, "Code": "apprentice:veterinarykit", "Profession": "animalhusbandry", "Kind": "item", "Feature": "First aid for any injured living entity." },
+    { "SchemaVersion": 1, "Code": "apprentice:framehive", "Profession": "beekeeper", "Kind": "block", "Feature": "Persistent removable-frame colony station." },
+    { "SchemaVersion": 1, "Code": "apprentice:atlatl", "Profession": "spearman", "Kind": "item", "Feature": "Reinforced Grandmaster polearm for melee and throwing." },
+    { "SchemaVersion": 1, "Code": "apprentice:towershield", "Profession": "shield", "Kind": "item", "Feature": "Strong frontal defense with movement and stamina costs." },
+    { "SchemaVersion": 1, "Code": "apprentice:armorpaddingkit", "Profession": "tank", "Kind": "item", "Feature": "One-time 20% maximum-durability upgrade for armor and shields." }
+  ],
+  "Discoveries": [
+    {
+      "SchemaVersion": 1, "Id": "lumberjack", "DisplayName": "Lumberjack",
+      "Description": "A master of timber work who wastes neither edge nor log.",
+      "RequiredClasses": ["woodworker", "builder"],
+      "Effects": [
+        { "Type": "DurabilitySave", "ValuePerRank": 0.10, "Stat": "Axe durability saved", "Code": "*:axe-*|*:*axe*" },
+        { "Type": "CraftYield", "ValuePerRank": 0.10, "Stat": "Log and plank crafting output", "Code": "*log*|*plank*" }
+      ]
+    },
+    {
+      "SchemaVersion": 1, "Id": "weaponmaster", "DisplayName": "Weapon Master",
+      "Description": "Every weapon feels familiar in the hands of a true master.",
+      "RequiredClasses": ["warrior", "spearman", "blacksmith"],
+      "Effects": [{ "Type": "DurabilitySave", "ValuePerRank": 0.10, "Stat": "Weapon and tool durability saved", "Code": "*" }]
+    },
+    {
+      "SchemaVersion": 1, "Id": "shadowarcher", "DisplayName": "Shadow Archer",
+      "Description": "An unseen shot becomes a perfect strike.",
+      "RequiredClasses": ["ranger", "hunter", "animalhusbandry"],
+      "Effects": [{ "Type": "ShadowArrowCrit", "ValuePerRank": 1.0, "Stat": "Arrow critical chance against unaware PvE targets", "Code": "*:arrow-*|*:bow-*|*:crossbow-*|*:bolt-*" }]
+    },
+    {
+      "SchemaVersion": 1, "Id": "berserk", "DisplayName": "Berserk",
+      "Description": "Once every 48 in-game hours, lethal damage awakens a violent second life.",
+      "RequiredClasses": ["tank", "warrior", "cook"],
+      "Effects": [{ "Type": "CheatDeath", "ValuePerRank": 0.50, "Stat": "Health restored when lethal damage is prevented" }]
+    },
+    {
+      "SchemaVersion": 1, "Id": "deepwarden", "DisplayName": "Deepwarden",
+      "Description": "Stone, darkness and pressure have become familiar allies.",
+      "RequiredClasses": ["miner", "shield", "builder"],
+      "Effects": [
+        { "Type": "UndergroundDamageReduction", "ValuePerRank": 0.15, "Stat": "Damage taken while underground" },
+        { "Type": "OreYield", "ValuePerRank": 0.15, "Stat": "Ore yield while underground", "Code": "*ore*" }
+      ]
+    },
+    {
+      "SchemaVersion": 1, "Id": "wildheart", "DisplayName": "Wildheart",
+      "Description": "Predator and caretaker instincts combine into command of the wild.",
+      "RequiredClasses": ["farmer", "hunter", "animalhusbandry"],
+      "Effects": [
+        { "Type": "AnimalDamageReduction", "ValuePerRank": 0.20, "Stat": "Damage taken from animals" },
+        { "Type": "MeatYield", "ValuePerRank": 0.15, "Stat": "Meat recovered from carcasses", "Code": "*meat*" }
+      ]
+    },
+    {
+      "SchemaVersion": 1, "Id": "grandartisan", "DisplayName": "Grand Artisan",
+      "Description": "Four crafts converge into exceptional economy of material.",
+      "RequiredClasses": ["cook", "potter", "tailor", "leatherworker"],
+      "Effects": [{ "Type": "CraftYield", "ValuePerRank": 0.20, "Stat": "Crafted item output", "Code": "*" }]
+    },
+    {
+      "SchemaVersion": 1, "Id": "stormforged", "DisplayName": "Stormforged",
+      "Description": "Metal, string and swarm-speed combine into relentless ranged pressure.",
+      "RequiredClasses": ["blacksmith", "ranger", "beekeeper"],
+      "Effects": [
+        { "Type": "RangedDamage", "ValuePerRank": 0.15, "Stat": "Ranged weapon damage" },
+        { "Type": "DurabilitySave", "ValuePerRank": 0.15, "Stat": "Ranged weapon durability saved", "Code": "*:bow-*|*:crossbow-*|*:sling-*|*:arrow-*|*:bolt-*" }
+      ]
+    },
+    {
+      "SchemaVersion": 1, "Id": "mastersmelter", "DisplayName": "Master Smelter",
+      "Description": "Controls advanced cementation cycles and refractory wear; enables Starsteel.",
+      "RequiredClasses": ["miner", "blacksmith", "potter"],
+      "Effects": [{ "Type": "CementationSpeed", "ValuePerRank": 0.10, "Stat": "Advanced furnace cycle speed" }]
+    },
+    {
+      "SchemaVersion": 1, "Id": "siegewright", "DisplayName": "Siegewright",
+      "Description": "Designs defensive structures and durable mechanisms.",
+      "RequiredClasses": ["builder", "blacksmith", "woodworker"],
+      "Effects": [{ "Type": "DurabilitySave", "ValuePerRank": 0.08, "Stat": "Mechanism durability saved", "Code": "*mechanism*|*gear*|*reinforcement*" }]
+    },
+    {
+      "SchemaVersion": 1, "Id": "fieldchirurgeon", "DisplayName": "Field Chirurgeon",
+      "Description": "Improves crafted bandages, splints and treatment efficiency.",
+      "RequiredClasses": ["cook", "tailor", "leatherworker", "animalhusbandry"],
+      "Effects": [{ "Type": "HealingEffectiveness", "ValuePerRank": 0.12, "Stat": "Healing effectiveness" }]
+    },
+    {
+      "SchemaVersion": 1, "Id": "riverwarden", "DisplayName": "River Warden",
+      "Description": "Combines aquatic tracking, durable tackle and wet-weather ranged handling.",
+      "RequiredClasses": ["fisher", "hunter", "ranger"],
+      "Effects": [{ "Type": "DurabilitySave", "ValuePerRank": 0.10, "Stat": "Tackle and ranged durability saved", "Code": "*fishing*|*:bow-*|*:arrow-*" }]
+    },
+    {
+      "SchemaVersion": 1, "Id": "hivealchemist", "DisplayName": "Hive Alchemist",
+      "Description": "Creates wax-sealed vessels, medicinal honey and concentrated arrow poison.",
+      "RequiredClasses": ["beekeeper", "cook", "potter"],
+      "Effects": [{ "Type": "HoneyYield", "ValuePerRank": 0.12, "Stat": "Hive product yield", "Code": "*honey*|*wax*" }]
+    },
+    {
+      "SchemaVersion": 1, "Id": "caravanmaster", "DisplayName": "Caravan Master",
+      "Description": "Builds reinforced packs and harnesses for safer transport.",
+      "RequiredClasses": ["animalhusbandry", "leatherworker", "builder"],
+      "Effects": [{ "Type": "DurabilitySave", "ValuePerRank": 0.10, "Stat": "Pack and harness durability saved", "Code": "*pack*|*harness*|*saddle*" }]
+    },
+    {
+      "SchemaVersion": 1, "Id": "trailengineer", "DisplayName": "Trail Engineer",
+      "Description": "Builds survey markers and climbing aids with low remote tool wear.",
+      "RequiredClasses": ["ranger", "miner", "builder"],
+      "Effects": [{ "Type": "DurabilitySave", "ValuePerRank": 0.08, "Stat": "Survey and climbing tool durability saved", "Code": "*survey*|*climb*|*rope*" }]
+    },
+    {
+      "SchemaVersion": 1, "Id": "quartermaster", "DisplayName": "Quartermaster",
+      "Description": "Fits replaceable armor liners and reduces defensive-equipment wear.",
+      "RequiredClasses": ["tank", "shield", "tailor", "leatherworker"],
+      "Effects": [{ "Type": "DurabilitySave", "ValuePerRank": 0.12, "Stat": "Armor and shield durability saved", "Code": "*armor*|*shield*" }]
+    },
+    {
+      "SchemaVersion": 1, "Id": "runeforger", "DisplayName": "Runeforger",
+      "Description": "A Mountain Dwarf or Duergar refractory and anvil specialist.",
+      "RequiredClasses": ["blacksmith", "miner"], "RequiredProfession": "blacksmith",
+      "AllowedRaces": ["dwarf"], "AllowedSubraces": ["mountain", "duergar"],
+      "Effects": [{ "Type": "SmithingYield", "ValuePerRank": 0.08, "Stat": "Smithing material efficiency", "Code": "*anvil*|*refractory*" }]
+    },
+    {
+      "SchemaVersion": 1, "Id": "nightstalker", "DisplayName": "Nightstalker",
+      "Description": "A Drow tracker with a cooldown-limited low-light first-shot bonus.",
+      "RequiredClasses": ["ranger", "hunter"], "RequiredProfession": "ranger",
+      "AllowedRaces": ["elf"], "AllowedSubraces": ["drow"],
+      "Effects": [{ "Type": "RangedCritChance", "ValuePerRank": 0.08, "Stat": "Ranged critical chance" }]
+    },
+    {
+      "SchemaVersion": 1, "Id": "grovewarden", "DisplayName": "Grove Warden",
+      "Description": "A Wood Elf specialist in saplings, grafts and forage.",
+      "RequiredClasses": ["farmer", "ranger"], "RequiredProfession": "farmer",
+      "AllowedRaces": ["elf"], "AllowedSubraces": ["wood"],
+      "Effects": [{ "Type": "SeedYield", "ValuePerRank": 0.10, "Stat": "Seed and sapling yield", "Code": "*seed*|*sapling*|*graft*" }]
+    },
+    {
+      "SchemaVersion": 1, "Id": "gearwright", "DisplayName": "Gearwright",
+      "Description": "A Rock Gnome master of precision mechanisms and low-waste joinery.",
+      "RequiredClasses": ["woodworker", "builder"], "RequiredProfession": "woodworker",
+      "AllowedRaces": ["gnome"], "AllowedSubraces": ["rock"],
+      "Effects": [{ "Type": "JoineryYield", "ValuePerRank": 0.10, "Stat": "Joinery and mechanism yield", "Code": "*gear*|*mechanism*|*join*" }]
+    },
+    {
+      "SchemaVersion": 1, "Id": "deepartificer", "DisplayName": "Deep Artificer",
+      "Description": "A Deep Gnome specialist in underground maintenance and rusty-gear recovery.",
+      "RequiredClasses": ["miner", "blacksmith"], "RequiredProfession": "miner",
+      "AllowedRaces": ["gnome"], "AllowedSubraces": ["deep"],
+      "Effects": [{ "Type": "DurabilitySave", "ValuePerRank": 0.10, "Stat": "Underground tool durability saved", "Code": "*pick*|*hammer*|*gear*" }]
+    },
+    {
+      "SchemaVersion": 1, "Id": "scalesmith", "DisplayName": "Scale Smith",
+      "Description": "A Metallic Dragonborn plate and scale armor specialist.",
+      "RequiredClasses": ["blacksmith", "tank"], "RequiredProfession": "blacksmith",
+      "AllowedRaces": ["dragonborn"], "AllowedSubraces": ["metallic"],
+      "Effects": [{ "Type": "DurabilitySave", "ValuePerRank": 0.10, "Stat": "Plate and scale armor durability saved", "Code": "*plate*|*scale*|*armor*" }]
+    },
+    {
+      "SchemaVersion": 1, "Id": "prismwarden", "DisplayName": "Prism Warden",
+      "Description": "A Gem Dragonborn master of refractory ceramics and defensive fittings.",
+      "RequiredClasses": ["potter", "shield"], "RequiredProfession": "potter",
+      "AllowedRaces": ["dragonborn"], "AllowedSubraces": ["gem"],
+      "Effects": [{ "Type": "DurabilitySave", "ValuePerRank": 0.10, "Stat": "Ceramic and shield durability saved", "Code": "*ceramic*|*refractory*|*shield*" }]
+    },
+    {
+      "SchemaVersion": 1, "Id": "ashboundsmith", "DisplayName": "Ashbound Smith",
+      "Description": "An Infernal Tiefling specialist in furnace control and heat-resistant components.",
+      "RequiredClasses": ["blacksmith", "potter"], "RequiredProfession": "blacksmith",
+      "AllowedRaces": ["tiefling"], "AllowedSubraces": ["infernal"],
+      "Effects": [{ "Type": "FireDamageReduction", "ValuePerRank": 0.08, "Stat": "Heat damage reduction" }]
+    },
+    {
+      "SchemaVersion": 1, "Id": "glaciersentinel", "DisplayName": "Glacier Sentinel",
+      "Description": "A Frost Giantkin defender with improved cold-region armor handling.",
+      "RequiredClasses": ["tank", "shield"], "RequiredProfession": "tank",
+      "AllowedRaces": ["goliath"], "AllowedSubraces": ["frost"],
+      "Effects": [{ "Type": "DamageReduction", "ValuePerRank": 0.06, "Stat": "Damage taken while armored" }]
+    },
+    {
+      "SchemaVersion": 1, "Id": "ironreaver", "DisplayName": "Iron Reaver",
+      "Description": "An Orog who turns heavy mining tools into controlled combat implements.",
+      "RequiredClasses": ["warrior", "miner"], "RequiredProfession": "warrior",
+      "AllowedRaces": ["orc"], "AllowedSubraces": ["orog"],
+      "Effects": [{ "Type": "WeaponDamage", "ValuePerRank": 0.08, "Stat": "Heavy mining-tool combat damage", "Code": "*pick*|*hammer*" }]
+    },
+    {
+      "SchemaVersion": 1, "Id": "trailblazer", "DisplayName": "Trailblazer",
+      "Description": "A Lightfoot Halfling master of travel tackle and recoverable lures.",
+      "RequiredClasses": ["fisher", "ranger"], "RequiredProfession": "fisher",
+      "AllowedRaces": ["halfling"], "AllowedSubraces": ["lightfoot"],
+      "Effects": [{ "Type": "DurabilitySave", "ValuePerRank": 0.12, "Stat": "Fishing tackle durability saved", "Code": "*fishing*|*lure*|*hook*" }]
+    },
+    {
+      "SchemaVersion": 1, "Id": "adaptivemaster", "DisplayName": "Adaptive Master",
+      "Description": "A Human who combines a chosen profession with two other Grandmaster disciplines.",
+      "RequiredClasses": [], "MinimumCapstones": 3, "AllowedRaces": ["human"],
+      "Effects": [{ "Type": "DurabilitySave", "ValuePerRank": 0.04, "Stat": "General tool durability saved", "Code": "*" }]
+    }
+  ],
+  "CementationCharges": [
+    {
+      "SchemaVersion": 1, "Id": "starsteel", "DurationDays": 7.5,
+      "Output": "apprentice:blister-starsteel", "OutputQuantity": 16,
+      "FuelCode": "game:charcoal", "FuelQuantity": 32,
+      "RefractoryCode": "apprentice:grandmaster-refractory", "RefractoryQuantity": 1,
+      "RequiredDiscoveries": ["mastersmelter"],
+      "RequiredItems": ["apprentice:grandmaster-refractory"],
+      "Inputs": [
+        { "Code": "game:ingot-steel", "Quantity": 8 },
+        { "Code": "game:ingot-meteoriciron", "Quantity": 4 },
+        { "Code": "game:ingot-nickel", "Quantity": 2 },
+        { "Code": "game:ingot-silver", "Quantity": 1 },
+        { "Code": "game:ingot-gold", "Quantity": 1 }
+      ]
+    },
+    {
+      "SchemaVersion": 1, "Id": "aethersteel", "DurationDays": 10.0,
+      "Output": "apprentice:blister-aethersteel", "OutputQuantity": 16,
+      "FuelCode": "game:charcoal", "FuelQuantity": 48,
+      "RefractoryCode": "apprentice:upgraded-refractory", "RefractoryQuantity": 2,
+      "RequiredDiscoveries": ["mastersmelter"],
+      "RequiredItems": ["apprentice:upgraded-refractory"],
+      "Inputs": [
+        { "Code": "game:ingot-starsteel", "Quantity": 6 },
+        { "Code": "game:ingot-meteoriciron", "Quantity": 3 },
+        { "Code": "game:ingot-nickel", "Quantity": 2 },
+        { "Code": "game:ingot-copper", "Quantity": 1 },
+        { "Code": "game:ingot-tin", "Quantity": 1 },
+        { "Code": "game:ingot-bismuth", "Quantity": 1 },
+        { "Code": "game:ingot-silver", "Quantity": 1 },
+        { "Code": "game:ingot-gold", "Quantity": 1 }
+      ]
+    }
+  ],
+  "Poisons": [
+    { "SchemaVersion": 1, "Id": "mild", "ArrowCode": "apprentice:arrow-poison-mild", "DamagePerSecond": 0.2, "DurationSeconds": 8, "MaximumDurationSeconds": 12 },
+    { "SchemaVersion": 1, "Id": "standard", "ArrowCode": "apprentice:arrow-poison-standard", "DamagePerSecond": 0.3, "DurationSeconds": 12, "MaximumDurationSeconds": 18 },
+    { "SchemaVersion": 1, "Id": "potent", "ArrowCode": "apprentice:arrow-poison-potent", "DamagePerSecond": 0.4, "DurationSeconds": 16, "MaximumDurationSeconds": 24 },
+    { "SchemaVersion": 1, "Id": "grandmaster", "ArrowCode": "apprentice:arrow-poison-grandmaster", "DamagePerSecond": 0.5, "DurationSeconds": 20, "MaximumDurationSeconds": 30, "RequiredDiscovery": "hivealchemist" }
+  ],
+  "Danger": {
+    "SchemaVersion": 2, "Enabled": true, "BaseRadius": 4000, "RingWidth": 2000,
+    "MaximumTier": 10, "HealthPerTier": 0.35, "DamagePerTier": 0.18,
+    "IncludeCodePatterns": [
+      "game:drifter-*", "game:locust-*", "game:bell-*", "game:shiver-*",
+      "game:bowtorn-*", "game:nightmare-*", "game:wolf-*", "game:bear-*",
+      "game:hyena-*", "game:fox-*", "game:boar-*", "game:seraphim-*"
+    ],
+    "ExcludeCodePatterns": ["game:player", "*trader*", "*villager*", "*livestock*", "*mount*", "*vehicle*", "*corpse*", "*drifter-normalized*"],
+    "Palette": ["#165A2A", "#62B44B", "#3F8F3B", "#2F6F2F", "#B7C83D", "#E5D744", "#F3B33D", "#ED7A2F", "#D94A2D", "#B3232E", "#650F24"]
+  },
+  "Ecology": [
+    { "SchemaVersion": 1, "Id": "venomberry", "DropCode": "apprentice:venomberry", "MinimumTier": 3, "ChancePerTier": 0.012, "MaximumQuantity": 2, "WorldgenBlockCode": "apprentice:venomberryplant", "WorldgenChancePerTier": 0.018, "WorldgenAttemptsPerChunk": 2 },
+    { "SchemaVersion": 1, "Id": "gloamcap", "DropCode": "apprentice:gloamcap", "MinimumTier": 5, "ChancePerTier": 0.010, "MaximumQuantity": 2, "WorldgenBlockCode": "apprentice:gloamcapplant", "WorldgenChancePerTier": 0.012, "WorldgenAttemptsPerChunk": 2 },
+    { "SchemaVersion": 1, "Id": "dangerous-tissue", "DropCode": "apprentice:dangerous-tissue", "MinimumTier": 4, "ChancePerTier": 0.015, "MaximumQuantity": 3 }
+  ]
+}

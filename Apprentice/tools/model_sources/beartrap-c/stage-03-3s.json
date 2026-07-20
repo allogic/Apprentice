@@ -1,0 +1,3192 @@
+{
+  "editor": {
+    "allAngles": true
+  },
+  "textureWidth": 32,
+  "textureHeight": 32,
+  "textures": {
+    "oak": "game:block/wood/planks/oak1",
+    "walnut": "game:block/wood/planks/walnut1",
+    "iron": "game:block/metal/ingot/iron",
+    "copper": "game:block/metal/ingot/copper",
+    "gold": "game:block/metal/ingot/gold",
+    "leather": "game:block/leather/plain",
+    "cloth": "game:block/creature/bone",
+    "stone": "game:block/stone/granite",
+    "red": "game:block/leather/plain",
+    "blue": "game:block/leather/plain",
+    "green": "game:block/leather/plain",
+    "black": "game:block/wood/planks/walnut1"
+  },
+  "elements": [
+    {
+      "name": "base-crossbar",
+      "from": [
+        1.95,
+        0.8,
+        7.35
+      ],
+      "to": [
+        14.05,
+        1.55,
+        8.65
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "base-spine",
+      "from": [
+        7.3,
+        0.72,
+        2.75
+      ],
+      "to": [
+        8.7,
+        1.48,
+        13.55
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        },
+        "up": {
+          "texture": "#black"
+        },
+        "down": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "name": "left-jaw-pivot",
+      "from": [
+        1.85,
+        1.55,
+        7.25
+      ],
+      "to": [
+        3.05,
+        2.75,
+        8.75
+      ],
+      "faces": {
+        "north": {
+          "texture": "#copper"
+        },
+        "east": {
+          "texture": "#copper"
+        },
+        "south": {
+          "texture": "#copper"
+        },
+        "west": {
+          "texture": "#copper"
+        },
+        "up": {
+          "texture": "#copper"
+        },
+        "down": {
+          "texture": "#copper"
+        }
+      }
+    },
+    {
+      "name": "right-jaw-pivot",
+      "from": [
+        12.95,
+        1.55,
+        7.25
+      ],
+      "to": [
+        14.15,
+        2.75,
+        8.75
+      ],
+      "faces": {
+        "north": {
+          "texture": "#copper"
+        },
+        "east": {
+          "texture": "#copper"
+        },
+        "south": {
+          "texture": "#copper"
+        },
+        "west": {
+          "texture": "#copper"
+        },
+        "up": {
+          "texture": "#copper"
+        },
+        "down": {
+          "texture": "#copper"
+        }
+      }
+    },
+    {
+      "name": "chain-mount",
+      "from": [
+        7.25,
+        0.8,
+        12.95
+      ],
+      "to": [
+        8.75,
+        1.75,
+        14.1
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "trap-front-jaw-1",
+      "from": [
+        2.6500000000000004,
+        1.77,
+        7.62
+      ],
+      "to": [
+        4.049833800805457,
+        2.53,
+        8.38
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": 46.888718843752535,
+      "rotationZ": 74.11501903497836,
+      "rotationOrigin": [
+        2.6500000000000004,
+        2.15,
+        8.0
+      ]
+    },
+    {
+      "name": "trap-front-jaw-2",
+      "from": [
+        2.9118476378209293,
+        2.690138643254787,
+        6.59808250742328
+      ],
+      "to": [
+        4.366616404180247,
+        3.4501386432547867,
+        7.35808250742328
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": 39.323536786452124,
+      "rotationZ": 47.526527669564295,
+      "rotationOrigin": [
+        2.9118476378209293,
+        3.070138643254787,
+        6.97808250742328
+      ]
+    },
+    {
+      "name": "trap-front-jaw-3",
+      "from": [
+        3.6717590800940316,
+        3.5202077051248937,
+        5.676197419137812
+      ],
+      "to": [
+        5.211268157172562,
+        4.2802077051248935,
+        6.4361974191378115
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": 28.373956235115067,
+      "rotationZ": 29.098850364006417,
+      "rotationOrigin": [
+        3.6717590800940316,
+        3.9002077051248936,
+        6.056197419137812
+      ]
+    },
+    {
+      "name": "trap-front-jaw-4",
+      "from": [
+        4.855348900235269,
+        4.178954242403247,
+        4.944585270736077
+      ],
+      "to": [
+        6.475171184697291,
+        4.938954242403247,
+        5.704585270736077
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": 16.857048713521678,
+      "rotationZ": 15.832532288638394,
+      "rotationOrigin": [
+        4.855348900235269,
+        4.558954242403247,
+        5.324585270736077
+      ]
+    },
+    {
+      "name": "trap-front-jaw-5",
+      "from": [
+        6.3467590800940314,
+        4.601895554264032,
+        4.474861356745214
+      ],
+      "to": [
+        8.014284710163004,
+        5.361895554264032,
+        5.234861356745213
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": 5.570097124043005,
+      "rotationZ": 5.037686286449335,
+      "rotationOrigin": [
+        6.3467590800940314,
+        4.981895554264032,
+        4.8548613567452135
+      ]
+    },
+    {
+      "name": "trap-front-jaw-6",
+      "from": [
+        8.0,
+        4.7476311982969195,
+        4.313005526625596
+      ],
+      "to": [
+        9.667525630068972,
+        5.507631198296919,
+        5.073005526625596
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": -5.5700971240429755,
+      "rotationZ": -5.037686286449335,
+      "rotationOrigin": [
+        8.0,
+        5.127631198296919,
+        4.693005526625596
+      ]
+    },
+    {
+      "name": "trap-front-jaw-7",
+      "from": [
+        9.653240919905969,
+        4.601895554264032,
+        4.474861356745213
+      ],
+      "to": [
+        11.27306320436799,
+        5.361895554264032,
+        5.2348613567452125
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": -16.857048713521728,
+      "rotationZ": -15.832532288638413,
+      "rotationOrigin": [
+        9.653240919905969,
+        4.981895554264032,
+        4.854861356745213
+      ]
+    },
+    {
+      "name": "trap-front-jaw-8",
+      "from": [
+        11.14465109976473,
+        4.178954242403247,
+        4.944585270736077
+      ],
+      "to": [
+        12.68416017684326,
+        4.938954242403247,
+        5.704585270736077
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": -28.373956235115003,
+      "rotationZ": -29.098850364006324,
+      "rotationOrigin": [
+        11.14465109976473,
+        4.558954242403247,
+        5.324585270736077
+      ]
+    },
+    {
+      "name": "trap-front-jaw-9",
+      "from": [
+        12.32824091990597,
+        3.5202077051248946,
+        5.676197419137811
+      ],
+      "to": [
+        13.783009686265286,
+        4.280207705124894,
+        6.436197419137811
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": -39.323536786452145,
+      "rotationZ": -47.52652766956437,
+      "rotationOrigin": [
+        12.32824091990597,
+        3.9002077051248945,
+        6.056197419137811
+      ]
+    },
+    {
+      "name": "trap-front-jaw-10",
+      "from": [
+        13.08815236217907,
+        2.6901386432547874,
+        6.598082507423279
+      ],
+      "to": [
+        14.487986162984527,
+        3.450138643254787,
+        7.358082507423279
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": -46.88871884375252,
+      "rotationZ": -74.1150190349783,
+      "rotationOrigin": [
+        13.08815236217907,
+        3.0701386432547872,
+        6.978082507423279
+      ]
+    },
+    {
+      "name": "trap-front-tooth-1",
+      "from": [
+        2.9118476378209293,
+        2.8901386432547866,
+        6.79808250742328
+      ],
+      "to": [
+        3.8787499079599543,
+        3.250138643254787,
+        7.15808250742328
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": -18.36465355999013,
+      "rotationZ": -2.003468531420781,
+      "rotationOrigin": [
+        2.9118476378209293,
+        3.070138643254787,
+        6.97808250742328
+      ]
+    },
+    {
+      "name": "trap-front-tooth-3",
+      "from": [
+        4.855348900235269,
+        4.378954242403247,
+        5.144585270736077
+      ],
+      "to": [
+        5.822251170374294,
+        4.7389542424032465,
+        5.504585270736077
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": -42.41349462846948,
+      "rotationZ": -28.89915337760496,
+      "rotationOrigin": [
+        4.855348900235269,
+        4.558954242403247,
+        5.324585270736077
+      ]
+    },
+    {
+      "name": "trap-front-tooth-5",
+      "from": [
+        8.0,
+        4.94763119829692,
+        4.513005526625596
+      ],
+      "to": [
+        8.966902270139025,
+        5.307631198296919,
+        4.873005526625596
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": -58.728859298010036,
+      "rotationZ": -90.0,
+      "rotationOrigin": [
+        8.0,
+        5.127631198296919,
+        4.693005526625596
+      ]
+    },
+    {
+      "name": "trap-front-tooth-7",
+      "from": [
+        10.519686398995235,
+        4.033967241250031,
+        5.796737930645863
+      ],
+      "to": [
+        11.48658866913426,
+        4.393967241250031,
+        6.156737930645862
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": 42.41349462846948,
+      "rotationZ": 28.89915337760496,
+      "rotationOrigin": [
+        10.519686398995235,
+        4.213967241250031,
+        5.976737930645863
+      ]
+    },
+    {
+      "name": "trap-front-tooth-9",
+      "from": [
+        12.171054837663743,
+        2.8580573055774234,
+        7.10271822151585
+      ],
+      "to": [
+        13.137957107802768,
+        3.2180573055774238,
+        7.46271822151585
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": 18.364653559990117,
+      "rotationZ": 2.00346853142078,
+      "rotationOrigin": [
+        12.171054837663743,
+        3.0380573055774236,
+        7.28271822151585
+      ]
+    },
+    {
+      "name": "trap-rear-jaw-1",
+      "from": [
+        2.6500000000000004,
+        1.77,
+        7.62
+      ],
+      "to": [
+        4.049833800805458,
+        2.53,
+        8.38
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": -46.88871884375255,
+      "rotationZ": 74.11501903497837,
+      "rotationOrigin": [
+        2.6500000000000004,
+        2.15,
+        8.0
+      ]
+    },
+    {
+      "name": "trap-rear-jaw-2",
+      "from": [
+        2.9118476378209293,
+        2.6901386432547874,
+        8.64191749257672
+      ],
+      "to": [
+        4.366616404180248,
+        3.450138643254787,
+        9.401917492576722
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": -39.32353678645213,
+      "rotationZ": 47.5265276695643,
+      "rotationOrigin": [
+        2.9118476378209293,
+        3.0701386432547872,
+        9.021917492576721
+      ]
+    },
+    {
+      "name": "trap-rear-jaw-3",
+      "from": [
+        3.6717590800940316,
+        3.5202077051248946,
+        9.56380258086219
+      ],
+      "to": [
+        5.211268157172562,
+        4.280207705124894,
+        10.323802580862191
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": -28.373956235115045,
+      "rotationZ": 29.098850364006385,
+      "rotationOrigin": [
+        3.6717590800940316,
+        3.9002077051248945,
+        9.94380258086219
+      ]
+    },
+    {
+      "name": "trap-rear-jaw-4",
+      "from": [
+        4.855348900235269,
+        4.178954242403247,
+        10.295414729263923
+      ],
+      "to": [
+        6.475171184697291,
+        4.938954242403247,
+        11.055414729263925
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": -16.857048713521614,
+      "rotationZ": 15.832532288638394,
+      "rotationOrigin": [
+        4.855348900235269,
+        4.558954242403247,
+        10.675414729263924
+      ]
+    },
+    {
+      "name": "trap-rear-jaw-5",
+      "from": [
+        6.3467590800940314,
+        4.601895554264032,
+        10.765138643254785
+      ],
+      "to": [
+        8.014284710163004,
+        5.361895554264032,
+        11.525138643254786
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": -5.570097124043036,
+      "rotationZ": 5.037686286449305,
+      "rotationOrigin": [
+        6.3467590800940314,
+        4.981895554264032,
+        11.145138643254786
+      ]
+    },
+    {
+      "name": "trap-rear-jaw-6",
+      "from": [
+        8.0,
+        4.747631198296919,
+        10.926994473374403
+      ],
+      "to": [
+        9.667525630068972,
+        5.507631198296918,
+        11.686994473374405
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": 5.570097124043036,
+      "rotationZ": -5.037686286449305,
+      "rotationOrigin": [
+        8.0,
+        5.1276311982969185,
+        11.306994473374404
+      ]
+    },
+    {
+      "name": "trap-rear-jaw-7",
+      "from": [
+        9.653240919905969,
+        4.601895554264032,
+        10.765138643254785
+      ],
+      "to": [
+        11.273063204367988,
+        5.361895554264032,
+        11.525138643254786
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": 16.85704871352164,
+      "rotationZ": -15.832532288638413,
+      "rotationOrigin": [
+        9.653240919905969,
+        4.981895554264032,
+        11.145138643254786
+      ]
+    },
+    {
+      "name": "trap-rear-jaw-8",
+      "from": [
+        11.14465109976473,
+        4.178954242403247,
+        10.295414729263923
+      ],
+      "to": [
+        12.68416017684326,
+        4.938954242403247,
+        11.055414729263925
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": 28.373956235115003,
+      "rotationZ": -29.098850364006324,
+      "rotationOrigin": [
+        11.14465109976473,
+        4.558954242403247,
+        10.675414729263924
+      ]
+    },
+    {
+      "name": "trap-rear-jaw-9",
+      "from": [
+        12.32824091990597,
+        3.5202077051248946,
+        9.56380258086219
+      ],
+      "to": [
+        13.783009686265288,
+        4.280207705124894,
+        10.323802580862191
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": 39.323536786452166,
+      "rotationZ": -47.52652766956437,
+      "rotationOrigin": [
+        12.32824091990597,
+        3.9002077051248945,
+        9.94380258086219
+      ]
+    },
+    {
+      "name": "trap-rear-jaw-10",
+      "from": [
+        13.08815236217907,
+        2.6901386432547874,
+        8.64191749257672
+      ],
+      "to": [
+        14.487986162984528,
+        3.450138643254787,
+        9.401917492576722
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": 46.88871884375254,
+      "rotationZ": -74.11501903497832,
+      "rotationOrigin": [
+        13.08815236217907,
+        3.0701386432547872,
+        9.021917492576721
+      ]
+    },
+    {
+      "name": "trap-rear-tooth-1",
+      "from": [
+        2.9118476378209293,
+        2.890138643254787,
+        8.841917492576721
+      ],
+      "to": [
+        3.8787499079599543,
+        3.2501386432547874,
+        9.20191749257672
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": 18.36465355999013,
+      "rotationZ": -2.003468531420781,
+      "rotationOrigin": [
+        2.9118476378209293,
+        3.0701386432547872,
+        9.021917492576721
+      ]
+    },
+    {
+      "name": "trap-rear-tooth-3",
+      "from": [
+        4.855348900235269,
+        4.378954242403247,
+        10.495414729263924
+      ],
+      "to": [
+        5.822251170374293,
+        4.7389542424032465,
+        10.855414729263924
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": 42.41349462846945,
+      "rotationZ": -28.899153377604897,
+      "rotationOrigin": [
+        4.855348900235269,
+        4.558954242403247,
+        10.675414729263924
+      ]
+    },
+    {
+      "name": "trap-rear-tooth-5",
+      "from": [
+        8.0,
+        4.947631198296919,
+        11.126994473374404
+      ],
+      "to": [
+        8.966902270139023,
+        5.307631198296918,
+        11.486994473374404
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": 58.728859298010065,
+      "rotationZ": -90.0,
+      "rotationOrigin": [
+        8.0,
+        5.1276311982969185,
+        11.306994473374404
+      ]
+    },
+    {
+      "name": "trap-rear-tooth-7",
+      "from": [
+        10.519686398995235,
+        4.033967241250032,
+        9.84326206935414
+      ],
+      "to": [
+        11.48658866913426,
+        4.3939672412500315,
+        10.203262069354139
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": -42.41349462846945,
+      "rotationZ": 28.899153377604897,
+      "rotationOrigin": [
+        10.519686398995235,
+        4.213967241250032,
+        10.02326206935414
+      ]
+    },
+    {
+      "name": "trap-rear-tooth-9",
+      "from": [
+        12.171054837663743,
+        2.8580573055774234,
+        8.53728177848415
+      ],
+      "to": [
+        13.137957107802768,
+        3.2180573055774238,
+        8.89728177848415
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": -18.364653559990117,
+      "rotationZ": 2.00346853142078,
+      "rotationOrigin": [
+        12.171054837663743,
+        3.0380573055774236,
+        8.71728177848415
+      ]
+    },
+    {
+      "name": "pan-center",
+      "from": [
+        5.85,
+        1.45,
+        6.25
+      ],
+      "to": [
+        10.15,
+        2.0,
+        9.75
+      ],
+      "faces": {
+        "north": {
+          "texture": "#copper"
+        },
+        "east": {
+          "texture": "#copper"
+        },
+        "south": {
+          "texture": "#copper"
+        },
+        "west": {
+          "texture": "#copper"
+        },
+        "up": {
+          "texture": "#copper"
+        },
+        "down": {
+          "texture": "#copper"
+        }
+      },
+      "rotationX": -10,
+      "rotationOrigin": [
+        8.0,
+        1.7,
+        8.0
+      ]
+    },
+    {
+      "name": "pan-cross",
+      "from": [
+        5.35,
+        1.49,
+        6.9
+      ],
+      "to": [
+        10.65,
+        1.96,
+        9.1
+      ],
+      "faces": {
+        "north": {
+          "texture": "#copper"
+        },
+        "east": {
+          "texture": "#copper"
+        },
+        "south": {
+          "texture": "#copper"
+        },
+        "west": {
+          "texture": "#copper"
+        },
+        "up": {
+          "texture": "#copper"
+        },
+        "down": {
+          "texture": "#copper"
+        }
+      },
+      "rotationX": -10,
+      "rotationOrigin": [
+        8.0,
+        1.7,
+        8.0
+      ]
+    },
+    {
+      "name": "pan-pivot-left",
+      "from": [
+        5.1,
+        1.2,
+        7.55
+      ],
+      "to": [
+        5.8,
+        2.15,
+        8.45
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "pan-notch",
+      "from": [
+        6.65,
+        1.9,
+        8.9
+      ],
+      "to": [
+        7.35,
+        2.5,
+        9.45
+      ],
+      "faces": {
+        "north": {
+          "texture": "#copper"
+        },
+        "east": {
+          "texture": "#copper"
+        },
+        "south": {
+          "texture": "#copper"
+        },
+        "west": {
+          "texture": "#copper"
+        },
+        "up": {
+          "texture": "#copper"
+        },
+        "down": {
+          "texture": "#copper"
+        }
+      }
+    },
+    {
+      "name": "dog-pivot",
+      "from": [
+        2.45,
+        1.75,
+        8.55
+      ],
+      "to": [
+        3.35,
+        2.65,
+        9.45
+      ],
+      "faces": {
+        "north": {
+          "texture": "#copper"
+        },
+        "east": {
+          "texture": "#copper"
+        },
+        "south": {
+          "texture": "#copper"
+        },
+        "west": {
+          "texture": "#copper"
+        },
+        "up": {
+          "texture": "#copper"
+        },
+        "down": {
+          "texture": "#copper"
+        }
+      }
+    },
+    {
+      "name": "dog-latch",
+      "from": [
+        2.9,
+        2.0599999999999996,
+        8.76
+      ],
+      "to": [
+        7.201906554075762,
+        2.54,
+        9.24
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": -1.0655569888344631,
+      "rotationZ": 17.5924245621816,
+      "rotationOrigin": [
+        2.9,
+        2.3,
+        9.0
+      ]
+    },
+    {
+      "name": "dog-notch-tip",
+      "from": [
+        6.7,
+        3.3200000000000003,
+        8.78
+      ],
+      "to": [
+        7.35,
+        3.88,
+        9.38
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      }
+    },
+    {
+      "name": "left-actuator-front-leg",
+      "from": [
+        2.45,
+        0.94,
+        5.04
+      ],
+      "to": [
+        2.8200000000000003,
+        1.56,
+        5.659999999999999
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": -0.0,
+      "rotationZ": 90.0,
+      "rotationOrigin": [
+        2.45,
+        1.25,
+        5.35
+      ]
+    },
+    {
+      "name": "left-actuator-rear-leg",
+      "from": [
+        2.45,
+        0.94,
+        10.34
+      ],
+      "to": [
+        2.8200000000000003,
+        1.56,
+        10.96
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": -0.0,
+      "rotationZ": 90.0,
+      "rotationOrigin": [
+        2.45,
+        1.25,
+        10.65
+      ]
+    },
+    {
+      "name": "left-actuator-bridge",
+      "from": [
+        2.45,
+        1.31,
+        5.04
+      ],
+      "to": [
+        7.750000000000001,
+        1.9300000000000002,
+        5.659999999999999
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": -90.0,
+      "rotationZ": 0.0,
+      "rotationOrigin": [
+        2.45,
+        1.62,
+        5.35
+      ]
+    },
+    {
+      "name": "left-longspring-front-leaf",
+      "from": [
+        -0.9,
+        0.87,
+        4.62
+      ],
+      "to": [
+        2.661165539538987,
+        1.63,
+        5.38
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        },
+        "up": {
+          "texture": "#black"
+        },
+        "down": {
+          "texture": "#black"
+        }
+      },
+      "rotationY": -18.840089546498138,
+      "rotationZ": 6.302645368903619,
+      "rotationOrigin": [
+        -0.9,
+        1.25,
+        5.0
+      ]
+    },
+    {
+      "name": "left-longspring-rear-leaf",
+      "from": [
+        -0.9,
+        0.87,
+        10.62
+      ],
+      "to": [
+        2.661165539538987,
+        1.63,
+        11.38
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        },
+        "up": {
+          "texture": "#black"
+        },
+        "down": {
+          "texture": "#black"
+        }
+      },
+      "rotationY": 18.840089546498138,
+      "rotationZ": 6.302645368903619,
+      "rotationOrigin": [
+        -0.9,
+        1.25,
+        11.0
+      ]
+    },
+    {
+      "name": "left-longspring-eye",
+      "from": [
+        2.45,
+        1.2100000000000002,
+        5.34
+      ],
+      "to": [
+        6.95,
+        2.0300000000000002,
+        6.16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": -90.0,
+      "rotationZ": 0.0,
+      "rotationOrigin": [
+        2.45,
+        1.62,
+        5.75
+      ]
+    },
+    {
+      "name": "right-fixed-hinge-front",
+      "from": [
+        13.0,
+        1.1,
+        6.55
+      ],
+      "to": [
+        14.1,
+        2.35,
+        7.35
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "right-fixed-hinge-rear",
+      "from": [
+        13.0,
+        1.1,
+        8.65
+      ],
+      "to": [
+        14.1,
+        2.35,
+        9.45
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "anchor-chain-1-1",
+      "from": [
+        8.669669272048301,
+        1.7249999999999999,
+        14.186752494528783
+      ],
+      "to": [
+        9.01988387036289,
+        2.0749999999999997,
+        14.466752494528784
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": -131.6124815376833,
+      "rotationOrigin": [
+        8.669669272048301,
+        1.9,
+        14.326752494528783
+      ]
+    },
+    {
+      "name": "anchor-chain-1-2",
+      "from": [
+        8.437095574586847,
+        1.7249999999999999,
+        14.448591643858588
+      ],
+      "to": [
+        8.886256825635147,
+        2.0749999999999997,
+        14.72859164385859
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": -166.689654055301,
+      "rotationOrigin": [
+        8.437095574586847,
+        1.9,
+        14.588591643858589
+      ]
+    },
+    {
+      "name": "anchor-chain-1-3",
+      "from": [
+        8.0,
+        1.7249999999999999,
+        14.552
+      ],
+      "to": [
+        8.4491612510483,
+        2.0749999999999997,
+        14.832
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": 166.689654055301,
+      "rotationOrigin": [
+        8.0,
+        1.9,
+        14.692
+      ]
+    },
+    {
+      "name": "anchor-chain-1-4",
+      "from": [
+        7.562904425413153,
+        1.7249999999999999,
+        14.448591643858588
+      ],
+      "to": [
+        7.913119023727742,
+        2.0749999999999997,
+        14.72859164385859
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": 131.6124815376833,
+      "rotationOrigin": [
+        7.562904425413153,
+        1.9,
+        14.588591643858589
+      ]
+    },
+    {
+      "name": "anchor-chain-1-5",
+      "from": [
+        7.330330727951699,
+        1.7249999999999999,
+        14.186752494528783
+      ],
+      "to": [
+        7.638844363913216,
+        2.0749999999999997,
+        14.466752494528784
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": 74.82250354820968,
+      "rotationOrigin": [
+        7.330330727951699,
+        1.9,
+        14.326752494528783
+      ]
+    },
+    {
+      "name": "anchor-chain-1-6",
+      "from": [
+        7.4111027254265816,
+        1.7249999999999999,
+        13.889
+      ],
+      "to": [
+        7.816979721241072,
+        2.0749999999999997,
+        14.169
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": 28.608702806419203,
+      "rotationOrigin": [
+        7.4111027254265816,
+        1.9,
+        14.029
+      ]
+    },
+    {
+      "name": "anchor-chain-1-7",
+      "from": [
+        7.767426302538546,
+        1.7249999999999999,
+        13.694655861612627
+      ],
+      "to": [
+        8.232573697461454,
+        2.0749999999999997,
+        13.974655861612629
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": -0.0,
+      "rotationOrigin": [
+        7.767426302538546,
+        1.9,
+        13.834655861612628
+      ]
+    },
+    {
+      "name": "anchor-chain-1-8",
+      "from": [
+        8.232573697461454,
+        1.7249999999999999,
+        13.694655861612627
+      ],
+      "to": [
+        8.638450693275944,
+        2.0749999999999997,
+        13.974655861612629
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": -28.608702806419263,
+      "rotationOrigin": [
+        8.232573697461454,
+        1.9,
+        13.834655861612628
+      ]
+    },
+    {
+      "name": "anchor-chain-2-1",
+      "from": [
+        9.319669272048301,
+        1.7249999999999999,
+        15.386752494528782
+      ],
+      "to": [
+        9.66988387036289,
+        2.0749999999999997,
+        15.666752494528783
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": -131.6124815376833,
+      "rotationOrigin": [
+        9.319669272048301,
+        1.9,
+        15.526752494528782
+      ]
+    },
+    {
+      "name": "anchor-chain-2-2",
+      "from": [
+        9.087095574586847,
+        1.7249999999999999,
+        15.648591643858587
+      ],
+      "to": [
+        9.536256825635148,
+        2.0749999999999997,
+        15.928591643858589
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": -166.689654055301,
+      "rotationOrigin": [
+        9.087095574586847,
+        1.9,
+        15.788591643858588
+      ]
+    },
+    {
+      "name": "anchor-chain-2-3",
+      "from": [
+        8.65,
+        1.7249999999999999,
+        15.751999999999999
+      ],
+      "to": [
+        9.0991612510483,
+        2.0749999999999997,
+        16.032
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": 166.689654055301,
+      "rotationOrigin": [
+        8.65,
+        1.9,
+        15.892
+      ]
+    },
+    {
+      "name": "anchor-chain-2-4",
+      "from": [
+        8.212904425413154,
+        1.7249999999999999,
+        15.648591643858587
+      ],
+      "to": [
+        8.563119023727742,
+        2.0749999999999997,
+        15.928591643858589
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": 131.6124815376833,
+      "rotationOrigin": [
+        8.212904425413154,
+        1.9,
+        15.788591643858588
+      ]
+    },
+    {
+      "name": "anchor-chain-2-5",
+      "from": [
+        7.980330727951699,
+        1.7249999999999999,
+        15.386752494528782
+      ],
+      "to": [
+        8.288844363913217,
+        2.0749999999999997,
+        15.666752494528783
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": 74.82250354820951,
+      "rotationOrigin": [
+        7.980330727951699,
+        1.9,
+        15.526752494528782
+      ]
+    },
+    {
+      "name": "anchor-chain-2-6",
+      "from": [
+        8.061102725426583,
+        1.7249999999999999,
+        15.088999999999999
+      ],
+      "to": [
+        8.466979721241072,
+        2.0749999999999997,
+        15.369
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": 28.608702806419263,
+      "rotationOrigin": [
+        8.061102725426583,
+        1.9,
+        15.229
+      ]
+    },
+    {
+      "name": "anchor-chain-2-7",
+      "from": [
+        8.417426302538546,
+        1.7249999999999999,
+        14.894655861612627
+      ],
+      "to": [
+        8.882573697461455,
+        2.0749999999999997,
+        15.174655861612628
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": -0.0,
+      "rotationOrigin": [
+        8.417426302538546,
+        1.9,
+        15.034655861612627
+      ]
+    },
+    {
+      "name": "anchor-chain-2-8",
+      "from": [
+        8.882573697461455,
+        1.7249999999999999,
+        14.894655861612627
+      ],
+      "to": [
+        9.288450693275944,
+        2.0749999999999997,
+        15.174655861612628
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": -28.608702806419263,
+      "rotationOrigin": [
+        8.882573697461455,
+        1.9,
+        15.034655861612627
+      ]
+    },
+    {
+      "name": "anchor-chain-3-1",
+      "from": [
+        9.969669272048302,
+        1.7249999999999999,
+        16.58675249452878
+      ],
+      "to": [
+        10.31988387036289,
+        2.0749999999999997,
+        16.866752494528782
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": -131.6124815376833,
+      "rotationOrigin": [
+        9.969669272048302,
+        1.9,
+        16.72675249452878
+      ]
+    },
+    {
+      "name": "anchor-chain-3-2",
+      "from": [
+        9.737095574586847,
+        1.7249999999999999,
+        16.848591643858587
+      ],
+      "to": [
+        10.186256825635148,
+        2.0749999999999997,
+        17.128591643858588
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": -166.689654055301,
+      "rotationOrigin": [
+        9.737095574586847,
+        1.9,
+        16.988591643858587
+      ]
+    },
+    {
+      "name": "anchor-chain-3-3",
+      "from": [
+        9.3,
+        1.7249999999999999,
+        16.951999999999998
+      ],
+      "to": [
+        9.749161251048301,
+        2.0749999999999997,
+        17.232
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": 166.689654055301,
+      "rotationOrigin": [
+        9.3,
+        1.9,
+        17.092
+      ]
+    },
+    {
+      "name": "anchor-chain-3-4",
+      "from": [
+        8.862904425413154,
+        1.7249999999999999,
+        16.848591643858587
+      ],
+      "to": [
+        9.213119023727742,
+        2.0749999999999997,
+        17.128591643858588
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": 131.6124815376833,
+      "rotationOrigin": [
+        8.862904425413154,
+        1.9,
+        16.988591643858587
+      ]
+    },
+    {
+      "name": "anchor-chain-3-5",
+      "from": [
+        8.6303307279517,
+        1.7249999999999999,
+        16.58675249452878
+      ],
+      "to": [
+        8.938844363913217,
+        2.0749999999999997,
+        16.866752494528782
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": 74.82250354820951,
+      "rotationOrigin": [
+        8.6303307279517,
+        1.9,
+        16.72675249452878
+      ]
+    },
+    {
+      "name": "anchor-chain-3-6",
+      "from": [
+        8.711102725426583,
+        1.7249999999999999,
+        16.288999999999998
+      ],
+      "to": [
+        9.116979721241073,
+        2.0749999999999997,
+        16.569
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": 28.608702806419263,
+      "rotationOrigin": [
+        8.711102725426583,
+        1.9,
+        16.429
+      ]
+    },
+    {
+      "name": "anchor-chain-3-7",
+      "from": [
+        9.067426302538546,
+        1.7249999999999999,
+        16.094655861612626
+      ],
+      "to": [
+        9.532573697461455,
+        2.0749999999999997,
+        16.374655861612627
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": -0.0,
+      "rotationOrigin": [
+        9.067426302538546,
+        1.9,
+        16.234655861612627
+      ]
+    },
+    {
+      "name": "anchor-chain-3-8",
+      "from": [
+        9.532573697461455,
+        1.7249999999999999,
+        16.094655861612626
+      ],
+      "to": [
+        9.938450693275945,
+        2.0749999999999997,
+        16.374655861612627
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": -28.608702806419263,
+      "rotationOrigin": [
+        9.532573697461455,
+        1.9,
+        16.234655861612627
+      ]
+    },
+    {
+      "name": "anchor-chain-4-1",
+      "from": [
+        10.6196692720483,
+        1.7249999999999999,
+        17.786752494528784
+      ],
+      "to": [
+        10.969883870362889,
+        2.0749999999999997,
+        18.066752494528785
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": -131.6124815376833,
+      "rotationOrigin": [
+        10.6196692720483,
+        1.9,
+        17.926752494528785
+      ]
+    },
+    {
+      "name": "anchor-chain-4-2",
+      "from": [
+        10.387095574586846,
+        1.7249999999999999,
+        18.04859164385859
+      ],
+      "to": [
+        10.836256825635147,
+        2.0749999999999997,
+        18.32859164385859
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": -166.689654055301,
+      "rotationOrigin": [
+        10.387095574586846,
+        1.9,
+        18.18859164385859
+      ]
+    },
+    {
+      "name": "anchor-chain-4-3",
+      "from": [
+        9.95,
+        1.7249999999999999,
+        18.152
+      ],
+      "to": [
+        10.3991612510483,
+        2.0749999999999997,
+        18.432000000000002
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": 166.689654055301,
+      "rotationOrigin": [
+        9.95,
+        1.9,
+        18.292
+      ]
+    },
+    {
+      "name": "anchor-chain-4-4",
+      "from": [
+        9.512904425413153,
+        1.7249999999999999,
+        18.04859164385859
+      ],
+      "to": [
+        9.86311902372774,
+        2.0749999999999997,
+        18.32859164385859
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": 131.6124815376833,
+      "rotationOrigin": [
+        9.512904425413153,
+        1.9,
+        18.18859164385859
+      ]
+    },
+    {
+      "name": "anchor-chain-4-5",
+      "from": [
+        9.280330727951698,
+        1.7249999999999999,
+        17.786752494528784
+      ],
+      "to": [
+        9.588844363913216,
+        2.0749999999999997,
+        18.066752494528785
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": 74.82250354820951,
+      "rotationOrigin": [
+        9.280330727951698,
+        1.9,
+        17.926752494528785
+      ]
+    },
+    {
+      "name": "anchor-chain-4-6",
+      "from": [
+        9.361102725426582,
+        1.7249999999999999,
+        17.489
+      ],
+      "to": [
+        9.766979721241071,
+        2.0749999999999997,
+        17.769000000000002
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": 28.608702806419263,
+      "rotationOrigin": [
+        9.361102725426582,
+        1.9,
+        17.629
+      ]
+    },
+    {
+      "name": "anchor-chain-4-7",
+      "from": [
+        9.717426302538545,
+        1.7249999999999999,
+        17.29465586161263
+      ],
+      "to": [
+        10.182573697461454,
+        2.0749999999999997,
+        17.57465586161263
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": -0.0,
+      "rotationOrigin": [
+        9.717426302538545,
+        1.9,
+        17.43465586161263
+      ]
+    },
+    {
+      "name": "anchor-chain-4-8",
+      "from": [
+        10.182573697461454,
+        1.7249999999999999,
+        17.29465586161263
+      ],
+      "to": [
+        10.588450693275943,
+        2.0749999999999997,
+        17.57465586161263
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationY": -28.608702806419263,
+      "rotationOrigin": [
+        10.182573697461454,
+        1.9,
+        17.43465586161263
+      ]
+    }
+  ]
+}

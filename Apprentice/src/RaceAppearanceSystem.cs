@@ -26,7 +26,10 @@ namespace Apprentice
     {
         private const string HarmonyId = "apprentice.raceappearance";
         private const string ChannelName = "apprentice-racebody";
-        private const string PersistentRaceDataKey = "apprenticeRaceSelection-v1";
+        private const string PersistentRaceDataKey = "apprenticeRaceCustomization-v2";
+        private const string LegacyPersistentRaceDataKey = "apprenticeRaceSelection-v1";
+        private const int RaceSnapshotSchemaVersion = 2;
+        private const string FaceSkinPartCode = "apprenticefaceskin";
         private const string SkinPartCode = "apprenticerace";
         private const string HornPartCode = "apprenticehorns";
         private const string HornColorPartCode = "apprenticehorncolor";
@@ -234,11 +237,6 @@ namespace Apprentice
         private static readonly string[] HornColorCodes =
         {
             "dark-gray", "light-gray", "white", "light-pink", "yellowish-white"
-        };
-
-        private static readonly string[] HornColorNames =
-        {
-            "Dark gray", "Light gray", "White", "Light pink", "Yellowish white"
         };
 
         private static readonly string[] ProfessionCodes =
@@ -618,6 +616,10 @@ namespace Apprentice
             .ToArray();
 
         private static readonly HashSet<object> ConfirmedRaceDialogs = new();
+        private static readonly HashSet<object> ApprovedCharacterDialogClosures = new();
+        private static readonly Dictionary<object, ActionConsumable>
+            NativeFinalCharacterConfirmCallbacks = new();
+        private static readonly HashSet<EntityPlayer> RestoreInProgress = new();
         private static readonly Dictionary<EntityBehaviorExtraSkinnable, List<PaletteSnapshot>>
             PaletteSnapshots = new();
         private static readonly ConditionalWeakTable<MeshData, HashSet<int>>
@@ -632,8 +634,10 @@ namespace Apprentice
         private static IServerNetworkChannel? serverChannel;
         private static object? activeCharacterDialog;
         private static object? pendingSkinConfirmDialog;
+        private static long pendingSkinConfirmRequestId;
+        private static long nextRaceSaveRequestId = DateTime.UtcNow.Ticks;
+        private static bool skinCloseRequested;
         private static RaceOptionsDialog? optionsDialog;
-        private static HornColorDialog? hornColorDialog;
 
         public override double ExecuteOrder() => 0.2;
 
@@ -645,13 +649,15 @@ namespace Apprentice
             {
                 serverChannel = ((ICoreServerAPI)api).Network
                     .RegisterChannel(ChannelName)
-                    .RegisterMessageType<RaceBodyPacket>();
+                    .RegisterMessageType<RaceBodyPacket>()
+                    .RegisterMessageType<RaceSaveResultPacket>();
             }
             else
             {
                 clientChannel = ((ICoreClientAPI)api).Network
                     .RegisterChannel(ChannelName)
-                    .RegisterMessageType<RaceBodyPacket>();
+                    .RegisterMessageType<RaceBodyPacket>()
+                    .RegisterMessageType<RaceSaveResultPacket>();
             }
 
             harmony = new Harmony(HarmonyId);
@@ -666,7 +672,7 @@ namespace Apprentice
             }
 
             api.Logger.Notification(
-                "[Apprentice] Installed race customization."
+                "[Apprentice 2.7.0] Installed race customization foundation (height-scaled camera, stable skin columns and direct pause-dialog cleanup)."
             );
         }
 
@@ -681,6 +687,8 @@ namespace Apprentice
         public override void StartClientSide(ICoreClientAPI api)
         {
             clientApi = api;
+            clientChannel?.SetMessageHandler<RaceBodyPacket>(OnRaceSnapshotReceived);
+            clientChannel?.SetMessageHandler<RaceSaveResultPacket>(OnRaceSaveResult);
         }
 
         private void PatchCharacterClass()
@@ -742,6 +750,36 @@ namespace Apprentice
             );
 
             if (harmony == null || api.Side != EnumAppSide.Client) return;
+
+            MethodInfo? eyeHeightTarget = AccessTools.Method(
+                typeof(EntityPlayer),
+                "updateEyeHeight",
+                new[] { typeof(float) }
+            );
+            MethodInfo? eyeHeightPrefix = AccessTools.Method(
+                typeof(RaceAppearanceSystem),
+                nameof(BeforePlayerEyeHeightUpdate)
+            );
+            MethodInfo? eyeHeightFinalizer = AccessTools.Method(
+                typeof(RaceAppearanceSystem),
+                nameof(FinalizePlayerEyeHeightUpdate)
+            );
+            if (eyeHeightTarget != null &&
+                eyeHeightPrefix != null &&
+                eyeHeightFinalizer != null)
+            {
+                harmony.Patch(
+                    eyeHeightTarget,
+                    prefix: new HarmonyMethod(eyeHeightPrefix),
+                    finalizer: new HarmonyMethod(eyeHeightFinalizer)
+                );
+            }
+            else
+            {
+                api.Logger.Warning(
+                    "[Apprentice] Could not patch the local-player eye-height update; scaled camera height is unavailable."
+                );
+            }
 
             MethodInfo? meshTarget = rendererType.GetMethod(
                 "<Tesselate>b__21_0",
@@ -863,13 +901,31 @@ namespace Apprentice
             );
             if (dialogType == null || harmony == null) return;
 
-            PatchDialogMethod(dialogType, "OnGuiOpened", null, nameof(AfterDialogOpened));
+            PatchDialogMethod(
+                dialogType,
+                "OnGuiOpened",
+                nameof(BeforeDialogOpened),
+                nameof(AfterDialogOpened)
+            );
             PatchDialogMethod(dialogType, "OnGuiClosed", null, nameof(AfterDialogClosed));
             PatchDialogMethod(dialogType, "changeClass", null, nameof(AfterRaceChanged));
             PatchDialogMethod(dialogType, "onTabClicked", nameof(BeforeTabClicked), nameof(AfterTabClicked));
             PatchDialogMethod(dialogType, "OnNext", nameof(BeforeSkinConfirmNext), null);
             PatchDialogMethod(dialogType, "OnConfirm", nameof(BeforeDialogConfirm), null);
-            PatchDialogMethod(dialogType, "ComposeGuis", nameof(BeforeComposeGuis), nameof(AfterComposeGuis));
+            PatchDialogMethod(
+                dialogType,
+                "ComposeGuis",
+                nameof(BeforeComposeGuis),
+                nameof(AfterComposeGuis),
+                nameof(FinalizeComposeGuis)
+            );
+
+            PatchDialogMethod(
+                typeof(GuiDialog),
+                nameof(GuiDialog.TryClose),
+                nameof(BeforeCharacterDialogTryClose),
+                null
+            );
 
             MethodInfo? composerWheelTarget = AccessTools.Method(
                 typeof(GuiComposer),
@@ -951,6 +1007,7 @@ namespace Apprentice
                     postfix: new HarmonyMethod(skinPartPostfix)
                 );
             }
+
         }
 
         private static void AfterSkinPartSelected(
@@ -977,6 +1034,14 @@ namespace Apprentice
             refreshingRaceShapeTexture = true;
             try
             {
+                if (__0 == "baseskin")
+                {
+                    SelectHiddenPart(
+                        __instance,
+                        FaceSkinPartCode,
+                        GetAppliedSkinPartCode(__instance, "baseskin", "skin4")
+                    );
+                }
                 SelectHiddenPart(
                     __instance,
                     SkinPartCode,
@@ -993,7 +1058,8 @@ namespace Apprentice
             Type dialogType,
             string methodName,
             string? prefixName,
-            string? postfixName)
+            string? postfixName,
+            string? finalizerName = null)
         {
             if (harmony == null) return;
             MethodInfo? target = AccessTools.Method(dialogType, methodName);
@@ -1003,13 +1069,29 @@ namespace Apprentice
             MethodInfo? postfix = postfixName == null
                 ? null
                 : AccessTools.Method(typeof(RaceAppearanceSystem), postfixName);
+            MethodInfo? finalizer = finalizerName == null
+                ? null
+                : AccessTools.Method(typeof(RaceAppearanceSystem), finalizerName);
             if (target != null)
             {
-                harmony.Patch(
-                    target,
-                    prefix: prefix == null ? null : new HarmonyMethod(prefix),
-                    postfix: postfix == null ? null : new HarmonyMethod(postfix)
-                );
+                try
+                {
+                    harmony.Patch(
+                        target,
+                        prefix: prefix == null ? null : new HarmonyMethod(prefix),
+                        postfix: postfix == null ? null : new HarmonyMethod(postfix),
+                        finalizer: finalizer == null ? null : new HarmonyMethod(finalizer)
+                    );
+                }
+                catch (Exception error)
+                {
+                    clientApi?.Logger.Error(
+                        "[Apprentice] Could not patch {0}.{1}: {2}",
+                        dialogType.FullName,
+                        methodName,
+                        error
+                    );
+                }
             }
         }
 

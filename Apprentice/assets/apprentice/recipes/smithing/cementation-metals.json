@@ -1,0 +1,24 @@
+[
+  {
+    "code": "apprentice:starsteel-ingot",
+    "ingredient": { "type": "item", "code": "apprentice:blister-starsteel" },
+    "pattern": [[
+      "_#######_",
+      "#########",
+      "_#######_"
+    ]],
+    "name": "Starsteel ingot",
+    "output": { "type": "item", "code": "game:ingot-starsteel" }
+  },
+  {
+    "code": "apprentice:aethersteel-ingot",
+    "ingredient": { "type": "item", "code": "apprentice:blister-aethersteel" },
+    "pattern": [[
+      "_#######_",
+      "#########",
+      "_#######_"
+    ]],
+    "name": "Aethersteel ingot",
+    "output": { "type": "item", "code": "game:ingot-aethersteel" }
+  }
+]

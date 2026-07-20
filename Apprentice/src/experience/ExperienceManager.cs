@@ -53,6 +53,7 @@ namespace Apprentice
 		private readonly IServerNetworkChannel networkChannel;
 		private readonly BaseConfig baseConfig;
 		private readonly SkillTreeManager skillTreeManager;
+		private readonly List<ClassDefinition> compiledClasses = new();
 		private readonly Dictionary<
 			string,
 			List<CompiledInteraction>
@@ -224,6 +225,101 @@ namespace Apprentice
 			return awardedClasses;
 		}
 
+		/// <summary>
+		/// Floors every configured profession to the beginning of its
+		/// current level. Completed levels, skill points, purchased nodes,
+		/// capstones and hidden-class state are stored separately and are
+		/// deliberately untouched.
+		/// </summary>
+		public int LoseCurrentLevelProgress(
+			IServerPlayer player)
+		{
+			ArgumentNullException.ThrowIfNull(player);
+
+			int changedClasses = 0;
+
+			foreach (ClassDefinition classDefinition
+					 in compiledClasses)
+			{
+				double previousTotal =
+					ProgressionData.GetExperience(
+						player.Entity,
+						classDefinition.Id
+					);
+
+				if (!double.IsFinite(previousTotal) ||
+					previousTotal < 0)
+				{
+					serverApi.Logger.Warning(
+						$"[Apprentice] Repaired invalid XP " +
+						$"for {player.PlayerName} in " +
+						$"'{classDefinition.Id}' after death: " +
+						$"{previousTotal}."
+					);
+
+					ProgressionData.SetExperience(
+						player,
+						classDefinition.Id,
+						0
+					);
+
+					changedClasses++;
+					continue;
+				}
+
+				int level = ExpMath.GetLevel(previousTotal);
+				double levelStart =
+					ExpMath.GetLevelStartExp(level);
+
+				if (previousTotal <= levelStart)
+				{
+					continue;
+				}
+
+				ExperienceChange change =
+					ProgressionData.SetExperience(
+						player,
+						classDefinition.Id,
+						levelStart
+					);
+
+				double lostExperience =
+					change.PreviousTotal -
+					change.NewTotal;
+
+				networkChannel.SendPacket(
+					new ExperienceNotificationPacket
+					{
+						ClassId = classDefinition.Id,
+						ClassDisplayName =
+							classDefinition.DisplayName,
+						Interaction = "death",
+						TargetCode = string.Empty,
+						GainedExperience = -lostExperience,
+						PreviousTotalExperience =
+							change.PreviousTotal,
+						NewTotalExperience =
+							change.NewTotal,
+						PreviousLevel = level,
+						NewLevel = level,
+						IsPenalty = true
+					},
+					player
+				);
+
+				serverApi.Logger.Notification(
+					$"[Apprentice] {player.PlayerName} lost " +
+					$"{lostExperience:0.###} current-level XP " +
+					$"in '{classDefinition.Id}' on death; " +
+					$"level {level} remains."
+				);
+
+				changedClasses++;
+			}
+
+			return changedClasses;
+		}
+
 		private void AwardExperience(
 			IServerPlayer player,
 			ClassDefinition classDefinition,
@@ -295,6 +391,8 @@ namespace Apprentice
 			foreach (ClassDefinition classDefinition
 					 in classConfig.ClassTypes.Values)
 			{
+				compiledClasses.Add(classDefinition);
+
 				var compiledClass =
 					new CompiledClass(classDefinition);
 

@@ -167,7 +167,7 @@ namespace Apprentice
 			if (outputCode == null || SkillTreeRuntime.CanCraftLockedRecipe(
 				byPlayer,
 				outputCode,
-				out string requiredNode))
+				out string requiredSkill))
 			{
 				return true;
 			}
@@ -177,7 +177,7 @@ namespace Apprentice
 			{
 				serverPlayer.SendMessage(
 					GlobalConstants.GeneralChatGroup,
-					$"This recipe requires the Apprentice capstone '{requiredNode}'.",
+					$"This recipe requires the Apprentice skill '{requiredSkill}'.",
 					EnumChatType.Notification
 				);
 			}

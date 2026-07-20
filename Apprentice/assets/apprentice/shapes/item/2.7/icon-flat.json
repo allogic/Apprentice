@@ -1,0 +1,16 @@
+{
+  "textureWidth": 128,
+  "textureHeight": 128,
+  "textureSizes": { "base": [128, 128] },
+  "textures": { "base": "apprentice:item/2.7/mastersurveykit" },
+  "elements": [
+    {
+      "name": "icon",
+      "from": [0, 0, 7.75],
+      "to": [16, 16, 8.25],
+      "faces": {
+        "south": { "texture": "#base", "uv": [0, 128, 128, 0], "autoUv": false }
+      }
+    }
+  ]
+}

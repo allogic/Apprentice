@@ -1,0 +1,1651 @@
+{
+  "editor": {
+    "allAngles": true
+  },
+  "textureWidth": 32,
+  "textureHeight": 32,
+  "textures": {
+    "wood": "game:block/wood/planks/oak1",
+    "darkwood": "game:block/wood/planks/walnut1",
+    "iron": "game:block/metal/ingot/iron",
+    "copper": "game:block/metal/ingot/copper",
+    "gold": "game:block/metal/ingot/gold",
+    "leather": "game:block/leather/plain",
+    "cork": "game:block/creature/bone",
+    "string": "game:block/wood/planks/walnut1"
+  },
+  "elements": [
+    {
+      "name": "butt-cap",
+      "from": [
+        6.75,
+        -2.0,
+        6.75
+      ],
+      "to": [
+        9.25,
+        -0.5,
+        9.25
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      }
+    },
+    {
+      "name": "main-hand-grip",
+      "from": [
+        7.0,
+        -0.5,
+        7.0
+      ],
+      "to": [
+        9.0,
+        5.5,
+        9.0
+      ],
+      "faces": {
+        "north": {
+          "texture": "#leather"
+        },
+        "east": {
+          "texture": "#leather"
+        },
+        "south": {
+          "texture": "#leather"
+        },
+        "west": {
+          "texture": "#leather"
+        },
+        "up": {
+          "texture": "#leather"
+        },
+        "down": {
+          "texture": "#leather"
+        }
+      }
+    },
+    {
+      "name": "reel-seat-collar-lower",
+      "from": [
+        6.65,
+        4.7,
+        6.65
+      ],
+      "to": [
+        9.35,
+        5.35,
+        9.35
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "reel-seat-collar-upper",
+      "from": [
+        6.65,
+        5.55,
+        6.65
+      ],
+      "to": [
+        9.35,
+        6.3,
+        9.35
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "reel-mount",
+      "from": [
+        6.15,
+        3.1300000000000003,
+        7.25
+      ],
+      "to": [
+        7.25,
+        3.93,
+        8.75
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "reel-support",
+      "from": [
+        5.85,
+        2.95,
+        7.05
+      ],
+      "to": [
+        6.55,
+        4.1000000000000005,
+        8.95
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "reel-spool-center",
+      "from": [
+        3.727,
+        2.35632,
+        6.45
+      ],
+      "to": [
+        6.372999999999999,
+        4.54368,
+        9.55
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      }
+    },
+    {
+      "name": "reel-spool-top",
+      "from": [
+        4.15036,
+        4.54368,
+        6.55
+      ],
+      "to": [
+        5.94964,
+        4.969,
+        9.450000000000001
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      }
+    },
+    {
+      "name": "reel-spool-bottom",
+      "from": [
+        4.15036,
+        1.9310000000000003,
+        6.55
+      ],
+      "to": [
+        5.94964,
+        2.35632,
+        9.450000000000001
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      }
+    },
+    {
+      "name": "reel-spool-left",
+      "from": [
+        3.4623999999999997,
+        2.8120200000000004,
+        6.55
+      ],
+      "to": [
+        3.727,
+        4.08798,
+        9.450000000000001
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      }
+    },
+    {
+      "name": "reel-spool-right",
+      "from": [
+        6.372999999999999,
+        2.8120200000000004,
+        6.55
+      ],
+      "to": [
+        6.57145,
+        4.08798,
+        9.450000000000001
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "reel-hub-front",
+      "from": [
+        4.6286,
+        3.0286,
+        6.13
+      ],
+      "to": [
+        5.4714,
+        3.8714000000000004,
+        6.45
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "reel-hub-rear",
+      "from": [
+        4.6286,
+        3.0286,
+        9.55
+      ],
+      "to": [
+        5.4714,
+        3.8714000000000004,
+        9.870000000000001
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "reel-crank-shaft",
+      "from": [
+        4.85,
+        3.25,
+        5.6000000000000005
+      ],
+      "to": [
+        5.25,
+        3.6500000000000004,
+        6.13
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "reel-crank-arm",
+      "from": [
+        3.8249999999999997,
+        3.27,
+        5.37
+      ],
+      "to": [
+        5.05,
+        3.6300000000000003,
+        5.73
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      },
+      "rotationZ": -20,
+      "rotationOrigin": [
+        5.05,
+        3.45,
+        5.55
+      ]
+    },
+    {
+      "name": "reel-crank-knob",
+      "from": [
+        3.4623999999999997,
+        2.9000000000000004,
+        5.1
+      ],
+      "to": [
+        4.021,
+        4.0,
+        6.0
+      ],
+      "faces": {
+        "north": {
+          "texture": "#leather"
+        },
+        "east": {
+          "texture": "#leather"
+        },
+        "south": {
+          "texture": "#leather"
+        },
+        "west": {
+          "texture": "#leather"
+        },
+        "up": {
+          "texture": "#leather"
+        },
+        "down": {
+          "texture": "#leather"
+        }
+      }
+    },
+    {
+      "name": "reel-perforation-1",
+      "from": [
+        4.2424,
+        3.25,
+        6.33
+      ],
+      "to": [
+        4.6424,
+        3.6500000000000004,
+        6.45
+      ],
+      "faces": {
+        "north": {
+          "texture": "#darkwood"
+        },
+        "east": {
+          "texture": "#darkwood"
+        },
+        "south": {
+          "texture": "#darkwood"
+        },
+        "west": {
+          "texture": "#darkwood"
+        },
+        "up": {
+          "texture": "#darkwood"
+        },
+        "down": {
+          "texture": "#darkwood"
+        }
+      }
+    },
+    {
+      "name": "reel-perforation-2",
+      "from": [
+        5.457599999999999,
+        3.25,
+        6.33
+      ],
+      "to": [
+        5.8576,
+        3.6500000000000004,
+        6.45
+      ],
+      "faces": {
+        "north": {
+          "texture": "#darkwood"
+        },
+        "east": {
+          "texture": "#darkwood"
+        },
+        "south": {
+          "texture": "#darkwood"
+        },
+        "west": {
+          "texture": "#darkwood"
+        },
+        "up": {
+          "texture": "#darkwood"
+        },
+        "down": {
+          "texture": "#darkwood"
+        }
+      }
+    },
+    {
+      "name": "reel-perforation-3",
+      "from": [
+        4.85,
+        2.564,
+        6.33
+      ],
+      "to": [
+        5.25,
+        2.9640000000000004,
+        6.45
+      ],
+      "faces": {
+        "north": {
+          "texture": "#darkwood"
+        },
+        "east": {
+          "texture": "#darkwood"
+        },
+        "south": {
+          "texture": "#darkwood"
+        },
+        "west": {
+          "texture": "#darkwood"
+        },
+        "up": {
+          "texture": "#darkwood"
+        },
+        "down": {
+          "texture": "#darkwood"
+        }
+      }
+    },
+    {
+      "name": "reel-perforation-4",
+      "from": [
+        4.85,
+        3.936,
+        6.33
+      ],
+      "to": [
+        5.25,
+        4.336,
+        6.45
+      ],
+      "faces": {
+        "north": {
+          "texture": "#darkwood"
+        },
+        "east": {
+          "texture": "#darkwood"
+        },
+        "south": {
+          "texture": "#darkwood"
+        },
+        "west": {
+          "texture": "#darkwood"
+        },
+        "up": {
+          "texture": "#darkwood"
+        },
+        "down": {
+          "texture": "#darkwood"
+        }
+      }
+    },
+    {
+      "name": "grip-wrap-1",
+      "from": [
+        6.78,
+        -0.15,
+        6.78
+      ],
+      "to": [
+        9.22,
+        0.1,
+        9.22
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      }
+    },
+    {
+      "name": "grip-wrap-2",
+      "from": [
+        6.78,
+        0.45,
+        6.78
+      ],
+      "to": [
+        9.22,
+        0.7,
+        9.22
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      }
+    },
+    {
+      "name": "grip-wrap-3",
+      "from": [
+        6.78,
+        1.05,
+        6.78
+      ],
+      "to": [
+        9.22,
+        1.3,
+        9.22
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      }
+    },
+    {
+      "name": "grip-wrap-4",
+      "from": [
+        6.78,
+        1.65,
+        6.78
+      ],
+      "to": [
+        9.22,
+        1.9,
+        9.22
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      }
+    },
+    {
+      "name": "grip-wrap-5",
+      "from": [
+        6.78,
+        2.25,
+        6.78
+      ],
+      "to": [
+        9.22,
+        2.5,
+        9.22
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      }
+    },
+    {
+      "name": "grip-wrap-6",
+      "from": [
+        6.78,
+        2.85,
+        6.78
+      ],
+      "to": [
+        9.22,
+        3.1,
+        9.22
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      }
+    },
+    {
+      "name": "reel-gold-inlay",
+      "from": [
+        4.15,
+        3.35,
+        6.55
+      ],
+      "to": [
+        5.85,
+        3.8,
+        6.9
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      }
+    },
+    {
+      "name": "pommel-gold-core",
+      "from": [
+        7.35,
+        -2.5,
+        7.35
+      ],
+      "to": [
+        8.65,
+        -2.0,
+        8.65
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      }
+    },
+    {
+      "name": "spine-1",
+      "from": [
+        7.325,
+        6.3,
+        7.325
+      ],
+      "to": [
+        8.675,
+        15.3,
+        8.675
+      ],
+      "faces": {
+        "north": {
+          "texture": "#darkwood"
+        },
+        "east": {
+          "texture": "#darkwood"
+        },
+        "south": {
+          "texture": "#darkwood"
+        },
+        "west": {
+          "texture": "#darkwood"
+        },
+        "up": {
+          "texture": "#darkwood"
+        },
+        "down": {
+          "texture": "#darkwood"
+        }
+      },
+      "rotationZ": 4,
+      "rotationOrigin": [
+        8.0,
+        6.3,
+        8
+      ]
+    },
+    {
+      "name": "ferrule-1",
+      "from": [
+        6.393441736302872,
+        14.998076452338418,
+        7.02125
+      ],
+      "to": [
+        8.350941736302872,
+        15.698076452338418,
+        8.97875
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      },
+      "rotationZ": 4,
+      "rotationOrigin": [
+        7.372191736302872,
+        15.278076452338418,
+        8
+      ]
+    },
+    {
+      "name": "spine-2",
+      "from": [
+        6.882191736302872,
+        15.278076452338418,
+        7.51
+      ],
+      "to": [
+        7.862191736302872,
+        23.278076452338418,
+        8.49
+      ],
+      "faces": {
+        "north": {
+          "texture": "#darkwood"
+        },
+        "east": {
+          "texture": "#darkwood"
+        },
+        "south": {
+          "texture": "#darkwood"
+        },
+        "west": {
+          "texture": "#darkwood"
+        },
+        "up": {
+          "texture": "#darkwood"
+        },
+        "down": {
+          "texture": "#darkwood"
+        }
+      },
+      "rotationZ": 9,
+      "rotationOrigin": [
+        7.372191736302872,
+        15.278076452338418,
+        8
+      ]
+    },
+    {
+      "name": "ferrule-2",
+      "from": [
+        5.4102160159810255,
+        22.89958317709952,
+        7.2895
+      ],
+      "to": [
+        6.831216015981025,
+        23.59958317709952,
+        8.7105
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      },
+      "rotationZ": 9,
+      "rotationOrigin": [
+        6.120716015981025,
+        23.17958317709952,
+        8
+      ]
+    },
+    {
+      "name": "spine-3",
+      "from": [
+        5.780716015981025,
+        23.17958317709952,
+        7.66
+      ],
+      "to": [
+        6.460716015981025,
+        30.17958317709952,
+        8.34
+      ],
+      "faces": {
+        "north": {
+          "texture": "#wood"
+        },
+        "east": {
+          "texture": "#wood"
+        },
+        "south": {
+          "texture": "#wood"
+        },
+        "west": {
+          "texture": "#wood"
+        },
+        "up": {
+          "texture": "#wood"
+        },
+        "down": {
+          "texture": "#wood"
+        }
+      },
+      "rotationZ": 14,
+      "rotationOrigin": [
+        6.120716015981025,
+        23.17958317709952,
+        8
+      ]
+    },
+    {
+      "name": "ferrule-3",
+      "from": [
+        3.9342627467833515,
+        29.691653261031494,
+        7.507
+      ],
+      "to": [
+        4.920262746783352,
+        30.391653261031497,
+        8.493
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold"
+        },
+        "east": {
+          "texture": "#gold"
+        },
+        "south": {
+          "texture": "#gold"
+        },
+        "west": {
+          "texture": "#gold"
+        },
+        "up": {
+          "texture": "#gold"
+        },
+        "down": {
+          "texture": "#gold"
+        }
+      },
+      "rotationZ": 14,
+      "rotationOrigin": [
+        4.427262746783351,
+        29.971653261031495,
+        8
+      ]
+    },
+    {
+      "name": "spine-4",
+      "from": [
+        4.237262746783351,
+        29.971653261031495,
+        7.81
+      ],
+      "to": [
+        4.617262746783352,
+        35.47165326103149,
+        8.19
+      ],
+      "faces": {
+        "north": {
+          "texture": "#wood"
+        },
+        "east": {
+          "texture": "#wood"
+        },
+        "south": {
+          "texture": "#wood"
+        },
+        "west": {
+          "texture": "#wood"
+        },
+        "up": {
+          "texture": "#wood"
+        },
+        "down": {
+          "texture": "#wood"
+        }
+      },
+      "rotationZ": 21,
+      "rotationOrigin": [
+        4.427262746783351,
+        29.971653261031495,
+        8
+      ]
+    },
+    {
+      "name": "guide-1-foot",
+      "from": [
+        7.172191736302872,
+        14.998076452338418,
+        7.35
+      ],
+      "to": [
+        7.722191736302872,
+        15.558076452338417,
+        8.65
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "guide-1-arm",
+      "from": [
+        6.572191736302872,
+        15.058076452338417,
+        7.55
+      ],
+      "to": [
+        7.222191736302872,
+        15.498076452338418,
+        8.45
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "guide-1-eye",
+      "from": [
+        6.2221917363028725,
+        14.928076452338418,
+        7.4
+      ],
+      "to": [
+        6.7221917363028725,
+        15.628076452338417,
+        8.6
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "guide-2-foot",
+      "from": [
+        5.920716015981025,
+        22.89958317709952,
+        7.35
+      ],
+      "to": [
+        6.470716015981025,
+        23.45958317709952,
+        8.65
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "guide-2-arm",
+      "from": [
+        5.420716015981025,
+        22.95958317709952,
+        7.55
+      ],
+      "to": [
+        5.970716015981025,
+        23.39958317709952,
+        8.45
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "guide-2-eye",
+      "from": [
+        5.070716015981025,
+        22.82958317709952,
+        7.4
+      ],
+      "to": [
+        5.570716015981025,
+        23.52958317709952,
+        8.6
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "guide-3-foot",
+      "from": [
+        4.227262746783351,
+        29.691653261031494,
+        7.35
+      ],
+      "to": [
+        4.777262746783351,
+        30.251653261031496,
+        8.65
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "guide-3-arm",
+      "from": [
+        3.8272627467833513,
+        29.751653261031496,
+        7.55
+      ],
+      "to": [
+        4.277262746783351,
+        30.191653261031494,
+        8.45
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "guide-3-eye",
+      "from": [
+        3.4772627467833512,
+        29.621653261031494,
+        7.4
+      ],
+      "to": [
+        3.9772627467833512,
+        30.321653261031496,
+        8.6
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "guide-4-foot",
+      "from": [
+        2.2562390242842,
+        34.826345606766104,
+        7.35
+      ],
+      "to": [
+        2.8062390242842,
+        35.386345606766106,
+        8.65
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "guide-4-arm",
+      "from": [
+        1.9562390242842,
+        34.886345606766106,
+        7.55
+      ],
+      "to": [
+        2.3062390242842,
+        35.326345606766104,
+        8.45
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "guide-4-eye",
+      "from": [
+        1.6062390242842,
+        34.756345606766104,
+        7.4
+      ],
+      "to": [
+        2.1062390242842,
+        35.45634560676611,
+        8.6
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "name": "tip-eye-cap",
+      "from": [
+        2.0062390242842,
+        34.80634560676611,
+        7.45
+      ],
+      "to": [
+        2.6062390242842,
+        35.45634560676611,
+        8.55
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    }
+  ]
+}

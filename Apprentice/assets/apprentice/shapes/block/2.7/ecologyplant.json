@@ -1,0 +1,24 @@
+{
+  "textureWidth": 128,
+  "textureHeight": 128,
+  "textureSizes": { "plant": [128, 128] },
+  "textures": { "plant": "#plant" },
+  "elements": [
+    {
+      "name": "plant-a", "from": [4.5, 0, 7.9], "to": [11.5, 7, 8.1],
+      "rotationOrigin": [8, 3.5, 8], "rotationY": 45,
+      "faces": {
+        "north": { "texture": "#plant", "uv": [0, 128, 128, 0], "autoUv": false },
+        "south": { "texture": "#plant", "uv": [128, 128, 0, 0], "autoUv": false }
+      }
+    },
+    {
+      "name": "plant-b", "from": [4.5, 0, 7.9], "to": [11.5, 7, 8.1],
+      "rotationOrigin": [8, 3.5, 8], "rotationY": -45,
+      "faces": {
+        "north": { "texture": "#plant", "uv": [0, 128, 128, 0], "autoUv": false },
+        "south": { "texture": "#plant", "uv": [128, 128, 0, 0], "autoUv": false }
+      }
+    }
+  ]
+}
