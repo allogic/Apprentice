@@ -1,12 +1,16 @@
 ﻿using Cairo;
+using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
 using Vintagestory.API.MathTools;
+using Vintagestory.Client.NoObf;
 using Vintagestory.GameContent;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Apprentice.Weapon
 {
@@ -41,7 +45,8 @@ namespace Apprentice.Weapon
 		}
 	}
 
-	internal class DebugLineRenderer : IRenderer
+	// TODO: refactor me pls..
+	internal class LineGizmo : IRenderer
 	{
 		private readonly IClientEventAPI eventApi;
 		private readonly IRenderAPI renderApi;
@@ -52,7 +57,7 @@ namespace Apprentice.Weapon
 		private MeshData? mesh = null;
 		private MeshRef? meshRef = null;
 
-		public DebugLineRenderer(ICoreClientAPI api, int numLines)
+		public LineGizmo(ICoreClientAPI api, int numLines)
 		{
 			eventApi = api.Event;
 			renderApi = api.Render;
@@ -60,7 +65,7 @@ namespace Apprentice.Weapon
 			mesh = new(numLines * 2, numLines * 2, false, false, true, false);
 			mesh?.mode = EnumDrawMode.Lines;
 
-			api.Event.RegisterRenderer(this, EnumRenderStage.Done);
+			eventApi.RegisterRenderer(this, EnumRenderStage.Done);
 		}
 
 		public void OnRenderFrame(float deltaTime, EnumRenderStage stage)
@@ -70,6 +75,11 @@ namespace Apprentice.Weapon
 			if (meshRef != null)
 			{
 				IShaderProgram program = renderApi.CurrentActiveShader;
+
+				// renderApi.CameraMatrix
+				// renderApi.ViewMatrix
+				// renderApi.ProjectionMatrix
+				// renderApi.CurrentProjectionMatrix
 
 				renderApi.GlDisableCullFace();
 				renderApi.RenderMesh(meshRef);
@@ -116,29 +126,92 @@ namespace Apprentice.Weapon
 			meshRef?.Dispose();
 		}
 	}
+	internal class DashBlur : IRenderer
+	{
+		private readonly IClientEventAPI eventApi;
+		private readonly IRenderAPI renderApi;
+		private readonly IShaderAPI shaderApi;
+
+		private readonly MeshRef meshRef;
+
+		private readonly IShaderProgram program;
+
+		public double RenderOrder => 1.0;
+		public int RenderRange => 9999;
+
+		public DashBlur(ICoreClientAPI api)
+		{
+			eventApi = api.Event;
+			renderApi = api.Render;
+			shaderApi = api.Shader;
+
+			program = shaderApi.NewShaderProgram();
+
+			program.AssetDomain = "apprentice";
+			program.VertexShader = shaderApi.NewShader(EnumShaderType.VertexShader);
+			program.FragmentShader = shaderApi.NewShader(EnumShaderType.FragmentShader);
+
+			int programId = shaderApi.RegisterFileShaderProgram("dash-blur", program);
+
+			program = renderApi.GetShader(programId);
+
+			program.Compile();
+
+			meshRef = renderApi.UploadMesh(QuadMeshUtil.GetQuad());
+
+			eventApi.RegisterRenderer(this, EnumRenderStage.AfterFinalComposition);
+		}
+
+		public void OnRenderFrame(float deltaTime, EnumRenderStage stage)
+		{
+			if (stage != EnumRenderStage.AfterFinalComposition) return;
+
+			program.Use();
+
+			// program.BindTexture2D("tex", );
+			program.Uniform("strength", 0.3F);
+
+			renderApi.RenderMesh(meshRef);
+		}
+
+		public void Dispose()
+		{
+			eventApi.UnregisterRenderer(this, EnumRenderStage.AfterFinalComposition);
+
+			program.Dispose();
+			meshRef.Dispose();
+		}
+	}
 
 	internal class UchigatanaDashBehaviour : EntityBehavior
 	{
+		private readonly AssetLocation dashSound1 = new("apprentice", "sounds/dash-1");
+		private readonly AssetLocation dashSound2 = new("apprentice", "sounds/dash-2");
+		private readonly AssetLocation dashRecoverSound1 = new("apprentice", "sounds/dash-recover-1");
+		private readonly AssetLocation dashRecoverSound2 = new("apprentice", "sounds/dash-recover-2");
+
 		private readonly ICoreClientAPI clientApi;
 		private readonly IInputAPI inputApi;
 
+		private const float animationStep = 1.0F / 60;
+		private const float animationFrames = animationStep * 30.0F;
+		private const float animationSpeed = 15.0F;
+
+		private const float impulseAirbourne = 0.28F;
+		private const float impulseGrounded = 0.8F;
+
+		private const int dashCooldownMs = 800;
+
 		EntityPlayer? entityPlayer = null;
-		DebugLineRenderer? lineRenderer = null;
+		LineGizmo? lineGizmo = null;
+		DashBlur? dashBlur = null;
 
-		private bool Init { get; set; }
-		private bool Playing { get; set; }
+		private bool isInit = true;
+		private bool isPlaying = false;
 
-		private float AnimationDuration { get; set; } = 4.0F;
-		private float AnimationStep { get; set; } = 0.2F;
-		private float DashImpulse { get; set; } = 0.3F;
-
-		// private float Duration { get; set; } = 1.0F;
-		// private float Attenuator { get; set; } = 5.0F;
-		// private float Dampening { get; set; } = 0.002F;
-		// private float EngageAngle { get; set; } = 0.01745329251994329547F * 30.0F;
-
-		private float AnimationTime { get; set; } = 0.0F;
-		private float GroundEpsilon { get; set; } = 0.0F;
+		private float animationFrame = 0.0F;
+		private bool dashOnCooldown = false;
+		private Vec3d dashDirection = Vec3d.Zero;
 
 		public UchigatanaDashBehaviour(ICoreClientAPI api, Entity entity) : base(entity)
 		{
@@ -146,92 +219,134 @@ namespace Apprentice.Weapon
 			inputApi = api.Input;
 
 			entityPlayer = api.World.Player.Entity;
+			lineGizmo = new(api, 1000);
+			// dashBlur = new(api);
 
-			lineRenderer = new(api, 1000);
-
-			inputApi.RegisterHotKey("play_blood_scythe_anim", "Play a test sequence", GlKeys.F, HotkeyType.MovementControls);
+			inputApi.RegisterHotKey("play_blood_scythe_anim", "Play a test sequence", GlKeys.ShiftLeft, HotkeyType.MovementControls);
 			inputApi.SetHotKeyHandler("play_blood_scythe_anim", OnReset);
 		}
 
 		public override string PropertyName()
 		{
-			return "UchigatanaDashBehaviourName";
+			return "UchigatanaDashBehaviour";
 		}
 		public override void OnGameTick(float deltaTime)
 		{
 			if (entityPlayer == null) return;
 
 			EntityPos transform = entityPlayer.Pos;
-			Vec3d forward = Vec3d.Zero;
-			float initalAngle = 0.0F;
 
-			if (Playing)
+			if (isPlaying)
 			{
-				if (Init)
+				if (isInit)
 				{
-					Init = false;
+					isInit = false;
 
-					AnimationTime = AnimationDuration;
+					animationFrame = 0.0F;
 
-					initalAngle = transform.Pitch;
-					// forward = new Vec3d(GameMath.Sin(transform.Yaw), 0, GameMath.Cos(transform.Yaw)).Normalize();
-					forward = transform.GetViewVector().ToVec3d();
+					Vec3d worldUp = new(0, 1, 0);
 
-					transform.SetPos(transform.X, transform.Y + GroundEpsilon, transform.Z);
-					transform.Motion.Set(0.0F, transform.Motion.Y, 0.0F);
+					Vec3d localForward = transform.GetViewVector().ToVec3d();
+					Vec3d localBack = localForward.Clone().Mul(-1);
+					Vec3d localRight = worldUp.Cross(localForward).Normalize();
+					Vec3d localLeft = localRight.Clone().Mul(-1);
 
-					if (lineRenderer != null)
+					EntityControls controls = clientApi.World.Player.Entity.Controls;
+
+					dashDirection = Vec3d.Zero;
+
+					if (controls.Forward) dashDirection += localForward;
+					if (controls.Backward) dashDirection += localBack;
+					if (controls.Left) dashDirection += localRight;
+					if (controls.Right) dashDirection += localLeft;
+
+					dashDirection.Y = 0.0F;
+
+					if (dashDirection.LengthSq() > 0)
 					{
-						lineRenderer.Reset();
-						lineRenderer.AddLine(
-							(float)transform.X, (float)transform.Y, (float)transform.Z,
+						dashDirection.Normalize();
+					}
+
+					if (lineGizmo != null)
+					{
+						lineGizmo.Reset();
+						lineGizmo.AddLine(
+							(float)transform.X,        (float)transform.Y,        (float)transform.Z,
 							(float)transform.Motion.X, (float)transform.Motion.Y, (float)transform.Motion.Z,
 							ColorUtil.ToRgba(0xFF, 0xFF, 0x00, 0x00));
-						lineRenderer.Commit();
+						lineGizmo.Commit();
 					}
 
 					// BlockSelection? blockSelection = null;
 					// EntitySelection? entitySelection = null;
-
 					// entity.World.RayTraceForSelection(entity.Pos.XYZ, target, ref blockSelection, ref entitySelection);
 
-					// entity.StartAnimation(""); // TODO
+					// entity.StartAnimation("");
 					// entity.StopAnimation..
 				}
 
-				// transform.Add(Velocity);
-				// transform.SetPos(transform.X, transform.Y, transform.Z);
-				// transform.SetAngles(transform.Roll, transform.Yaw, transform.Pitch + EngageAngle);
+				float impulseAttenuator = entity.OnGround
+					? impulseGrounded
+					: impulseAirbourne;
 
-				transform.Motion.Add(forward * DashImpulse);
+				Vec3d force = dashDirection * EaseOutElastic(animationFrame / animationFrames) * impulseAttenuator;
 
-				AnimationTime -= AnimationStep;
+				transform.Motion.Add(force);
 
-				if (0.0F > AnimationTime)
+				animationFrame += animationStep * animationSpeed;
+
+				if (animationFrame >= animationFrames)
 				{
-					AnimationTime = AnimationDuration;
-
-					// transform.Motion.Set(0.0F, transform.Y, 0.0F);
-
-					Playing = false;
-					Init = true;
+					isPlaying = false;
+					isInit = true;
 				}
 			}
+		}
 
-			// TODO: check out these flags..
-			// entity.ApplyGravity
-			// entity.requirePosesOnServer
+		// Pirate's Life https://easings.net/
+		float EaseInCirc(float x)
+		{
+			return 1.0F - (float)Math.Sqrt(1.0F - (float)Math.Pow(x, 2.0F));
+		}
+		float EaseInOutElastic(float x)
+		{
+			float c5 = (2.0F * (float)Math.PI) / 4.5F;
+			return x == 0.0F
+				? 0.0F
+				: x == 1.0F
+				? 1.0F
+				: x < 0.5F
+				? -((float)Math.Pow(2.0F,  20.0F * x - 10.0F) * (float)Math.Sin((20.0F * x - 11.125F) * c5)) / 2.0F
+				:  ((float)Math.Pow(2.0F, -20.0F * x + 10.0F) * (float)Math.Sin((20.0F * x - 11.125F) * c5)) / 2.0F + 1.0F;
+		}
+		float EaseOutElastic(float x)
+		{
+			float c4 = (2.0F * (float)Math.PI) / 3.0F;
+			return x == 0.0F
+				? 0.0F
+				: x == 1.0F
+				? 1.0F
+				: (float)Math.Pow(2.0F, -10.0F * x) * (float)Math.Sin((x * 10.0F - 0.75F) * c4) + 1.0F;
 		}
 
 		private bool OnReset(KeyCombination combination)
 		{
-			// TODO: add reset timer..
+			if (entityPlayer == null) return true;
+			if (dashOnCooldown) return true;
 
-			if (Playing == false)
+			dashOnCooldown = true;
+			isPlaying = true;
+			isInit = true;
+
+			clientApi.World.PlaySoundAt(dashSound1, new BlockPos(entityPlayer.Pos.XYZInt, 0), 0.0, null, true, 64.0F, 1.0F);
+
+			clientApi.World.RegisterCallback(_ =>
 			{
-				Playing = true;
-				Init = true;
-			}
+				dashOnCooldown = false;
+
+				clientApi.World.PlaySoundAt(dashRecoverSound1, new BlockPos(entityPlayer.Pos.XYZInt, 0), 0.0, null, true, 64.0F, 1.0F);
+
+			}, dashCooldownMs);
 
 			return true;
 		}
