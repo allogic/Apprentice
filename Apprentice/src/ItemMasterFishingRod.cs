@@ -1,3 +1,4 @@
+using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
 using Vintagestory.API.MathTools;
@@ -7,112 +8,107 @@ namespace Apprentice
 {
     public sealed class ItemMasterFishingRod : ItemFishingPole
     {
-        // Centre of the modelled tip eye: y = 35.45634560676611 / 16.
-        // ItemFishingPole overwrites JSON pole-tip attributes with the vanilla
-        // pole's +X offsets, so the custom +Y model must restore its own value
-        // after base.OnLoaded().
-        private const float ModelTipY = 2.216021f;
+        // Centre of the modelled final guide eye, converted from shape units
+        // (1/16 block) to item-model units.
+        private static readonly Vec3f ModelTipEye = new Vec3f(
+            1.856239f / 16f,
+            35.106346f / 16f,
+            8f / 16f);
 
         public override void OnLoaded(ICoreAPI api)
         {
             base.OnLoaded(api);
 
-            offsetToPoleTipFp = new Vec3f(0f, ModelTipY, 0f);
-            offsetToPoleTipTp = new Vec3f(0f, ModelTipY, 0f);
-        }
-
-        public override void OnHeldInteractStart(
-            ItemSlot slot,
-            EntityAgent byEntity,
-            BlockSelection blockSel,
-            EntitySelection? entitySel,
-            bool firstEvent,
-            ref EnumHandHandling handling)
-        {
-            bool wasFishing = slot.Itemstack?.Attributes.GetBool("fishing") == true;
-            long previousBobberId = slot.Itemstack?.Attributes
-                .GetLong("bobberEntityId", 0L) ?? 0L;
-
-            base.OnHeldInteractStart(
-                slot,
-                byEntity,
-                blockSel,
-                entitySel,
-                firstEvent,
-                ref handling);
-
-            // Native ItemFishingPole normally clears these values itself. If
-            // its bobber lookup misses or the client/server state is stale,
-            // however, the hook and fishing state can survive collection and
-            // permanently block the next cast. A click made while a cast was
-            // active always means "collect", so finish that old session fully.
-            if (wasFishing)
-            {
-                FinishCollectedSession(slot, byEntity, previousBobberId);
-                handling = EnumHandHandling.PreventDefault;
-            }
+            // Base ItemFishingPole overwrites the JSON FP offset in OnLoaded.
+            // Restore the complete custom-model point, including X and Z.
+            offsetToPoleTipFp = ModelTipEye.Clone();
         }
 
         public override void OnHeldIdle(ItemSlot slot, EntityAgent byEntity)
         {
+            // Preserve the complete native fishing lifecycle. In particular,
+            // do not perform a missing-bobber watchdog here: priority-spawned
+            // bobbers may not be indexed yet during the first idle tick.
             base.OnHeldIdle(slot, byEntity);
+            RemoveOrphanedOwnedBobbers(slot, byEntity);
+            PinThirdPersonRopeToRenderedTip(slot, byEntity);
+        }
 
-            // The client can receive the item state one packet before the
-            // freshly spawned bobber entity. Let the authoritative server run
-            // the missing-entity watchdog so that normal casts are never
-            // cancelled by that harmless client-side arrival order.
+        private void RemoveOrphanedOwnedBobbers(ItemSlot slot, EntityAgent byEntity)
+        {
             if (api.Side != EnumAppSide.Server)
             {
                 return;
             }
 
-            ItemStack? stack = slot.Itemstack;
-            if (stack == null || !stack.Attributes.GetBool("fishing"))
-            {
-                return;
-            }
+            long activeBobberId =
+                slot.Itemstack?.Attributes.GetLong("bobberEntityId", 0L) ?? 0L;
 
-            long bobberId = stack.Attributes.GetLong("bobberEntityId", 0L);
-            if (bobberId == 0L || api.World.GetEntityById(bobberId) == null)
+            Entity[] nearbyBobbers = api.World.GetEntitiesAround(
+                byEntity.Pos.XYZ,
+                256f,
+                256f,
+                entity => entity is EntityBobber bobber &&
+                    bobber.AttachedToEntityId == byEntity.EntityId);
+
+            foreach (Entity entity in nearbyBobbers)
             {
-                FinishCollectedSession(slot, byEntity, bobberId);
+                if (entity.EntityId != activeBobberId)
+                {
+                    entity.Die(EnumDespawnReason.Death, null);
+                }
             }
         }
 
-        private void FinishCollectedSession(
+        public override bool OnHeldInteractStep(
+            float secondsUsed,
             ItemSlot slot,
             EntityAgent byEntity,
-            long bobberId)
+            BlockSelection blockSel,
+            EntitySelection entitySel)
         {
-            ItemStack? stack = slot.Itemstack;
-            if (stack == null)
+            bool result = base.OnHeldInteractStep(
+                secondsUsed,
+                slot,
+                byEntity,
+                blockSel,
+                entitySel);
+
+            PinThirdPersonRopeToRenderedTip(slot, byEntity);
+            return result;
+        }
+
+        private void PinThirdPersonRopeToRenderedTip(
+            ItemSlot slot,
+            EntityAgent byEntity)
+        {
+            if (api is not ICoreClientAPI capi ||
+                capi.World.Player.CameraMode == EnumCameraMode.FirstPerson)
             {
                 return;
             }
 
-            byEntity.AnimManager.StopAnimation("fishingpole-idle");
-            byEntity.AnimManager.StopAnimation(aimAnimation);
-
-            int clothId = stack.Attributes.GetInt("clothId", 0);
-            if (clothId != 0)
+            int clothId = slot.Itemstack?.Attributes.GetInt("clothId", 0) ?? 0;
+            ClothSystem? rope = cm.GetClothSystem(clothId);
+            if (rope == null)
             {
-                cm.UnregisterCloth(clothId);
+                return;
             }
 
-            // The native collect path already catches fish and kills the
-            // bobber on the server. This is only a fallback for an entity that
-            // survived that path; it must never call TryCatchFish a second time.
-            if (api.Side == EnumAppSide.Server && bobberId != 0L)
+            Matrixf modelMatrix = new Matrixf();
+            if (!LoadHeldItemModelMatrix(modelMatrix, byEntity, slot, capi))
             {
-                Entity? bobber = api.World.GetEntityById(bobberId);
-                bobber?.Die(EnumDespawnReason.Death, null);
+                return;
             }
 
-            stack.Attributes.SetBool("fishing", false);
-            stack.Attributes.RemoveAttribute("bobberEntityId");
-            stack.Attributes.RemoveAttribute("clothId");
-            stack.Attributes.RemoveAttribute("fishingEntityId");
-            slot.MarkDirty();
+            Vec4f renderedTip = modelMatrix.TransformVector(new Vec4f(
+                ModelTipEye.X,
+                ModelTipEye.Y,
+                ModelTipEye.Z,
+                1f));
+
+            rope.FirstPoint.pinnedToOffset = renderedTip.XYZ;
+            rope.FirstPoint.NoAttachTransform = true;
         }
     }
 }

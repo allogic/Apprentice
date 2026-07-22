@@ -114,6 +114,9 @@
     <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\itemtypes\2.7\compositebow.json" />
     <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\itemtypes\2.7\towershield.json" />
     <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\itemtypes\2.7\advancedtrapkit.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\itemtypes\2.7\warscythe.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\itemtypes\2.7\manaburnsword.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\patches\2.7\war-scythe-player-animations.json" />
     <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\blocktypes\2.7\advancedtrap.json" />
     <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\shapes\block\2.7\advancedtrap-opening3.json" />
     <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\shapes\block\2.7\advancedtrap-opening4.json" />
@@ -121,6 +124,8 @@
     <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\shapes\item\2.7\grandmaster-spear.json" />
     <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\shapes\item\2.7\tower-shield.json" />
     <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\shapes\item\2.7\master-fishing-rod.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\shapes\item\2.7\war-scythe.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\shapes\item\2.7\manaburn-sword.json" />
     <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\shapes\item\2.7\kit-trap.json" />
     <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\shapes\item\2.7\kit-armor-upgrade.json" />
     <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\shapes\item\2.7\kit-weapon-upgrade.json" />
@@ -134,6 +139,11 @@
     <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\shapes\item\2.7\composite-bow-charge5.json" />
     <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\textures\item\2.7\compositebow-material.png" />
     <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\textures\item\2.7\compositebow-grip-wrap.png" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\textures\item\2.7\war-scythe-redmetal.png" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\textures\item\2.7\war-scythe-wrap.png" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\textures\item\2.7\manaburn-darkmetal.png" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\textures\item\2.7\manaburn-blade.png" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\textures\item\2.7\manaburn-edge.png" />
   </ItemGroup>
   <PropertyGroup>
     <SourceLooseModAssetCount>@(SourceLooseModAsset->Count())</SourceLooseModAssetCount>

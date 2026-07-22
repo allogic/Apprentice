@@ -1,0 +1,50 @@
+{
+  "code": "manaburnsword",
+  "class": "ApprenticeManaburnSword",
+  "damagedby": ["attacking"],
+  "attackRange": 3.1,
+  "attackpower": 11.0,
+  "heldTpIdleAnimation": "swordidle",
+  "heldRightReadyAnimation": "swordidle",
+  "heldTpHitAnimation": "swordhit",
+  "tags": ["apprentice-content"],
+  "maxstacksize": 1,
+  "storageFlags": 5,
+  "shape": { "base": "apprentice:item/2.7/manaburn-sword" },
+  "creativeinventory": {
+    "general": ["*"],
+    "items": ["*"],
+    "tools": ["*"]
+  },
+  "durability": 1800,
+  "attributes": {
+    "apprenticeFeature": "manaburnsword",
+    "combatOnly": true,
+    "damageTier": 6,
+    "heldItemPitchFollow": 1
+  },
+  "guiTransform": {
+    "translation": { "x": 0, "y": -0.15, "z": 0 },
+    "rotation": { "x": -8, "y": 24, "z": 44 },
+    "origin": { "x": 0.5, "y": 0.42, "z": 0.5 },
+    "scale": 0.72
+  },
+  "tpHandTransform": {
+    "translation": { "x": -0.7, "y": -0.12, "z": -0.55 },
+    "rotation": { "x": 0, "y": 0, "z": -90 },
+    "origin": { "x": 0.5, "y": 0.12, "z": 0.5 },
+    "scale": 0.82
+  },
+  "fpHandTransform": {
+    "translation": { "x": 0.15, "y": -0.2, "z": 0.05 },
+    "rotation": { "x": -8, "y": 12, "z": -82 },
+    "origin": { "x": 0.5, "y": 0.12, "z": 0.5 },
+    "scale": 1.2
+  },
+  "groundTransform": {
+    "translation": { "x": 0, "y": 0.1, "z": 0 },
+    "rotation": { "x": 90, "y": 0, "z": 18 },
+    "origin": { "x": 0.5, "y": 0.5, "z": 0.5 },
+    "scale": 0.85
+  }
+}

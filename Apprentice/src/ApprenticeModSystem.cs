@@ -16,7 +16,7 @@ namespace Apprentice
 {
 	public sealed class ApprenticeModSystem : ModSystem
 	{
-		private const string PlaytestVersion = "2.7.0-dev.20260722.40";
+		private const string PlaytestVersion = "2.7.0-dev.20260722.61";
 		private const string BowAssetFingerprint = "BOW-DARKWOOD-OXBLOOD-C-AXIS2-EDIT1-UV1-DRAW5";
 		private const string ReviewedAssetFingerprint = "ITEMS-RUNEBOUND5-GILDED2-SUNLANCE2-KITS-HANDANCHOR-TRAP-CHAIN-SHIELD-SIDEWAYS-FISHING-NATIVE-METALS-APPRENTICE2";
 		private static readonly string[] ExpectedBowShapeCodes =
@@ -41,6 +41,12 @@ namespace Apprentice
 		};
 		private static readonly string[] ExpectedReviewedAssetPaths =
 		{
+			"shapes/item/2.7/manaburn-sword.json",
+			"textures/item/2.7/manaburn-darkmetal.png",
+			"textures/item/2.7/manaburn-blade.png",
+			"textures/item/2.7/manaburn-edge.png",
+			"textures/item/2.7/manaburn-horn.png",
+			"textures/item/2.7/manaburn-grip.png",
 			"shapes/item/2.7/tower-shield.json",
 			"shapes/item/2.7/master-fishing-rod.json",
 			"shapes/item/2.7/grandmaster-spear.json",
@@ -79,6 +85,7 @@ namespace Apprentice
 		private InterfaceManager? interfaceManager = null;
 		private OverlayManager? overlayManager = null;
 		private HealthBarRenderer? healthBarRenderer = null;
+		private WarScytheCalibrationSystem? warScytheCalibration = null;
 		private Harmony? poisonInfoHarmony = null;
 		private Harmony? durabilityUpgradeHarmony = null;
 
@@ -133,6 +140,14 @@ namespace Apprentice
 			api.RegisterItemClass(
 				"ApprenticeMasterFishingRod",
 				typeof(ItemMasterFishingRod)
+			);
+			api.RegisterItemClass(
+				"ApprenticeWarScythe",
+				typeof(ItemWarScythe)
+			);
+			api.RegisterItemClass(
+				"ApprenticeManaburnSword",
+				typeof(ItemManaburnSword)
 			);
 			api.RegisterBlockClass(
 				"ApprenticeAdvancedTrap",
@@ -561,6 +576,8 @@ namespace Apprentice
 		}
 		public override void StartClientSide(ICoreClientAPI api)
 		{
+			warScytheCalibration = new WarScytheCalibrationSystem(api);
+
 			// Heatmap state is gameplay-owned and must not depend on optional
 			// client HUD construction succeeding later in this method.
 			if (clientNetworkChannel != null)
@@ -658,6 +675,7 @@ namespace Apprentice
 			overlayManager?.Dispose();
 			interfaceManager?.Dispose();
 			healthBarRenderer?.Dispose();
+			warScytheCalibration = null;
 
 			interactionEventBridge = null;
 			dangerTierSystem = null;
