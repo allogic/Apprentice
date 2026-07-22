@@ -1,17 +1,11 @@
-﻿using Cairo;
-using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Net.Mail;
-using System.Numerics;
-using System.Runtime.InteropServices;
+
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
 using Vintagestory.API.MathTools;
-using Vintagestory.Client.NoObf;
 using Vintagestory.GameContent;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Apprentice.Weapon
 {
@@ -134,20 +128,20 @@ namespace Apprentice.Weapon
 		private readonly IRenderAPI renderApi;
 		private readonly IShaderAPI shaderApi;
 
-		private readonly RawTexture screenBuffer;
+		private readonly RawTexture blitTexture;
+		private readonly RawTexture accTextureA;
+		private readonly RawTexture accTextureB;
 
 		private MeshRef? meshRef = null;
-		private FrameBufferRef? frameBufferRef = null;
+		private FrameBufferRef? frameBufferBlitRef = null;
+		private FrameBufferRef? frameBufferARef = null;
+		private FrameBufferRef? frameBufferBRef = null;
 
 		private readonly IShaderProgram blitProgram;
 		private readonly IShaderProgram blurProgram;
 
-		public Vec3f BlurDirection { get; set; } = new(0, 0, 0);
-		public Vec3f BlurVelocity { get; set; } = new(0, 0, 0);
-		public float BlurAmount { get; set; } = 0.2F;
-
-		public Matrixf CurrViewProjectionMatrix = Matrixf.Create();
-		public Matrixf PrevViewProjectionMatrix = Matrixf.Create();
+		public bool Enable = false;
+		public bool Reset = true;
 
 		public double RenderOrder => 1.0;
 		public int RenderRange => 9999;
@@ -175,77 +169,122 @@ namespace Apprentice.Weapon
 			shaderApi.RegisterFileShaderProgram("dash-blur", blurProgram);
 			blurProgram.Compile();
 
-			// Create render target
-			screenBuffer = new RawTexture();
-			screenBuffer.MinFilter = EnumTextureFilter.Nearest;
-			screenBuffer.MagFilter = EnumTextureFilter.Nearest;
-			screenBuffer.WrapS = EnumTextureWrap.ClampToEdge;
-			screenBuffer.WrapT = EnumTextureWrap.ClampToEdge;
-			screenBuffer.PixelInternalFormat = EnumTextureInternalFormat.Rgba8;
-			screenBuffer.Width = renderApi.FrameWidth; // TODO: update these values when main framebuffer changes size
-			screenBuffer.Height = renderApi.FrameHeight;
-			screenBuffer.TextureId = 0;
-			renderApi.GenTexture(screenBuffer);
-
 			meshRef = renderApi.UploadMesh(QuadMeshUtil.GetQuad());
 
-			// Create frame buffer
-			FramebufferAttrs frameBufferAttribs = new("blit", renderApi.FrameWidth, renderApi.FrameHeight);
-			frameBufferAttribs.Attachments = new FramebufferAttrsAttachment[1];
-			frameBufferAttribs.Attachments[0] = new();
-			frameBufferAttribs.Attachments[0].Texture = screenBuffer;
-			frameBufferAttribs.Attachments[0].AttachmentType = EnumFramebufferAttachment.ColorAttachment0;
-			frameBufferRef = renderApi.CreateFrameBuffer(frameBufferAttribs);
+			// Create blitTexture render target
+			blitTexture = new RawTexture();
+			blitTexture.MinFilter = EnumTextureFilter.Nearest;
+			blitTexture.MagFilter = EnumTextureFilter.Nearest;
+			blitTexture.WrapS = EnumTextureWrap.ClampToEdge;
+			blitTexture.WrapT = EnumTextureWrap.ClampToEdge;
+			blitTexture.PixelInternalFormat = EnumTextureInternalFormat.Rgba8;
+			blitTexture.Width = renderApi.FrameWidth; // TODO: update these values when main framebuffer changes size
+			blitTexture.Height = renderApi.FrameHeight;
+			blitTexture.TextureId = 0;
+			renderApi.GenTexture(blitTexture);
 
-			eventApi.RegisterRenderer(this, EnumRenderStage.AfterFinalComposition);
+			// Create accumulator render target A
+			accTextureA = new RawTexture();
+			accTextureA.MinFilter = EnumTextureFilter.Nearest;
+			accTextureA.MagFilter = EnumTextureFilter.Nearest;
+			accTextureA.WrapS = EnumTextureWrap.ClampToEdge;
+			accTextureA.WrapT = EnumTextureWrap.ClampToEdge;
+			accTextureA.PixelInternalFormat = EnumTextureInternalFormat.Rgba8;
+			accTextureA.Width = renderApi.FrameWidth; // TODO: update these values when main framebuffer changes size
+			accTextureA.Height = renderApi.FrameHeight;
+			accTextureA.TextureId = 0;
+			renderApi.GenTexture(accTextureA);
+
+			// Create accumulator render target B
+			accTextureB = new RawTexture();
+			accTextureB.MinFilter = EnumTextureFilter.Nearest;
+			accTextureB.MagFilter = EnumTextureFilter.Nearest;
+			accTextureB.WrapS = EnumTextureWrap.ClampToEdge;
+			accTextureB.WrapT = EnumTextureWrap.ClampToEdge;
+			accTextureB.PixelInternalFormat = EnumTextureInternalFormat.Rgba8;
+			accTextureB.Width = renderApi.FrameWidth; // TODO: update these values when main framebuffer changes size
+			accTextureB.Height = renderApi.FrameHeight;
+			accTextureB.TextureId = 0;
+			renderApi.GenTexture(accTextureB);
+
+			// Create blit frame buffer
+			FramebufferAttrs frameBufferBlitAttribs = new("blit", renderApi.FrameWidth, renderApi.FrameHeight);
+			frameBufferBlitAttribs.Attachments = new FramebufferAttrsAttachment[1];
+			frameBufferBlitAttribs.Attachments[0] = new();
+			frameBufferBlitAttribs.Attachments[0].Texture = blitTexture;
+			frameBufferBlitAttribs.Attachments[0].AttachmentType = EnumFramebufferAttachment.ColorAttachment0;
+			frameBufferBlitRef = renderApi.CreateFrameBuffer(frameBufferBlitAttribs);
+
+			// Create ping pong frame buffer A
+			FramebufferAttrs frameBufferAAttribs = new("accA", renderApi.FrameWidth, renderApi.FrameHeight);
+			frameBufferAAttribs.Attachments = new FramebufferAttrsAttachment[1];
+			frameBufferAAttribs.Attachments[0] = new();
+			frameBufferAAttribs.Attachments[0].Texture = accTextureA;
+			frameBufferAAttribs.Attachments[0].AttachmentType = EnumFramebufferAttachment.ColorAttachment0;
+			frameBufferARef = renderApi.CreateFrameBuffer(frameBufferAAttribs);
+
+			// Create ping pong frame buffer B
+			FramebufferAttrs frameBufferBAttribs = new("accB", renderApi.FrameWidth, renderApi.FrameHeight);
+			frameBufferBAttribs.Attachments = new FramebufferAttrsAttachment[1];
+			frameBufferBAttribs.Attachments[0] = new();
+			frameBufferBAttribs.Attachments[0].Texture = accTextureB;
+			frameBufferBAttribs.Attachments[0].AttachmentType = EnumFramebufferAttachment.ColorAttachment0;
+			frameBufferBRef = renderApi.CreateFrameBuffer(frameBufferBAttribs);
+
+			eventApi.RegisterRenderer(this, EnumRenderStage.Done);
 		}
 
 		public void OnRenderFrame(float deltaTime, EnumRenderStage stage)
 		{
-			if (stage != EnumRenderStage.AfterFinalComposition) return;
+			if (stage != EnumRenderStage.Done) return;
+
 			if (meshRef == null) return;
-			if (frameBufferRef == null) return;
-
-			PrevViewProjectionMatrix = CurrViewProjectionMatrix;
-			CurrViewProjectionMatrix = new Matrixf(renderApi.CameraMatrixOriginf);
-			CurrViewProjectionMatrix.Mul(renderApi.CurrentProjectionMatrix);
-
-			renderApi.GlDisableCullFace();
-			renderApi.GlDisableStencilTest();
-			renderApi.GlToggleBlend(false);
-
-			// Store source frame buffer color attachment
-			// int srcTexture = renderApi.FrameBuffers[(int)EnumFrameBuffer.Primary].ColorTextureIds[0];
-			int srcTexture = renderApi.FrameBuffers[(int)EnumFrameBuffer.Primary].DepthTextureId;
+			if (frameBufferBlitRef == null) return;
+			if (frameBufferARef == null) return;
+			if (frameBufferBRef == null) return;
 
 			// Blit render target
-			renderApi.CurrentFrameBuffer = frameBufferRef;
+			renderApi.CurrentFrameBuffer = frameBufferBlitRef;
 			blitProgram.Use();
-			blitProgram.BindTexture2D("tex", srcTexture, 0);
+			blitProgram.BindTexture2D("tex", renderApi.FrameBuffers[(int)EnumFrameBuffer.Primary].ColorTextureIds[0], 0);
 			renderApi.RenderMesh(meshRef);
 			blitProgram.Stop();
 
-			// Apply motion blur
-			renderApi.CurrentFrameBuffer = null;
+			// Accumulate motion blur
+			renderApi.CurrentFrameBuffer = frameBufferARef;
 			blurProgram.Use();
-			blurProgram.BindTexture2D("tex", frameBufferRef.ColorTextureIds[0], 0);
-			blurProgram.Uniform("cameraDirection", BlurDirection);
-			blurProgram.Uniform("worldVelocity", BlurVelocity);
-			blurProgram.Uniform("blurAmount", BlurAmount);
+			blurProgram.BindTexture2D("blitTex", frameBufferBlitRef.ColorTextureIds[0], 0);
+			blurProgram.BindTexture2D("accTex", frameBufferBRef.ColorTextureIds[0], 1);
 			renderApi.RenderMesh(meshRef);
 			blurProgram.Stop();
 
-			renderApi.GlToggleBlend(true);
-			renderApi.GlEnableStencilTest();
-			renderApi.GlEnableCullFace();
+			if (Enable)
+			{
+				// Blit render target
+				renderApi.CurrentFrameBuffer = null;
+				blitProgram.Use();
+				blitProgram.BindTexture2D("tex", frameBufferARef.ColorTextureIds[0], 0);
+				renderApi.RenderMesh(meshRef);
+				blitProgram.Stop();
+			}
+
+			// Swap frame accumulator
+			FrameBufferRef tmp = frameBufferARef;
+			frameBufferARef = frameBufferBRef;
+			frameBufferBRef = tmp;
 		}
 
 		public void Dispose()
 		{
 			eventApi.UnregisterRenderer(this, EnumRenderStage.AfterFinalComposition);
 
-			renderApi.DestroyFrameBuffer(frameBufferRef);
-			renderApi.GLDeleteTexture(screenBuffer.TextureId);
+			renderApi.DestroyFrameBuffer(frameBufferARef);
+			renderApi.DestroyFrameBuffer(frameBufferBRef);
+			renderApi.DestroyFrameBuffer(frameBufferBlitRef);
+
+			renderApi.GLDeleteTexture(blitTexture.TextureId);
+			renderApi.GLDeleteTexture(accTextureA.TextureId);
+			renderApi.GLDeleteTexture(accTextureB.TextureId);
 
 			blurProgram.Dispose();
 			blitProgram.Dispose();
@@ -272,6 +311,7 @@ namespace Apprentice.Weapon
 		private const float impulseGrounded = 0.8F;
 
 		private const int dashCooldownMs = 800;
+		private const int dashBlurEnableMs = 250;
 
 		EntityPlayer? entityPlayer = null;
 		LineGizmo? lineGizmo = null;
@@ -304,7 +344,6 @@ namespace Apprentice.Weapon
 		public override void OnGameTick(float deltaTime)
 		{
 			if (entityPlayer == null) return;
-			if (dashBlur == null) return;
 
 			EntityPos transform = entityPlayer.Pos;
 
@@ -369,17 +408,10 @@ namespace Apprentice.Weapon
 
 				if (animationFrame >= animationFrames)
 				{
-					// dashBlur.BlurDirection = Vec3f.Zero;
-					// dashBlur.BlurAmount = 0.0F;
-
 					isPlaying = false;
 					isInit = true;
 				}
 			}
-
-			dashBlur.BlurDirection = transform.GetViewVector();
-			dashBlur.BlurVelocity = transform.Motion.ToVec3f();
-			dashBlur.BlurAmount = 0.05F;
 		}
 
 		// Pirate's Life https://easings.net/
@@ -412,20 +444,27 @@ namespace Apprentice.Weapon
 		{
 			if (entityPlayer == null) return true;
 			if (dashOnCooldown) return true;
+			if (dashBlur == null) return true;
 
 			dashOnCooldown = true;
 			isPlaying = true;
 			isInit = true;
+
+			dashBlur.Enable = true;
+			dashBlur.Reset = true;
 
 			clientApi.World.PlaySoundAt(dashSound1, new BlockPos(entityPlayer.Pos.XYZInt, 0), 0.0, null, true, 64.0F, 1.0F);
 
 			clientApi.World.RegisterCallback(_ =>
 			{
 				dashOnCooldown = false;
-
 				clientApi.World.PlaySoundAt(dashRecoverSound1, new BlockPos(entityPlayer.Pos.XYZInt, 0), 0.0, null, true, 64.0F, 1.0F);
-
 			}, dashCooldownMs);
+
+			clientApi.World.RegisterCallback(_ =>
+			{
+				dashBlur.Enable = false;
+			}, dashBlurEnableMs);
 
 			return true;
 		}
