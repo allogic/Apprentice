@@ -21,6 +21,7 @@ SUPPORTED_VERSION = re.compile(
     r"^\d+\.\d+\.\d+(?:-(?:[a-z]|(?:rc|pre|dev)(?:\.\d+)*))?$"
 )
 NATIVE_HELD_GRIP_TARGET = (-0.0488, 0.0098, -0.0292)
+SHIELD_OFFHAND_CLEARANCE_TARGET = (-0.0488, 0.0098, -0.1276)
 
 
 class Validation:
@@ -102,6 +103,32 @@ def transformed_model_point(
         ox + scale * (tx + rotated[0]),
         oy + scale * (ty + rotated[1]),
         oz + scale * (tz + rotated[2]),
+    )
+
+
+def rotated_model_vector(
+    raw_vector: Iterable[float],
+    rotation: dict[str, Any],
+) -> tuple[float, float, float]:
+    """Rotate a model-space direction with Vintage Story's Euler order."""
+    rx, ry, rz = (
+        math.radians(float(rotation.get(axis, 0)))
+        for axis in ("x", "y", "z")
+    )
+    sx, cx = math.sin(rx), math.cos(rx)
+    sy, cy = math.sin(ry), math.cos(ry)
+    sz, cz = math.sin(rz), math.cos(rz)
+    a01 = sx * sy
+    a02 = -cx * sy
+    matrix = (
+        (cy * cz, -cy * sz, sy),
+        (a01 * cz + cx * sz, cx * cz - a01 * sz, -sx * cy),
+        (a02 * cz + sx * sz, sx * cz - a02 * sz, cx * cy),
+    )
+    vector = tuple(float(component) for component in raw_vector)
+    return tuple(
+        sum(matrix[row][column] * vector[column] for column in range(3))
+        for row in range(3)
     )
 
 
@@ -532,24 +559,32 @@ def validate_language_keys(validation: Validation) -> None:
         f"en.json is missing direct language keys: {sorted(used - set(lang))}.",
     )
     metal_language_keys = {
-        "game:item-metalplate-starsteel",
-        "game:item-metalplate-aethersteel",
-        "game:block-metalsheet-starsteel-down",
-        "game:block-metalsheet-aethersteel-down",
-        "game:block-metalblock-new-plain-starsteel",
-        "game:block-metalblock-corroded-plain-starsteel",
-        "game:block-metalblock-new-riveted-starsteel",
-        "game:block-metalblock-corroded-riveted-starsteel",
-        "game:block-metalblock-new-plain-aethersteel",
-        "game:block-metalblock-corroded-plain-aethersteel",
-        "game:block-metalblock-new-riveted-aethersteel",
-        "game:block-metalblock-corroded-riveted-aethersteel",
+        "item-ingot-starsteel",
+        "item-ingot-aethersteel",
+        "item-workitem-starsteel",
+        "item-workitem-aethersteel",
+        "item-metalchunk-starsteel",
+        "item-metalchunk-aethersteel",
+        "item-plate-starsteel",
+        "item-plate-aethersteel",
     }
     validation.check(
         metal_language_keys <= set(lang),
         (
-            "en.json is missing Vintage Story metal variant keys: "
+            "en.json is missing canonical Apprentice metal keys: "
             f"{sorted(metal_language_keys - set(lang))}."
+        ),
+    )
+    game_domain_metal_keys = {
+        key for key in lang
+        if key.startswith("game:")
+        and ("starsteel" in key or "aethersteel" in key)
+    }
+    validation.check(
+        not game_domain_metal_keys,
+        (
+            "Starsteel and Aethersteel language keys must not advertise "
+            f"game-domain collectibles: {sorted(game_domain_metal_keys)}."
         ),
     )
 
@@ -982,47 +1017,115 @@ def validate_content_27(validation: Validation) -> None:
     metal_patch_path = ASSET_ROOT / "patches" / "2.7" / "metals.json"
     metal_patches = validation.load_json(metal_patch_path)
     metal_patch_entries = metal_patches if isinstance(metal_patches, list) else []
-    invalid_patch_targets = {
+    metal_patch_targets = {
         patch.get("file")
         for patch in metal_patch_entries
         if isinstance(patch, dict)
-    } & {"game:blocktypes/metal/ingotpile.json"}
-    validation.check(
-        not invalid_patch_targets,
-        (
-            "The 1.22 ingot-pile asset is not located at "
-            "game:blocktypes/metal/ingotpile.json; do not ship a patch that "
-            "can never resolve."
-        ),
-    )
-    metal_tiers = {
-        patch.get("value", {}).get("code"): patch.get("value", {}).get("tier")
-        for patch in metal_patch_entries
-        if isinstance(patch, dict)
-        and isinstance(patch.get("value"), dict)
     }
     validation.check(
-        metal_tiers.get("starsteel") == 6
-        and metal_tiers.get("aethersteel") == 7,
-        "The metal patch must register Starsteel tier 6 and Aethersteel tier 7.",
-    )
-    ingot_variant_exclusions = {
-        value
-        for patch in metal_patch_entries
-        if isinstance(patch, dict)
-        and patch.get("file") == "game:itemtypes/resource/ingot.json"
-        and patch.get("path") == "/skipVariants"
-        and isinstance(patch.get("value"), list)
-        for value in patch["value"]
-        if isinstance(value, str)
-    }
-    validation.check(
-        not ({"*-starsteel", "*-aethersteel"} & ingot_variant_exclusions),
+        metal_patch_targets == {"game:blocktypes/legacy/ingotpile.json"}
+        and len(metal_patch_entries) == 1,
         (
-            "The vanilla ingot template must generate native game:ingot-* "
-            "variants for both Apprentice metals."
+            "Advanced metals may patch only the vanilla legacy ingot-pile "
+            "texture atlas. Patching game world properties or item templates "
+            "recreates duplicate game-domain collectibles."
         ),
     )
+
+    metal_property_path = (
+        ASSET_ROOT / "worldproperties" / "block" / "metal.json"
+    )
+    validation.check(
+        not metal_property_path.exists(),
+        (
+            "Apprentice must not publish worldproperties/block/metal.json. "
+            "Vintage Story merges that path into vanilla variant templates "
+            "and generates game-domain Starsteel/Aethersteel collectibles."
+        ),
+    )
+
+    ingot_path = ASSET_ROOT / "itemtypes" / "2.7" / "ingot.json"
+    ingot = require_mapping(
+        validation,
+        validation.load_json(ingot_path),
+        ingot_path,
+    )
+    ingot_states = (
+        ingot.get("variantgroups", [{}])[0].get("states", [])
+        if isinstance(ingot.get("variantgroups"), list)
+        and ingot.get("variantgroups")
+        and isinstance(ingot.get("variantgroups")[0], dict)
+        else []
+    )
+    ingot_combustibles = ingot.get("combustiblePropsByType", {})
+    ingot_density = ingot.get("materialDensityByType", {})
+    ingot_attributes = ingot.get("attributesByType", {})
+    validation.check(
+        ingot.get("class") == "ApprenticeIngot"
+        and ingot.get("shape", {}).get("base") == "game:item/ingot"
+        and {"starsteel", "aethersteel"} <= set(ingot_states)
+        and ingot_combustibles.get(
+            "ingot-starsteel", {}
+        ).get("smeltedStack", {}).get("code") ==
+            "apprentice:ingot-starsteel"
+        and ingot_combustibles.get(
+            "ingot-aethersteel", {}
+        ).get("smeltedStack", {}).get("code") ==
+            "apprentice:ingot-aethersteel"
+        and ingot_density.get("ingot-starsteel") == 8050
+        and ingot_density.get("ingot-aethersteel") == 7900
+        and ingot_attributes.get(
+            "ingot-starsteel", {}
+        ).get("requiresAnvilTier") == 5
+        and ingot_attributes.get(
+            "ingot-aethersteel", {}
+        ).get("requiresAnvilTier") == 6,
+        (
+            "Canonical advanced-metal ingots must be explicit Apprentice "
+            "items using the vanilla ingot model and exact thermal/tier data."
+        ),
+    )
+
+    workitem_path = ASSET_ROOT / "itemtypes" / "2.7" / "workitem.json"
+    workitem = require_mapping(
+        validation,
+        validation.load_json(workitem_path),
+        workitem_path,
+    )
+    workitem_attributes = workitem.get("attributesByType", {})
+    validation.check(
+        workitem.get("class") == "ItemWorkItem"
+        and workitem.get("shape", {}).get("base") == "game:item/ingot"
+        and "creativeinventory" not in workitem
+        and all(
+            workitem_attributes.get(
+                f"workitem-{metal}", {}
+            ).get("baseMaterialDomain") == "apprentice"
+            for metal in ("starsteel", "aethersteel")
+        ),
+        (
+            "Advanced-metal work items must resolve their base ingots from "
+            "the apprentice domain while retaining the vanilla work-item class."
+        ),
+    )
+
+    content_registry_path = PROJECT_ROOT / "src" / "ContentRegistry.cs"
+    try:
+        content_registry_source = content_registry_path.read_text(
+            encoding="utf-8-sig"
+        )
+    except (OSError, UnicodeError) as error:
+        validation.errors.append(str(error))
+        content_registry_source = ""
+    validation.check(
+        'collectible.Code.Path.StartsWith(' in content_registry_source
+        and '"workitem-"' in content_registry_source,
+        (
+            "Native smithing work items are persisted intermediates and must "
+            "remain hidden from Apprentice creative-inventory exposure."
+        ),
+    )
+
     chunk_path = ASSET_ROOT / "itemtypes" / "2.7" / "metalchunk.json"
     chunks = require_mapping(
         validation,
@@ -1053,20 +1156,121 @@ def validate_content_27(validation: Validation) -> None:
             "mesh/transforms and smelt at twenty chunks per ingot."
         ),
     )
-    partial_metal_smelting = {
-        (patch.get("file"), patch.get("path"))
-        for patch in metal_patch_entries
-        if isinstance(patch, dict)
-        and isinstance(patch.get("value"), dict)
-        and patch["value"].get("smeltedRatio") == 20
+    validation.check(
+        all(
+            chunk_combustibles.get(
+                f"metalchunk-{metal}", {}
+            ).get("smeltedStack", {}).get("code") ==
+                f"apprentice:ingot-{metal}"
+            for metal in ("starsteel", "aethersteel")
+        ),
+        "Every advanced-metal chunk must smelt into its Apprentice ingot.",
+    )
+
+    remaps_path = ASSET_ROOT / "config" / "remaps.json"
+    remaps = require_mapping(
+        validation,
+        validation.load_json(remaps_path),
+        remaps_path,
+    )
+    remap_commands = remaps.get(
+        "apprentice:canonical-advanced-metals-2.7.0", []
+    )
+    expected_item_remaps = {
+        "/iir remapq apprentice:ingot-starsteel game:ingot-starsteel force",
+        "/iir remapq apprentice:ingot-aethersteel game:ingot-aethersteel force",
+        "/iir remapq apprentice:metalchunk-starsteel game:metalbit-starsteel force",
+        "/iir remapq apprentice:metalchunk-aethersteel game:metalbit-aethersteel force",
+        "/iir remapq apprentice:plate-starsteel game:metalplate-starsteel force",
+        "/iir remapq apprentice:plate-aethersteel game:metalplate-aethersteel force",
+        "/iir remapq apprentice:workitem-starsteel game:workitem-starsteel force",
+        "/iir remapq apprentice:workitem-aethersteel game:workitem-aethersteel force",
     }
-    for partial_asset in ("game:itemtypes/resource/metalbit.json",):
-        for metal in ("starsteel", "aethersteel"):
-            validation.check(
-                (partial_asset, f"/combustiblePropsByType/*-{metal}")
-                in partial_metal_smelting,
-                f"{partial_asset} must smelt {metal} units at 20 per ingot.",
-            )
+    validation.check(
+        isinstance(remap_commands, list)
+        and set(remap_commands) == expected_item_remaps
+        and len(remap_commands) == 8,
+        (
+            "The 1.22 remap table must contain only the eight game-domain "
+            "item IDs actually registered by the old metal injection. "
+            "Apprentice ores were never game-domain and must not be remapped."
+        ),
+    )
+
+    advanced_metal_source_path = (
+        PROJECT_ROOT / "src" / "AdvancedMetalItems.cs"
+    )
+    mod_system_path = PROJECT_ROOT / "src" / "ApprenticeModSystem.cs"
+    try:
+        advanced_metal_source = advanced_metal_source_path.read_text(
+            encoding="utf-8-sig"
+        )
+        metal_mod_system_source = mod_system_path.read_text(
+            encoding="utf-8-sig"
+        )
+    except (OSError, UnicodeError) as error:
+        validation.errors.append(str(error))
+        advanced_metal_source = ""
+        metal_mod_system_source = ""
+    validation.check(
+        "class ItemApprenticeIngot : Item, IAnvilWorkable" in
+            advanced_metal_source
+        and 'new AssetLocation("apprentice", $"workitem-{metalCode}")' in
+            advanced_metal_source
+        and '"ApprenticeIngot"' in metal_mod_system_source
+        and "typeof(ItemApprenticeIngot)" in metal_mod_system_source
+        and "ApplyVanillaMetalPresentation(api)" in metal_mod_system_source
+        and '"game:ingot-iron"' in metal_mod_system_source
+        and '"game:workitem-iron"' in metal_mod_system_source
+        and "reference.TpOffHandTransform != null" in metal_mod_system_source
+        and "Advanced-metal registry ownership verified" in metal_mod_system_source
+        and "RejectGameDomainAdvancedMetals(api)" in metal_mod_system_source
+        and "item.IsMissing" in metal_mod_system_source
+        and "!item.IsMissing" in metal_mod_system_source
+        and "block.IsMissing" in metal_mod_system_source
+        and "!block.IsMissing" in metal_mod_system_source
+        and "historical game-domain advanced-metal save mappings" in
+            metal_mod_system_source,
+        (
+            "Advanced-metal ingots must retain vanilla anvil behavior and "
+            "runtime presentation while enforcing Apprentice-only ownership. "
+            "Historical missing save mappings must be reported separately "
+            "from active game-domain registrations."
+        ),
+    )
+
+    forbidden_game_metal_references: list[str] = []
+    for json_path in sorted(PROJECT_ROOT.rglob("*.json")):
+        if json_path == remaps_path:
+            continue
+        document = validation.load_json(json_path)
+
+        def inspect_advanced_metal_reference(value: Any) -> None:
+            if isinstance(value, dict):
+                for child in value.values():
+                    inspect_advanced_metal_reference(child)
+            elif isinstance(value, list):
+                for child in value:
+                    inspect_advanced_metal_reference(child)
+            elif isinstance(value, str):
+                if not value.startswith("game:"):
+                    return
+                if "starsteel" not in value and "aethersteel" not in value:
+                    return
+                if value.startswith("game:block/metal/ingot/"):
+                    return
+                forbidden_game_metal_references.append(
+                    f"{relative(json_path)} -> {value}"
+                )
+
+        inspect_advanced_metal_reference(document)
+    validation.check(
+        not forbidden_game_metal_references,
+        (
+            "All advanced-metal collectible references must use apprentice:; "
+            f"found {forbidden_game_metal_references}."
+        ),
+    )
 
     venom_patch_path = (
         ASSET_ROOT / "patches" / "2.7" / "venomberry-fruitingbush.json"
@@ -1298,17 +1502,17 @@ def validate_content_27(validation: Validation) -> None:
             "x": 0.5, "y": 0.5, "z": 0.609375
         }
         and shield_offhand.get("translation") == {
-            "x": -0.67, "y": -0.6, "z": -0.78
+            "x": -0.67, "y": -0.6, "z": -0.9
         }
         and shield_offhand.get("rotation") == {
-            "x": -4, "y": 173, "z": 90
+            "x": 0, "y": 0, "z": 90
         }
         and shield_offhand.get("origin") == {
             "x": 0.5, "y": 0.5, "z": 0.609375
         }
         and shield_offhand.get("scale") == 0.82
         and shield_hand.get("rotation") == {
-            "x": -4, "y": 4, "z": 90
+            "x": 0, "y": 180, "z": 90
         }
         and shield_hand.get("origin") == {
             "x": 0.5, "y": 0.5, "z": 0.609375
@@ -1317,8 +1521,8 @@ def validate_content_27(validation: Validation) -> None:
         and isinstance(shield_stats.get("protectionChance"), dict),
         (
             "Tower Shield must use the fixed ItemShield class, a dedicated "
-            "tall shield mesh, grip-derived hand anchors, horizontal pose, "
-            "and native shield stats."
+            "tall shield mesh, grip-derived hand anchors, the accepted "
+            "horizontal off-hand pose, and native shield stats."
         ),
     )
     shield_grip = (8, 8, 9.75)
@@ -1331,6 +1535,47 @@ def validate_content_27(validation: Validation) -> None:
             "Tower Shield rear-grip centre must land on the same hand-space "
             "point as the approved Composite Bow grip in the main hand. The "
             "off-hand pose must use its raised shield-specific anchor."
+        ),
+    )
+    validation.check(
+        points_close(
+            transformed_model_point(shield_grip, shield_offhand),
+            SHIELD_OFFHAND_CLEARANCE_TARGET,
+        ),
+        (
+            "Tower Shield off-hand transform must preserve its accepted pose "
+            "while adding rear-grip clearance for the hand and forearm."
+        ),
+    )
+    validation.check(
+        points_close(
+            rotated_model_vector(
+                (0, 1, 0), shield_hand.get("rotation", {})
+            ),
+            (1, 0, 0),
+        )
+        and points_close(
+            rotated_model_vector(
+                (0, 1, 0), shield_offhand.get("rotation", {})
+            ),
+            (-1, 0, 0),
+        )
+        and points_close(
+            rotated_model_vector(
+                (0, 0, -1), shield_hand.get("rotation", {})
+            ),
+            (0, 0, 1),
+        )
+        and points_close(
+            rotated_model_vector(
+                (0, 0, -1), shield_offhand.get("rotation", {})
+            ),
+            (0, 0, -1),
+        ),
+        (
+            "Tower Shield long axis must be horizontal in both third-person "
+            "paths. Its decorated face must point away from the player in "
+            "each mirrored hand attachment while retaining the grip anchor."
         ),
     )
     shield_chances = shield_stats.get("protectionChance", {})
@@ -1713,6 +1958,30 @@ def validate_content_27(validation: Validation) -> None:
             "instead of orbiting around the model's lower bounding corner."
         ),
     )
+    validation.check(
+        spear.get("tpHandTransform", {}).get("rotation") == {
+            "x": 0, "y": 0, "z": 0
+        }
+        and points_close(
+            rotated_model_vector(
+                (1, 0, 0),
+                spear.get("tpHandTransform", {}).get("rotation", {}),
+            ),
+            (1, 0, 0),
+        )
+        and points_close(
+            rotated_model_vector(
+                (0, 0, 1),
+                spear.get("tpHandTransform", {}).get("rotation", {}),
+            ),
+            (0, 0, 1),
+        ),
+        (
+            "Grandmaster Spear third-person roll must keep its shaft/tip "
+            "direction unchanged while placing the paired gold spearhead "
+            "decorations on the left and right sides."
+        ),
+    )
 
     for model_code in (
         "advancedtrapkit",
@@ -1743,6 +2012,113 @@ def validate_content_27(validation: Validation) -> None:
                 "with first-person, third-person and ground transforms."
             ),
         )
+        if model_code in {
+            "advancedtrapkit",
+            "armorpaddingkit",
+            "graftingkit",
+            "masterweaponpatterns",
+            "veterinarykit",
+        }:
+            validation.check(
+                model_item.get("guiTransform", {}).get(
+                    "rotation", {}
+                ).get("z") == 180,
+                (
+                    f"{model_code} must use the approved 180-degree GUI "
+                    "roll so its handle/top reads upright in inventory and "
+                    "the hotbar."
+                ),
+            )
+
+        if model_code in {
+            "armorpaddingkit",
+            "graftingkit",
+            "masterweaponpatterns",
+            "veterinarykit",
+        }:
+            grip = (
+                (8, 11.9, 7.5)
+                if model_code == "veterinarykit"
+                else (8, 11.4, 7.5)
+            )
+            expected_origin = (
+                {"x": 0.5, "y": 0.74375, "z": 0.46875}
+                if model_code == "veterinarykit"
+                else {"x": 0.5, "y": 0.7125, "z": 0.46875}
+            )
+            held = model_item.get("tpHandTransform", {})
+            held_rotation = held.get("rotation", {})
+            combined_rotation = {
+                "x": float(held_rotation.get("x", 0)),
+                "y": float(held_rotation.get("y", 0)) - 180,
+                "z": float(held_rotation.get("z", 0)),
+            }
+            validation.check(
+                held.get("origin") == expected_origin
+                and held.get("rotation") == {"x": 0, "y": 180, "z": 0}
+                and points_close(
+                    transformed_model_point(grip, held),
+                    NATIVE_HELD_GRIP_TARGET,
+                )
+                and points_close(
+                    rotated_model_vector((0, 0, -1), combined_rotation),
+                    (0, 0, -1),
+                ),
+                (
+                    f"{model_code} must pivot on the exact modeled handle "
+                    "centre, place that handle on the approved native hand "
+                    "anchor, and quarter-turn its decorated front from the "
+                    "player's back toward the player's right side."
+                ),
+            )
+
+        if model_code == "advancedtrapkit":
+            held = model_item.get("tpHandTransform", {})
+            chain_grip = (10.075398, 1.9, 17.877625)
+            trap_body = (8, 1.7, 8)
+            transformed_body = transformed_model_point(trap_body, held)
+            validation.check(
+                held.get("rotation") == {"x": -82, "y": 0, "z": 8}
+                and points_close(
+                    transformed_model_point(chain_grip, held),
+                    NATIVE_HELD_GRIP_TARGET,
+                )
+                and transformed_body[1] < NATIVE_HELD_GRIP_TARGET[1] - 0.35,
+                (
+                    "advancedtrapkit must be carried from the final modeled "
+                    "chain link with the trap body hanging below the hand. "
+                    "A centre pivot or positive pitch produces the sideways "
+                    "wrist pose seen in .22."
+                ),
+            )
+
+    fixed_slot_renderer_path = (
+        REPOSITORY_ROOT / "tools" / "render_fixed_slot_qa.py"
+    )
+    try:
+        fixed_slot_renderer_source = fixed_slot_renderer_path.read_text(
+            encoding="utf-8-sig"
+        )
+    except (OSError, UnicodeError) as error:
+        validation.errors.append(str(error))
+        fixed_slot_renderer_source = ""
+    validation.check(
+        'axis.set_ylim(34, -34)' in fixed_slot_renderer_source
+        and all(
+            f'"{code}"' in fixed_slot_renderer_source
+            for code in (
+                "advancedtrapkit",
+                "armorpaddingkit",
+                "graftingkit",
+                "masterweaponpatterns",
+                "veterinarykit",
+            )
+        ),
+        (
+            "Fixed-slot QA must use the engine's screen-space Y direction "
+            "and render the Bear Trap plus all four corrected kits."
+        ),
+    )
 
     trap_source_path = PROJECT_ROOT / "src" / "AdvancedTrapKit.cs"
     try:
@@ -1836,7 +2212,7 @@ def validate_content_27(validation: Validation) -> None:
         ),
     )
     validation.check(
-        'ReviewedAssetFingerprint = "ITEMS-RUNEBOUND5-GILDED2-SUNLANCE2-KITS-D-TRAP-C5"' in mod_system_source
+        'ReviewedAssetFingerprint = "ITEMS-RUNEBOUND5-GILDED2-SUNLANCE2-KITS-HANDANCHOR-TRAP-CHAIN-SHIELD-SIDEWAYS-FISHING-NATIVE-METALS-APPRENTICE2"' in mod_system_source
         and "LogReviewedAssetFingerprint(api)" in mod_system_source
         and "ExpectedReviewedAssetPaths" in mod_system_source,
         (
@@ -1995,15 +2371,35 @@ def validate_content_27(validation: Validation) -> None:
         and fishing.get("attributes", {}).get("ropelessShape", {}).get(
             "base"
         ) == "apprentice:item/2.7/master-fishing-rod"
+        and fishing.get("attributes", {}).get("aimAnimation") ==
+            "fishingpole-throw"
         and bool(fishing.get("fpHandTransform"))
         and bool(fishing.get("tpHandTransform"))
         and "ItemMasterFishingRod : ItemFishingPole" in fishing_source
-        and "StopFishingAnimations" in fishing_source
+        and "override" not in fishing_source
+        and "StopFishing" not in fishing_source
+        and "StopAnimation" not in fishing_source
+        and "ApplyVanillaFishingPolePresentation(api)" in mod_system_source
+        and 'referenceCode = "game:fishingpole-simple-wood"' in
+            mod_system_source
+        and "target.TpHandTransform = referenceTransform.Clone()" in
+            mod_system_source
+        and "target.TpHandTransform.Rotation.Z += 90f" in
+            mod_system_source
+        and "target.TpOffHandTransform.Rotation.Z += 90f" in
+            mod_system_source
+        and "target.TpOffHandTransform" in mod_system_source
+        and "CheckMasterFishingRodAnimation" not in mod_system_source
+        and "fishingAnimationGuardListenerId" not in mod_system_source
+        and "bowaimlong" not in fishing_source
+        and "bowaimlong" not in json.dumps(fishing)
         and '"ApprenticeMasterFishingRod"' in mod_system_source,
         (
             "Master Fishing Rod must extend the native fishing-pole behavior, "
-            "release stale fishing animations and retain visible first- and "
-            "third-person 3D transforms."
+            "use fishingpole-throw, inherit the vanilla simple wood pole's "
+            "complete third-person presentation with the required custom "
+            "model-axis correction, and leave bobber, rope, hook, bait and "
+            "animation lifecycle exclusively to vanilla."
         ),
     )
 
@@ -2286,6 +2682,9 @@ def validate_repository_layout(validation: Validation) -> None:
     required_loose_mod_sentinels = (
         "config\\class.json",
         "config\\content-2.7.json",
+        "config\\remaps.json",
+        "itemtypes\\2.7\\ingot.json",
+        "itemtypes\\2.7\\workitem.json",
         "itemtypes\\2.7\\compositebow.json",
         "itemtypes\\2.7\\towershield.json",
         "blocktypes\\2.7\\advancedtrap.json",

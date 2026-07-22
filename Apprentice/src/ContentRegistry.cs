@@ -144,8 +144,8 @@ namespace Apprentice
         public IReadOnlyList<EcologyDefinition> Ecology => ecology;
 
         /// <summary>
-        /// Makes every Apprentice collectible visible in both the normal
-        /// creative inventory and a dedicated Apprentice tab.  The JSON
+        /// Makes every player-facing Apprentice collectible visible in both
+        /// the normal creative inventory and a dedicated Apprentice tab. The JSON
         /// declarations remain the primary source; this finalization pass is
         /// deliberately redundant so a third-party asset patch cannot
         /// accidentally make all 2.7 content undiscoverable.
@@ -190,7 +190,11 @@ namespace Apprentice
 				collectible.Code.Path == "advancedtrap-opening2" ||
 				collectible.Code.Path == "advancedtrap-opening3" ||
 				collectible.Code.Path == "advancedtrap-opening4" ||
-				collectible.Code.Path == "advancedtrap-triggered")
+				collectible.Code.Path == "advancedtrap-triggered" ||
+				collectible.Code.Path.StartsWith(
+					"workitem-",
+					StringComparison.Ordinal
+				))
             {
                 collectible.CreativeInventoryTabs = Array.Empty<string>();
                 return false;

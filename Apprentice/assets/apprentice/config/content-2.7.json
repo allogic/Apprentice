@@ -237,7 +237,7 @@
       "RequiredDiscoveries": ["mastersmelter"],
       "RequiredItems": ["apprentice:upgraded-refractory"],
       "Inputs": [
-        { "Code": "game:ingot-starsteel", "Quantity": 6 },
+        { "Code": "apprentice:ingot-starsteel", "Quantity": 6 },
         { "Code": "game:ingot-meteoriciron", "Quantity": 3 },
         { "Code": "game:ingot-nickel", "Quantity": 2 },
         { "Code": "game:ingot-copper", "Quantity": 1 },

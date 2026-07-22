@@ -1,0 +1,54 @@
+{
+  "code": "ingot",
+  "class": "ApprenticeIngot",
+  "variantgroups": [
+    { "code": "metal", "states": ["starsteel", "aethersteel"] }
+  ],
+  "tags": ["apprentice-content"],
+  "maxstacksize": 16,
+  "storageFlags": 5,
+  "shape": { "base": "game:item/ingot" },
+  "texturesByType": {
+    "ingot-starsteel": {
+      "metal": { "base": "game:block/metal/ingot/starsteel" }
+    },
+    "ingot-aethersteel": {
+      "metal": { "base": "game:block/metal/ingot/aethersteel" }
+    }
+  },
+  "creativeinventory": {
+    "general": ["*"],
+    "items": ["*"],
+    "apprentice": ["*"]
+  },
+  "combustiblePropsByType": {
+    "ingot-starsteel": {
+      "meltingPoint": 1535,
+      "meltingDuration": 30,
+      "smeltedRatio": 1,
+      "smeltedStack": { "type": "item", "code": "apprentice:ingot-starsteel" }
+    },
+    "ingot-aethersteel": {
+      "meltingPoint": 1620,
+      "meltingDuration": 30,
+      "smeltedRatio": 1,
+      "smeltedStack": { "type": "item", "code": "apprentice:ingot-aethersteel" }
+    }
+  },
+  "materialDensityByType": {
+    "ingot-starsteel": 8050,
+    "ingot-aethersteel": 7900
+  },
+  "attributesByType": {
+    "ingot-starsteel": {
+      "requiresAnvilTier": 5,
+      "workableTemperature": 900,
+      "forgable": true
+    },
+    "ingot-aethersteel": {
+      "requiresAnvilTier": 6,
+      "workableTemperature": 980,
+      "forgable": true
+    }
+  }
+}

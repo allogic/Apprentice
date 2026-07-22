@@ -1,11 +1,14 @@
-using Apprentice.Weapon;
-using HarmonyLib;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using HarmonyLib;
+using Newtonsoft.Json.Linq;
+
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
+using Vintagestory.API.Datastructures;
 using Vintagestory.API.Server;
 using Vintagestory.GameContent;
 
@@ -13,9 +16,9 @@ namespace Apprentice
 {
 	public sealed class ApprenticeModSystem : ModSystem
 	{
-		private const string PlaytestVersion = "2.7.0-dev.20260720.20";
+		private const string PlaytestVersion = "2.7.0-dev.20260722.40";
 		private const string BowAssetFingerprint = "BOW-DARKWOOD-OXBLOOD-C-AXIS2-EDIT1-UV1-DRAW5";
-		private const string ReviewedAssetFingerprint = "ITEMS-RUNEBOUND5-GILDED2-SUNLANCE2-KITS-D-TRAP-C5";
+		private const string ReviewedAssetFingerprint = "ITEMS-RUNEBOUND5-GILDED2-SUNLANCE2-KITS-HANDANCHOR-TRAP-CHAIN-SHIELD-SIDEWAYS-FISHING-NATIVE-METALS-APPRENTICE2";
 		private static readonly string[] ExpectedBowShapeCodes =
 		{
 			"apprentice:item/2.7/composite-bow",
@@ -78,8 +81,6 @@ namespace Apprentice
 		private HealthBarRenderer? healthBarRenderer = null;
 		private Harmony? poisonInfoHarmony = null;
 		private Harmony? durabilityUpgradeHarmony = null;
-		private long fishingAnimationGuardListenerId = 0L;
-		private bool localPlayerHeldMasterFishingRod = false;
 
 		#region ModSystem Impl
 		public override void Start(ICoreAPI api)
@@ -96,6 +97,10 @@ namespace Apprentice
 			api.RegisterItemClass(
 				"ApprenticeCementationBlister",
 				typeof(ItemCementationBlister)
+			);
+			api.RegisterItemClass(
+				"ApprenticeIngot",
+				typeof(ItemApprenticeIngot)
 			);
 			api.RegisterItemClass(
 				"ApprenticeTrapKit",
@@ -291,6 +296,8 @@ namespace Apprentice
 		}
 		public override void AssetsFinalize(ICoreAPI api)
 		{
+			ApplyVanillaMetalPresentation(api);
+			RejectGameDomainAdvancedMetals(api);
 			int creativeCollectibles =
 				ApprenticeContentRegistry.EnsureCreativeInventoryPresence(api);
 			api.Logger.Notification(
@@ -312,6 +319,153 @@ namespace Apprentice
 				LogReviewedAssetFingerprint(api);
 			}
 		}
+
+		private static void ApplyVanillaMetalPresentation(ICoreAPI api)
+		{
+			CloneVanillaPresentation(
+				api,
+				"game:ingot-iron",
+				new[]
+				{
+					"apprentice:ingot-starsteel",
+					"apprentice:ingot-aethersteel"
+				},
+				copyTongAttributes: true
+			);
+			CloneVanillaPresentation(
+				api,
+				"game:workitem-iron",
+				new[]
+				{
+					"apprentice:workitem-starsteel",
+					"apprentice:workitem-aethersteel"
+				},
+				copyTongAttributes: false
+			);
+		}
+
+		private static void CloneVanillaPresentation(
+			ICoreAPI api,
+			string referenceCode,
+			IEnumerable<string> targetCodes,
+			bool copyTongAttributes)
+		{
+			Item reference = api.World.GetItem(new AssetLocation(referenceCode))
+				?? throw new InvalidOperationException(
+					$"Required vanilla reference '{referenceCode}' is missing."
+				);
+			foreach (string targetCode in targetCodes)
+			{
+				Item target = api.World.GetItem(new AssetLocation(targetCode))
+					?? throw new InvalidOperationException(
+						$"Required Apprentice item '{targetCode}' is missing."
+					);
+				if (reference.GuiTransform != null)
+					target.GuiTransform = reference.GuiTransform.Clone();
+				if (reference.FpHandTransform != null)
+					target.FpHandTransform = reference.FpHandTransform.Clone();
+				if (reference.GroundTransform != null)
+					target.GroundTransform = reference.GroundTransform.Clone();
+				if (reference.TpHandTransform != null)
+					target.TpHandTransform = reference.TpHandTransform.Clone();
+				if (reference.TpOffHandTransform != null)
+					target.TpOffHandTransform = reference.TpOffHandTransform.Clone();
+
+				if (!copyTongAttributes ||
+					reference.Attributes?.Token is not JObject referenceAttributes)
+				{
+					continue;
+				}
+
+				JObject targetAttributes =
+					target.Attributes?.Token?.DeepClone() as JObject
+					?? new JObject();
+				foreach (string key in new[]
+				{
+					"requiresTongs",
+					"tongOpening",
+					"onTongTransform",
+					"onMetalTongTransform"
+				})
+				{
+					if (targetAttributes[key] == null &&
+						referenceAttributes[key] != null)
+					{
+						targetAttributes[key] =
+							referenceAttributes[key]!.DeepClone();
+					}
+				}
+				target.Attributes = new JsonObject(targetAttributes);
+			}
+		}
+
+		private static void RejectGameDomainAdvancedMetals(ICoreAPI api)
+		{
+			string[] missingLegacyCodes = api.World.Items
+				.Where(item =>
+					item != null &&
+					item.IsMissing &&
+					IsGameDomainAdvancedMetal(item.Code)
+				)
+				.Select(item => item.Code.ToString())
+				.Concat(
+					api.World.Blocks
+						.Where(block =>
+							block != null &&
+							block.IsMissing &&
+							IsGameDomainAdvancedMetal(block.Code)
+						)
+						.Select(block => block.Code.ToString())
+				)
+				.Distinct(StringComparer.Ordinal)
+				.OrderBy(code => code, StringComparer.Ordinal)
+				.ToArray();
+			if (missingLegacyCodes.Length != 0)
+			{
+				api.Logger.Notification(
+					"[Apprentice] Found {0} historical game-domain advanced-metal save mappings represented by Vintage Story as missing collectibles; they are not active registrations: {1}",
+					missingLegacyCodes.Length,
+					string.Join(", ", missingLegacyCodes)
+				);
+			}
+
+			string[] invalidCodes = api.World.Items
+				.Where(item =>
+					item != null &&
+					!item.IsMissing &&
+					IsGameDomainAdvancedMetal(item.Code)
+				)
+				.Select(item => item.Code.ToString())
+				.Concat(
+					api.World.Blocks
+						.Where(block =>
+							block != null &&
+							!block.IsMissing &&
+							IsGameDomainAdvancedMetal(block.Code)
+						)
+						.Select(block => block.Code.ToString())
+				)
+				.Distinct(StringComparer.Ordinal)
+				.OrderBy(code => code, StringComparer.Ordinal)
+				.ToArray();
+			if (invalidCodes.Length == 0)
+			{
+				api.Logger.Notification(
+					"[Apprentice] Advanced-metal registry ownership verified: apprentice domain only."
+				);
+				return;
+			}
+
+			throw new InvalidOperationException(
+				"Starsteel and Aethersteel must be owned only by the " +
+				$"apprentice domain. Invalid game-domain registrations: {string.Join(", ", invalidCodes)}"
+			);
+		}
+
+		private static bool IsGameDomainAdvancedMetal(AssetLocation? code) =>
+			code?.Domain == "game" &&
+			(code.Path.Contains("starsteel", StringComparison.Ordinal) ||
+			 code.Path.Contains("aethersteel", StringComparison.Ordinal));
 
 		private static void LogReviewedAssetFingerprint(ICoreAPI api)
 		{
@@ -407,11 +561,6 @@ namespace Apprentice
 		}
 		public override void StartClientSide(ICoreClientAPI api)
 		{
-			fishingAnimationGuardListenerId =
-				api.Event.RegisterGameTickListener(
-					CheckMasterFishingRodAnimation,
-					100
-				);
 			// Heatmap state is gameplay-owned and must not depend on optional
 			// client HUD construction succeeding later in this method.
 			if (clientNetworkChannel != null)
@@ -489,46 +638,10 @@ namespace Apprentice
 				);
 				api.Logger.Error(exception);
 			}
-
-			capi?.Event.PlayerJoin += OnPlayerJoin;
 		}
 
-		private void CheckMasterFishingRodAnimation(float deltaTime)
-		{
-			EntityPlayer? playerEntity = capi?.World?.Player?.Entity;
-			if (playerEntity == null)
-			{
-				localPlayerHeldMasterFishingRod = false;
-				return;
-			}
-
-			ItemStack? stack = playerEntity.ActiveHandItemSlot?.Itemstack;
-			bool holdsMasterRod = stack?.Collectible is ItemMasterFishingRod;
-
-			if (localPlayerHeldMasterFishingRod && !holdsMasterRod)
-			{
-				playerEntity.AnimManager.StopAnimation("bowaimlong");
-				playerEntity.AnimManager.StopAnimation("fishingpole-idle");
-			}
-			else if (holdsMasterRod && stack != null &&
-				!stack.Attributes.GetBool("fishing") &&
-				stack.Attributes.GetLong("fishingEntityId", 0L) == 0L &&
-				stack.Attributes.GetLong("bobberEntityId", 0L) == 0L)
-			{
-				playerEntity.AnimManager.StopAnimation("fishingpole-idle");
-			}
-
-			localPlayerHeldMasterFishingRod = holdsMasterRod;
-		}
 		public override void Dispose()
 		{
-			if (fishingAnimationGuardListenerId != 0L)
-			{
-				capi?.Event.UnregisterGameTickListener(
-					fishingAnimationGuardListenerId
-				);
-				fishingAnimationGuardListenerId = 0L;
-			}
 			durabilityUpgradeHarmony?.UnpatchAll(
 				"apprentice.item-upgrades"
 			);
@@ -564,14 +677,6 @@ namespace Apprentice
 		#endregion
 
 		#region Event Handler
-		private void OnPlayerJoin(IClientPlayer byPlayer)
-		{
-			if (capi != null)
-			{
-				// Entity playerEntity = capi.World.Player.Entity;
-				byPlayer.Entity.AddBehavior(new UchigatanaDashBehaviour(capi, byPlayer.Entity));
-			}
-		}
 		private void OnExperienceNotification(ExperienceNotificationPacket packet)
 		{
 			// Network packet callbacks are not a safe place to create
