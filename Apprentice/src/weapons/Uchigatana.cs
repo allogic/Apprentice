@@ -5,6 +5,8 @@ using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
 using Vintagestory.API.MathTools;
+using Vintagestory.API.Util;
+using Vintagestory.Client.NoObf;
 using Vintagestory.GameContent;
 
 namespace Apprentice.Weapon
@@ -22,7 +24,7 @@ namespace Apprentice.Weapon
 
 			animMetaDataByName?["test"].AnimationSpeed = 0.5F;
 
-			RunningAnimation? runAnim = animManager?.GetAnimationState("");
+			RunningAnimation? runAnim = animManager?.GetAnimationState("runAnim");
 
 			IAnimator? animator = animManager?.Animator;
 
@@ -40,23 +42,35 @@ namespace Apprentice.Weapon
 		}
 	}
 
-	// TODO: refactor me pls..
 	internal class LineGizmo : IRenderer
 	{
 		private readonly IClientEventAPI eventApi;
 		private readonly IRenderAPI renderApi;
+		private readonly IShaderAPI shaderApi;
 
-		public double RenderOrder => 1.0;
-		public int RenderRange => 10;
+		private readonly IShaderProgram lineProgram;
 
 		private MeshData? mesh = null;
 		private MeshRef? meshRef = null;
+
+		public double RenderOrder => 1.0;
+		public int RenderRange => 10;
 
 		public LineGizmo(ICoreClientAPI api, int numLines)
 		{
 			eventApi = api.Event;
 			renderApi = api.Render;
+			shaderApi = api.Shader;
 
+			// Create line program
+			lineProgram = shaderApi.NewShaderProgram();
+			lineProgram.AssetDomain = "apprentice";
+			lineProgram.VertexShader = shaderApi.NewShader(EnumShaderType.VertexShader);
+			lineProgram.FragmentShader = shaderApi.NewShader(EnumShaderType.FragmentShader);
+			shaderApi.RegisterFileShaderProgram("line-shader", lineProgram);
+			lineProgram.Compile();
+
+			// Create mesh
 			mesh = new(numLines * 2, numLines * 2, false, false, true, false);
 			mesh?.mode = EnumDrawMode.Lines;
 
@@ -67,19 +81,17 @@ namespace Apprentice.Weapon
 		{
 			if (stage != EnumRenderStage.Done) return;
 
-			if (meshRef != null)
-			{
-				IShaderProgram program = renderApi.CurrentActiveShader;
+			if (meshRef == null) return;
 
-				// renderApi.CameraMatrix
-				// renderApi.ViewMatrix
-				// renderApi.ProjectionMatrix
-				// renderApi.CurrentProjectionMatrix
+			renderApi.GlDisableCullFace();
 
-				renderApi.GlDisableCullFace();
-				renderApi.RenderMesh(meshRef);
-				renderApi.GlEnableCullFace();
-			}
+			// Draw tha gizmo
+			lineProgram.Use();
+			// lineProgram.Uniform("color", 0); // TODO
+			renderApi.RenderMesh(meshRef);
+			lineProgram.Stop();
+
+			renderApi.GlEnableCullFace();
 		}
 
 		public void AddLine(
@@ -118,12 +130,13 @@ namespace Apprentice.Weapon
 		{
 			eventApi.UnregisterRenderer(this, EnumRenderStage.AfterFinalComposition);
 
+			lineProgram.Dispose();
+
 			meshRef?.Dispose();
 		}
 	}
 	internal class DashBlur : IRenderer
 	{
-		private readonly ICoreClientAPI clientApi;
 		private readonly IClientEventAPI eventApi;
 		private readonly IRenderAPI renderApi;
 		private readonly IShaderAPI shaderApi;
@@ -132,13 +145,13 @@ namespace Apprentice.Weapon
 		private readonly RawTexture accTextureA;
 		private readonly RawTexture accTextureB;
 
+		private readonly IShaderProgram blitProgram;
+		private readonly IShaderProgram blurProgram;
+
 		private MeshRef? meshRef = null;
 		private FrameBufferRef? frameBufferBlitRef = null;
 		private FrameBufferRef? frameBufferARef = null;
 		private FrameBufferRef? frameBufferBRef = null;
-
-		private readonly IShaderProgram blitProgram;
-		private readonly IShaderProgram blurProgram;
 
 		public bool BlurEnable = false;
 		public float BlurIntensity = 0.0F;
@@ -148,7 +161,6 @@ namespace Apprentice.Weapon
 
 		public DashBlur(ICoreClientAPI api)
 		{
-			clientApi = api;
 			eventApi = api.Event;
 			renderApi = api.Render;
 			shaderApi = api.Shader;
@@ -303,6 +315,7 @@ namespace Apprentice.Weapon
 
 		private readonly ICoreClientAPI clientApi;
 		private readonly IInputAPI inputApi;
+		private readonly IAnimationManager animManager;
 
 		private const float animationStep = 1.0F / 60;
 		private const float animationFrames = animationStep * 30.0F;
@@ -325,10 +338,16 @@ namespace Apprentice.Weapon
 		private bool dashOnCooldown = false;
 		private Vec3d dashDirection = Vec3d.Zero;
 
+		private RunningAnimation runningAnimation = new();
+		private RunningAnimation sprintAnimation = new();
+
+		private Animation currAnimation = new();
+
 		public UchigatanaDashBehaviour(ICoreClientAPI api, Entity entity) : base(entity)
 		{
 			clientApi = api;
 			inputApi = api.Input;
+			animManager = entity.AnimManager;
 
 			entityPlayer = api.World.Player.Entity;
 			lineGizmo = new(api, 1000);
@@ -393,8 +412,83 @@ namespace Apprentice.Weapon
 					// EntitySelection? entitySelection = null;
 					// entity.World.RayTraceForSelection(entity.Pos.XYZ, target, ref blockSelection, ref entitySelection);
 
-					// entity.StartAnimation("");
-					// entity.StopAnimation..
+					// animManager.LoadAnimator();
+					// animManager.OnAnimationReceived
+
+					sprintAnimation = animManager.GetAnimationState("walk");
+					sprintAnimation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Stop;
+
+					runningAnimation = animManager.GetAnimationState("swordhit");
+					runningAnimation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Stop;
+
+					// IAnimator? animator = animManager.Animator;
+					// animator.ActiveAnimationCount
+
+					// RunningAnimation[] animations = entity.AnimManager.Animator.Animations;
+					// int animationCount = entity.AnimManager.Animator.Animations.Length;
+					// for (int i = 0; i < animationCount; i++)
+					// {
+					// 	animations[i].
+					// }
+
+					// entity.AnimManager.StartAnimation(new AnimationMetaData()
+					// {
+					// 	Animation = "walk",
+					// 	Code = "walk",
+					// 	Weight = 0.5F,
+					// 	SupressDefaultAnimation = true,
+					// 	ClientSide = true,
+					// 	AnimationSpeed = 0.7F,
+					// 	BlendMode = EnumAnimationBlendMode.Add,
+					// 	ElementWeight = {
+					// 		{ "root", 100.0F },
+					// 	},
+					// 	ElementBlendMode = {
+					// 		{ "root", EnumAnimationBlendMode.Add },
+					// 	},
+					// });
+
+					entity.AnimManager.StartAnimation(new AnimationMetaData()
+					{
+						Animation = "jump",
+						Code = "newjump",
+						Weight = 0.5F,
+						SupressDefaultAnimation = true,
+						ClientSide = true,
+						AnimationSpeed = 0.5F,
+						BlendMode = EnumAnimationBlendMode.Add,
+						ElementWeight = {
+							{ "root", 100.0F },
+						},
+						ElementBlendMode = {
+							{ "root", EnumAnimationBlendMode.Add },
+						},
+					});
+
+					entity.AnimManager.StartAnimation(new AnimationMetaData()
+					{
+						Animation = "swordhit",
+						Code = "swordhit",
+						EaseInSpeed = 8.0F,
+						EaseOutSpeed = 8.0F,
+						Weight = 1.0F,
+						SupressDefaultAnimation = true,
+						ClientSide = true,
+						AnimationSpeed = 2.2F,
+						BlendMode = EnumAnimationBlendMode.AddAverage,
+						ElementWeight = {
+							{ "UpperArmR", 20.0F },
+							{ "LowerArmR", 20.0F },
+							{ "UpperArmL", 20.0F },
+							{ "LowerArmL", 20.0F }
+						},
+						ElementBlendMode = {
+							{ "UpperArmR", EnumAnimationBlendMode.AddAverage },
+							{ "LowerArmR", EnumAnimationBlendMode.AddAverage },
+							{ "UpperArmL", EnumAnimationBlendMode.AddAverage },
+							{ "LowerArmL", EnumAnimationBlendMode.AddAverage }
+						},
+					});
 				}
 
 				float impulseAttenuator = entity.OnGround
@@ -455,6 +549,8 @@ namespace Apprentice.Weapon
 
 			dashBlur.BlurEnable = true;
 
+			clientApi.World.AddCameraShake(2.0F);
+
 			clientApi.World.PlaySoundAt(dashSound1, new BlockPos(entityPlayer.Pos.XYZInt, 0), 0.0, null, true, 64.0F, 1.0F);
 
 			clientApi.World.RegisterCallback(_ =>
@@ -469,6 +565,40 @@ namespace Apprentice.Weapon
 			}, dashBlurEnableMs);
 
 			return true;
+		}
+	}
+
+	internal class TrueThirdPersonBehaviour : EntityBehavior
+	{
+		private readonly ICoreClientAPI clientApi;
+
+		EntityPlayer? entityPlayer = null;
+
+		public TrueThirdPersonBehaviour(ICoreClientAPI api, Entity entity) : base(entity)
+		{
+			clientApi = api;
+
+			entityPlayer = api.World.Player.Entity;
+		}
+
+		public override string PropertyName()
+		{
+			return "TrueThirdPersonBehaviour";
+		}
+		public override void OnGameTick(float deltaTime)
+		{
+			if (entityPlayer == null) return;
+
+			EntityPos transform = entityPlayer.Pos;
+
+			transform.HeadPitch = 45.0F;
+			transform.HeadYaw = 0.0F;
+
+			// clientApi.World.Player.CameraRoll = 45.0F;
+			// clientApi.World.Player.camera
+
+			// clientApi.Render.CurrentModelviewMatrix
+			// clientApi.Render.CameraOffset.ScaleXYZ.X = 10.0F;
 		}
 	}
 }

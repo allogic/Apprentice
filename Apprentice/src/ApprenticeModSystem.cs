@@ -684,6 +684,7 @@ namespace Apprentice
 			if (capi != null)
 			{
 				byPlayer.Entity.AddBehavior(new UchigatanaDashBehaviour(capi, byPlayer.Entity));
+				byPlayer.Entity.AddBehavior(new TrueThirdPersonBehaviour(capi, byPlayer.Entity));
 			}
 		}
 		private void OnExperienceNotification(ExperienceNotificationPacket packet)
