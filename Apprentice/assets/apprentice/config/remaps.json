@@ -1,0 +1,12 @@
+{
+  "apprentice:canonical-advanced-metals-2.7.0": [
+    "/iir remapq apprentice:ingot-starsteel game:ingot-starsteel force",
+    "/iir remapq apprentice:ingot-aethersteel game:ingot-aethersteel force",
+    "/iir remapq apprentice:metalchunk-starsteel game:metalbit-starsteel force",
+    "/iir remapq apprentice:metalchunk-aethersteel game:metalbit-aethersteel force",
+    "/iir remapq apprentice:plate-starsteel game:metalplate-starsteel force",
+    "/iir remapq apprentice:plate-aethersteel game:metalplate-aethersteel force",
+    "/iir remapq apprentice:workitem-starsteel game:workitem-starsteel force",
+    "/iir remapq apprentice:workitem-aethersteel game:workitem-aethersteel force"
+  ]
+}

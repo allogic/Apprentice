@@ -8,7 +8,7 @@
       "_#######_"
     ]],
     "name": "Starsteel ingot",
-    "output": { "type": "item", "code": "game:ingot-starsteel" }
+    "output": { "type": "item", "code": "apprentice:ingot-starsteel" }
   },
   {
     "code": "apprentice:aethersteel-ingot",
@@ -19,6 +19,6 @@
       "_#######_"
     ]],
     "name": "Aethersteel ingot",
-    "output": { "type": "item", "code": "game:ingot-aethersteel" }
+    "output": { "type": "item", "code": "apprentice:ingot-aethersteel" }
   }
 ]

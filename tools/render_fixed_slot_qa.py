@@ -18,6 +18,11 @@ ITEMS = (
     ("Composite Bow", "compositebow", "composite-bow"),
     ("Tower Shield", "towershield", "tower-shield"),
     ("Sunlance", "atlatl", "grandmaster-spear"),
+    ("Bear Trap", "advancedtrapkit", "kit-trap"),
+    ("Armor Kit", "armorpaddingkit", "kit-armor-upgrade"),
+    ("Weapon Kit", "masterweaponpatterns", "kit-weapon-upgrade"),
+    ("Tool Kit", "graftingkit", "kit-tool-upgrade"),
+    ("First Aid", "veterinarykit", "kit-first-aid"),
 )
 COLORS = {
     "wood": "#86552e",
@@ -133,23 +138,27 @@ def draw_slot(axis, title, item, shape):
     axis.add_patch(Rectangle((-33, -33), 66, 66, fill=False,
                              edgecolor="#241e19", linewidth=2))
     axis.set_xlim(-34, 34)
-    axis.set_ylim(-34, 34)
+    axis.set_ylim(34, -34)
     axis.set_aspect("equal")
     axis.axis("off")
     axis.set_title(title, color="#f5eadb", fontsize=11, pad=7)
 
 
 def main():
-    figure, axes = plt.subplots(1, len(ITEMS), figsize=(7.8, 3.0))
+    figure, axes = plt.subplots(
+        2,
+        len(ITEMS) // 2,
+        figsize=(10.4, 5.8),
+    )
     figure.patch.set_facecolor("#392f25")
-    for axis, (title, item_code, shape_code) in zip(axes, ITEMS):
+    for axis, (title, item_code, shape_code) in zip(axes.flat, ITEMS):
         item = load(ASSETS / "itemtypes" / "2.7" / f"{item_code}.json")
         shape = load(
             ASSETS / "shapes" / "item" / "2.7" / f"{shape_code}.json"
         )
         draw_slot(axis, title, item, shape)
-    figure.subplots_adjust(left=0.025, right=0.975, bottom=0.04, top=0.86,
-                           wspace=0.12)
+    figure.subplots_adjust(left=0.025, right=0.975, bottom=0.04, top=0.87,
+                           wspace=0.12, hspace=0.34)
     OUT.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(OUT, dpi=180, facecolor=figure.get_facecolor())
     print(OUT)

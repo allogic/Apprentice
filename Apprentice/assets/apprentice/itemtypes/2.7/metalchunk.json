@@ -12,8 +12,8 @@
   "dimensions":{"width":0.0625,"height":0.0625,"length":0.0625},
   "creativeinventory":{"general":["*"],"items":["*"],"apprentice":["*"]},
   "combustiblePropsByType":{
-    "metalchunk-starsteel":{"meltingPoint":1535,"meltingDuration":30,"smeltedRatio":20,"smeltedStack":{"type":"item","code":"game:ingot-starsteel"}},
-    "metalchunk-aethersteel":{"meltingPoint":1620,"meltingDuration":30,"smeltedRatio":20,"smeltedStack":{"type":"item","code":"game:ingot-aethersteel"}}
+    "metalchunk-starsteel":{"meltingPoint":1535,"meltingDuration":30,"smeltedRatio":20,"smeltedStack":{"type":"item","code":"apprentice:ingot-starsteel"}},
+    "metalchunk-aethersteel":{"meltingPoint":1620,"meltingDuration":30,"smeltedRatio":20,"smeltedStack":{"type":"item","code":"apprentice:ingot-aethersteel"}}
   },
   "guiTransform":{"rotation":{"x":176,"y":132,"z":-21},"origin":{"x":0.5,"y":0.07,"z":0.5},"scale":5.61},
   "fpHandTransform":{"translation":{"x":0,"y":0.2,"z":0},"rotation":{"x":0,"y":24,"z":20},"origin":{"x":0.5,"y":0.1,"z":0.5},"scale":2.68},

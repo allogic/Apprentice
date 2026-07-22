@@ -351,6 +351,9 @@ namespace CakeBuild
 				$"{stagingDirectory}/modinfo.json",
 				$"{stagingDirectory}/assets/apprentice/config/class.json",
 				$"{stagingDirectory}/assets/apprentice/config/content-2.7.json",
+				$"{stagingDirectory}/assets/apprentice/config/remaps.json",
+				$"{stagingDirectory}/assets/apprentice/itemtypes/2.7/ingot.json",
+				$"{stagingDirectory}/assets/apprentice/itemtypes/2.7/workitem.json",
 				$"{stagingDirectory}/assets/apprentice/itemtypes/2.7/compositebow.json",
 				$"{stagingDirectory}/assets/apprentice/itemtypes/2.7/towershield.json",
 				$"{stagingDirectory}/assets/apprentice/itemtypes/2.7/advancedtrapkit.json",
@@ -374,12 +377,8 @@ namespace CakeBuild
 				$"{stagingDirectory}/assets/apprentice/shapes/item/2.7/composite-bow-charge5.json",
 				$"{stagingDirectory}/assets/apprentice/textures/item/2.7/compositebow-material.png",
 				$"{stagingDirectory}/assets/apprentice/textures/item/2.7/compositebow-grip-wrap.png",
-				// The two ingots are deliberately vanilla metal variants now. Their
-				// definitions come from the game's generic ingot itemtype, while these
-				// textures and metal patches provide the Apprentice-specific material.
-				// Requiring the deleted duplicate itemtype files here encouraged people
-				// to copy only assets after Package failed, producing a silently broken
-				// install with no ModSystem, poison, heatmap, or trap block entity.
+				// Apprentice owns the collectible IDs; the game-domain assets below are
+				// texture inputs for the vanilla ingot/work-item renderers only.
 				$"{stagingDirectory}/assets/game/textures/block/metal/ingot/starsteel.png",
 				$"{stagingDirectory}/assets/game/textures/block/metal/ingot/aethersteel.png",
 				$"{stagingDirectory}/assets/apprentice/patches/2.7/metals.json",

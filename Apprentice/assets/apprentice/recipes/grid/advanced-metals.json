@@ -31,7 +31,7 @@
   {
     "ingredientPattern": "III, I ,III",
     "ingredients": {
-      "I": { "type": "item", "code": "game:ingot-starsteel" }
+      "I": { "type": "item", "code": "apprentice:ingot-starsteel" }
     },
     "width": 3, "height": 3,
     "output": { "type": "block", "code": "apprentice:anvil-starsteel", "quantity": 1 }
@@ -39,7 +39,7 @@
   {
     "ingredientPattern": " I ,IHI, I ",
     "ingredients": {
-      "I": { "type": "item", "code": "game:ingot-starsteel" },
+      "I": { "type": "item", "code": "apprentice:ingot-starsteel" },
       "H": { "type": "item", "code": "game:hammer-*", "isTool": true, "toolDurabilityCost": 1 }
     },
     "width": 3, "height": 3,
@@ -48,7 +48,7 @@
   {
     "ingredientPattern": " I ,IHI, I ",
     "ingredients": {
-      "I": { "type": "item", "code": "game:ingot-aethersteel" },
+      "I": { "type": "item", "code": "apprentice:ingot-aethersteel" },
       "H": { "type": "item", "code": "game:hammer-*", "isTool": true, "toolDurabilityCost": 1 }
     },
     "width": 3, "height": 3,
@@ -57,7 +57,7 @@
   {
     "ingredientPattern": "I I, I ,I I",
     "ingredients": {
-      "I": { "type": "item", "code": "game:ingot-starsteel" }
+      "I": { "type": "item", "code": "apprentice:ingot-starsteel" }
     },
     "width": 3, "height": 3,
     "output": { "type": "item", "code": "apprentice:chain-starsteel", "quantity": 4 }
@@ -65,7 +65,7 @@
   {
     "ingredientPattern": "III,I I,III",
     "ingredients": {
-      "I": { "type": "item", "code": "game:ingot-aethersteel" }
+      "I": { "type": "item", "code": "apprentice:ingot-aethersteel" }
     },
     "width": 3, "height": 3,
     "output": { "type": "item", "code": "apprentice:scales-aethersteel", "quantity": 8 }
