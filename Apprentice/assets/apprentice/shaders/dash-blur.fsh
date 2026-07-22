@@ -44,5 +44,5 @@ void main()
 	// fragColor = color;
 	// fragColor = ReconstructWorldPosition(texCoord);
 	// fragColor = vec4(blurDirection, 1);
-	fragColor = vec4(cameraDirection * 0.5 + 0.5, 1.0);
+	fragColor = vec4(worldVelocity * 0.5 + 0.5, 1.0);
 }

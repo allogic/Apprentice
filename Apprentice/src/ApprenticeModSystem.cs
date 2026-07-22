@@ -1,10 +1,10 @@
+using Apprentice.Weapon;
+using HarmonyLib;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using HarmonyLib;
-using Newtonsoft.Json.Linq;
-
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
@@ -638,6 +638,8 @@ namespace Apprentice
 				);
 				api.Logger.Error(exception);
 			}
+
+			capi?.Event.PlayerJoin += OnPlayerJoin;
 		}
 
 		public override void Dispose()
@@ -677,6 +679,13 @@ namespace Apprentice
 		#endregion
 
 		#region Event Handler
+		private void OnPlayerJoin(IClientPlayer byPlayer)
+		{
+			if (capi != null)
+			{
+				byPlayer.Entity.AddBehavior(new UchigatanaDashBehaviour(capi, byPlayer.Entity));
+			}
+		}
 		private void OnExperienceNotification(ExperienceNotificationPacket packet)
 		{
 			// Network packet callbacks are not a safe place to create

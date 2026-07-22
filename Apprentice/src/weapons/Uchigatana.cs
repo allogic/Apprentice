@@ -197,8 +197,7 @@ namespace Apprentice.Weapon
 			frameBufferAttribs.Attachments[0].AttachmentType = EnumFramebufferAttachment.ColorAttachment0;
 			frameBufferRef = renderApi.CreateFrameBuffer(frameBufferAttribs);
 
-			// TODO: help me..
-			// eventApi.RegisterRenderer(this, EnumRenderStage.AfterFinalComposition);
+			eventApi.RegisterRenderer(this, EnumRenderStage.AfterFinalComposition);
 		}
 
 		public void OnRenderFrame(float deltaTime, EnumRenderStage stage)
@@ -243,8 +242,7 @@ namespace Apprentice.Weapon
 
 		public void Dispose()
 		{
-			// TODO: help me..
-			// eventApi.UnregisterRenderer(this, EnumRenderStage.AfterFinalComposition);
+			eventApi.UnregisterRenderer(this, EnumRenderStage.AfterFinalComposition);
 
 			renderApi.DestroyFrameBuffer(frameBufferRef);
 			renderApi.GLDeleteTexture(screenBuffer.TextureId);
