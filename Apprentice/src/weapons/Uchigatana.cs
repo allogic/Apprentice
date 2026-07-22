@@ -2,6 +2,7 @@
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using System.Net.Mail;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Vintagestory.API.Client;
@@ -128,58 +129,130 @@ namespace Apprentice.Weapon
 	}
 	internal class DashBlur : IRenderer
 	{
+		private readonly ICoreClientAPI clientApi;
 		private readonly IClientEventAPI eventApi;
 		private readonly IRenderAPI renderApi;
 		private readonly IShaderAPI shaderApi;
 
-		private readonly MeshRef meshRef;
+		private readonly RawTexture screenBuffer;
 
-		private readonly IShaderProgram program;
+		private MeshRef? meshRef = null;
+		private FrameBufferRef? frameBufferRef = null;
+
+		private readonly IShaderProgram blitProgram;
+		private readonly IShaderProgram blurProgram;
+
+		public Vec3f BlurDirection { get; set; } = new(0, 0, 0);
+		public Vec3f BlurVelocity { get; set; } = new(0, 0, 0);
+		public float BlurAmount { get; set; } = 0.2F;
+
+		public Matrixf CurrViewProjectionMatrix = Matrixf.Create();
+		public Matrixf PrevViewProjectionMatrix = Matrixf.Create();
 
 		public double RenderOrder => 1.0;
 		public int RenderRange => 9999;
 
 		public DashBlur(ICoreClientAPI api)
 		{
+			clientApi = api;
 			eventApi = api.Event;
 			renderApi = api.Render;
 			shaderApi = api.Shader;
 
-			program = shaderApi.NewShaderProgram();
+			// Create blit program
+			blitProgram = shaderApi.NewShaderProgram();
+			blitProgram.AssetDomain = "apprentice";
+			blitProgram.VertexShader = shaderApi.NewShader(EnumShaderType.VertexShader);
+			blitProgram.FragmentShader = shaderApi.NewShader(EnumShaderType.FragmentShader);
+			shaderApi.RegisterFileShaderProgram("blit-shader", blitProgram);
+			blitProgram.Compile();
 
-			program.AssetDomain = "apprentice";
-			program.VertexShader = shaderApi.NewShader(EnumShaderType.VertexShader);
-			program.FragmentShader = shaderApi.NewShader(EnumShaderType.FragmentShader);
+			// Create blur program
+			blurProgram = shaderApi.NewShaderProgram();
+			blurProgram.AssetDomain = "apprentice";
+			blurProgram.VertexShader = shaderApi.NewShader(EnumShaderType.VertexShader);
+			blurProgram.FragmentShader = shaderApi.NewShader(EnumShaderType.FragmentShader);
+			shaderApi.RegisterFileShaderProgram("dash-blur", blurProgram);
+			blurProgram.Compile();
 
-			int programId = shaderApi.RegisterFileShaderProgram("dash-blur", program);
-
-			program = renderApi.GetShader(programId);
-
-			program.Compile();
+			// Create render target
+			screenBuffer = new RawTexture();
+			screenBuffer.MinFilter = EnumTextureFilter.Nearest;
+			screenBuffer.MagFilter = EnumTextureFilter.Nearest;
+			screenBuffer.WrapS = EnumTextureWrap.ClampToEdge;
+			screenBuffer.WrapT = EnumTextureWrap.ClampToEdge;
+			screenBuffer.PixelInternalFormat = EnumTextureInternalFormat.Rgba8;
+			screenBuffer.Width = renderApi.FrameWidth; // TODO: update these values when main framebuffer changes size
+			screenBuffer.Height = renderApi.FrameHeight;
+			screenBuffer.TextureId = 0;
+			renderApi.GenTexture(screenBuffer);
 
 			meshRef = renderApi.UploadMesh(QuadMeshUtil.GetQuad());
 
-			eventApi.RegisterRenderer(this, EnumRenderStage.AfterFinalComposition);
+			// Create frame buffer
+			FramebufferAttrs frameBufferAttribs = new("blit", renderApi.FrameWidth, renderApi.FrameHeight);
+			frameBufferAttribs.Attachments = new FramebufferAttrsAttachment[1];
+			frameBufferAttribs.Attachments[0] = new();
+			frameBufferAttribs.Attachments[0].Texture = screenBuffer;
+			frameBufferAttribs.Attachments[0].AttachmentType = EnumFramebufferAttachment.ColorAttachment0;
+			frameBufferRef = renderApi.CreateFrameBuffer(frameBufferAttribs);
+
+			// TODO: help me..
+			// eventApi.RegisterRenderer(this, EnumRenderStage.AfterFinalComposition);
 		}
 
 		public void OnRenderFrame(float deltaTime, EnumRenderStage stage)
 		{
 			if (stage != EnumRenderStage.AfterFinalComposition) return;
+			if (meshRef == null) return;
+			if (frameBufferRef == null) return;
 
-			program.Use();
+			PrevViewProjectionMatrix = CurrViewProjectionMatrix;
+			CurrViewProjectionMatrix = new Matrixf(renderApi.CameraMatrixOriginf);
+			CurrViewProjectionMatrix.Mul(renderApi.CurrentProjectionMatrix);
 
-			// program.BindTexture2D("tex", );
-			program.Uniform("strength", 0.3F);
+			renderApi.GlDisableCullFace();
+			renderApi.GlDisableStencilTest();
+			renderApi.GlToggleBlend(false);
 
+			// Store source frame buffer color attachment
+			// int srcTexture = renderApi.FrameBuffers[(int)EnumFrameBuffer.Primary].ColorTextureIds[0];
+			int srcTexture = renderApi.FrameBuffers[(int)EnumFrameBuffer.Primary].DepthTextureId;
+
+			// Blit render target
+			renderApi.CurrentFrameBuffer = frameBufferRef;
+			blitProgram.Use();
+			blitProgram.BindTexture2D("tex", srcTexture, 0);
 			renderApi.RenderMesh(meshRef);
+			blitProgram.Stop();
+
+			// Apply motion blur
+			renderApi.CurrentFrameBuffer = null;
+			blurProgram.Use();
+			blurProgram.BindTexture2D("tex", frameBufferRef.ColorTextureIds[0], 0);
+			blurProgram.Uniform("cameraDirection", BlurDirection);
+			blurProgram.Uniform("worldVelocity", BlurVelocity);
+			blurProgram.Uniform("blurAmount", BlurAmount);
+			renderApi.RenderMesh(meshRef);
+			blurProgram.Stop();
+
+			renderApi.GlToggleBlend(true);
+			renderApi.GlEnableStencilTest();
+			renderApi.GlEnableCullFace();
 		}
 
 		public void Dispose()
 		{
-			eventApi.UnregisterRenderer(this, EnumRenderStage.AfterFinalComposition);
+			// TODO: help me..
+			// eventApi.UnregisterRenderer(this, EnumRenderStage.AfterFinalComposition);
 
-			program.Dispose();
-			meshRef.Dispose();
+			renderApi.DestroyFrameBuffer(frameBufferRef);
+			renderApi.GLDeleteTexture(screenBuffer.TextureId);
+
+			blurProgram.Dispose();
+			blitProgram.Dispose();
+
+			meshRef?.Dispose();
 		}
 	}
 
@@ -220,7 +293,7 @@ namespace Apprentice.Weapon
 
 			entityPlayer = api.World.Player.Entity;
 			lineGizmo = new(api, 1000);
-			// dashBlur = new(api);
+			dashBlur = new(api);
 
 			inputApi.RegisterHotKey("play_blood_scythe_anim", "Play a test sequence", GlKeys.ShiftLeft, HotkeyType.MovementControls);
 			inputApi.SetHotKeyHandler("play_blood_scythe_anim", OnReset);
@@ -233,6 +306,7 @@ namespace Apprentice.Weapon
 		public override void OnGameTick(float deltaTime)
 		{
 			if (entityPlayer == null) return;
+			if (dashBlur == null) return;
 
 			EntityPos transform = entityPlayer.Pos;
 
@@ -297,10 +371,17 @@ namespace Apprentice.Weapon
 
 				if (animationFrame >= animationFrames)
 				{
+					// dashBlur.BlurDirection = Vec3f.Zero;
+					// dashBlur.BlurAmount = 0.0F;
+
 					isPlaying = false;
 					isInit = true;
 				}
 			}
+
+			dashBlur.BlurDirection = transform.GetViewVector();
+			dashBlur.BlurVelocity = transform.Motion.ToVec3f();
+			dashBlur.BlurAmount = 0.05F;
 		}
 
 		// Pirate's Life https://easings.net/
