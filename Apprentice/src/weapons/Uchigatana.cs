@@ -140,8 +140,8 @@ namespace Apprentice.Weapon
 		private readonly IShaderProgram blitProgram;
 		private readonly IShaderProgram blurProgram;
 
-		public bool Enable = false;
-		public bool Reset = true;
+		public bool BlurEnable = false;
+		public float BlurIntensity = 0.0F;
 
 		public double RenderOrder => 1.0;
 		public int RenderRange => 9999;
@@ -255,10 +255,11 @@ namespace Apprentice.Weapon
 			blurProgram.Use();
 			blurProgram.BindTexture2D("blitTex", frameBufferBlitRef.ColorTextureIds[0], 0);
 			blurProgram.BindTexture2D("accTex", frameBufferBRef.ColorTextureIds[0], 1);
+			blurProgram.Uniform("blurIntensity", BlurIntensity);
 			renderApi.RenderMesh(meshRef);
 			blurProgram.Stop();
 
-			if (Enable)
+			if (BlurEnable)
 			{
 				// Blit render target
 				renderApi.CurrentFrameBuffer = null;
@@ -411,6 +412,8 @@ namespace Apprentice.Weapon
 					isPlaying = false;
 					isInit = true;
 				}
+
+				dashBlur?.BlurIntensity = (float)transform.Motion.Length();
 			}
 		}
 
@@ -450,8 +453,7 @@ namespace Apprentice.Weapon
 			isPlaying = true;
 			isInit = true;
 
-			dashBlur.Enable = true;
-			dashBlur.Reset = true;
+			dashBlur.BlurEnable = true;
 
 			clientApi.World.PlaySoundAt(dashSound1, new BlockPos(entityPlayer.Pos.XYZInt, 0), 0.0, null, true, 64.0F, 1.0F);
 
@@ -463,7 +465,7 @@ namespace Apprentice.Weapon
 
 			clientApi.World.RegisterCallback(_ =>
 			{
-				dashBlur.Enable = false;
+				dashBlur.BlurEnable = false;
 			}, dashBlurEnableMs);
 
 			return true;
