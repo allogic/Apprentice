@@ -16,7 +16,7 @@ namespace Apprentice
 {
 	public sealed class ApprenticeModSystem : ModSystem
 	{
-		private const string PlaytestVersion = "2.7.0-dev.20260723.80";
+		private const string PlaytestVersion = "2.7.0-dev.20260723.86";
 		private const string BowAssetFingerprint = "BOW-DARKWOOD-OXBLOOD-C-AXIS2-EDIT1-UV1-DRAW5";
 		private const string ReviewedAssetFingerprint = "ITEMS-RUNEBOUND5-GILDED2-SUNLANCE2-KITS-HANDANCHOR-TRAP-CHAIN-SHIELD-SIDEWAYS-FISHING-NATIVE-METALS-APPRENTICE2";
 		private static readonly string[] ExpectedBowShapeCodes =

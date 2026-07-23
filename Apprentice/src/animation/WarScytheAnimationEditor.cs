@@ -4,6 +4,12 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 
+using Apprentice.AnimationReference;
+using Animation =
+    Apprentice.AnimationReference.Animation;
+
+using Newtonsoft.Json;
+
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
@@ -25,15 +31,15 @@ namespace Apprentice
 
         private const string HotKeyCode =
             "apprentice-war-scythe-editor";
-        private const int MaximumHistoryEntries = 64;
 
         private readonly ICoreClientAPI api;
         private readonly ApprenticeAnimationSystem animationSystem;
         private readonly ApprenticeAnimationDefinition sourceDefinition;
         private readonly WarScytheGeometryProbe geometryProbe;
         private readonly WarScytheCalibrationRenderer markerRenderer;
-        private readonly Stack<string> undo = new();
-        private readonly Stack<string> redo = new();
+        private readonly AnimationEditorHistory history = new();
+        private readonly Dictionary<string, Animation> editableAnimations =
+            new(StringComparer.Ordinal);
         private readonly HashSet<string> reachedElements =
             new(StringComparer.OrdinalIgnoreCase);
         private readonly string workingPath;
@@ -58,6 +64,8 @@ namespace Apprentice
         private bool geometryAvailable;
         private bool fullPlaybackComplete;
         private bool latestPlaybackContractPass;
+        private bool valueEditActive;
+        private bool valueEditChanged;
         private bool disposed;
 
         public WarScytheAnimationEditor(
@@ -71,7 +79,10 @@ namespace Apprentice
             this.sourceDefinition = sourceDefinition;
             this.geometryProbe = geometryProbe;
             workingDefinition = sourceDefinition.DeepClone();
+            editableAnimations[workingDefinition.Code] =
+                workingDefinition.Animation;
             playbackTrace = NewTrace();
+
             string authoringDirectory = Path.Combine(
                 GamePaths.DataPath,
                 "ModConfig",
@@ -93,7 +104,7 @@ namespace Apprentice
 
             api.Input.RegisterHotKey(
                 HotKeyCode,
-                "Apprentice War Scythe live editor",
+                "Apprentice War Scythe reference animation editor",
                 GlKeys.K,
                 HotkeyType.GUIOrOtherControls,
                 ctrlPressed: true,
@@ -105,7 +116,7 @@ namespace Apprentice
             );
             api.ChatCommands.Create("scytheeditor")
                 .WithDescription(
-                    "Open the Apprentice War Scythe live animation editor"
+                    "Open the Apprentice War Scythe reference-pipeline editor"
                 )
                 .HandleWith(_ =>
                 {
@@ -116,23 +127,23 @@ namespace Apprentice
                 });
 
             api.Logger.Notification(
-                "[Apprentice] War Scythe authoring editor ready: command=.scytheeditor; hotkey=Ctrl+Shift+K; working={0}; accepted={1}.",
+                "[Apprentice] War Scythe reference editor ready: command=.scytheeditor; hotkey=Ctrl+Shift+K; working={0}; accepted={1}.",
                 workingPath,
                 exportPath
             );
         }
 
         public bool PreviewActive => previewActive;
-        public bool MarkersVisible => previewActive && markersVisible;
+        public bool MarkersVisible =>
+            previewActive && markersVisible;
         public bool Playing => playing;
         public bool LoopPlayback => loopPlayback;
         public float PreviewTime => previewTime;
         public float PlaybackSpeed => playbackSpeed;
         public int SelectedFrameIndex => selectedFrameIndex;
         public int SelectedElementIndex => selectedElementIndex;
-        public string SelectedElement => ControlledElements[
-            selectedElementIndex
-        ];
+        public string SelectedElement =>
+            ControlledElements[selectedElementIndex];
         public ApprenticeAnimationDefinition WorkingDefinition =>
             workingDefinition;
         public string ExportPath => exportPath;
@@ -140,14 +151,16 @@ namespace Apprentice
         public bool ToggleDialog()
         {
             if (disposed) return false;
-            dialog ??= new WarScytheAnimationEditorDialog(api, this);
+            dialog ??= new WarScytheAnimationEditorDialog(
+                api,
+                this
+            );
 
             if (dialog.IsOpened())
             {
                 dialog.TryClose();
                 return true;
             }
-
             if (!HasHeldWarScythe())
             {
                 statusMessage =
@@ -168,9 +181,7 @@ namespace Apprentice
             animationSystem.EnterEditorMode();
             previewActive = true;
             playing = false;
-            previewTime = workingDefinition.KeyFrames[
-                selectedFrameIndex
-            ].TimeSeconds;
+            previewTime = FrameTimeSeconds(selectedFrameIndex);
             reachedElements.Clear();
             geometryAvailable = false;
             latestPlaybackStatus = "not-run";
@@ -178,17 +189,20 @@ namespace Apprentice
             latestPlaybackContractPass = false;
             playbackTrace = NewTrace();
             statusMessage =
-                "Live preview active. Editing writes only the temporary composer frame.";
+                "Reference preview active. The editor and gameplay use the same PlayerItemFrame path.";
+            UpdatePreviewFrame();
         }
 
         public void DeactivatePreview()
         {
+            EndValueEdit();
             previewActive = false;
             playing = false;
             geometryAvailable = false;
             reachedElements.Clear();
+            animationSystem.SetEditorFrameOverride(null);
             statusMessage =
-                "Preview closed; the canonical asset was not modified.";
+                "Preview closed; the packaged asset was not modified.";
         }
 
         public void Tick(float deltaTime)
@@ -204,28 +218,35 @@ namespace Apprentice
 
             if (playing)
             {
-                previewTime += Math.Max(0, deltaTime) * playbackSpeed;
-                if (previewTime >= workingDefinition.DurationSeconds)
+                previewTime += Math.Max(0, deltaTime) *
+                    playbackSpeed;
+                if (previewTime >=
+                    workingDefinition.DurationSeconds)
                 {
-                    latestPlaybackStatus = playbackTrace.BuildStatus(0);
+                    latestPlaybackStatus =
+                        playbackTrace.BuildStatus(0);
                     fullPlaybackComplete = true;
                     latestPlaybackContractPass =
                         playbackTrace.ContractPass;
                     if (loopPlayback)
                     {
-                        previewTime %= workingDefinition.DurationSeconds;
+                        previewTime %=
+                            workingDefinition.DurationSeconds;
                         playbackTrace = NewTrace();
                     }
                     else
                     {
-                        previewTime = workingDefinition.DurationSeconds;
+                        previewTime =
+                            workingDefinition.DurationSeconds;
                         playing = false;
                     }
                 }
+                UpdatePreviewFrame();
             }
 
             EntityAgent entity = api.World.Player.Entity;
-            ItemStack? stack = entity.RightHandItemSlot?.Itemstack;
+            ItemStack? stack =
+                entity.RightHandItemSlot?.Itemstack;
             geometryAvailable = stack != null &&
                 geometryProbe.TrySample(
                     entity,
@@ -243,26 +264,6 @@ namespace Apprentice
             }
         }
 
-        public bool TrySample(
-            EntityAgent entity,
-            string elementName,
-            out ApprenticeElementTransform transform)
-        {
-            transform = default;
-            if (!previewActive ||
-                api.World.Player?.Entity?.EntityId != entity.EntityId ||
-                !HasHeldWarScythe())
-            {
-                return false;
-            }
-
-            return workingDefinition.TrySample(
-                elementName,
-                previewTime,
-                out transform
-            );
-        }
-
         public void NoteHookElement(string elementName)
         {
             if (!previewActive ||
@@ -272,7 +273,6 @@ namespace Apprentice
             {
                 return;
             }
-
             reachedElements.Add(elementName);
         }
 
@@ -280,41 +280,48 @@ namespace Apprentice
             out WarScytheDebugGeometry geometry)
         {
             geometry = default;
-            if (!MarkersVisible || !HasHeldWarScythe()) return false;
+            if (!MarkersVisible || !HasHeldWarScythe())
+            {
+                return false;
+            }
 
             EntityAgent entity = api.World.Player.Entity;
-            ItemStack? stack = entity.RightHandItemSlot?.Itemstack;
-            return stack != null && geometryProbe.TryBuildDebugGeometry(
-                entity,
-                stack,
-                out geometry
-            );
+            ItemStack? stack =
+                entity.RightHandItemSlot?.Itemstack;
+            return stack != null &&
+                geometryProbe.TryBuildDebugGeometry(
+                    entity,
+                    stack,
+                    out geometry
+                );
         }
 
-        public float[] GetSelectedValues()
-        {
-            ApprenticeAnimationKeyFrame frame =
-                workingDefinition.KeyFrames[selectedFrameIndex];
-            return frame.Elements[SelectedElement];
-        }
+        public float[] GetSelectedValues() =>
+            ReferenceAnimationEditing.GetValues(
+                workingDefinition.Animation,
+                selectedFrameIndex,
+                SelectedElement
+            );
 
         public void SelectFrame(int index)
         {
+            EndValueEdit();
             selectedFrameIndex = Math.Clamp(
                 index,
                 0,
-                workingDefinition.KeyFrames.Count - 1
+                workingDefinition.Animation.PlayerKeyFrames.Count -
+                    1
             );
-            previewTime = workingDefinition.KeyFrames[
-                selectedFrameIndex
-            ].TimeSeconds;
+            previewTime = FrameTimeSeconds(selectedFrameIndex);
             playing = false;
+            UpdatePreviewFrame();
             statusMessage =
                 $"Selected keyframe {selectedFrameIndex + 1}.";
         }
 
         public void SelectElement(int index)
         {
+            EndValueEdit();
             selectedElementIndex = Math.Clamp(
                 index,
                 0,
@@ -323,7 +330,9 @@ namespace Apprentice
             statusMessage = $"Selected {SelectedElement}.";
         }
 
-        public void SetSelectedValue(int component, float value)
+        public void SetSelectedValue(
+            int component,
+            float value)
         {
             if (component < 0 || component >= 6 ||
                 !float.IsFinite(value))
@@ -331,16 +340,63 @@ namespace Apprentice
                 return;
             }
 
-            PushUndo();
             float[] values = GetSelectedValues();
-            values[component] = value;
+            if (Math.Abs(values[component] - value) < 0.0001f)
+            {
+                return;
+            }
+
+            bool implicitTransaction = !valueEditActive;
+            if (implicitTransaction) BeginValueEdit();
+            ReferenceAnimationEditing.SetComponent(
+                workingDefinition.Animation,
+                selectedFrameIndex,
+                SelectedElement,
+                component,
+                value
+            );
+            valueEditChanged = true;
+            InvalidatePlaybackAcceptance();
+            UpdatePreviewFrame();
             statusMessage = string.Format(
                 CultureInfo.InvariantCulture,
-                "{0} {1} = {2:0.0}",
+                "{0} {1} = {2:0.0}; reference frame updated live",
                 SelectedElement,
                 ComponentName(component),
                 value
             );
+            if (implicitTransaction) EndValueEdit();
+        }
+
+        public void BeginValueEdit()
+        {
+            if (valueEditActive) return;
+            valueEditActive = true;
+            valueEditChanged = false;
+            history.BeginEdit(
+                workingDefinition.Code,
+                workingDefinition.Animation,
+                $"{SelectedElement} slider drag"
+            );
+        }
+
+        public void EndValueEdit()
+        {
+            if (!valueEditActive) return;
+
+            if (valueEditChanged)
+            {
+                history.CommitEdit(
+                    workingDefinition.Code,
+                    workingDefinition.Animation
+                );
+            }
+            else
+            {
+                history.CancelPendingEdit();
+            }
+            valueEditActive = false;
+            valueEditChanged = false;
         }
 
         public void SetPreviewMilliseconds(int milliseconds)
@@ -351,6 +407,7 @@ namespace Apprentice
                 workingDefinition.DurationSeconds
             );
             playing = false;
+            UpdatePreviewFrame();
         }
 
         public void SetPreviewFraction(float fraction)
@@ -358,20 +415,25 @@ namespace Apprentice
             previewTime = workingDefinition.DurationSeconds *
                 Math.Clamp(fraction, 0, 1);
             playing = false;
+            UpdatePreviewFrame();
         }
 
         public void StepRenderedFrame(int direction)
         {
             SetPreviewMilliseconds((int)Math.Round(
-                (previewTime + Math.Sign(direction) / 30f) * 1000f
+                (previewTime + Math.Sign(direction) / 30f) *
+                    1000f
             ));
         }
 
         public void StepKeyFrame(int direction)
         {
-            int next = selectedFrameIndex + Math.Sign(direction);
-            if (next < 0) next = workingDefinition.KeyFrames.Count - 1;
-            if (next >= workingDefinition.KeyFrames.Count) next = 0;
+            int next =
+                selectedFrameIndex + Math.Sign(direction);
+            int count =
+                workingDefinition.Animation.PlayerKeyFrames.Count;
+            if (next < 0) next = count - 1;
+            if (next >= count) next = 0;
             SelectFrame(next);
         }
 
@@ -384,7 +446,8 @@ namespace Apprentice
                 return;
             }
 
-            if (previewTime >= workingDefinition.DurationSeconds)
+            if (previewTime >=
+                workingDefinition.DurationSeconds)
             {
                 previewTime = 0;
             }
@@ -393,15 +456,18 @@ namespace Apprentice
             fullPlaybackComplete = false;
             latestPlaybackContractPass = false;
             playing = true;
+            UpdatePreviewFrame();
             statusMessage =
-                "Playback uses the same final-pose composer as the attack.";
+                "Playback samples the same reference Animation used by gameplay.";
         }
 
         public void StopPlayback()
         {
             playing = false;
-            SelectFrame(selectedFrameIndex);
-            statusMessage = "Playback stopped at the selected keyframe.";
+            previewTime = FrameTimeSeconds(selectedFrameIndex);
+            UpdatePreviewFrame();
+            statusMessage =
+                "Playback stopped at the selected keyframe.";
         }
 
         public void AdjustPlaybackSpeed(float delta)
@@ -436,8 +502,12 @@ namespace Apprentice
 
         public void CopySelectedFrame()
         {
-            copiedFrame = SerializeFrame(
-                workingDefinition.KeyFrames[selectedFrameIndex]
+            copiedFrame = JsonConvert.SerializeObject(
+                PLayerKeyFrameJson.FromKeyFrame(
+                    workingDefinition.Animation.PlayerKeyFrames[
+                        selectedFrameIndex]
+                ),
+                Formatting.Indented
             );
             statusMessage =
                 $"Copied keyframe {selectedFrameIndex + 1}.";
@@ -447,43 +517,58 @@ namespace Apprentice
         {
             if (string.IsNullOrWhiteSpace(copiedFrame))
             {
-                statusMessage = "No copied keyframe is available.";
+                statusMessage =
+                    "No copied keyframe is available.";
                 return;
             }
 
-            PushUndo();
-            ApprenticeAnimationKeyFrame parsed =
-                Newtonsoft.Json.JsonConvert
-                    .DeserializeObject<ApprenticeAnimationKeyFrame>(
-                        copiedFrame
-                    ) ?? throw new InvalidOperationException(
-                        "The copied keyframe is invalid."
-                    );
-            float time = workingDefinition.KeyFrames[
-                selectedFrameIndex
-            ].TimeSeconds;
-            parsed.TimeSeconds = time;
-            workingDefinition.KeyFrames[selectedFrameIndex] = parsed;
-            previewTime = time;
+            PLayerKeyFrameJson parsed =
+                JsonConvert.DeserializeObject<PLayerKeyFrameJson>(
+                    copiedFrame
+                ) ?? throw new InvalidOperationException(
+                    "The copied reference keyframe is invalid."
+                );
+            PLayerKeyFrame replacement =
+                ReferenceAnimationEditing.WithTime(
+                    parsed.ToKeyFrame(),
+                    workingDefinition.Animation.PlayerKeyFrames[
+                        selectedFrameIndex].Time
+                );
+            PerformEdit("Paste frame", () =>
+            {
+                workingDefinition.Animation.PlayerKeyFrames[
+                    selectedFrameIndex] = replacement;
+            });
+            previewTime = FrameTimeSeconds(selectedFrameIndex);
             statusMessage =
                 $"Pasted pose into keyframe {selectedFrameIndex + 1}.";
         }
 
         public void ResetSelectedFrame()
         {
-            PushUndo();
-            ApprenticeAnimationKeyFrame source =
-                sourceDefinition.DeepClone().KeyFrames[selectedFrameIndex];
-            workingDefinition.KeyFrames[selectedFrameIndex] = source;
-            previewTime = source.TimeSeconds;
+            PLayerKeyFrame source =
+                ReferenceAnimationEditing.CloneFrame(
+                    sourceDefinition.Animation.PlayerKeyFrames[
+                        selectedFrameIndex]
+                );
+            PerformEdit("Reset frame", () =>
+            {
+                workingDefinition.Animation.PlayerKeyFrames[
+                    selectedFrameIndex] = source;
+            });
+            previewTime = FrameTimeSeconds(selectedFrameIndex);
             statusMessage =
                 $"Reset keyframe {selectedFrameIndex + 1} to the packaged source.";
         }
 
         public void ResetAll()
         {
-            PushUndo();
-            workingDefinition = sourceDefinition.DeepClone();
+            Animation source =
+                sourceDefinition.Animation.Clone();
+            PerformEdit(
+                "Reset all frames",
+                () => ReplaceWorkingAnimation(source)
+            );
             selectedFrameIndex = 0;
             selectedElementIndex = 0;
             previewTime = 0;
@@ -494,37 +579,54 @@ namespace Apprentice
 
         public void Undo()
         {
-            if (undo.Count == 0)
+            EndValueEdit();
+            if (!history.Undo(
+                    workingDefinition.Code,
+                    editableAnimations,
+                    out string status))
             {
-                statusMessage = "Nothing to undo.";
+                statusMessage = status;
                 return;
             }
 
-            redo.Push(workingDefinition.ToJson());
-            workingDefinition = Parse(undo.Pop(), "undo");
+            workingDefinition.ReplaceAnimation(
+                editableAnimations[workingDefinition.Code]
+            );
             ClampSelection();
-            statusMessage = "Undid the last editor change.";
+            InvalidatePlaybackAcceptance();
+            UpdatePreviewFrame();
+            statusMessage = status;
         }
 
         public void Redo()
         {
-            if (redo.Count == 0)
+            EndValueEdit();
+            if (!history.Redo(
+                    workingDefinition.Code,
+                    editableAnimations,
+                    out string status))
             {
-                statusMessage = "Nothing to redo.";
+                statusMessage = status;
                 return;
             }
 
-            undo.Push(workingDefinition.ToJson());
-            workingDefinition = Parse(redo.Pop(), "redo");
+            workingDefinition.ReplaceAnimation(
+                editableAnimations[workingDefinition.Code]
+            );
             ClampSelection();
-            statusMessage = "Redid the editor change.";
+            InvalidatePlaybackAcceptance();
+            UpdatePreviewFrame();
+            statusMessage = status;
         }
 
         public void SaveWorking()
         {
-            WriteDefinition(workingPath);
+            WriteDefinition(
+                workingPath,
+                requireReadyPoseLoop: false
+            );
             statusMessage =
-                "Working JSON saved and copied to the clipboard.";
+                "Working reference JSON saved and copied to the clipboard.";
         }
 
         public void Export()
@@ -535,16 +637,22 @@ namespace Apprentice
                 return;
             }
 
-            WriteDefinition(exportPath);
-            statusMessage =
-                "Accepted JSON exported to file and clipboard.";
-            api.Logger.Notification(
-                "[Apprentice] WARSCYTHE EDITOR EXPORT path={0}; hooks={1}; playback=[{2}]",
+            WriteDefinition(
                 exportPath,
-                string.Join(",", reachedElements.OrderBy(
-                    value => value,
-                    StringComparer.Ordinal
-                )),
+                requireReadyPoseLoop: true
+            );
+            statusMessage =
+                "Accepted reference JSON exported to file and clipboard.";
+            api.Logger.Notification(
+                "[Apprentice] WARSCYTHE REFERENCE EDITOR EXPORT path={0}; elements={1}; playback=[{2}]",
+                exportPath,
+                string.Join(
+                    ",",
+                    reachedElements.OrderBy(
+                        value => value,
+                        StringComparer.Ordinal
+                    )
+                ),
                 latestPlaybackStatus
             );
         }
@@ -553,26 +661,49 @@ namespace Apprentice
         {
             if (!File.Exists(workingPath))
             {
-                statusMessage = "No working JSON exists yet.";
+                statusMessage =
+                    "No working reference JSON exists yet.";
                 return;
             }
 
-            PushUndo();
-            workingDefinition = Parse(
+            ApprenticeAnimationDefinition reloaded = ParseDraft(
                 File.ReadAllText(workingPath),
                 "working-file"
             );
-            ClampSelection();
-            statusMessage = "Reloaded the working JSON file.";
+            ReplaceFromDefinition(
+                reloaded,
+                "Reload working JSON"
+            );
+            statusMessage =
+                "Reloaded the working reference JSON file.";
         }
 
         public void ReloadPackagedAsset()
         {
-            PushUndo();
-            workingDefinition =
+            ApprenticeAnimationDefinition reloaded =
                 ApprenticeAnimationDefinition.LoadWarScythe(api);
-            ClampSelection();
-            statusMessage = "Reloaded the packaged animation asset.";
+            ReplaceFromDefinition(
+                reloaded,
+                "Reload packaged asset"
+            );
+            statusMessage =
+                "Reloaded the packaged reference animation asset.";
+        }
+
+        public void ReportUiFailure(
+            string action,
+            Exception exception)
+        {
+            history.CancelPendingEdit();
+            valueEditActive = false;
+            valueEditChanged = false;
+            statusMessage =
+                $"{action} failed: {exception.Message}";
+            api.Logger.Error(
+                "[Apprentice] WARSCYTHE REFERENCE EDITOR action failed: {0}",
+                action
+            );
+            api.Logger.Error(exception);
         }
 
         public string BuildStatusText()
@@ -583,7 +714,7 @@ namespace Apprentice
                     !reachedElements.Contains(element))
             );
             string hooks = missing.Length == 0
-                ? "all six controlled elements reached"
+                ? "all six reference elements reached"
                 : "missing: " + missing;
 
             string geometry = geometryAvailable
@@ -608,6 +739,7 @@ namespace Apprentice
                 CultureInfo.InvariantCulture,
                 "{0}\n\nTime {1:0.000}/{2:0.000}s | speed {3:0.0}x | {4}\n" +
                 "Frame {5}/{6} at {7:0.000}s | element {8}\n" +
+                "Pipeline: reference Animation -> PlayerItemFrame -> OnFrameInvoke\n" +
                 "Hook: {9}\n{10}\nPlayback gate: {11}",
                 statusMessage,
                 previewTime,
@@ -615,10 +747,8 @@ namespace Apprentice
                 playbackSpeed,
                 playing ? "playing" : "paused",
                 selectedFrameIndex + 1,
-                workingDefinition.KeyFrames.Count,
-                workingDefinition.KeyFrames[
-                    selectedFrameIndex
-                ].TimeSeconds,
+                workingDefinition.Animation.PlayerKeyFrames.Count,
+                FrameTimeSeconds(selectedFrameIndex),
                 SelectedElement,
                 hooks,
                 geometry,
@@ -627,13 +757,14 @@ namespace Apprentice
         }
 
         public string[] FrameCodes() =>
-            workingDefinition.KeyFrames.Select((frame, index) =>
-                string.Format(
-                    CultureInfo.InvariantCulture,
-                    "{0}: {1:0.000}s",
-                    index + 1,
-                    frame.TimeSeconds
-                ))
+            workingDefinition.Animation.PlayerKeyFrames
+                .Select((frame, index) =>
+                    string.Format(
+                        CultureInfo.InvariantCulture,
+                        "{0}: {1:0.000}s",
+                        index + 1,
+                        frame.Time.TotalSeconds
+                    ))
                 .ToArray();
 
         public void Dispose()
@@ -642,23 +773,82 @@ namespace Apprentice
             disposed = true;
             previewActive = false;
             playing = false;
+            history.CancelPendingEdit();
+            animationSystem.SetEditorFrameOverride(null);
             dialog?.TryClose();
             dialog?.Dispose();
             dialog = null;
             markerRenderer.Dispose();
-            undo.Clear();
-            redo.Clear();
+            editableAnimations.Clear();
             reachedElements.Clear();
+        }
+
+        private void PerformEdit(
+            string label,
+            Action edit)
+        {
+            EndValueEdit();
+            history.BeginEdit(
+                workingDefinition.Code,
+                workingDefinition.Animation,
+                label
+            );
+            try
+            {
+                edit();
+                editableAnimations[workingDefinition.Code] =
+                    workingDefinition.Animation;
+                history.CommitEdit(
+                    workingDefinition.Code,
+                    workingDefinition.Animation
+                );
+            }
+            catch
+            {
+                history.CancelPendingEdit();
+                throw;
+            }
+            InvalidatePlaybackAcceptance();
+            UpdatePreviewFrame();
+        }
+
+        private void ReplaceFromDefinition(
+            ApprenticeAnimationDefinition replacement,
+            string label)
+        {
+            PerformEdit(
+                label,
+                () => ReplaceWorkingAnimation(
+                    replacement.Animation.Clone()
+                )
+            );
+            ClampSelection();
+        }
+
+        private void ReplaceWorkingAnimation(Animation animation)
+        {
+            workingDefinition.ReplaceAnimation(animation);
+            editableAnimations[workingDefinition.Code] = animation;
         }
 
         private bool CanExport(out string reason)
         {
+            if (!workingDefinition.HasExactReadyPoseLoop(
+                    out string differingElement))
+            {
+                reason =
+                    "keyframe 1 and the final keyframe differ for " +
+                    differingElement;
+                return false;
+            }
+
             string[] missing = ControlledElements.Where(element =>
                 !reachedElements.Contains(element))
                 .ToArray();
             if (missing.Length != 0)
             {
-                reason = "render hook has not reached " +
+                reason =
+                    "the reference pose hook has not reached " +
                     string.Join(", ", missing);
                 return false;
             }
@@ -674,38 +864,45 @@ namespace Apprentice
             }
             if (!fullPlaybackComplete)
             {
-                reason = "play the complete timeline after the last edit";
+                reason =
+                    "play the complete timeline after the last edit";
                 return false;
             }
             if (!latestPlaybackContractPass)
             {
-                reason = "the complete playback acceptance contract failed";
+                reason =
+                    "the complete playback acceptance contract failed";
                 return false;
             }
+
             reason = string.Empty;
             return true;
         }
 
         private bool HasHeldWarScythe() =>
-            api.World.Player?.Entity?.RightHandItemSlot?.Itemstack?.Item?
-                .Code?.ToString() == workingDefinition.HeldItemCode;
+            api.World.Player?.Entity?.RightHandItemSlot?.Itemstack?
+                .Item?.Code?.ToString() ==
+            workingDefinition.HeldItemCode;
 
-        private void PushUndo()
+        private void UpdatePreviewFrame()
+        {
+            if (!previewActive) return;
+
+            float duration =
+                workingDefinition.DurationSeconds;
+            float progress = duration <= 0
+                ? 0
+                : Math.Clamp(previewTime / duration, 0, 1);
+            PlayerItemFrame frame =
+                workingDefinition.Animation.StillFrame(progress);
+            animationSystem.SetEditorFrameOverride(frame);
+        }
+
+        private void InvalidatePlaybackAcceptance()
         {
             fullPlaybackComplete = false;
             latestPlaybackContractPass = false;
             latestPlaybackStatus = "not-run-after-edit";
-            undo.Push(workingDefinition.ToJson());
-            while (undo.Count > MaximumHistoryEntries)
-            {
-                string[] retained = undo
-                    .Take(MaximumHistoryEntries)
-                    .Reverse()
-                    .ToArray();
-                undo.Clear();
-                foreach (string entry in retained) undo.Push(entry);
-            }
-            redo.Clear();
         }
 
         private void ClampSelection()
@@ -713,7 +910,8 @@ namespace Apprentice
             selectedFrameIndex = Math.Clamp(
                 selectedFrameIndex,
                 0,
-                workingDefinition.KeyFrames.Count - 1
+                workingDefinition.Animation.PlayerKeyFrames.Count -
+                    1
             );
             selectedElementIndex = Math.Clamp(
                 selectedElementIndex,
@@ -726,12 +924,19 @@ namespace Apprentice
                 workingDefinition.DurationSeconds
             );
             playing = false;
+            editableAnimations[workingDefinition.Code] =
+                workingDefinition.Animation;
+            UpdatePreviewFrame();
         }
 
-        private ApprenticeAnimationDefinition Parse(
+        private float FrameTimeSeconds(int index) =>
+            (float)workingDefinition.Animation.PlayerKeyFrames[
+                index].Time.TotalSeconds;
+
+        private ApprenticeAnimationDefinition ParseDraft(
             string json,
             string source) =>
-            ApprenticeAnimationDefinition.ParseWarScythe(
+            ApprenticeAnimationDefinition.ParseWarScytheDraft(
                 json,
                 new AssetLocation(
                     "apprentice",
@@ -742,28 +947,42 @@ namespace Apprentice
         private WarScytheGeometryTrace NewTrace() =>
             new(geometryProbe.Acceptance);
 
-        private void WriteDefinition(string path)
+        private void WriteDefinition(
+            string path,
+            bool requireReadyPoseLoop)
         {
             string json = workingDefinition.ToJson();
-            _ = Parse(json, "write-validation");
-            string? directory = Path.GetDirectoryName(path);
-            if (directory == null)
+            if (requireReadyPoseLoop)
             {
-                throw new InvalidOperationException(
-                    "The authoring directory is unavailable."
+                _ = ApprenticeAnimationDefinition.ParseWarScythe(
+                    json,
+                    new AssetLocation(
+                        "apprentice",
+                        "editor/accepted-write-validation.json"
+                    )
                 );
             }
+            else
+            {
+                _ = ApprenticeAnimationDefinition
+                    .ParseWarScytheDraft(
+                        json,
+                        new AssetLocation(
+                            "apprentice",
+                            "editor/working-write-validation.json"
+                        )
+                    );
+            }
 
-            Directory.CreateDirectory(directory);
-            string temporaryPath = path + ".tmp";
-            File.WriteAllText(temporaryPath, json);
-            File.Move(temporaryPath, path, overwrite: true);
+            Directory.CreateDirectory(
+                Path.GetDirectoryName(path) ??
+                throw new InvalidOperationException(
+                    "Authoring path has no directory."
+                )
+            );
+            File.WriteAllText(path, json);
             api.Forms.SetClipboardText(json);
         }
-
-        private static string SerializeFrame(
-            ApprenticeAnimationKeyFrame frame) =>
-            Newtonsoft.Json.JsonConvert.SerializeObject(frame);
 
         private static string ComponentName(int component) =>
             component switch
@@ -774,7 +993,7 @@ namespace Apprentice
                 3 => "rotation X",
                 4 => "rotation Y",
                 5 => "rotation Z",
-                _ => "unknown"
+                _ => "component"
             };
     }
 }

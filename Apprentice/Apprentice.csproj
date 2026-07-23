@@ -67,7 +67,23 @@
   </Content>
 </ItemGroup>
 
+<!--
+  .76-.79 contained a separate War Scythe IK solver. The .85+ reference
+  pipeline intentionally removed that implementation and its
+  ApprenticeElementTransform dependency. Exclude the retired source explicitly
+  so extracting a current release over an older folder cannot make the SDK's
+  default **/*.cs glob compile the stale solver again.
+-->
+<ItemGroup>
+  <Compile Remove="src\animation\WarScytheOffhandIkSolver.cs" />
+</ItemGroup>
+
 <Target Name="RejectLegacyCharacterClassOverrides" BeforeTargets="PrepareForBuild">
+  <Message
+    Condition="Exists('src\animation\WarScytheOffhandIkSolver.cs')"
+    Importance="high"
+    Text="Ignoring stale src/animation/WarScytheOffhandIkSolver.cs from .76-.79. It is not part of the .86 OverhaulLib reference animation pipeline and may be deleted."
+  />
   <Error
     Condition="Exists('assets\game\config\characterclasses.json')"
     Text="Remove Apprentice/assets/game/config/characterclasses.json. Apprentice retains the engine class roster and filters only its Race dialog. Extract the source into a new directory instead of overlaying an older checkout."
@@ -78,7 +94,7 @@
   />
   <Error
     Condition="Exists('assets\apprentice\patches\2.7\war-scythe-player-animations.json')"
-    Text="Remove the rejected .71 War Scythe player-animation patch. .80 owns ItemAnchor, ItemAnchorL, and both arm chains through one temporary-pose category; the rejected .76-.79 IK branch is absent. Extract the source into a new directory instead of overlaying an older build."
+    Text="Remove the rejected .71 War Scythe player-animation patch. .86 uses the adapted OverhaulLib Legacy AnimationJson-to-ElementPose pipeline and its animation-editor history as one ownership path; the rejected .76-.79 IK and .80-.84 experimental preview/proof paths are absent. Extract the source into a new directory instead of overlaying an older build."
   />
   <Error
     Condition="Exists('assets\apprentice\worldproperties\block\metal.json')"
