@@ -520,12 +520,20 @@ namespace Apprentice.Weapon
 						// 	lineGizmo.Commit();
 						// }
 
-						// Start dash animation
+						// Stop all animations
 						entity.AnimManager.StopAllAnimations();
+
+						// Start dash animation
 						entity.AnimManager.StartAnimation(dashForwardData);
-						RunningAnimation animation = entity.AnimManager.GetAnimationState(dashForwardData.Code);
-						animation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
-						animation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
+						RunningAnimation dashForwardAnimation = entity.AnimManager.GetAnimationState(dashForwardData.Code);
+						dashForwardAnimation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
+						dashForwardAnimation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
+
+						// Start sword animation
+						entity.AnimManager.StartAnimation(swordHitData);
+						RunningAnimation swordHitAnimation = entity.AnimManager.GetAnimationState(swordHitData.Code);
+						swordHitAnimation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
+						swordHitAnimation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
 
 						sequenceState = SequenceState.SEQUENCE_STATE_DASH;
 
