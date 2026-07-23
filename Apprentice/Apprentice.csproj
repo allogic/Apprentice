@@ -1,0 +1,183 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <OutputPath>bin\$(Configuration)\Mods\mod</OutputPath>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="VintagestoryAPI">
+      <HintPath>$(VINTAGE_STORY)/VintagestoryAPI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="VSSurvivalMod">
+      <HintPath>$(VINTAGE_STORY)/Mods/VSSurvivalMod.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="VSEssentials">
+      <HintPath>$(VINTAGE_STORY)/Mods/VSEssentials.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="VSCreativeMod">
+      <HintPath>$(VINTAGE_STORY)/Mods/VSCreativeMod.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>$(VINTAGE_STORY)/Lib/Newtonsoft.Json.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>$(VINTAGE_STORY)/Lib/0Harmony.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="VintagestoryLib">
+      <HintPath>$(VINTAGE_STORY)/VintagestoryLib.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="protobuf-net">
+      <HintPath>$(VINTAGE_STORY)/Lib/protobuf-net.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="cairo-sharp">
+      <HintPath>$(VINTAGE_STORY)/Lib/cairo-sharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.Data.Sqlite">
+      <HintPath>$(VINTAGE_STORY)/Lib/Microsoft.Data.Sqlite.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
+<ItemGroup>
+  <Content Include="modinfo.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </Content>
+
+  <Content Include="assets\**\*">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+  </Content>
+</ItemGroup>
+
+<ItemGroup>
+  <Content Include="modicon.png" Condition="Exists('modicon.png')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </Content>
+</ItemGroup>
+
+<!--
+  .76-.79 contained a separate War Scythe IK solver. The .85+ reference
+  pipeline intentionally removed that implementation and its
+  ApprenticeElementTransform dependency. Exclude the retired source explicitly
+  so extracting a current release over an older folder cannot make the SDK's
+  default **/*.cs glob compile the stale solver again.
+-->
+<ItemGroup>
+  <Compile Remove="src\animation\WarScytheOffhandIkSolver.cs" />
+</ItemGroup>
+
+<Target Name="RejectLegacyCharacterClassOverrides" BeforeTargets="PrepareForBuild">
+  <Message
+    Condition="Exists('src\animation\WarScytheOffhandIkSolver.cs')"
+    Importance="high"
+    Text="Ignoring stale src/animation/WarScytheOffhandIkSolver.cs from .76-.79. It is not part of the .86 OverhaulLib reference animation pipeline and may be deleted."
+  />
+  <Error
+    Condition="Exists('assets\game\config\characterclasses.json')"
+    Text="Remove Apprentice/assets/game/config/characterclasses.json. Apprentice retains the engine class roster and filters only its Race dialog. Extract the source into a new directory instead of overlaying an older checkout."
+  />
+  <Error
+    Condition="Exists('assets\apprentice\patches\replace-vanilla-characterclasses.json')"
+    Text="Remove the stale replace-vanilla-characterclasses.json patch. Apprentice must retain vanilla classes for engine and mod compatibility."
+  />
+  <Error
+    Condition="Exists('assets\apprentice\patches\2.7\war-scythe-player-animations.json')"
+    Text="Remove the rejected .71 War Scythe player-animation patch. .86 uses the adapted OverhaulLib Legacy AnimationJson-to-ElementPose pipeline and its animation-editor history as one ownership path; the rejected .76-.79 IK and .80-.84 experimental preview/proof paths are absent. Extract the source into a new directory instead of overlaying an older build."
+  />
+  <Error
+    Condition="Exists('assets\apprentice\worldproperties\block\metal.json')"
+    Text="Remove assets/apprentice/worldproperties/block/metal.json. Vintage Story consumes every block/metal world property in vanilla templates and recreates game-domain Starsteel/Aethersteel duplicates. Extract this source into a new empty directory instead of overlaying .22."
+  />
+</Target>
+
+<Target
+  Name="CleanStaleDebugAssets"
+  BeforeTargets="PrepareForBuild"
+  Condition="'$(DesignTimeBuild)' != 'true'">
+  <!-- Content copy is additive. Remove only the generated mod asset tree so
+       deleted source assets cannot survive between Visual Studio test runs.
+
+       This must run before PrepareForBuild. Running it immediately before
+       CopyFilesToOutputDirectory is too late: MSBuild may already have copied
+       content in that target's dependency chain, which leaves a DLL-only mod. -->
+  <RemoveDir Directories="$(OutputPath)assets" />
+</Target>
+
+<Target
+  Name="VerifyLooseModAssets"
+  AfterTargets="Build"
+  Condition="'$(DesignTimeBuild)' != 'true'">
+  <!-- A successful DLL compile is not a successful Vintage Story mod build.
+       Keep representative server, client, model and gameplay assets as hard
+       sentinels so Visual Studio cannot silently launch an incomplete mod. -->
+  <ItemGroup>
+    <SourceLooseModAsset Include="$(MSBuildProjectDirectory)\assets\**\*" />
+    <BuiltLooseModAsset Include="$(TargetDir)assets\**\*" />
+    <RequiredLooseModAsset Include="$(TargetDir)modinfo.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\config\class.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\config\content-2.7.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\config\remaps.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\config\animations\war-scythe.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\config\animations\war-scythe-acceptance.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\itemtypes\2.7\ingot.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\itemtypes\2.7\workitem.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\itemtypes\2.7\compositebow.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\itemtypes\2.7\towershield.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\itemtypes\2.7\advancedtrapkit.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\itemtypes\2.7\warscythe.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\itemtypes\2.7\manaburnsword.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\blocktypes\2.7\advancedtrap.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\shapes\block\2.7\advancedtrap-opening3.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\shapes\block\2.7\advancedtrap-opening4.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\entities\2.7\atlatl.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\shapes\item\2.7\grandmaster-spear.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\shapes\item\2.7\tower-shield.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\shapes\item\2.7\master-fishing-rod.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\shapes\item\2.7\war-scythe.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\shapes\item\2.7\manaburn-sword.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\shapes\item\2.7\kit-trap.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\shapes\item\2.7\kit-armor-upgrade.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\shapes\item\2.7\kit-weapon-upgrade.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\shapes\item\2.7\kit-tool-upgrade.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\shapes\item\2.7\kit-first-aid.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\shapes\item\2.7\composite-bow.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\shapes\item\2.7\composite-bow-charge1.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\shapes\item\2.7\composite-bow-charge2.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\shapes\item\2.7\composite-bow-charge3.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\shapes\item\2.7\composite-bow-charge4.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\shapes\item\2.7\composite-bow-charge5.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\textures\item\2.7\compositebow-material.png" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\textures\item\2.7\compositebow-grip-wrap.png" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\textures\item\2.7\war-scythe-redmetal.png" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\textures\item\2.7\war-scythe-wrap.png" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\textures\item\2.7\manaburn-darkmetal.png" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\textures\item\2.7\manaburn-blade.png" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\textures\item\2.7\manaburn-edge.png" />
+  </ItemGroup>
+  <PropertyGroup>
+    <SourceLooseModAssetCount>@(SourceLooseModAsset->Count())</SourceLooseModAssetCount>
+    <BuiltLooseModAssetCount>@(BuiltLooseModAsset->Count())</BuiltLooseModAssetCount>
+  </PropertyGroup>
+  <Error
+    Condition="'$(SourceLooseModAssetCount)' != '$(BuiltLooseModAssetCount)'"
+    Text="The Apprentice loose-mod build is incomplete: copied $(BuiltLooseModAssetCount) of $(SourceLooseModAssetCount) source assets. Clean and rebuild before starting Vintage Story."
+  />
+  <Error
+    Condition="!Exists('%(RequiredLooseModAsset.Identity)')"
+    Text="The Apprentice loose-mod build is incomplete: missing %(RequiredLooseModAsset.Identity). Clean and rebuild before starting Vintage Story."
+  />
+</Target>
+
+</Project>

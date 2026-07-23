@@ -2,7 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+using Apprentice.AnimationReference;
+using Animation =
+    Apprentice.AnimationReference.Animation;
+
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 using Vintagestory.API.Common;
 
@@ -10,7 +15,16 @@ namespace Apprentice
 {
     internal sealed class ApprenticeAnimationDefinition
     {
-        private static readonly string[] RequiredWarScytheElements =
+        public const string AnimationCode =
+            "apprentice:war-scythe-attack";
+        public const string CategoryCode =
+            "apprentice-mainhand";
+        public const string ItemCode =
+            "apprentice:warscythe";
+        public const float EaseInSecondsValue = 0.12f;
+        public const float EaseOutSecondsValue = 0.18f;
+
+        private static readonly string[] RequiredElements =
         {
             "ItemAnchor",
             "ItemAnchorL",
@@ -20,7 +34,7 @@ namespace Apprentice
             "LowerArmL"
         };
 
-        private static readonly string[] RequiredWarScytheCallbacks =
+        private static readonly string[] RequiredCallbacks =
         {
             "attack-start",
             "attack-sample",
@@ -28,45 +42,54 @@ namespace Apprentice
             "ready"
         };
 
-        public int Version { get; set; }
-        public string Code { get; set; } = string.Empty;
-        public string Category { get; set; } = string.Empty;
-        public string HeldItemCode { get; set; } = string.Empty;
-        public float EaseInSeconds { get; set; }
-        public float EaseOutSeconds { get; set; }
-        public List<ApprenticeAnimationKeyFrame> KeyFrames { get; set; } = new();
-        public List<ApprenticeAnimationCallback> Callbacks { get; set; } = new();
-
-        [JsonIgnore]
-        public float DurationSeconds => KeyFrames.Count == 0
-            ? 0
-            : KeyFrames[^1].TimeSeconds;
-
-        [JsonIgnore]
-        public float TotalActionSeconds =>
-            EaseInSeconds + DurationSeconds + EaseOutSeconds;
-
-        public ApprenticeAnimationDefinition DeepClone()
+        private ApprenticeAnimationDefinition(
+            Animation animation,
+            IReadOnlyList<ApprenticeAnimationCallback> callbacks)
         {
-            string json = ToJson();
-            return ParseWarScythe(
-                json,
-                new AssetLocation(
-                    "apprentice",
-                    "config/animations/war-scythe-editor-copy.json"
-                )
-            );
+            Animation = animation;
+            Callbacks = callbacks;
         }
 
-        public string ToJson() =>
-            JsonConvert.SerializeObject(this, Formatting.Indented) +
-            Environment.NewLine;
+        public Animation Animation { get; private set; }
+        public string Code => AnimationCode;
+        public string Category => CategoryCode;
+        public string HeldItemCode => ItemCode;
+        public float EaseInSeconds => EaseInSecondsValue;
+        public float EaseOutSeconds => EaseOutSecondsValue;
+        public float DurationSeconds =>
+            (float)Animation.TotalDuration.TotalSeconds;
+        public float TotalActionSeconds =>
+            EaseInSeconds + DurationSeconds + EaseOutSeconds;
+        public IReadOnlyList<ApprenticeAnimationCallback> Callbacks
+        {
+            get;
+        }
+
+        public ApprenticeAnimationDefinition DeepClone() =>
+            new(
+                Animation.Clone(),
+                Callbacks.Select(callback => callback.Clone()).ToArray()
+            );
+
+        public string ToJson()
+        {
+            JObject root = new()
+            {
+                [AnimationCode] = JToken.FromObject(
+                    AnimationJson.FromAnimation(Animation),
+                    JsonSerializer.CreateDefault()
+                )
+            };
+            return root.ToString(Formatting.Indented) + Environment.NewLine;
+        }
 
         public static ApprenticeAnimationDefinition LoadWarScythe(
             ICoreAPI api)
         {
-            ArgumentNullException.ThrowIfNull(api);
-
+            if (api == null)
+            {
+                throw new ArgumentNullException(nameof(api));
+            }
             AssetLocation location = new(
                 "apprentice",
                 "config/animations/war-scythe.json"
@@ -77,17 +100,21 @@ namespace Apprentice
 
         internal static ApprenticeAnimationDefinition ParseWarScythe(
             string json,
-            AssetLocation location)
-        {
-            ApprenticeAnimationDefinition definition =
-                JsonConvert.DeserializeObject<ApprenticeAnimationDefinition>(
-                    json
-                ) ?? throw new InvalidOperationException(
-                    $"Failed to parse {location}."
-                );
+            AssetLocation location) =>
+            Parse(json, location, requireReadyPoseLoop: true);
 
-            definition.ValidateWarScythe(location);
-            return definition;
+        internal static ApprenticeAnimationDefinition ParseWarScytheDraft(
+            string json,
+            AssetLocation location) =>
+            Parse(json, location, requireReadyPoseLoop: false);
+
+        internal void ReplaceAnimation(Animation animation)
+        {
+            if (animation == null)
+            {
+                throw new ArgumentNullException(nameof(animation));
+            }
+            Animation = animation;
         }
 
         internal void CollectCallbacks(
@@ -102,128 +129,177 @@ namespace Apprentice
             }
         }
 
-        public bool TrySample(
-            string elementName,
-            float timeSeconds,
-            out ApprenticeElementTransform transform)
+        internal bool HasExactReadyPoseLoop(
+            out string differingElement)
         {
-            transform = default;
-            if (KeyFrames.Count == 0) return false;
-
-            float clamped = Math.Clamp(timeSeconds, 0, DurationSeconds);
-            int nextIndex = KeyFrames.FindIndex(
-                frame => frame.TimeSeconds >= clamped
-            );
-            if (nextIndex < 0) nextIndex = KeyFrames.Count - 1;
-
-            ApprenticeAnimationKeyFrame next = KeyFrames[nextIndex];
-            if (!next.TryGet(elementName, out ApprenticeElementTransform to))
+            int last = Animation.PlayerKeyFrames.Count - 1;
+            foreach (string elementName in RequiredElements)
             {
-                return false;
+                AnimationElement first =
+                    ReferenceAnimationEditing.GetElement(
+                        Animation,
+                        0,
+                        elementName
+                    );
+                AnimationElement final =
+                    ReferenceAnimationEditing.GetElement(
+                        Animation,
+                        last,
+                        elementName
+                    );
+                if (!ReferenceAnimationEditing.NearlyEquals(
+                    first,
+                    final,
+                    0.0001f))
+                {
+                    differingElement = elementName;
+                    return false;
+                }
             }
 
-            if (nextIndex == 0 || next.TimeSeconds <= clamped)
-            {
-                transform = to;
-                return true;
-            }
-
-            ApprenticeAnimationKeyFrame previous = KeyFrames[nextIndex - 1];
-            if (!previous.TryGet(
-                elementName,
-                out ApprenticeElementTransform from))
-            {
-                return false;
-            }
-
-            float span = next.TimeSeconds - previous.TimeSeconds;
-            float progress = span <= 0
-                ? 1
-                : (clamped - previous.TimeSeconds) / span;
-            transform = ApprenticeElementTransform.Interpolate(
-                from,
-                to,
-                progress
-            );
+            differingElement = string.Empty;
             return true;
         }
 
-        private void ValidateWarScythe(AssetLocation location)
+        private static ApprenticeAnimationDefinition Parse(
+            string json,
+            AssetLocation location,
+            bool requireReadyPoseLoop)
         {
-            if (Version != 1)
+            JObject root;
+            try
+            {
+                root = JObject.Parse(json);
+            }
+            catch (Exception exception)
             {
                 throw new InvalidOperationException(
-                    $"{location} must use animation definition version 1."
+                    $"Failed to parse {location}.",
+                    exception
                 );
             }
 
-            Code = Code.Trim();
-            Category = Category.Trim();
-            HeldItemCode = HeldItemCode.Trim();
-            if (Code != "war-scythe-attack" ||
-                Category != "apprentice-mainhand" ||
-                HeldItemCode != "apprentice:warscythe")
+            if (root.Properties().Count() != 1 ||
+                root.Property(AnimationCode, StringComparison.Ordinal) is not
+                    JProperty animationProperty)
             {
                 throw new InvalidOperationException(
-                    $"{location} contains an unexpected code, category, or item owner."
+                    $"{location} must contain exactly '{AnimationCode}' in the proven OverhaulLib animation format."
                 );
             }
 
-            if (!float.IsFinite(EaseInSeconds) || EaseInSeconds <= 0 ||
-                !float.IsFinite(EaseOutSeconds) || EaseOutSeconds <= 0 ||
-                KeyFrames.Count < 2)
+            AnimationJson animationJson =
+                animationProperty.Value.ToObject<AnimationJson>() ??
+                throw new InvalidOperationException(
+                    $"{location} does not contain a valid animation."
+                );
+            ValidateJson(animationJson, location);
+
+            Animation animation;
+            try
+            {
+                animation = animationJson.ToAnimation();
+            }
+            catch (Exception exception)
             {
                 throw new InvalidOperationException(
-                    $"{location} must define positive transitions and at least two keyframes."
+                    $"{location} could not be converted by the reference animation parser.",
+                    exception
                 );
             }
 
-            KeyFrames = KeyFrames
-                .OrderBy(frame => frame.TimeSeconds)
-                .ToList();
-            if (Math.Abs(KeyFrames[0].TimeSeconds) > 0.0001f ||
-                DurationSeconds <= 0)
+            ApprenticeAnimationCallback[] callbacks =
+                animation.CallbackFrames
+                    .Select(frame => new ApprenticeAnimationCallback(
+                        frame.Code,
+                        frame.DurationFraction *
+                            (float)animation.TotalDuration.TotalSeconds
+                    ))
+                    .ToArray();
+            ApprenticeAnimationDefinition result =
+                new(animation, callbacks);
+
+            if (requireReadyPoseLoop &&
+                !result.HasExactReadyPoseLoop(
+                    out string differingElement))
             {
                 throw new InvalidOperationException(
-                    $"{location} must start at 0 seconds and end after 0 seconds."
+                    $"{location} must finish in the exact '{differingElement}' ready pose."
+                );
+            }
+
+            return result;
+        }
+
+        private static void ValidateJson(
+            AnimationJson animation,
+            AssetLocation location)
+        {
+            if (animation.Hold ||
+                animation.PlayerKeyFrames.Length < 2 ||
+                animation.ItemKeyFrames.Length != 0 ||
+                animation.SoundFrames.Length != 0 ||
+                animation.ParticlesFrames.Length != 0)
+            {
+                throw new InvalidOperationException(
+                    $"{location} must be a non-holding player animation with at least two frames and no unrelated item, sound, or particle tracks."
                 );
             }
 
             float previousTime = -1;
-            foreach (ApprenticeAnimationKeyFrame frame in KeyFrames)
+            foreach (PLayerKeyFrameJson frame in
+                animation.PlayerKeyFrames)
             {
-                if (!float.IsFinite(frame.TimeSeconds) ||
-                    frame.TimeSeconds <= previousTime)
+                if (!float.IsFinite(frame.EasingTime) ||
+                    frame.EasingTime <= previousTime ||
+                    frame.Elements.Count != RequiredElements.Length ||
+                    !RequiredElements.All(frame.Elements.ContainsKey))
                 {
                     throw new InvalidOperationException(
-                        $"{location} keyframe times must be finite and strictly increasing."
+                        $"{location} frames must have strictly increasing times and own exactly ItemAnchor, ItemAnchorL, and both arm chains."
                     );
                 }
-                previousTime = frame.TimeSeconds;
-                frame.Validate(location, RequiredWarScytheElements);
-            }
-
-            foreach (string element in RequiredWarScytheElements)
-            {
-                if (!KeyFrames[0].TryGet(
-                    element,
-                    out ApprenticeElementTransform first) ||
-                    !KeyFrames[^1].TryGet(
-                        element,
-                        out ApprenticeElementTransform last) ||
-                    !first.NearlyEquals(last, 0.0001f))
+                if (frame.DetachedAnchor || frame.SwitchArms ||
+                    frame.PitchFollow ||
+                    !frame.PitchDontFollow ||
+                    Math.Abs(frame.FOVMultiplier - 1f) > 0.0001f ||
+                    Math.Abs(frame.BobbingAmplitude - 1f) > 0.0001f)
                 {
                     throw new InvalidOperationException(
-                        $"{location} must finish in the exact '{element}' ready pose."
+                        $"{location} War Scythe frames must keep normal hands, disable pitch following, and preserve FOV/bobbing."
                     );
                 }
+
+                foreach ((string element, float?[] values) in
+                    frame.Elements)
+                {
+                    if (values == null || values.Length != 6 ||
+                        values.Any(value =>
+                            value.HasValue &&
+                            !float.IsFinite(value.Value)))
+                    {
+                        throw new InvalidOperationException(
+                            $"{location} element '{element}' must contain six finite or omitted transform components."
+                        );
+                    }
+                }
+                previousTime = frame.EasingTime;
             }
 
-            Callbacks = Callbacks
-                .OrderBy(callback => callback.TimeSeconds)
-                .ToList();
-            if (!Callbacks.Select(callback => callback.Code).SequenceEqual(
-                RequiredWarScytheCallbacks,
+            if (Math.Abs(animation.PlayerKeyFrames[0].EasingTime) >
+                    0.0001f ||
+                animation.PlayerKeyFrames[^1].EasingTime <= 0)
+            {
+                throw new InvalidOperationException(
+                    $"{location} must start at 0 ms and finish after 0 ms."
+                );
+            }
+
+            string[] callbackCodes = animation.CallbackFrames
+                .Select(frame => frame.Code)
+                .ToArray();
+            if (!callbackCodes.SequenceEqual(
+                RequiredCallbacks,
                 StringComparer.Ordinal))
             {
                 throw new InvalidOperationException(
@@ -231,163 +307,38 @@ namespace Apprentice
                 );
             }
 
-            previousTime = -1;
-            foreach (ApprenticeAnimationCallback callback in Callbacks)
+            float previousFraction = -1;
+            foreach (CallbackFrameJson callback in
+                animation.CallbackFrames)
             {
-                callback.Code = callback.Code.Trim();
-                if (!float.IsFinite(callback.TimeSeconds) ||
-                    callback.TimeSeconds <= previousTime ||
-                    callback.TimeSeconds > DurationSeconds)
+                if (!float.IsFinite(callback.DurationFraction) ||
+                    callback.DurationFraction <= previousFraction ||
+                    callback.DurationFraction < 0 ||
+                    callback.DurationFraction > 1)
                 {
                     throw new InvalidOperationException(
-                        $"{location} callback times must be ordered and inside the animation duration."
+                        $"{location} callback fractions must be finite, ordered, and inside the animation."
                     );
                 }
-                previousTime = callback.TimeSeconds;
-            }
-        }
-    }
-
-    internal sealed class ApprenticeAnimationKeyFrame
-    {
-        public float TimeSeconds { get; set; }
-        public Dictionary<string, float[]> Elements { get; set; } =
-            new(StringComparer.Ordinal);
-
-        public bool TryGet(
-            string elementName,
-            out ApprenticeElementTransform transform)
-        {
-            transform = default;
-            if (!Elements.TryGetValue(elementName, out float[]? values) ||
-                values.Length != 6)
-            {
-                return false;
-            }
-
-            transform = new ApprenticeElementTransform(values);
-            return true;
-        }
-
-        public void Validate(
-            AssetLocation location,
-            IReadOnlyCollection<string> requiredElements)
-        {
-            if (Elements.Count != requiredElements.Count ||
-                !requiredElements.All(Elements.ContainsKey))
-            {
-                throw new InvalidOperationException(
-                    $"{location} frame {TimeSeconds:0.###} must own exactly ItemAnchor, ItemAnchorL, and both arm chains."
-                );
-            }
-
-            foreach ((string element, float[] values) in Elements)
-            {
-                if (values == null || values.Length != 6 ||
-                    values.Any(value => !float.IsFinite(value)))
-                {
-                    throw new InvalidOperationException(
-                        $"{location} frame {TimeSeconds:0.###} element '{element}' must contain six finite values."
-                    );
-                }
+                previousFraction = callback.DurationFraction;
             }
         }
     }
 
     internal sealed class ApprenticeAnimationCallback
     {
-        public string Code { get; set; } = string.Empty;
-        public float TimeSeconds { get; set; }
-    }
-
-    internal readonly struct ApprenticeElementTransform
-    {
-        public ApprenticeElementTransform(float[] values)
+        public ApprenticeAnimationCallback(
+            string code,
+            float timeSeconds)
         {
-            OffsetX = values[0];
-            OffsetY = values[1];
-            OffsetZ = values[2];
-            RotationX = values[3];
-            RotationY = values[4];
-            RotationZ = values[5];
+            Code = code;
+            TimeSeconds = timeSeconds;
         }
 
-        private ApprenticeElementTransform(
-            float offsetX,
-            float offsetY,
-            float offsetZ,
-            float rotationX,
-            float rotationY,
-            float rotationZ)
-        {
-            OffsetX = offsetX;
-            OffsetY = offsetY;
-            OffsetZ = offsetZ;
-            RotationX = rotationX;
-            RotationY = rotationY;
-            RotationZ = rotationZ;
-        }
+        public string Code { get; }
+        public float TimeSeconds { get; }
 
-        public float OffsetX { get; }
-        public float OffsetY { get; }
-        public float OffsetZ { get; }
-        public float RotationX { get; }
-        public float RotationY { get; }
-        public float RotationZ { get; }
-
-        public static ApprenticeElementTransform Interpolate(
-            ApprenticeElementTransform from,
-            ApprenticeElementTransform to,
-            float progress)
-        {
-            float t = Math.Clamp(progress, 0, 1);
-            return new ApprenticeElementTransform(
-                Lerp(from.OffsetX, to.OffsetX, t),
-                Lerp(from.OffsetY, to.OffsetY, t),
-                Lerp(from.OffsetZ, to.OffsetZ, t),
-                LerpAngle(from.RotationX, to.RotationX, t),
-                LerpAngle(from.RotationY, to.RotationY, t),
-                LerpAngle(from.RotationZ, to.RotationZ, t)
-            );
-        }
-
-        public bool NearlyEquals(
-            ApprenticeElementTransform other,
-            float epsilon) =>
-            Math.Abs(OffsetX - other.OffsetX) <= epsilon &&
-            Math.Abs(OffsetY - other.OffsetY) <= epsilon &&
-            Math.Abs(OffsetZ - other.OffsetZ) <= epsilon &&
-            Math.Abs(NormalizeDegrees(RotationX - other.RotationX)) <= epsilon &&
-            Math.Abs(NormalizeDegrees(RotationY - other.RotationY)) <= epsilon &&
-            Math.Abs(NormalizeDegrees(RotationZ - other.RotationZ)) <= epsilon;
-
-        public ApprenticeElementTransform WithRotations(
-            float rotationX,
-            float rotationY,
-            float rotationZ) =>
-            new(
-                OffsetX,
-                OffsetY,
-                OffsetZ,
-                rotationX,
-                rotationY,
-                rotationZ
-            );
-
-        private static float Lerp(float from, float to, float progress) =>
-            from + (to - from) * progress;
-
-        private static float LerpAngle(
-            float from,
-            float to,
-            float progress) =>
-            from + NormalizeDegrees(to - from) * progress;
-
-        internal static float NormalizeDegrees(float degrees)
-        {
-            float normalized = (degrees + 180f) % 360f;
-            if (normalized < 0) normalized += 360f;
-            return normalized - 180f;
-        }
+        public ApprenticeAnimationCallback Clone() =>
+            new(Code, TimeSeconds);
     }
 }

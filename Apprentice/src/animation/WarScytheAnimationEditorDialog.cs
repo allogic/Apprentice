@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 
 using Vintagestory.API.Client;
+using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
 
@@ -156,15 +157,22 @@ namespace Apprentice
             for (int index = 0; index < 6; index++)
             {
                 int component = index;
+                ElementBounds sliderBounds =
+                    ElementBounds.Fixed(130, sliderY, 390, 25);
                 composer
                     .AddStaticText(
                         ComponentLabels[index],
                         body,
                         ElementBounds.Fixed(18, sliderY + 4, 112, 25)
                     )
-                    .AddSlider(
-                        value => OnValueChanged(component, value),
-                        ElementBounds.Fixed(130, sliderY, 390, 25),
+                    .AddInteractiveElement(
+                        new TransactionalSlider(
+                            capi,
+                            value => OnValueChanged(component, value),
+                            sliderBounds,
+                            editor.BeginValueEdit,
+                            editor.EndValueEdit
+                        ),
                         sliderKeys[index]
                     )
                     .AddDynamicText(
@@ -365,8 +373,18 @@ namespace Apprentice
         private bool OnValueChanged(int component, int value)
         {
             if (composing) return true;
-            editor.SetSelectedValue(component, value / 10f);
-            RefreshDynamicState();
+            try
+            {
+                editor.SetSelectedValue(component, value / 10f);
+                RefreshDynamicState();
+            }
+            catch (Exception exception)
+            {
+                editor.ReportUiFailure(
+                    ComponentLabels[component] + " slider",
+                    exception
+                );
+            }
             return true;
         }
 
@@ -394,8 +412,26 @@ namespace Apprentice
                     label,
                     () =>
                     {
-                        handler();
-                        RefreshSelection();
+                        try
+                        {
+                            handler();
+                            RefreshSelection();
+                        }
+                        catch (Exception exception)
+                        {
+                            editor.ReportUiFailure(label, exception);
+                            try
+                            {
+                                RefreshDynamicState();
+                            }
+                            catch (Exception refreshException)
+                            {
+                                editor.ReportUiFailure(
+                                    label + " UI refresh",
+                                    refreshException
+                                );
+                            }
+                        }
                         return true;
                     },
                     ElementBounds.Fixed(x, y, width, 26),
@@ -461,10 +497,96 @@ namespace Apprentice
             capi.Render.GlPopMatrix();
         }
 
+        private sealed class TransactionalSlider : GuiElementSlider
+        {
+            private readonly Action beginEdit;
+            private readonly Action endEdit;
+            private bool mouseEditActive;
+
+            public TransactionalSlider(
+                ICoreClientAPI api,
+                ActionConsumable<int> onValueChanged,
+                ElementBounds bounds,
+                Action beginEdit,
+                Action endEdit)
+                : base(api, onValueChanged, bounds)
+            {
+                this.beginEdit = beginEdit;
+                this.endEdit = endEdit;
+            }
+
+            public override void OnMouseDownOnElement(
+                ICoreClientAPI api,
+                MouseEvent args)
+            {
+                beginEdit();
+                mouseEditActive = true;
+                try
+                {
+                    base.OnMouseDownOnElement(api, args);
+                }
+                catch
+                {
+                    mouseEditActive = false;
+                    endEdit();
+                    throw;
+                }
+            }
+
+            public override void OnMouseUp(
+                ICoreClientAPI api,
+                MouseEvent args)
+            {
+                try
+                {
+                    base.OnMouseUp(api, args);
+                }
+                finally
+                {
+                    if (mouseEditActive)
+                    {
+                        mouseEditActive = false;
+                        endEdit();
+                    }
+                }
+            }
+
+            public override void OnMouseWheel(
+                ICoreClientAPI api,
+                MouseWheelEventArgs args)
+            {
+                beginEdit();
+                try
+                {
+                    base.OnMouseWheel(api, args);
+                }
+                finally
+                {
+                    endEdit();
+                }
+            }
+
+            public override void OnKeyDown(
+                ICoreClientAPI api,
+                KeyEvent args)
+            {
+                beginEdit();
+                try
+                {
+                    base.OnKeyDown(api, args);
+                }
+                finally
+                {
+                    endEdit();
+                }
+            }
+        }
+
         private string[] FrameCodes()
         {
             string[] codes = new string[
-                editor.WorkingDefinition.KeyFrames.Count
+                editor.WorkingDefinition.Animation
+                    .PlayerKeyFrames.Count
             ];
             for (int index = 0; index < codes.Length; index++)
             {

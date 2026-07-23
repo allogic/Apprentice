@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Numerics;
+
+using Apprentice.AnimationReference;
 
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
@@ -19,23 +22,20 @@ namespace Apprentice
         private readonly ApprenticeAnimationDefinition definition;
         private readonly WarScytheGeometryProbe geometryProbe;
         private readonly WarScytheAnimationEditor editor;
-        private readonly Dictionary<long, ActiveAnimationState> activeStates =
-            new();
+        private readonly Dictionary<long, WarScythePoseBehavior>
+            thirdPersonBehaviors = new();
+        private readonly Dictionary<long, ActiveRuntimeState>
+            activeStates = new();
         private readonly Dictionary<long, int> localSequences = new();
         private readonly Dictionary<long, int> lastAcceptedSequences = new();
-        private readonly Dictionary<ElementPose, ElementPose> scratchPoses =
-            new();
         private readonly Queue<string> callbackTrace = new();
         private readonly long tickListenerId;
 
+        private WarScythePoseBehavior? firstPersonBehavior;
         private bool disposed;
         private bool hookReached;
         private bool hookReachLogged;
-        private long temporaryPoseApplications;
-        private int finishOwnershipChecks;
-        private int finishHitConflicts;
-        private bool geometryFailureReported;
-        private string lastFinishOwnership = "none";
+        private long appliedElementCount;
         private string lastGeometry = "none";
 
         public ApprenticeAnimationSystem(
@@ -48,11 +48,8 @@ namespace Apprentice
             this.definition = definition;
             geometryProbe = new WarScytheGeometryProbe(api);
 
-            channel.SetMessageHandler<WarScytheAnimationPacket>(OnPacket);
-            ApprenticeAnimationHook.Install(api, this);
-            tickListenerId = api.Event.RegisterGameTickListener(
-                OnTick,
-                TickMilliseconds
+            channel.SetMessageHandler<WarScytheAnimationPacket>(
+                OnPacket
             );
             editor = new WarScytheAnimationEditor(
                 api,
@@ -60,8 +57,15 @@ namespace Apprentice
                 definition,
                 geometryProbe
             );
+            ApprenticeAnimationHook.Install(api, this);
+            tickListenerId = api.Event.RegisterGameTickListener(
+                OnTick,
+                TickMilliseconds
+            );
             RegisterStatusCommand();
         }
+
+        public bool EditorPreviewActive => editor.PreviewActive;
 
         public static void RegisterServerHandler(
             ICoreServerAPI api,
@@ -73,9 +77,11 @@ namespace Apprentice
                 (player, packet) =>
                 {
                     EntityAgent entity = player.Entity;
-                    ItemStack? stack = entity.RightHandItemSlot?.Itemstack;
+                    ItemStack? stack =
+                        entity.RightHandItemSlot?.Itemstack;
                     if (!entity.Alive || stack?.Item == null ||
-                        stack.Item.Code?.ToString() != definition.HeldItemCode ||
+                        stack.Item.Code?.ToString() !=
+                            definition.HeldItemCode ||
                         packet.Sequence <= 0)
                     {
                         return;
@@ -85,8 +91,8 @@ namespace Apprentice
                     if (packet.Stop)
                     {
                         if (!lastAcceptedSequences.TryGetValue(
-                            entityId,
-                            out int activeSequence) ||
+                                entityId,
+                                out int activeSequence) ||
                             packet.Sequence != activeSequence)
                         {
                             return;
@@ -95,14 +101,14 @@ namespace Apprentice
                     else
                     {
                         if (lastAcceptedSequences.TryGetValue(
-                            entityId,
-                            out int latestSequence) &&
+                                entityId,
+                                out int latestSequence) &&
                             packet.Sequence <= latestSequence)
                         {
                             return;
                         }
-
-                        lastAcceptedSequences[entityId] = packet.Sequence;
+                        lastAcceptedSequences[entityId] =
+                            packet.Sequence;
                     }
 
                     WarScytheAnimationPacket sanitized = new()
@@ -121,22 +127,20 @@ namespace Apprentice
                         ),
                         Stop = packet.Stop
                     };
-
                     channel.BroadcastPacket(sanitized, player);
                 }
             );
 
             api.Logger.Notification(
-                "[Apprentice] War Scythe animation relay registered with held-item validation."
+                "[Apprentice] War Scythe reference-animation relay registered with held-item and sequence validation."
             );
         }
 
         public void StartLocal(EntityAgent entity)
         {
             if (disposed || editor.PreviewActive ||
-                !TryGetHeldWarScythe(
-                entity,
-                out ItemStack stack))
+                entity is not EntityPlayer player ||
+                !TryGetHeldWarScythe(player, out ItemStack stack))
             {
                 return;
             }
@@ -144,12 +148,34 @@ namespace Apprentice
             int sequence = localSequences.TryGetValue(
                 entity.EntityId,
                 out int previous)
-                ? previous + 1
-                : 1;
+                    ? previous + 1
+                    : 1;
             if (sequence <= 0) sequence = 1;
             localSequences[entity.EntityId] = sequence;
 
-            StartState(entity.EntityId, stack.Item.Id, sequence);
+            EnsureLocalBehaviors(player);
+            AnimationRequest firstPersonRequest =
+                CreateRequest(
+                    callback => Trace(
+                        entity.EntityId,
+                        sequence,
+                        callback
+                    )
+                );
+            firstPersonBehavior!.Play(firstPersonRequest, stack.Item.Id);
+            GetThirdPersonBehavior(player).Play(
+                CreateRequest(callbackHandler: null),
+                stack.Item.Id
+            );
+
+            activeStates[entity.EntityId] = new ActiveRuntimeState(
+                stack.Item.Id,
+                sequence,
+                api.World.ElapsedMilliseconds,
+                geometryProbe.Acceptance
+            );
+            lastAcceptedSequences[entity.EntityId] = sequence;
+            Trace(entity.EntityId, sequence, "start");
             channel.SendPacket(CreatePacket(
                 entity.EntityId,
                 stack.Item.Id,
@@ -158,18 +184,17 @@ namespace Apprentice
             ));
         }
 
-        public bool EditorPreviewActive => editor.PreviewActive;
-
-        public void EnterEditorMode()
+        public void StopLocal(EntityAgent entity)
         {
-            EntityAgent? entity = api.World.Player?.Entity;
-            if (entity == null || !activeStates.TryGetValue(
+            if (disposed ||
+                !activeStates.TryGetValue(
                     entity.EntityId,
-                    out ActiveAnimationState? state))
+                    out ActiveRuntimeState? state))
             {
                 return;
             }
 
+            StopBehaviors(entity.EntityId);
             activeStates.Remove(entity.EntityId);
             channel.SendPacket(CreatePacket(
                 entity.EntityId,
@@ -177,140 +202,110 @@ namespace Apprentice
                 state.Sequence,
                 stop: true
             ));
-            Trace(entity.EntityId, state.Sequence, "editor-stop");
+            Trace(entity.EntityId, state.Sequence, "stop");
         }
 
-        public void StopLocal(EntityAgent entity)
+        public void EnterEditorMode()
         {
-            if (disposed || !activeStates.TryGetValue(
-                entity.EntityId,
-                out ActiveAnimationState? state))
-            {
-                return;
-            }
+            EntityPlayer? player = api.World.Player?.Entity;
+            if (player == null) return;
 
-            state.BeginForcedEaseOut(
-                api.World.ElapsedMilliseconds,
-                definition
-            );
-            channel.SendPacket(CreatePacket(
-                entity.EntityId,
-                state.ItemId,
-                state.Sequence,
-                stop: true
-            ));
+            if (activeStates.TryGetValue(
+                player.EntityId,
+                out ActiveRuntimeState? state))
+            {
+                StopBehaviors(player.EntityId);
+                activeStates.Remove(player.EntityId);
+                channel.SendPacket(CreatePacket(
+                    player.EntityId,
+                    state.ItemId,
+                    state.Sequence,
+                    stop: true
+                ));
+                Trace(
+                    player.EntityId,
+                    state.Sequence,
+                    "editor-stop"
+                );
+            }
+            EnsureLocalBehaviors(player);
+        }
+
+        internal void SetEditorFrameOverride(
+            PlayerItemFrame? frame)
+        {
+            EntityPlayer? player = api.World.Player?.Entity;
+            if (player == null) return;
+            EnsureLocalBehaviors(player);
+            firstPersonBehavior!.FrameOverride = frame;
+            GetThirdPersonBehavior(player).FrameOverride = frame;
         }
 
         public void NoteLocalLifecycle(
             EntityAgent entity,
             string eventCode)
         {
-            if (disposed || string.IsNullOrWhiteSpace(eventCode) ||
+            if (disposed ||
+                string.IsNullOrWhiteSpace(eventCode) ||
                 !localSequences.TryGetValue(
                     entity.EntityId,
                     out int sequence))
             {
                 return;
             }
-
             Trace(entity.EntityId, sequence, eventCode);
         }
 
-        public ElementPose PrepareFinalPose(
-            ClientAnimator animator,
-            ElementPose pose)
+        internal void OnBeforeReferenceFrame(
+            Entity entity,
+            float deltaTime)
         {
-            if (disposed || !ApprenticeAnimationHook.Enabled ||
-                animator.entityForLogging is not EntityAgent entity ||
-                pose.ForElement?.Name is not string elementName)
+            if (disposed || entity is not EntityPlayer player) return;
+
+            WarScythePoseBehavior third =
+                GetThirdPersonBehavior(player);
+            if (IsLocalPlayer(player))
             {
-                return pose;
+                EnsureLocalBehaviors(player);
+                firstPersonBehavior!.Advance(deltaTime);
+            }
+            third.Advance(deltaTime);
+        }
+
+        internal void OnReferenceFrame(
+            EntityPlayer player,
+            ElementPose pose,
+            ClientAnimator animator)
+        {
+            if (disposed) return;
+
+            bool applied = false;
+            if (thirdPersonBehaviors.TryGetValue(
+                player.EntityId,
+                out WarScythePoseBehavior? third))
+            {
+                applied |= third.OnFrame(pose);
+            }
+            if (IsLocalPlayer(player))
+            {
+                EnsureLocalBehaviors(player);
+                applied |= firstPersonBehavior!.OnFrame(pose);
             }
 
-            ApprenticeElementTransform target;
-            float weight;
-            if (editor.TrySample(entity, elementName, out target))
-            {
-                weight = 1f;
-                editor.NoteHookElement(elementName);
-            }
-            else
-            {
-                if (!activeStates.TryGetValue(
-                        entity.EntityId,
-                        out ActiveAnimationState? state))
-                {
-                    return pose;
-                }
-
-                if (!StateStillMatches(entity, state))
-                {
-                    activeStates.Remove(entity.EntityId);
-                    return pose;
-                }
-
-                long now = api.World.ElapsedMilliseconds;
-                float actionTime = state.GetActionTimeSeconds(
-                    now,
-                    definition
-                );
-                weight = state.GetWeight(now, definition);
-                if (weight <= 0 || !definition.TrySample(
-                    elementName,
-                    actionTime,
-                    out target))
-                {
-                    return pose;
-                }
-            }
-
-            ElementPose prepared = GetScratchPose(pose);
-            CopyPose(pose, prepared);
-
-            prepared.translateX = Lerp(
-                prepared.translateX,
-                target.OffsetX / 16f,
-                weight
-            );
-            prepared.translateY = Lerp(
-                prepared.translateY,
-                target.OffsetY / 16f,
-                weight
-            );
-            prepared.translateZ = Lerp(
-                prepared.translateZ,
-                target.OffsetZ / 16f,
-                weight
-            );
-            prepared.degX = LerpAngle(
-                prepared.degX,
-                target.RotationX,
-                weight
-            );
-            prepared.degY = LerpAngle(
-                prepared.degY,
-                target.RotationY,
-                weight
-            );
-            prepared.degZ = LerpAngle(
-                prepared.degZ,
-                target.RotationZ,
-                weight
-            );
-
+            if (!applied) return;
             hookReached = true;
-            temporaryPoseApplications++;
+            appliedElementCount++;
+            string elementName =
+                pose.ForElement?.Name ?? "unknown";
+            editor.NoteHookElement(elementName);
             if (!hookReachLogged)
             {
                 hookReachLogged = true;
                 api.Logger.Notification(
-                    "[Apprentice] War Scythe temporary-pose hook reached for entity {0}; category={1}; animator-owned poses remain unchanged.",
-                    entity.EntityId,
-                    definition.Category
+                    "[Apprentice] War Scythe reference pipeline reached the animator-owned ElementPose traversal for entity {0}.",
+                    player.EntityId
                 );
             }
-
-            return prepared;
         }
 
         public string BuildStatus()
@@ -320,21 +315,18 @@ namespace Apprentice
                 : string.Join(" | ", callbackTrace);
             return string.Format(
                 CultureInfo.InvariantCulture,
-                "War Scythe animation: hookEnabled={0}, injectionPoints={1}, hookReached={2}, activeEntities={3}, editorPreview={4}, definition={5}, category={6}, duration={7:0.###}s, callbacks=[{8}], renderPath=temporary-copy-six-part-composer, controlledElements=ItemAnchor+ItemAnchorL+both-arm-chains, temporaryApplications={9}, scratchPoses={10}, finishOwnershipChecks={11}, finishHitConflicts={12}, lastFinishOwnership=[{13}], lastGeometry=[{14}]",
+                "War Scythe animation: pipeline=OverhaulLib-reference AnimationJson->Animation->Animator->Composer->OnFrameInvoke->ElementPose; hookEnabled={0}; insertionPoints={1}; hookReached={2}; FPowner={3}; TPowners={4}; activeEntities={5}; editorPreview={6}; category={7}; duration={8:0.###}s; appliedElements={9}; callbacks=[{10}]; lastGeometry=[{11}]",
                 ApprenticeAnimationHook.Enabled,
                 ApprenticeAnimationHook.InjectionPointCount,
                 hookReached,
+                firstPersonBehavior != null,
+                thirdPersonBehaviors.Count,
                 activeStates.Count,
                 editor.PreviewActive,
-                definition.Code,
                 definition.Category,
                 definition.TotalActionSeconds,
+                appliedElementCount,
                 callbacks,
-                temporaryPoseApplications,
-                scratchPoses.Count,
-                finishOwnershipChecks,
-                finishHitConflicts,
-                lastFinishOwnership,
                 lastGeometry
             );
         }
@@ -346,25 +338,37 @@ namespace Apprentice
 
             api.Event.UnregisterGameTickListener(tickListenerId);
             editor.Dispose();
+            firstPersonBehavior?.StopAll();
+            firstPersonBehavior = null;
+            foreach (WarScythePoseBehavior behavior in
+                thirdPersonBehaviors.Values)
+            {
+                behavior.StopAll();
+            }
+            thirdPersonBehaviors.Clear();
             activeStates.Clear();
             localSequences.Clear();
             lastAcceptedSequences.Clear();
-            scratchPoses.Clear();
             callbackTrace.Clear();
             ApprenticeAnimationHook.Uninstall(this);
         }
 
         private void OnPacket(WarScytheAnimationPacket packet)
         {
-            if (disposed || packet.AnimationCode != definition.Code ||
+            if (disposed ||
+                packet.AnimationCode != definition.Code ||
                 packet.Category != definition.Category ||
-                packet.Speed != 1f || packet.Sequence <= 0)
+                packet.Speed != 1f ||
+                packet.Sequence <= 0)
             {
                 return;
             }
 
-            if (api.World.GetEntityById(packet.EntityId) is not EntityAgent entity ||
-                !TryGetHeldWarScythe(entity, out ItemStack stack) ||
+            if (api.World.GetEntityById(packet.EntityId) is not
+                    EntityPlayer player ||
+                !TryGetHeldWarScythe(
+                    player,
+                    out ItemStack stack) ||
                 stack.Item.Id != packet.ItemId)
             {
                 return;
@@ -372,49 +376,49 @@ namespace Apprentice
 
             if (packet.Stop)
             {
-                if (activeStates.TryGetValue(
-                    packet.EntityId,
-                    out ActiveAnimationState? state) &&
-                    state.Sequence == packet.Sequence)
+                if (lastAcceptedSequences.TryGetValue(
+                        packet.EntityId,
+                        out int activeSequence) &&
+                    activeSequence == packet.Sequence)
                 {
-                    state.BeginForcedEaseOut(
-                        api.World.ElapsedMilliseconds,
-                        definition
+                    GetThirdPersonBehavior(player).Stop(
+                        definition.Category
+                    );
+                    activeStates.Remove(packet.EntityId);
+                    Trace(
+                        packet.EntityId,
+                        packet.Sequence,
+                        "remote-stop"
                     );
                 }
                 return;
             }
 
             if (lastAcceptedSequences.TryGetValue(
-                packet.EntityId,
-                out int latestSequence) &&
+                    packet.EntityId,
+                    out int latestSequence) &&
                 packet.Sequence <= latestSequence)
             {
                 return;
             }
 
-            lastAcceptedSequences[packet.EntityId] = packet.Sequence;
-            StartState(packet.EntityId, packet.ItemId, packet.Sequence);
-        }
-
-        private void StartState(long entityId, int itemId, int sequence)
-        {
-            if (activeStates.TryGetValue(
-                entityId,
-                out ActiveAnimationState? existing) &&
-                sequence <= existing.Sequence)
-            {
-                return;
-            }
-
-            activeStates[entityId] = new ActiveAnimationState(
-                itemId,
-                sequence,
+            lastAcceptedSequences[packet.EntityId] =
+                packet.Sequence;
+            GetThirdPersonBehavior(player).Play(
+                CreateRequest(callbackHandler: null),
+                stack.Item.Id
+            );
+            activeStates[packet.EntityId] = new ActiveRuntimeState(
+                stack.Item.Id,
+                packet.Sequence,
                 api.World.ElapsedMilliseconds,
                 geometryProbe.Acceptance
             );
-            lastAcceptedSequences[entityId] = sequence;
-            Trace(entityId, sequence, "start");
+            Trace(
+                packet.EntityId,
+                packet.Sequence,
+                "remote-start"
+            );
         }
 
         private void OnTick(float deltaTime)
@@ -423,49 +427,46 @@ namespace Apprentice
             editor.Tick(deltaTime);
 
             long now = api.World.ElapsedMilliseconds;
-            foreach ((long entityId, ActiveAnimationState state) in
+            foreach ((long entityId, ActiveRuntimeState state) in
                 activeStates.ToArray())
             {
-                if (api.World.GetEntityById(entityId) is not EntityAgent entity ||
-                    !StateStillMatches(entity, state))
+                if (api.World.GetEntityById(entityId) is not
+                        EntityPlayer player ||
+                    !player.Alive ||
+                    !TryGetHeldWarScythe(
+                        player,
+                        out ItemStack stack) ||
+                    stack.Item.Id != state.ItemId)
                 {
+                    StopBehaviors(entityId);
                     activeStates.Remove(entityId);
-                    Trace(entityId, state.Sequence, "stale-item-stop");
+                    Trace(
+                        entityId,
+                        state.Sequence,
+                        "stale-item-stop"
+                    );
                     continue;
                 }
 
-                float actionTime = state.GetActionTimeSeconds(
-                    now,
-                    definition
+                bool local =
+                    api.World.Player?.Entity?.EntityId == entityId;
+                float actionTime = Math.Clamp(
+                    Math.Max(0, now - state.StartedMs) / 1000f -
+                        definition.EaseInSeconds,
+                    0,
+                    definition.DurationSeconds
                 );
-                List<ApprenticeAnimationCallback> crossedCallbacks = new();
-                definition.CollectCallbacks(
-                    ref state.NextCallbackIndex,
-                    actionTime,
-                    crossedCallbacks
-                );
-                foreach (ApprenticeAnimationCallback callback in
-                    crossedCallbacks)
-                {
-                    Trace(entityId, state.Sequence, callback.Code);
-                }
-
-                bool isLocalPlayer = api.World.Player?.Entity?.EntityId ==
-                    entityId;
-                if (isLocalPlayer && !geometryFailureReported)
+                if (local && !editor.PreviewActive)
                 {
                     try
                     {
-                        if (TryGetHeldWarScythe(
-                            entity,
-                            out ItemStack heldStack) &&
-                            geometryProbe.TrySample(
-                                entity,
-                                heldStack,
-                                out WarScytheGeometrySample geometrySample))
+                        if (geometryProbe.TrySample(
+                            player,
+                            stack,
+                            out WarScytheGeometrySample geometry))
                         {
                             state.Geometry.Record(
-                                geometrySample,
+                                geometry,
                                 actionTime,
                                 definition.Callbacks[0].TimeSeconds,
                                 definition.Callbacks[2].TimeSeconds
@@ -474,50 +475,108 @@ namespace Apprentice
                     }
                     catch (Exception exception)
                     {
-                        lastGeometry = "probe-error";
-                        if (!geometryFailureReported)
-                        {
-                            geometryFailureReported = true;
-                            api.Logger.Warning(
-                                "[Apprentice] War Scythe geometry diagnostics stopped without affecting animation playback: {0}",
-                                exception.Message
-                            );
-                        }
+                        api.Logger.Warning(
+                            "[Apprentice] War Scythe geometry diagnostics stopped for sequence {0}: {1}",
+                            state.Sequence,
+                            exception.Message
+                        );
                     }
                 }
 
-                if (state.IsFinished(now, definition))
+                if (now - state.StartedMs <
+                    definition.TotalActionSeconds * 1000f)
                 {
-                    if (isLocalPlayer && !geometryFailureReported)
-                    {
-                        lastGeometry = state.Geometry.BuildStatus(
-                            state.Sequence
-                        );
-                        api.Logger.Notification(
-                            "[Apprentice] WARSCYTHE GEOMETRY {0}",
-                            lastGeometry
-                        );
-                    }
-                    InspectFinishOwnership(entity, state.Sequence);
-                    activeStates.Remove(entityId);
-                    Trace(entityId, state.Sequence, "finish");
+                    continue;
                 }
+
+                if (local)
+                {
+                    lastGeometry =
+                        state.Geometry.BuildStatus(state.Sequence);
+                    api.Logger.Notification(
+                        "[Apprentice] WARSCYTHE GEOMETRY {0}",
+                        lastGeometry
+                    );
+                }
+                activeStates.Remove(entityId);
+                Trace(entityId, state.Sequence, "finish");
             }
         }
 
-        private bool StateStillMatches(
-            EntityAgent entity,
-            ActiveAnimationState state) =>
-            entity.Alive &&
-            TryGetHeldWarScythe(entity, out ItemStack stack) &&
-            stack.Item.Id == state.ItemId;
+        private AnimationRequest CreateRequest(
+            Action<string>? callbackHandler) =>
+            new(
+                definition.Animation,
+                animationSpeed: 1f,
+                weight: 1f,
+                category: definition.Category,
+                easeOutDuration: TimeSpan.FromSeconds(
+                    definition.EaseOutSeconds
+                ),
+                easeInDuration: TimeSpan.FromSeconds(
+                    definition.EaseInSeconds
+                ),
+                easeOut: true,
+                finishCallback: null,
+                callbackHandler: callbackHandler
+            );
+
+        private void EnsureLocalBehaviors(EntityPlayer player)
+        {
+            if (firstPersonBehavior == null ||
+                firstPersonBehavior.Player.EntityId !=
+                    player.EntityId)
+            {
+                firstPersonBehavior = new WarScythePoseBehavior(
+                    api,
+                    player,
+                    firstPerson: true,
+                    definition
+                );
+            }
+            _ = GetThirdPersonBehavior(player);
+        }
+
+        private WarScythePoseBehavior GetThirdPersonBehavior(
+            EntityPlayer player)
+        {
+            if (!thirdPersonBehaviors.TryGetValue(
+                player.EntityId,
+                out WarScythePoseBehavior? behavior))
+            {
+                behavior = new WarScythePoseBehavior(
+                    api,
+                    player,
+                    firstPerson: false,
+                    definition
+                );
+                thirdPersonBehaviors[player.EntityId] = behavior;
+            }
+            return behavior;
+        }
+
+        private void StopBehaviors(long entityId)
+        {
+            if (firstPersonBehavior?.Player.EntityId == entityId)
+            {
+                firstPersonBehavior.Stop(definition.Category);
+            }
+            if (thirdPersonBehaviors.TryGetValue(
+                entityId,
+                out WarScythePoseBehavior? third))
+            {
+                third.Stop(definition.Category);
+            }
+        }
 
         private bool TryGetHeldWarScythe(
             EntityAgent entity,
             out ItemStack stack)
         {
-            ItemStack? current = entity.RightHandItemSlot?.Itemstack;
-            if (current?.Item?.Code?.ToString() == definition.HeldItemCode)
+            ItemStack? current =
+                entity.RightHandItemSlot?.Itemstack;
+            if (current?.Item?.Code?.ToString() ==
+                definition.HeldItemCode)
             {
                 stack = current;
                 return true;
@@ -527,45 +586,8 @@ namespace Apprentice
             return false;
         }
 
-        private void InspectFinishOwnership(
-            EntityAgent entity,
-            int sequence)
-        {
-            ItemSlot? slot = entity.RightHandItemSlot;
-            Item? item = slot?.Itemstack?.Item;
-            string? hitCode = item == null || slot == null
-                ? null
-                : item.GetHeldTpHitAnimation(slot, entity);
-            string? idleCode = item == null || slot == null
-                ? null
-                : item.GetHeldTpIdleAnimation(
-                    slot,
-                    entity,
-                    EnumHand.Right
-                );
-            bool hitConfigured = !string.IsNullOrWhiteSpace(hitCode);
-            bool hitActive = hitConfigured &&
-                entity.AnimManager.IsAnimationActive(hitCode);
-            bool idleActive = !string.IsNullOrWhiteSpace(idleCode) &&
-                entity.AnimManager.IsAnimationActive(idleCode);
-
-            finishOwnershipChecks++;
-            if (hitConfigured || hitActive) finishHitConflicts++;
-            lastFinishOwnership = string.Format(
-                CultureInfo.InvariantCulture,
-                "seq={0},hit={1},hitActive={2},idle={3},idleActive={4}",
-                sequence,
-                hitCode ?? "none",
-                hitActive,
-                idleCode ?? "none",
-                idleActive
-            );
-
-            api.Logger.Notification(
-                "[Apprentice] WARSCYTHE OWNERSHIP {0}",
-                lastFinishOwnership
-            );
-        }
+        private bool IsLocalPlayer(EntityPlayer player) =>
+            api.World.Player?.Entity?.EntityId == player.EntityId;
 
         private WarScytheAnimationPacket CreatePacket(
             long entityId,
@@ -579,8 +601,12 @@ namespace Apprentice
             AnimationCode = definition.Code,
             Category = definition.Category,
             Speed = 1f,
-            EaseInMilliseconds = ToMilliseconds(definition.EaseInSeconds),
-            EaseOutMilliseconds = ToMilliseconds(definition.EaseOutSeconds),
+            EaseInMilliseconds = ToMilliseconds(
+                definition.EaseInSeconds
+            ),
+            EaseOutMilliseconds = ToMilliseconds(
+                definition.EaseOutSeconds
+            ),
             Stop = stop
         };
 
@@ -588,12 +614,16 @@ namespace Apprentice
         {
             api.ChatCommands.Create("apprenticeanimstatus")
                 .WithDescription(
-                    "Show the Apprentice temporary-pose hook, owner and callback state"
+                    "Show the Apprentice OverhaulLib-reference animation pipeline state"
                 )
-                .HandleWith(_ => TextCommandResult.Success(BuildStatus()));
+                .HandleWith(_ =>
+                    TextCommandResult.Success(BuildStatus()));
         }
 
-        private void Trace(long entityId, int sequence, string callback)
+        private void Trace(
+            long entityId,
+            int sequence,
+            string callback)
         {
             string entry = string.Format(
                 CultureInfo.InvariantCulture,
@@ -603,7 +633,10 @@ namespace Apprentice
                 callback
             );
             callbackTrace.Enqueue(entry);
-            while (callbackTrace.Count > 12) callbackTrace.Dequeue();
+            while (callbackTrace.Count > 12)
+            {
+                callbackTrace.Dequeue();
+            }
 
             if (api.World.Player?.Entity?.EntityId == entityId)
             {
@@ -617,60 +650,9 @@ namespace Apprentice
         private static int ToMilliseconds(float seconds) =>
             Math.Max(1, (int)Math.Round(seconds * 1000f));
 
-        private ElementPose GetScratchPose(ElementPose source)
+        private sealed class ActiveRuntimeState
         {
-            if (!scratchPoses.TryGetValue(
-                source,
-                out ElementPose? scratch))
-            {
-                scratch = new ElementPose();
-                scratchPoses.Add(source, scratch);
-            }
-
-            return scratch;
-        }
-
-        private static void CopyPose(
-            ElementPose source,
-            ElementPose target)
-        {
-            target.ForElement = source.ForElement;
-            target.AnimModelMatrix = source.AnimModelMatrix;
-            target.ChildElementPoses = source.ChildElementPoses;
-            target.degOffX = source.degOffX;
-            target.degOffY = source.degOffY;
-            target.degOffZ = source.degOffZ;
-            target.degX = source.degX;
-            target.degY = source.degY;
-            target.degZ = source.degZ;
-            target.scaleX = source.scaleX;
-            target.scaleY = source.scaleY;
-            target.scaleZ = source.scaleZ;
-            target.translateX = source.translateX;
-            target.translateY = source.translateY;
-            target.translateZ = source.translateZ;
-            target.RotShortestDistanceX = source.RotShortestDistanceX;
-            target.RotShortestDistanceY = source.RotShortestDistanceY;
-            target.RotShortestDistanceZ = source.RotShortestDistanceZ;
-        }
-
-        private static float Lerp(float from, float to, float progress) =>
-            from + (to - from) * progress;
-
-        private static float LerpAngle(
-            float from,
-            float to,
-            float progress) =>
-            from + ApprenticeElementTransform.NormalizeDegrees(to - from) *
-                progress;
-
-        private sealed class ActiveAnimationState
-        {
-            private long? forcedEaseOutStartedMs;
-            private float forcedActionTimeSeconds;
-            private float forcedStartWeight;
-
-            public ActiveAnimationState(
+            public ActiveRuntimeState(
                 int itemId,
                 int sequence,
                 long startedMs,
@@ -685,89 +667,144 @@ namespace Apprentice
             public int ItemId { get; }
             public int Sequence { get; }
             public long StartedMs { get; }
-            public int NextCallbackIndex = 0;
             public WarScytheGeometryTrace Geometry { get; }
+        }
 
-            public float GetActionTimeSeconds(
-                long now,
+        private sealed class WarScythePoseBehavior
+        {
+            private readonly ICoreClientAPI api;
+            private readonly bool firstPerson;
+            private readonly ApprenticeAnimationDefinition definition;
+            private readonly Composer composer;
+            private PlayerItemFrame currentFrame =
+                PlayerItemFrame.Empty;
+            private int activeItemId;
+
+            public WarScythePoseBehavior(
+                ICoreClientAPI api,
+                EntityPlayer player,
+                bool firstPerson,
                 ApprenticeAnimationDefinition definition)
             {
-                if (forcedEaseOutStartedMs.HasValue)
-                {
-                    return forcedActionTimeSeconds;
-                }
-
-                float elapsed = Math.Max(0, now - StartedMs) / 1000f;
-                return Math.Clamp(
-                    elapsed - definition.EaseInSeconds,
-                    0,
-                    definition.DurationSeconds
+                this.api = api;
+                Player = player;
+                this.firstPerson = firstPerson;
+                this.definition = definition;
+                composer = new Composer(
+                    soundsManager: null,
+                    particleEffectsManager: null,
+                    player: player
                 );
             }
 
-            public float GetWeight(
-                long now,
-                ApprenticeAnimationDefinition definition)
+            public EntityPlayer Player { get; }
+            public PlayerItemFrame? FrameOverride { get; set; }
+
+            public void Play(
+                AnimationRequest request,
+                int itemId)
             {
-                if (forcedEaseOutStartedMs is long stopStarted)
-                {
-                    float stopProgress = Math.Clamp(
-                        (now - stopStarted) /
-                            (definition.EaseOutSeconds * 1000f),
-                        0,
-                        1
-                    );
-                    return forcedStartWeight * (1f - SmoothStep(stopProgress));
-                }
-
-                float elapsed = Math.Max(0, now - StartedMs) / 1000f;
-                if (elapsed < definition.EaseInSeconds)
-                {
-                    return SmoothStep(elapsed / definition.EaseInSeconds);
-                }
-
-                float easeOutStart =
-                    definition.EaseInSeconds + definition.DurationSeconds;
-                if (elapsed <= easeOutStart) return 1f;
-
-                float progress = (elapsed - easeOutStart) /
-                    definition.EaseOutSeconds;
-                return 1f - SmoothStep(Math.Clamp(progress, 0, 1));
+                activeItemId = itemId;
+                composer.Play(request);
             }
 
-            public void BeginForcedEaseOut(
-                long now,
-                ApprenticeAnimationDefinition definition)
+            public void Stop(string category)
             {
-                if (forcedEaseOutStartedMs.HasValue) return;
+                composer.Stop(category);
+                activeItemId = 0;
+                currentFrame = PlayerItemFrame.Empty;
+            }
 
-                // The caller freezes the current authored frame. Weight then
-                // returns the whole rigid chain to the same engine pose over
-                // one shared transition.
-                forcedActionTimeSeconds = GetActionTimeSeconds(
-                    now,
-                    definition
+            public void StopAll()
+            {
+                composer.StopAll();
+                activeItemId = 0;
+                currentFrame = PlayerItemFrame.Empty;
+                FrameOverride = null;
+            }
+
+            public void Advance(float deltaTime)
+            {
+                if (FrameOverride != null) return;
+
+                Item? heldItem =
+                    Player.RightHandItemSlot?.Itemstack?.Item;
+                if (activeItemId != 0 &&
+                    (!Player.Alive ||
+                    heldItem?.Id != activeItemId ||
+                    heldItem.Code?.ToString() !=
+                        definition.HeldItemCode))
+                {
+                    StopAll();
+                    return;
+                }
+
+                currentFrame = composer.Compose(
+                    TimeSpan.FromSeconds(
+                        Math.Max(0, deltaTime)
+                    )
                 );
-                forcedStartWeight = GetWeight(now, definition);
-                forcedEaseOutStartedMs = now;
+                if (!composer.AnyActiveAnimations())
+                {
+                    activeItemId = 0;
+                }
             }
 
-            public bool IsFinished(
-                long now,
-                ApprenticeAnimationDefinition definition)
+            public bool OnFrame(ElementPose pose)
             {
-                if (forcedEaseOutStartedMs is long stopStarted)
+                IClientPlayer? localPlayer = api.World.Player;
+                bool local = localPlayer?.Entity?.EntityId ==
+                    Player.EntityId;
+                bool localFirstPerson = local &&
+                    localPlayer!.CameraMode ==
+                        EnumCameraMode.FirstPerson;
+                if (firstPerson != localFirstPerson)
                 {
-                    return now - stopStarted >=
-                        definition.EaseOutSeconds * 1000f;
+                    return false;
                 }
 
-                return now - StartedMs >=
-                    definition.TotalActionSeconds * 1000f;
-            }
+                PlayerItemFrame? selected =
+                    FrameOverride ??
+                    (composer.AnyActiveAnimations()
+                        ? currentFrame
+                        : null);
+                if (selected == null ||
+                    pose.ForElement?.Name is not string name ||
+                    !Enum.TryParse(
+                        name,
+                        ignoreCase: false,
+                        out EnumAnimatedElement element) ||
+                    element == EnumAnimatedElement.Unknown)
+                {
+                    return false;
+                }
 
-            private static float SmoothStep(float value) =>
-                value * value * (3f - 2f * value);
+                bool controlled = element is
+                    EnumAnimatedElement.ItemAnchor or
+                    EnumAnimatedElement.ItemAnchorL or
+                    EnumAnimatedElement.UpperArmR or
+                    EnumAnimatedElement.LowerArmR or
+                    EnumAnimatedElement.UpperArmL or
+                    EnumAnimatedElement.LowerArmL;
+                if (!controlled) return false;
+
+                Vector3 eyePosition = new(
+                    (float)Player.LocalEyePos.X,
+                    (float)Player.LocalEyePos.Y,
+                    (float)Player.LocalEyePos.Z
+                );
+                selected.Value.Apply(
+                    pose,
+                    element,
+                    eyePosition,
+                    (float)Player.Properties.EyeHeight,
+                    Player.Pos.HeadPitch,
+                    applyCameraPitch:
+                        !firstPerson &&
+                        composer.AnyActiveAnimations()
+                );
+                return true;
+            }
         }
     }
 }
