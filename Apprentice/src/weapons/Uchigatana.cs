@@ -328,14 +328,11 @@ namespace Apprentice.Weapon
 		private bool isPhysicActive = false;
 		private bool dashOnCooldown = false;
 
-		private float stopVelocityEpsilon = 0.1F;
-
-		private int physicFps = 30;
-		private int physicFrames = 60;
+		private float stopVelocityEpsilon = 0.1F; // Obsolete..
 		private float physicSpeed = 8.356F;
-
-		private float horizontalImpulse = 0.2F;
-		private float verticalImpulse = 0.03F;
+		private float horizontalImpulseGrounded = 1.0F;
+		private float horizontalImpulseAirbourne = 0.036F;
+		private float verticalImpulse = 0.025F;
 
 		private int dashCooldownMs = 800;
 		private int dashBlurEnableMs = 250;
@@ -343,8 +340,8 @@ namespace Apprentice.Weapon
 		private float physicFrame = 0.0F;
 		private int animationFrame = 0;
 
-		private int dashForwardFrameCount = 10;
-		private int dashForwardRetractFrameCount = 17;
+		private int dashForwardFrameCount = 18;
+		private int dashForwardRetractFrameCount = 42;
 
 		private Vec3d dashDirection = Vec3d.Zero;
 
@@ -396,32 +393,22 @@ namespace Apprentice.Weapon
 				{ "root", EnumAnimationBlendMode.Add },
 			},
 		};
-		private AnimationMetaData swordHitData = new AnimationMetaData() // Maybe go full custom..
+		private AnimationMetaData ushigatanaSwingRightToLeftData = new AnimationMetaData()
 		{
-			Animation = "swordhit",
-			Code = "swordhit",
-			EaseInSpeed = 8.0F,
-			EaseOutSpeed = 8.0F,
+			Animation = "ushigatana-swing-right-to-left",
+			Code = "ushigatana-swing-right-to-left",
 			Weight = 1.0F,
-			SupressDefaultAnimation = false,
+			SupressDefaultAnimation = true,
 			ClientSide = true,
-			AnimationSpeed = 0.5F,
+			AnimationSpeed = 1.0F,
 			BlendMode = EnumAnimationBlendMode.AddAverage,
 			ElementWeight = {
-				{ "UpperArmR", 20.0F },
-				{ "LowerArmR", 20.0F },
-				{ "UpperArmL", 20.0F },
-				{ "LowerArmL", 20.0F }
+				{ "UpperTorso", 20.0F },
 			},
 			ElementBlendMode = {
-				{ "UpperArmR", EnumAnimationBlendMode.AddAverage },
-				{ "LowerArmR", EnumAnimationBlendMode.AddAverage },
-				{ "UpperArmL", EnumAnimationBlendMode.AddAverage },
-				{ "LowerArmL", EnumAnimationBlendMode.AddAverage }
+				{ "UpperTorso", EnumAnimationBlendMode.AddAverage },
 			},
 		};
-
-		// TODO: add "SpearIdle" animation
 
 		public UchigatanaDashBehaviour(ICoreClientAPI api, Entity entity) : base(entity)
 		{
@@ -434,7 +421,10 @@ namespace Apprentice.Weapon
 			debugDialog = new(api); // TODO: remove me..
 
 			inputApi.RegisterHotKey("ushigatana_dash_anim", "", GlKeys.ShiftLeft, HotkeyType.MovementControls);
-			inputApi.SetHotKeyHandler("ushigatana_dash_anim", OnReset);
+			inputApi.SetHotKeyHandler("ushigatana_dash_anim", OnDashReset);
+
+			inputApi.RegisterHotKey("ushigatana_dash_attack_anim", "", GlKeys.L, HotkeyType.MovementControls);
+			inputApi.SetHotKeyHandler("ushigatana_dash_attack_anim", OnAttackReset);
 
 			api.Input.RegisterHotKey("ushigatana_dialog", "", GlKeys.P, HotkeyType.GUIOrOtherControls);
 			api.Input.SetHotKeyHandler("ushigatana_dialog", OnToggleDebugDialog);
@@ -452,28 +442,18 @@ namespace Apprentice.Weapon
 			EntityPos transform = entityPlayer.Pos;
 			EntityControls controls = clientApi.World.Player.Entity.Controls;
 
-#if false
+#if true
 			DebugWidgets.IntSlider("Ushigatana", "General", "dashCooldownMs", 0, 5000, () => { return dashCooldownMs; }, (v) => { dashCooldownMs = v; });
 			DebugWidgets.IntSlider("Ushigatana", "General", "dashBlurEnableMs", 0, 5000, () => { return dashBlurEnableMs; }, (v) => { dashBlurEnableMs = v; });
 
-			DebugWidgets.IntSlider("Ushigatana", "Physic", "physicFps", 0, 120, () => { return physicFps; }, (v) => { physicFps = v; });
-			DebugWidgets.IntSlider("Ushigatana", "Physic", "physicFrames", 0, 120, () => { return physicFrames; }, (v) => { physicFrames = v; });
 			DebugWidgets.FloatSlider("Ushigatana", "Physic", "physicSpeed", -50.0F, 50.0F, () => { return physicSpeed; }, (v) => { physicSpeed = v; });
-			DebugWidgets.FloatSlider("Ushigatana", "Physic", "horizontalImpulse", -1.0F, 1.0F, () => { return horizontalImpulse; }, (v) => { horizontalImpulse = v; });
+			DebugWidgets.FloatSlider("Ushigatana", "Physic", "horizontalImpulseGrounded", -10.0F, 10.0F, () => { return horizontalImpulseGrounded; }, (v) => { horizontalImpulseGrounded = v; });
+			DebugWidgets.FloatSlider("Ushigatana", "Physic", "horizontalImpulseAirbourne", -1.0F, 1.0F, () => { return horizontalImpulseAirbourne; }, (v) => { horizontalImpulseAirbourne = v; });
 			DebugWidgets.FloatSlider("Ushigatana", "Physic", "verticalImpulse", -0.1F, 0.1F, () => { return verticalImpulse; }, (v) => { verticalImpulse = v; });
 
 			DebugWidgets.IntSlider("Ushigatana", "Animation", "dashForwardFrameFrames", 0, 1000, () => { return dashForwardFrameCount; }, (v) => { dashForwardFrameCount = v; });
 			DebugWidgets.IntSlider("Ushigatana", "Animation", "dashForwardRetractFrames", 0, 1000, () => { return dashForwardRetractFrameCount; }, (v) => { dashForwardRetractFrameCount = v; });
 #endif // DEBUG
-
-			// Disable controls while in dash
-			if (sequenceState != SequenceState.SEQUENCE_STATE_IDLE)
-			{
-				controls.Forward = false;
-				controls.Backward = false;
-				controls.Left = false;
-				controls.Right = false;
-			}
 
 			switch (sequenceState)
 			{
@@ -534,12 +514,6 @@ namespace Apprentice.Weapon
 						dashForwardAnimation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
 						dashForwardAnimation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
 
-						// Start sword animation
-						entity.AnimManager.StartAnimation(swordHitData);
-						RunningAnimation swordHitAnimation = entity.AnimManager.GetAnimationState(swordHitData.Code);
-						swordHitAnimation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
-						swordHitAnimation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
-
 						sequenceState = SequenceState.SEQUENCE_STATE_DASH;
 
 						break;
@@ -553,8 +527,10 @@ namespace Apprentice.Weapon
 
 							sequenceState = SequenceState.SEQUENCE_STATE_RETRACT;
 
-							// Start idle animation
+							// Stop all animations
 							entity.AnimManager.StopAllAnimations();
+
+							// Start idle animation
 							entity.AnimManager.StartAnimation(dashForwardRetractData);
 							RunningAnimation animation = entity.AnimManager.GetAnimationState(dashForwardRetractData.Code);
 							animation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Repeat;
@@ -569,22 +545,21 @@ namespace Apprentice.Weapon
 				case SequenceState.SEQUENCE_STATE_RETRACT:
 					{
 						// Check exit condition
-						if (transform.Motion.Length() < stopVelocityEpsilon)
+						if ((animationFrame >= dashForwardRetractFrameCount) || (entityPlayer.OnGround))
 						{
+							animationFrame = 0;
+
 							sequenceState = SequenceState.SEQUENCE_STATE_STOP;
 
-							// Start idle animation
+							// Stop all animations
 							entity.AnimManager.StopAllAnimations();
-							entity.AnimManager.StartAnimation(idle1Data);
-							// RunningAnimation animation = entity.AnimManager.GetAnimationState(idle1Data.Code);
-							// animation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Repeat;
-							// animation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.Stop;
-						}
 
-						// if (animationFrame >= dashForwardRetractFrameCount)
-						// {
-						// 	animationFrame = 0;
-						// }
+							// Start idle animation
+							entity.AnimManager.StartAnimation(idle1Data);
+							RunningAnimation animation = entity.AnimManager.GetAnimationState(idle1Data.Code);
+							animation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Repeat;
+							animation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.Stop;
+						}
 
 						// Increment animation frame
 						animationFrame++;
@@ -602,18 +577,29 @@ namespace Apprentice.Weapon
 					}
 			}
 
+			// Disable controls while in dash
+			if (sequenceState != SequenceState.SEQUENCE_STATE_IDLE)
+			{
+				controls.Forward = false;
+				controls.Backward = false;
+				controls.Left = false;
+				controls.Right = false;
+			}
+
 			if (isPhysicActive)
 			{
 				// Apply physics
-				float totalFrames = (1.0F / physicFps) * physicFrames;
-				// dashDirection.Y = 0.0F;
-				Vec3d force = dashDirection * EaseOutElastic(physicFrame / totalFrames) * horizontalImpulse;
-				force.Y += EaseOutCirc(physicFrame / totalFrames) * verticalImpulse;
+				Vec3d force = Vec3d.Zero;
+				float horizontalImpulse = entityPlayer.OnGround
+					? horizontalImpulseGrounded
+					: horizontalImpulseAirbourne;
+				force += EaseOutElastic(physicFrame) * horizontalImpulse * dashDirection;
+				force.Y += EaseOutElastic(physicFrame) * verticalImpulse;
 				transform.Motion.Add(force);
 
 				// Advance animation
-				physicFrame += (1.0F / physicFps) * physicSpeed;
-				if (physicFrame >= totalFrames)
+				physicFrame += physicSpeed * deltaTime;
+				if (physicFrame >= 1.0F)
 				{
 					isPhysicActive = false;
 				}
@@ -660,11 +646,20 @@ namespace Apprentice.Weapon
 			else debugDialog.TryOpen();
 			return true;
 		}
-		private bool OnReset(KeyCombination combination)
+		private bool OnAttackReset(KeyCombination combination)
+		{
+			// Start swing animation
+			entity.AnimManager.StartAnimation(ushigatanaSwingRightToLeftData);
+			RunningAnimation ushigatanaSwingRightToLeftAnimation = entity.AnimManager.GetAnimationState(ushigatanaSwingRightToLeftData.Code);
+			ushigatanaSwingRightToLeftAnimation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
+			ushigatanaSwingRightToLeftAnimation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
+
+			return true;
+		}
+		private bool OnDashReset(KeyCombination combination)
 		{
 			if (entityPlayer == null) return true;
 			if (dashOnCooldown) return true;
-			if (entityPlayer.OnGround == false) return true;
 
 			sequenceState = SequenceState.SEQUENCE_STATE_START;
 
