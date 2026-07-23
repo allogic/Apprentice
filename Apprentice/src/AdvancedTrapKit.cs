@@ -382,7 +382,7 @@ namespace Apprentice
                     localPlayer?.EntityId == capturedEntityId)
                 {
                     SuppressMovement(localPlayer.Controls);
-                    PinPosition(localPlayer, Pos, pinY, false);
+                    PinPosition(localPlayer, Pos, pinY);
                 }
                 return;
             }
@@ -456,14 +456,13 @@ namespace Apprentice
                 SuppressMovement(agent.Controls);
                 SuppressMovement(agent.ServerControls);
             }
-            PinPosition(entity, Pos, pinY, true);
+            PinPosition(entity, Pos, pinY);
         }
 
         private static void PinPosition(
             Entity entity,
             BlockPos trapPos,
-            double y,
-            bool includeServerPosition)
+            double y)
         {
             double x = trapPos.X + 0.5;
             double z = trapPos.Z + 0.5;
@@ -472,18 +471,6 @@ namespace Apprentice
             entity.Pos.X = x;
             entity.Pos.Y = y;
             entity.Pos.Z = z;
-
-            // Player movement packets update ServerPos independently of Pos.
-            // Clearing only Pos lets the next packet immediately move the
-            // player again even though ordinary EntityAgent controls are off.
-            // Pin both authoritative coordinates on the server; the client
-            // does not own or mutate ServerPos.
-            if (!includeServerPosition) return;
-
-            entity.ServerPos.Motion.Set(0, 0, 0);
-            entity.ServerPos.X = x;
-            entity.ServerPos.Y = y;
-            entity.ServerPos.Z = z;
         }
 
         private static void SuppressMovement(EntityControls? controls)

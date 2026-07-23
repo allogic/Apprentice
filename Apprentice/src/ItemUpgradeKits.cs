@@ -43,12 +43,13 @@ namespace Apprentice
                 return;
             }
 
-            ItemSlot targetSlot = player.LeftHandItemSlot;
+            ItemSlot? targetSlot = player.LeftHandItemSlot;
             ItemStack? target = targetSlot?.Itemstack;
             string category = Attributes?["upgradeCategory"]
                 .AsString(string.Empty) ?? string.Empty;
 
-            if (target == null || !MatchesCategory(target, category) ||
+            if (targetSlot == null || target == null ||
+                !MatchesCategory(target, category) ||
                 target.Attributes.GetBool(
                     DurabilityUpgradeRuntime.AttributeKey,
                     false

@@ -24,18 +24,24 @@ namespace Apprentice
 			EntitySelection entitySel
 		)
 		{
+			ItemStack? itemStack = slot.Itemstack;
+			if (itemStack == null)
+			{
+				return false;
+			}
+
 			int renderVariant = GameMath.Clamp(
 				(int)Math.Ceiling(secondsUsed * RenderVariantsPerSecond),
 				0,
 				MaximumRenderVariant
 			);
-			int previousRenderVariant = slot.Itemstack.Attributes.GetInt(
+			int previousRenderVariant = itemStack.Attributes.GetInt(
 				"renderVariant",
 				0
 			);
 
-			slot.Itemstack.TempAttributes.SetInt("renderVariant", renderVariant);
-			slot.Itemstack.Attributes.SetInt("renderVariant", renderVariant);
+			itemStack.TempAttributes.SetInt("renderVariant", renderVariant);
+			itemStack.Attributes.SetInt("renderVariant", renderVariant);
 
 			if (previousRenderVariant != renderVariant)
 			{

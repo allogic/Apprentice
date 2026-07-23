@@ -1,0 +1,52 @@
+{
+  "code": "warscythe",
+  "class": "ApprenticeWarScythe",
+  "damagedby": ["attacking"],
+  "tool": "sword",
+  "attackRange": 3.5,
+  "attackpower": 7.5,
+  "heldTpIdleAnimation": "scytheIdle",
+  "tags": ["apprentice-content"],
+  "maxstacksize": 1,
+  "storageFlags": 5,
+  "shape": { "base": "apprentice:item/2.7/war-scythe" },
+  "creativeinventory": {
+    "general": ["*"],
+    "items": ["*"],
+    "tools": ["*"]
+  },
+  "durability": 1000,
+  "attributes": {
+    "apprenticeFeature": "warscythe",
+    "aoeDamage": 7.5,
+    "aoeRadius": 3.5,
+    "aoeArcDegrees": 120,
+    "aoeMaxTargets": 6,
+    "damageTier": 5,
+    "heldItemPitchFollow": 1
+  },
+  "guiTransform": {
+    "translation": { "x": 0, "y": 0.4, "z": 0 },
+    "rotation": { "x": -12, "y": 20, "z": 42 },
+    "origin": { "x": 0.5, "y": 0.5, "z": 0.5 },
+    "scale": 0.62
+  },
+  "tpHandTransform": {
+    "translation": { "x": -0.82, "y": -0.2, "z": -0.65 },
+    "rotation": { "x": 58, "y": -4.5, "z": 280 },
+    "origin": { "x": 0.5, "y": 0.2, "z": 0.5 },
+    "scale": 0.7799
+  },
+  "fpHandTransform": {
+    "translation": { "x": 0.15, "y": -0.15, "z": 0.1 },
+    "rotation": { "x": -10, "y": 12, "z": -24 },
+    "origin": { "x": 0.5, "y": 0.2, "z": 0.5 },
+    "scale": 1.45
+  },
+  "groundTransform": {
+    "translation": { "x": 0, "y": 0.2, "z": 0 },
+    "rotation": { "x": 90, "y": 0, "z": 18 },
+    "origin": { "x": 0.5, "y": 0.5, "z": 0.5 },
+    "scale": 0.9
+  }
+}
