@@ -593,6 +593,13 @@
 				"animationSpeed": 1.0
 			},
 			{
+				"code": "ushigatana-swing-right-to-left",
+				"animation": "ushigatana-swing-right-to-left",
+				"blendMode": "Add",
+				"mulWithWalkSpeed": false,
+				"animationSpeed": 1.0
+			},
+			{
 				"code": "walk",
 				"animation": "walk",
 				"blendMode": "Average",

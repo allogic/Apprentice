@@ -1251,6 +1251,16 @@
 		},
 
 		{
+			"name": "ushigatana-swing-right-to-left",
+			"code": "ushigatana-swing-right-to-left",
+			"quantityframes": 50,
+			"onActivityStopped": "EaseOut",
+			"onAnimationEnd": "Repeat",
+			"keyframes": [
+			]
+		},
+
+		{
 			"name": "Walk",
 			"code": "walk",
 			"quantityframes": 25,
