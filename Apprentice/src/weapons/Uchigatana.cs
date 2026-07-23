@@ -332,8 +332,8 @@ namespace Apprentice.Weapon
 		private int physicFrames = 60;
 		private float physicSpeed = 8.356F;
 
-		private float impulseAirbourne = 0.28F;
-		private float impulseGrounded = 1.4F;
+		private float horizontalImpulse = 1.4F;
+		private float verticalImpulse = 0.04F;
 
 		private int dashCooldownMs = 800;
 		private int dashBlurEnableMs = 250;
@@ -457,8 +457,8 @@ namespace Apprentice.Weapon
 			DebugWidgets.IntSlider("Ushigatana", "Physic", "physicFps", 0, 120, () => { return physicFps; }, (v) => { physicFps = v; });
 			DebugWidgets.IntSlider("Ushigatana", "Physic", "physicFrames", 0, 120, () => { return physicFrames; }, (v) => { physicFrames = v; });
 			DebugWidgets.FloatSlider("Ushigatana", "Physic", "physicSpeed", -50.0F, 50.0F, () => { return physicSpeed; }, (v) => { physicSpeed = v; });
-			DebugWidgets.FloatSlider("Ushigatana", "Physic", "impulseAirbourne", -10.0F, 10.0F, () => { return impulseAirbourne; }, (v) => { impulseAirbourne = v; });
-			DebugWidgets.FloatSlider("Ushigatana", "Physic", "impulseGrounded", -10.0F, 10.0F, () => { return impulseGrounded; }, (v) => { impulseGrounded = v; });
+			DebugWidgets.FloatSlider("Ushigatana", "Physic", "horizontalImpulse", -50.0F, 50.0F, () => { return horizontalImpulse; }, (v) => { horizontalImpulse = v; });
+			DebugWidgets.FloatSlider("Ushigatana", "Physic", "verticalImpulse", -0.1F, 0.1F, () => { return verticalImpulse; }, (v) => { verticalImpulse = v; });
 
 			DebugWidgets.IntSlider("Ushigatana", "Animation", "dashForwardFrameFrames", 0, 1000, () => { return dashForwardFrameCount; }, (v) => { dashForwardFrameCount = v; });
 			DebugWidgets.IntSlider("Ushigatana", "Animation", "dashForwardRetractFrames", 0, 1000, () => { return dashForwardRetractFrameCount; }, (v) => { dashForwardRetractFrameCount = v; });
@@ -485,6 +485,9 @@ namespace Apprentice.Weapon
 
 						physicFrame = 0.0F;
 						animationFrame = 0;
+
+						// Enable motion blur
+						dashBlur.BlurEnable = true;
 
 						// Compute dash direction
 						Vec3d worldUp = new(0, 1, 0);
@@ -590,6 +593,9 @@ namespace Apprentice.Weapon
 					{
 						sequenceState = SequenceState.SEQUENCE_STATE_IDLE;
 
+						// Disable motion blur
+						dashBlur.BlurEnable = false;
+
 						break;
 					}
 			}
@@ -598,12 +604,9 @@ namespace Apprentice.Weapon
 			{
 				// Apply physics
 				float totalFrames = (1.0F / physicFps) * physicFrames;
-				float impulseAttenuator = entity.OnGround
-					? impulseGrounded
-					: impulseAirbourne;
-				dashDirection.Y = 0.0F;
-				Vec3d force = dashDirection * EaseOutElastic(physicFrame / totalFrames) * impulseAttenuator;
-				force.Y += EaseOutCirc(physicFrame / totalFrames) * 0.01F;
+				// dashDirection.Y = 0.0F;
+				Vec3d force = dashDirection * EaseOutElastic(physicFrame / totalFrames) * horizontalImpulse;
+				force.Y += EaseOutCirc(physicFrame / totalFrames) * verticalImpulse;
 				transform.Motion.Add(force);
 
 				// Advance animation
@@ -659,16 +662,12 @@ namespace Apprentice.Weapon
 		{
 			if (entityPlayer == null) return true;
 			if (dashOnCooldown) return true;
-			if (dashBlur == null) return true;
 			if (entityPlayer.OnGround == false) return true;
 
 			sequenceState = SequenceState.SEQUENCE_STATE_START;
 
 			// Set dash on cooldown
 			dashOnCooldown = true;
-
-			// Enable motion blur
-			dashBlur.BlurEnable = true;
 
 			// TODO: Refactor this stuff..
 			//  |
@@ -683,12 +682,6 @@ namespace Apprentice.Weapon
 				dashOnCooldown = false;
 				clientApi.World.PlaySoundAt(dashRecoverSound1, new BlockPos(entityPlayer.Pos.XYZInt, 0), 0.0, null, true, 64.0F, 1.0F);
 			}, dashCooldownMs);
-
-			// Disable motion blur
-			clientApi.World.RegisterCallback(_ =>
-			{
-				dashBlur.BlurEnable = false;
-			}, dashBlurEnableMs);
 
 			return true;
 		}
