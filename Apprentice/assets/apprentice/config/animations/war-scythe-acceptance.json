@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "heldItemCode": "apprentice:warscythe",
+  "modelOrigin": [8, 0, 8],
+  "shaftAxis": [0, 1, 0],
+  "rightGripMin": [6.65, -2.5, 6.65],
+  "rightGripMax": [9.35, 4.7, 9.35],
+  "leftGripMin": [6.65, 5.3, 6.65],
+  "leftGripMax": [9.35, 12.9, 9.35],
+  "bladeElementPrefixes": [
+    "blade-"
+  ],
+  "maximumGripDistance": 0.03,
+  "minimumBladeCenterLateralSpan": 0.75
+}

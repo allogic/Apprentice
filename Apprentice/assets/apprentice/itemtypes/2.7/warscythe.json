@@ -5,9 +5,7 @@
   "tool": "sword",
   "attackRange": 3.5,
   "attackpower": 7.5,
-  "heldTpIdleAnimation": "apprenticescytheshoulder",
-  "heldRightReadyAnimation": "apprenticescytheshoulder",
-  "heldTpHitAnimation": "apprenticescytheswing",
+  "heldTpIdleAnimation": "scytheIdle",
   "tags": ["apprentice-content"],
   "maxstacksize": 1,
   "storageFlags": 5,
@@ -34,8 +32,8 @@
     "scale": 0.62
   },
   "tpHandTransform": {
-    "translation": { "x": -0.57, "y": -0.3, "z": -0.7 },
-    "rotation": { "x": 52, "y": -8.5, "z": 238 },
+    "translation": { "x": -0.82, "y": -0.2, "z": -0.65 },
+    "rotation": { "x": 58, "y": -4.5, "z": 280 },
     "origin": { "x": 0.5, "y": 0.2, "z": 0.5 },
     "scale": 0.7799
   },

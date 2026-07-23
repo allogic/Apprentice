@@ -1,10 +1,10 @@
-using Apprentice.Weapon;
-using HarmonyLib;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using HarmonyLib;
+using Newtonsoft.Json.Linq;
+
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
@@ -16,7 +16,7 @@ namespace Apprentice
 {
 	public sealed class ApprenticeModSystem : ModSystem
 	{
-		private const string PlaytestVersion = "2.7.0-dev.20260722.61";
+		private const string PlaytestVersion = "2.7.0-dev.20260723.80";
 		private const string BowAssetFingerprint = "BOW-DARKWOOD-OXBLOOD-C-AXIS2-EDIT1-UV1-DRAW5";
 		private const string ReviewedAssetFingerprint = "ITEMS-RUNEBOUND5-GILDED2-SUNLANCE2-KITS-HANDANCHOR-TRAP-CHAIN-SHIELD-SIDEWAYS-FISHING-NATIVE-METALS-APPRENTICE2";
 		private static readonly string[] ExpectedBowShapeCodes =
@@ -71,6 +71,7 @@ namespace Apprentice
 
 		private ClassConfig? classConfig = null;
 		private SkillTreeConfig? skillTreeConfig = null;
+		private ApprenticeAnimationDefinition? warScytheAnimation = null;
 		private ApprenticeContentRegistry contentRegistry =
 			ApprenticeContentRegistry.Empty;
 
@@ -85,7 +86,7 @@ namespace Apprentice
 		private InterfaceManager? interfaceManager = null;
 		private OverlayManager? overlayManager = null;
 		private HealthBarRenderer? healthBarRenderer = null;
-		private WarScytheCalibrationSystem? warScytheCalibration = null;
+		private ApprenticeAnimationSystem? animationSystem = null;
 		private Harmony? poisonInfoHarmony = null;
 		private Harmony? durabilityUpgradeHarmony = null;
 
@@ -287,7 +288,8 @@ namespace Apprentice
 					.RegisterMessageType<DangerHeatmapStatePacket>()
 					.RegisterMessageType<DangerHeatmapRequestPacket>()
 					.RegisterMessageType<SkillPurchaseRequestPacket>()
-					.RegisterMessageType<SkillPurchaseResultPacket>();
+					.RegisterMessageType<SkillPurchaseResultPacket>()
+					.RegisterMessageType<WarScytheAnimationPacket>();
 			}
 			else
 			{
@@ -298,13 +300,16 @@ namespace Apprentice
 					.RegisterMessageType<DangerHeatmapStatePacket>()
 					.RegisterMessageType<DangerHeatmapRequestPacket>()
 					.RegisterMessageType<SkillPurchaseRequestPacket>()
-					.RegisterMessageType<SkillPurchaseResultPacket>();
+					.RegisterMessageType<SkillPurchaseResultPacket>()
+					.RegisterMessageType<WarScytheAnimationPacket>();
 			}
 		}
 		public override void AssetsLoaded(ICoreAPI api)
 		{
 			classConfig = ClassConfigLoader.Load(api);
 			skillTreeConfig = SkillTreeConfigLoader.Load(api);
+			warScytheAnimation =
+				ApprenticeAnimationDefinition.LoadWarScythe(api);
 			ConfigConsistencyValidator.Validate(classConfig, skillTreeConfig);
 			contentRegistry = ApprenticeContentRegistry.Load(api);
 			HiddenClassCatalog.Configure(contentRegistry.Discoveries);
@@ -573,10 +578,28 @@ namespace Apprentice
 			);
 			poisonEffectSystem = new PoisonEffectSystem(api, contentRegistry);
 			ecologyWorldgenSystem = new EcologyWorldgenSystem(api, contentRegistry);
+			ApprenticeAnimationSystem.RegisterServerHandler(
+				api,
+				networkChannel,
+				WarScytheAnimation
+			);
 		}
 		public override void StartClientSide(ICoreClientAPI api)
 		{
-			warScytheCalibration = new WarScytheCalibrationSystem(api);
+			if (clientNetworkChannel != null)
+			{
+				animationSystem = new ApprenticeAnimationSystem(
+					api,
+					clientNetworkChannel,
+					WarScytheAnimation
+				);
+			}
+			else
+			{
+				api.Logger.Error(
+					"[Apprentice] War Scythe animation is unavailable because the client network channel is missing."
+				);
+			}
 
 			// Heatmap state is gameplay-owned and must not depend on optional
 			// client HUD construction succeeding later in this method.
@@ -655,8 +678,6 @@ namespace Apprentice
 				);
 				api.Logger.Error(exception);
 			}
-
-			capi?.Event.PlayerJoin += OnPlayerJoin;
 		}
 
 		public override void Dispose()
@@ -677,7 +698,8 @@ namespace Apprentice
 			overlayManager?.Dispose();
 			interfaceManager?.Dispose();
 			healthBarRenderer?.Dispose();
-			warScytheCalibration = null;
+			animationSystem?.Dispose();
+			animationSystem = null;
 
 			interactionEventBridge = null;
 			dangerTierSystem = null;
@@ -691,20 +713,38 @@ namespace Apprentice
 			healthBarRenderer = null;
 			DangerHeatmapClientRuntime.RequestState = null;
 			DangerHeatmapClientRuntime.LatestState = null;
+			warScytheAnimation = null;
 
 			base.Dispose();
+		}
+
+		internal ApprenticeAnimationDefinition WarScytheAnimation =>
+			warScytheAnimation ?? throw new InvalidOperationException(
+				"The War Scythe animation definition was not loaded."
+			);
+
+		internal void StartWarScytheAnimation(EntityAgent entity)
+		{
+			animationSystem?.StartLocal(entity);
+		}
+
+		internal bool IsWarScytheEditorPreviewActive =>
+			animationSystem?.EditorPreviewActive == true;
+
+		internal void StopWarScytheAnimation(EntityAgent entity)
+		{
+			animationSystem?.StopLocal(entity);
+		}
+
+		internal void NoteWarScytheLifecycle(
+			EntityAgent entity,
+			string eventCode)
+		{
+			animationSystem?.NoteLocalLifecycle(entity, eventCode);
 		}
 		#endregion
 
 		#region Event Handler
-		private void OnPlayerJoin(IClientPlayer byPlayer)
-		{
-			if (capi != null)
-			{
-				byPlayer.Entity.AddBehavior(new UchigatanaDashBehaviour(capi, byPlayer.Entity));
-				byPlayer.Entity.AddBehavior(new TrueThirdPersonBehaviour(capi, byPlayer.Entity));
-			}
-		}
 		private void OnExperienceNotification(ExperienceNotificationPacket packet)
 		{
 			// Network packet callbacks are not a safe place to create

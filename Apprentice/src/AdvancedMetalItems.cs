@@ -19,9 +19,10 @@ namespace Apprentice
         public List<SmithingRecipe> GetMatchingRecipes(ItemStack stack) =>
             api.GetSmithingRecipes()
                 .Where(recipe =>
-                    recipe.Ingredient?.SatisfiesAsIngredient(stack) == true)
+                    recipe.Ingredient?.SatisfiesAsIngredient(stack) == true &&
+                    recipe.Output?.ResolvedItemstack?.Collectible?.Code != null)
                 .OrderBy(recipe =>
-                    recipe.Output.ResolvedItemstack.Collectible.Code)
+                    recipe.Output!.ResolvedItemstack!.Collectible.Code)
                 .ToList();
 
         public bool CanWork(ItemStack stack)

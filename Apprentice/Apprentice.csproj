@@ -77,6 +77,10 @@
     Text="Remove the stale replace-vanilla-characterclasses.json patch. Apprentice must retain vanilla classes for engine and mod compatibility."
   />
   <Error
+    Condition="Exists('assets\apprentice\patches\2.7\war-scythe-player-animations.json')"
+    Text="Remove the rejected .71 War Scythe player-animation patch. .80 owns ItemAnchor, ItemAnchorL, and both arm chains through one temporary-pose category; the rejected .76-.79 IK branch is absent. Extract the source into a new directory instead of overlaying an older build."
+  />
+  <Error
     Condition="Exists('assets\apprentice\worldproperties\block\metal.json')"
     Text="Remove assets/apprentice/worldproperties/block/metal.json. Vintage Story consumes every block/metal world property in vanilla templates and recreates game-domain Starsteel/Aethersteel duplicates. Extract this source into a new empty directory instead of overlaying .22."
   />
@@ -109,6 +113,8 @@
     <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\config\class.json" />
     <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\config\content-2.7.json" />
     <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\config\remaps.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\config\animations\war-scythe.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\config\animations\war-scythe-acceptance.json" />
     <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\itemtypes\2.7\ingot.json" />
     <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\itemtypes\2.7\workitem.json" />
     <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\itemtypes\2.7\compositebow.json" />
@@ -116,7 +122,6 @@
     <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\itemtypes\2.7\advancedtrapkit.json" />
     <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\itemtypes\2.7\warscythe.json" />
     <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\itemtypes\2.7\manaburnsword.json" />
-    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\patches\2.7\war-scythe-player-animations.json" />
     <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\blocktypes\2.7\advancedtrap.json" />
     <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\shapes\block\2.7\advancedtrap-opening3.json" />
     <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\shapes\block\2.7\advancedtrap-opening4.json" />

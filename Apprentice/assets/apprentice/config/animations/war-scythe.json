@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "code": "war-scythe-attack",
+  "category": "apprentice-mainhand",
+  "heldItemCode": "apprentice:warscythe",
+  "easeInSeconds": 0.12,
+  "easeOutSeconds": 0.18,
+  "keyFrames": [
+    {
+      "timeSeconds": 0.0,
+      "elements": {
+        "ItemAnchor": [0, 0, 0, 0, 0, 14],
+        "ItemAnchorL": [0, 0, 0, 0, 0, 0],
+        "UpperArmR": [0, 0, 0, -26, 0, -59],
+        "LowerArmR": [0, 0, 0, 0, 0, -53],
+        "UpperArmL": [0, 0, 0, -21, -24, -73],
+        "LowerArmL": [0, 0, 0, 0, 0, -19]
+      }
+    },
+    {
+      "timeSeconds": 0.15,
+      "elements": {
+        "ItemAnchor": [0, 0, 0, 0, 0, 6],
+        "ItemAnchorL": [0, 0, 0, 0, 0, 0],
+        "UpperArmR": [0, 0.1, 0, -22, 1.2, -69.2],
+        "LowerArmR": [0, -1.6, 0, 0, 0, -56],
+        "UpperArmL": [0, 0, 0, 0, -17, -93],
+        "LowerArmL": [0, 0, 0, 0, 0, 0]
+      }
+    },
+    {
+      "timeSeconds": 0.3,
+      "elements": {
+        "ItemAnchor": [0, 0, 0, 0, 0, 37],
+        "ItemAnchorL": [0, 0, 0, 0, 0, 0],
+        "UpperArmR": [0, 0.1, 0, -34, 4.2, -46.2],
+        "LowerArmR": [0, -1.6, 0, 0, 0, -10],
+        "UpperArmL": [0, 0, 0, 0, -9, -46],
+        "LowerArmL": [0, 0, 0, 0, 0, 0]
+      }
+    },
+    {
+      "timeSeconds": 0.45,
+      "elements": {
+        "ItemAnchor": [0, 0, 0, 0, 0, 60],
+        "ItemAnchorL": [0, 0, 0, 0, 0, 0],
+        "UpperArmR": [0, 0, 0, -44, 2.2, -51.2],
+        "LowerArmR": [0, -1.6, 0, 0, 0, 0],
+        "UpperArmL": [0, 0, 0, 0, -8, -32],
+        "LowerArmL": [0, 0, 0, 0, 0, -33]
+      }
+    },
+    {
+      "timeSeconds": 0.9,
+      "elements": {
+        "ItemAnchor": [0, 0, 0, 0, 0, 0],
+        "ItemAnchorL": [0, 0, 0, 0, 0, 0],
+        "UpperArmR": [0, -1.6, 0, -34, -1.8, -50.2],
+        "LowerArmR": [0, 1.6, 0, 0, 0, -74],
+        "UpperArmL": [0, 0, 0, -40, -28, -85],
+        "LowerArmL": [0, 0, 0, 0, 0, 0]
+      }
+    },
+    {
+      "timeSeconds": 1.2,
+      "elements": {
+        "ItemAnchor": [0, 0, 0, 0, 0, 14],
+        "ItemAnchorL": [0, 0, 0, 0, 0, 0],
+        "UpperArmR": [0, 0, 0, -26, 0, -59],
+        "LowerArmR": [0, 0, 0, 0, 0, -53],
+        "UpperArmL": [0, 0, 0, -21, -24, -73],
+        "LowerArmL": [0, 0, 0, 0, 0, -19]
+      }
+    }
+  ],
+  "callbacks": [
+    { "code": "attack-start", "timeSeconds": 0.15 },
+    { "code": "attack-sample", "timeSeconds": 0.45 },
+    { "code": "attack-stop", "timeSeconds": 0.6 },
+    { "code": "ready", "timeSeconds": 1.2 }
+  ]
+}

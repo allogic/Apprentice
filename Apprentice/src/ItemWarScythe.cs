@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 using Vintagestory.API.Common;
@@ -9,33 +8,33 @@ using Vintagestory.API.MathTools;
 namespace Apprentice
 {
     /// <summary>
-    /// Combat-only scythe. It deliberately does not inherit ItemScythe, so
-    /// Vintage Story's grass/crop harvesting sweep is never invoked.
+    /// Combat-only scythe. It uses the vanilla scythe presentation lifecycle
+    /// without inheriting ItemScythe's grass and crop harvesting behavior.
     /// </summary>
     public sealed class ItemWarScythe : Item
     {
-        private const float SwingDurationSeconds = 1.10f;
-        private const float ImpactDelaySeconds = 0.67f;
-        private const int AnimationStopGraceMilliseconds = 80;
-
-        private sealed class SwingState
-        {
-            public bool Active;
-            public bool AwaitingRelease;
-            public int Sequence;
-        }
-
-        private readonly Dictionary<long, SwingState> swingStates = new();
+        private const string TimelineTimeAttribute =
+            "apprenticeWarScytheTimelineTime";
+        private const string AttackWindowAttribute =
+            "apprenticeWarScytheAttackWindow";
+        private const string ImpactAppliedAttribute =
+            "apprenticeWarScytheImpactApplied";
+        private const string ReleaseDeferredAttribute =
+            "apprenticeWarScytheReleaseDeferred";
 
         public override void OnLoaded(ICoreAPI api)
         {
             base.OnLoaded(api);
 
-            HeldTpHitAnimation = "apprenticescytheswing";
-            HeldRightTpIdleAnimation = "apprenticescytheshoulder";
-            HeldLeftTpIdleAnimation = "apprenticescytheshoulder";
-            HeldRightReadyAnimation = "apprenticescytheshoulder";
-            HeldLeftReadyAnimation = "apprenticescytheshoulder";
+            // scytheIdle remains the delayed out-of-combat shoulder rest only.
+            // The Apprentice runtime is the sole hit-pose owner.
+            HeldTpHitAnimation = null;
+            HeldRightTpIdleAnimation = "scytheIdle";
+            HeldRightReadyAnimation = null;
+
+            api.Logger.Notification(
+                "[Apprentice] War Scythe animation ownership verified: hit=none; idle=scytheIdle; attack=apprentice-mainhand."
+            );
         }
 
         public override void OnHeldAttackStart(
@@ -45,72 +44,88 @@ namespace Apprentice
             EntitySelection entitySel,
             ref EnumHandHandling handHandling)
         {
-            handHandling = EnumHandHandling.PreventDefaultAction;
-
-            SwingState state = GetSwingState(byEntity);
-            if (state.Active || state.AwaitingRelease)
+            if (api.Side == EnumAppSide.Client &&
+                GetApprenticeSystem().IsWarScytheEditorPreviewActive)
             {
-                state.AwaitingRelease = true;
+                // The development editor and gameplay attack never own the
+                // same category at once. Closing the editor restores the
+                // ordinary attack path without changing the held stack.
+                handHandling = EnumHandHandling.PreventDefaultAction;
                 return;
             }
 
-            state.Active = true;
-            state.AwaitingRelease = true;
-            int sequence = ++state.Sequence;
-
-            OneShotMeleeAnimation.Stop(byEntity, HeldRightTpIdleAnimation);
-            OneShotMeleeAnimation.Stop(byEntity, HeldLeftTpIdleAnimation);
-
-            bool started = byEntity.AnimManager.StartAnimation(HeldTpHitAnimation);
-            if (!started)
-            {
-                state.Active = false;
-                api.Logger.Warning(
-                    "[Apprentice] War Scythe animation '{0}' could not be started for entity {1}.",
-                    HeldTpHitAnimation,
-                    byEntity.EntityId
-                );
-                ResumeShoulderPose(byEntity);
-                return;
-            }
-
-            api.Event.RegisterCallback(
-                _ => CompleteSwing(byEntity, slot, state, sequence),
-                (int)Math.Ceiling(SwingDurationSeconds * 1000f) +
-                    AnimationStopGraceMilliseconds
+            base.OnHeldAttackStart(
+                slot,
+                byEntity,
+                blockSel,
+                entitySel,
+                ref handHandling
             );
 
-            if (api.Side == EnumAppSide.Server)
+            byEntity.Attributes.SetFloat(TimelineTimeAttribute, -0.0001f);
+            byEntity.Attributes.SetBool(AttackWindowAttribute, false);
+            byEntity.Attributes.SetBool(ImpactAppliedAttribute, false);
+            byEntity.Attributes.SetBool(ReleaseDeferredAttribute, false);
+
+            if (api.Side == EnumAppSide.Client)
             {
-                api.Event.RegisterCallback(
-                    _ => ApplyScheduledImpact(byEntity, slot, state, sequence),
-                    (int)Math.Ceiling(ImpactDelaySeconds * 1000f)
-                );
+                GetApprenticeSystem().StartWarScytheAnimation(byEntity);
             }
+
+            // Vintage Story owns input duration and stop propagation. The
+            // Apprentice runtime exclusively owns the attack pose and impact.
+            handHandling = EnumHandHandling.PreventDefaultAction;
         }
 
-        public override void OnHeldIdle(ItemSlot slot, EntityAgent byEntity)
+        public override bool OnHeldAttackCancel(
+            float secondsUsed,
+            ItemSlot slot,
+            EntityAgent byEntity,
+            BlockSelection blockSel,
+            EntitySelection entitySel,
+            EnumItemUseCancelReason cancelReason)
         {
-            SwingState state = GetSwingState(byEntity);
-            if (!byEntity.Controls.LeftMouseDown)
+            if (ShouldDeferAttackCancel(cancelReason))
             {
-                state.AwaitingRelease = false;
+                // A War Scythe swing is a committed one-shot action. Denying
+                // the early mouse-up cancel keeps the vanilla idle controller
+                // paused until OnHeldAttackStep reaches the authored end.
+                if (!byEntity.Attributes.GetBool(ReleaseDeferredAttribute))
+                {
+                    byEntity.Attributes.SetBool(
+                        ReleaseDeferredAttribute,
+                        true
+                    );
+                    if (api.Side == EnumAppSide.Client)
+                    {
+                        GetApprenticeSystem().NoteWarScytheLifecycle(
+                            byEntity,
+                            "release-deferred"
+                        );
+                    }
+                }
+
+                return false;
             }
 
-            if (state.Active)
+            byEntity.Attributes.SetBool(AttackWindowAttribute, false);
+            byEntity.Attributes.SetBool(ReleaseDeferredAttribute, false);
+            if (api.Side == EnumAppSide.Client)
             {
-                OneShotMeleeAnimation.Stop(byEntity, HeldRightTpIdleAnimation);
-                return;
+                ApprenticeModSystem system = GetApprenticeSystem();
+                system.NoteWarScytheLifecycle(
+                    byEntity,
+                    $"cancel-{cancelReason}"
+                );
+                system.StopWarScytheAnimation(byEntity);
             }
 
-            base.OnHeldIdle(slot, byEntity);
-
-            if (!byEntity.AnimManager.IsAnimationActive(HeldTpHitAnimation) &&
-                !byEntity.AnimManager.IsAnimationActive(HeldRightTpIdleAnimation))
-            {
-                ResumeShoulderPose(byEntity);
-            }
+            return true;
         }
+
+        internal static bool ShouldDeferAttackCancel(
+            EnumItemUseCancelReason cancelReason) =>
+            cancelReason == EnumItemUseCancelReason.ReleasedMouse;
 
         public override bool OnHeldAttackStep(
             float secondsUsed,
@@ -119,8 +134,15 @@ namespace Apprentice
             BlockSelection blockSel,
             EntitySelection entitySel)
         {
-            return GetSwingState(byEntity).Active &&
-                secondsUsed < SwingDurationSeconds;
+            ApprenticeAnimationDefinition definition =
+                GetApprenticeSystem().WarScytheAnimation;
+            AdvanceTimeline(secondsUsed, byEntity, slot, definition);
+
+            // The client ends after the definition's ease-in, authored track,
+            // and ease-out. The server follows the normal held-action stop
+            // packet and remains authoritative for callback-owned damage.
+            return api.Side == EnumAppSide.Server ||
+                secondsUsed < definition.TotalActionSeconds;
         }
 
         public override void OnHeldAttackStop(
@@ -130,83 +152,91 @@ namespace Apprentice
             BlockSelection blockSel,
             EntitySelection entitySel)
         {
-            SwingState state = GetSwingState(byEntity);
-            if (!byEntity.Controls.LeftMouseDown)
+            ApprenticeAnimationDefinition definition =
+                GetApprenticeSystem().WarScytheAnimation;
+            AdvanceTimeline(secondsUsed, byEntity, slot, definition);
+            byEntity.Attributes.SetBool(AttackWindowAttribute, false);
+            byEntity.Attributes.SetBool(ReleaseDeferredAttribute, false);
+
+            if (api.Side == EnumAppSide.Client)
             {
-                state.AwaitingRelease = false;
+                ApprenticeModSystem system = GetApprenticeSystem();
+                system.NoteWarScytheLifecycle(byEntity, "held-stop");
+                system.StopWarScytheAnimation(byEntity);
             }
         }
 
-        private SwingState GetSwingState(EntityAgent entity)
-        {
-            if (!swingStates.TryGetValue(entity.EntityId, out SwingState? state))
-            {
-                state = new SwingState();
-                swingStates[entity.EntityId] = state;
-            }
-
-            return state;
-        }
-
-        private void CompleteSwing(
+        private void AdvanceTimeline(
+            float secondsUsed,
             EntityAgent byEntity,
             ItemSlot slot,
-            SwingState state,
-            int sequence)
+            ApprenticeAnimationDefinition definition)
         {
-            if (state.Sequence != sequence) return;
+            float previous = byEntity.Attributes.GetFloat(
+                TimelineTimeAttribute,
+                -0.0001f
+            );
+            float current = Math.Max(previous, secondsUsed);
 
-            OneShotMeleeAnimation.Stop(byEntity, HeldTpHitAnimation);
-            state.Active = false;
-
-            if (!byEntity.Controls.LeftMouseDown)
+            foreach (ApprenticeAnimationCallback callback in
+                definition.Callbacks)
             {
-                state.AwaitingRelease = false;
+                float callbackTime =
+                    definition.EaseInSeconds + callback.TimeSeconds;
+                if (previous < callbackTime && current >= callbackTime)
+                {
+                    ProcessTimelineCallback(
+                        callback.Code,
+                        byEntity,
+                        slot
+                    );
+                }
             }
 
-            if (IsScytheStillHeld(byEntity, slot))
-            {
-                ResumeShoulderPose(byEntity);
-            }
+            byEntity.Attributes.SetFloat(TimelineTimeAttribute, current);
         }
 
-        private void ApplyScheduledImpact(
+        private void ProcessTimelineCallback(
+            string callback,
             EntityAgent byEntity,
-            ItemSlot slot,
-            SwingState state,
-            int sequence)
+            ItemSlot slot)
         {
-            if (state.Sequence != sequence ||
-                !state.Active ||
-                !IsScytheStillHeld(byEntity, slot))
+            switch (callback)
             {
-                return;
-            }
+                case "attack-start":
+                    byEntity.Attributes.SetBool(AttackWindowAttribute, true);
+                    break;
 
-            ApplyAreaDamage(byEntity, slot);
-        }
+                case "attack-sample":
+                    if (api.Side == EnumAppSide.Server &&
+                        byEntity.Attributes.GetBool(AttackWindowAttribute) &&
+                        !byEntity.Attributes.GetBool(ImpactAppliedAttribute))
+                    {
+                        ApplyAreaDamage(byEntity, slot);
+                        byEntity.Attributes.SetBool(
+                            ImpactAppliedAttribute,
+                            true
+                        );
+                    }
+                    break;
 
-        private bool IsScytheStillHeld(EntityAgent byEntity, ItemSlot startedSlot)
-        {
-            if (startedSlot.Empty || startedSlot.Itemstack?.Collectible != this)
-            {
-                return false;
-            }
-
-            return byEntity.RightHandItemSlot?.Itemstack?.Collectible == this;
-        }
-
-        private void ResumeShoulderPose(EntityAgent byEntity)
-        {
-            if (!byEntity.AnimManager.IsAnimationActive(HeldRightTpIdleAnimation))
-            {
-                byEntity.AnimManager.StartAnimation(HeldRightTpIdleAnimation);
+                case "attack-stop":
+                case "ready":
+                    byEntity.Attributes.SetBool(
+                        AttackWindowAttribute,
+                        false
+                    );
+                    break;
             }
         }
 
         private void ApplyAreaDamage(EntityAgent byEntity, ItemSlot slot)
         {
-            if (api.Side != EnumAppSide.Server || slot.Empty) return;
+            if (api.Side != EnumAppSide.Server || slot.Empty ||
+                slot.Itemstack?.Item is not ItemWarScythe)
+            {
+                return;
+            }
 
             float damage = Attributes?["aoeDamage"].AsFloat(7.5f) ?? 7.5f;
             float radius = Attributes?["aoeRadius"].AsFloat(3.5f) ?? 3.5f;
@@ -279,5 +309,8 @@ namespace Apprentice
                 entity.IsInteractable &&
                 entity is EntityAgent;
         }
+
+        private ApprenticeModSystem GetApprenticeSystem() =>
+            api.ModLoader.GetModSystem<ApprenticeModSystem>(true);
     }
 }

@@ -5,9 +5,14 @@ using Vintagestory.API.Common;
 
 namespace Apprentice
 {
-	internal sealed class WarScytheCalibrationSystem
+	internal sealed class WarScytheCalibrationSystem : IDisposable
 	{
 		private const string ScytheCode = "apprentice:warscythe";
+		private const float MaximumTranslation = 8f;
+		private const float MaximumOrigin = 4f;
+		private const float MinimumScale = 0.05f;
+		private const float MaximumScale = 5f;
+		private const float MaximumRotation = 3600f;
 		private static readonly string[] Components =
 		{
 			"tx", "ty", "tz", "rx", "ry", "rz", "ox", "oy", "oz", "scale"
@@ -15,17 +20,26 @@ namespace Apprentice
 
 		private readonly ICoreClientAPI api;
 		private readonly ModelTransform baseline;
+		private ModelTransform current;
+		private static WarScytheCalibrationSystem? active;
 
 		public WarScytheCalibrationSystem(ICoreClientAPI api)
 		{
 			this.api = api;
-			baseline = Current().Clone();
+			baseline = Scythe().TpHandTransform?.Clone()
+				?? throw new InvalidOperationException(
+					"War Scythe has no third-person transform."
+				);
+			baseline.EnsureDefaultValues();
+			current = baseline.Clone();
+			active = this;
 
 			CommandArgumentParsers parsers = api.ChatCommands.Parsers;
 			api.ChatCommands.Create("scythecal")
 				.WithDescription("Live War Scythe third-person pose calibration")
 				.WithAdditionalInformation(
 					"Components: tx ty tz rx ry rz ox oy oz scale. " +
+					"Use .scythecal <component> <amount> for a direct adjustment, " +
 					"Use .scythecal add <component> <amount>, .scythecal set <component> <value>, " +
 					".scythecal show, .scythecal reset, or .scythecal export."
 				)
@@ -38,6 +52,16 @@ namespace Apprentice
 					.WithArgs(parsers.WordRange("component", Components), parsers.Float("value"))
 					.HandleWith(Set)
 				.EndSubCommand()
+				.BeginSubCommand("tx").WithArgs(parsers.Float("amount")).HandleWith(args => AddDirect("tx", args)).EndSubCommand()
+				.BeginSubCommand("ty").WithArgs(parsers.Float("amount")).HandleWith(args => AddDirect("ty", args)).EndSubCommand()
+				.BeginSubCommand("tz").WithArgs(parsers.Float("amount")).HandleWith(args => AddDirect("tz", args)).EndSubCommand()
+				.BeginSubCommand("rx").WithArgs(parsers.Float("amount")).HandleWith(args => AddDirect("rx", args)).EndSubCommand()
+				.BeginSubCommand("ry").WithArgs(parsers.Float("amount")).HandleWith(args => AddDirect("ry", args)).EndSubCommand()
+				.BeginSubCommand("rz").WithArgs(parsers.Float("amount")).HandleWith(args => AddDirect("rz", args)).EndSubCommand()
+				.BeginSubCommand("ox").WithArgs(parsers.Float("amount")).HandleWith(args => AddDirect("ox", args)).EndSubCommand()
+				.BeginSubCommand("oy").WithArgs(parsers.Float("amount")).HandleWith(args => AddDirect("oy", args)).EndSubCommand()
+				.BeginSubCommand("oz").WithArgs(parsers.Float("amount")).HandleWith(args => AddDirect("oz", args)).EndSubCommand()
+				.BeginSubCommand("scale").WithArgs(parsers.Float("amount")).HandleWith(args => AddDirect("scale", args)).EndSubCommand()
 				.BeginSubCommand("reset").HandleWith(Reset).EndSubCommand()
 				.BeginSubCommand("export").HandleWith(Export).EndSubCommand();
 
@@ -45,49 +69,118 @@ namespace Apprentice
 		}
 
 		private TextCommandResult Show(TextCommandCallingArgs args) =>
-			TextCommandResult.Success(FormatPose(Current()));
+			TextCommandResult.Success(FormatPose(current));
 
 		private TextCommandResult Add(TextCommandCallingArgs args)
 		{
 			string component = (string)args[0];
 			float amount = Convert.ToSingle(args[1], CultureInfo.InvariantCulture);
-			ModelTransform pose = Current();
-			SetComponent(pose, component, GetComponent(pose, component) + amount);
-			RefreshHeldItem();
-			return TextCommandResult.Success(FormatPose(pose));
+			return Change(component, amount, relative: true);
 		}
 
 		private TextCommandResult Set(TextCommandCallingArgs args)
 		{
 			string component = (string)args[0];
 			float value = Convert.ToSingle(args[1], CultureInfo.InvariantCulture);
-			ModelTransform pose = Current();
-			SetComponent(pose, component, value);
-			RefreshHeldItem();
-			return TextCommandResult.Success(FormatPose(pose));
+			return Change(component, value, relative: false);
+		}
+
+		private TextCommandResult AddDirect(
+			string component,
+			TextCommandCallingArgs args)
+		{
+			float amount = Convert.ToSingle(args[0], CultureInfo.InvariantCulture);
+			return Change(component, amount, relative: true);
+		}
+
+		private TextCommandResult Change(
+			string component,
+			float value,
+			bool relative)
+		{
+			ModelTransform next = current.Clone();
+			float requested = relative
+				? GetComponent(next, component) + value
+				: value;
+
+			string? validationError = Validate(component, requested);
+			if (validationError != null)
+			{
+				return TextCommandResult.Success(
+					"Scythe calibration unchanged: " + validationError + " " +
+					FormatPose(current)
+				);
+			}
+
+			SetComponent(next, component, requested);
+			current = next;
+			return TextCommandResult.Success(FormatPose(current));
 		}
 
 		private TextCommandResult Reset(TextCommandCallingArgs args)
 		{
-			Scythe().TpHandTransform = baseline.Clone();
-			RefreshHeldItem();
-			return TextCommandResult.Success("Scythe calibration reset. " + FormatPose(Current()));
+			current = baseline.Clone();
+			return TextCommandResult.Success(
+				"Scythe calibration reset. " + FormatPose(current)
+			);
 		}
 
 		private TextCommandResult Export(TextCommandCallingArgs args)
 		{
-			string json = FormatJson(Current());
+			string json = FormatJson(current);
 			api.Logger.Notification("[Apprentice] SCYTHECAL FINAL {0}", json);
-			return TextCommandResult.Success("SCYTHECAL FINAL written to client-main.log. " + FormatPose(Current()));
+			return TextCommandResult.Success(
+				"SCYTHECAL FINAL written to client-main.log. " +
+				FormatPose(current)
+			);
+		}
+
+		internal static ModelTransform? GetThirdPersonPreview() =>
+			active?.current;
+
+		public void Dispose()
+		{
+			if (ReferenceEquals(active, this)) active = null;
 		}
 
 		private Item Scythe() => api.World.GetItem(new AssetLocation(ScytheCode))
 			?? throw new InvalidOperationException("War Scythe is missing.");
 
-		private ModelTransform Current() => Scythe().TpHandTransform
-			?? throw new InvalidOperationException("War Scythe has no third-person transform.");
+		private static string? Validate(string component, float value)
+		{
+			if (!float.IsFinite(value))
+			{
+				return component + " must be a finite number.";
+			}
 
-		private void RefreshHeldItem() => api.World.Player.InventoryManager.ActiveHotbarSlot?.MarkDirty();
+			if ((component == "tx" || component == "ty" || component == "tz") &&
+				Math.Abs(value) > MaximumTranslation)
+			{
+				return component + " must stay between -8 and 8. " +
+					"Use small translation steps such as 0.05.";
+			}
+
+			if ((component == "ox" || component == "oy" || component == "oz") &&
+				Math.Abs(value) > MaximumOrigin)
+			{
+				return component + " must stay between -4 and 4. " +
+					"Use small origin steps such as 0.05.";
+			}
+
+			if (component == "scale" &&
+				(value < MinimumScale || value > MaximumScale))
+			{
+				return "scale must stay between 0.05 and 5.";
+			}
+
+			if ((component == "rx" || component == "ry" || component == "rz") &&
+				Math.Abs(value) > MaximumRotation)
+			{
+				return component + " must stay between -3600 and 3600 degrees.";
+			}
+
+			return null;
+		}
 
 		private static float GetComponent(ModelTransform pose, string component) => component switch
 		{
