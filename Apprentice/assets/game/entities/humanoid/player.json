@@ -1,0 +1,4713 @@
+{
+	"code": "player",
+	"class": "EntityPlayer",
+	"tags": [ "humanoid", "player", "seraph", "huntable", "habitat-land" ],
+	"weight": 65,
+	"canClimb": true,
+	"climbTouchDistance": 0.5,
+	"hitboxSize": {
+		"x": 0.6,
+		"y": 1.85
+	},
+	"deadHitboxSize": {
+		"x": 1,
+		"y": 0.5
+	},
+	"eyeHeight": 1.7,
+	"attributes": {
+		"glitchAffected": true,
+		"droppedItemsOnDeathTimer": 600,
+		"emotes": [ "wave", "cheer", "shrug", "cry", "nod", "facepalm", "bow", "laugh", "rage" ],
+		"randomIdleAnimations": [ "lookaround", "headscratch", "cough" ],
+		"disableElements": [ "hair-covered", "showshoeR", "showshoeL", "hoodtight" ],
+		"skinnableParts": [
+			{
+				"code": "baseskin",
+				"type": "texture",
+				"variants": [
+					{
+						"code": "skin1",
+						"texture": "entity/humanoid/seraphskinparts/body/skin1"
+					},
+					{
+						"code": "skin2",
+						"texture": "entity/humanoid/seraphskinparts/body/skin2"
+					},
+					{
+						"code": "skin3",
+						"texture": "entity/humanoid/seraphskinparts/body/skin3"
+					},
+					{
+						"code": "skin4",
+						"texture": "entity/humanoid/seraphskinparts/body/skin4"
+					},
+					{
+						"code": "skin5",
+						"texture": "entity/humanoid/seraphskinparts/body/skin5"
+					},
+					{
+						"code": "skin6",
+						"texture": "entity/humanoid/seraphskinparts/body/skin6"
+					},
+					{
+						"code": "skin7",
+						"texture": "entity/humanoid/seraphskinparts/body/skin7"
+					},
+					{
+						"code": "skin8",
+						"texture": "entity/humanoid/seraphskinparts/body/skin8"
+					},
+					{
+						"code": "skin9",
+						"texture": "entity/humanoid/seraphskinparts/body/skin9"
+					},
+					{
+						"code": "skin10",
+						"texture": "entity/humanoid/seraphskinparts/body/skin10"
+					},
+					{
+						"code": "skin11",
+						"texture": "entity/humanoid/seraphskinparts/body/skin11"
+					},
+					{
+						"code": "skin12",
+						"texture": "entity/humanoid/seraphskinparts/body/skin12"
+					},
+					{
+						"code": "skin13",
+						"texture": "entity/humanoid/seraphskinparts/body/skin13"
+					},
+					{
+						"code": "skin14",
+						"texture": "entity/humanoid/seraphskinparts/body/skin14"
+					},
+					{
+						"code": "skin15",
+						"texture": "entity/humanoid/seraphskinparts/body/skin15"
+					},
+					{
+						"code": "skin16",
+						"texture": "entity/humanoid/seraphskinparts/body/skin16"
+					},
+					{
+						"code": "skin17",
+						"texture": "entity/humanoid/seraphskinparts/body/skin17"
+					},
+					{
+						"code": "skin18",
+						"texture": "entity/humanoid/seraphskinparts/body/skin18"
+					},
+					{
+						"code": "skin19",
+						"texture": "entity/humanoid/seraphskinparts/body/skin19"
+					},
+					{
+						"code": "skin20",
+						"texture": "entity/humanoid/seraphskinparts/body/skin20"
+					}
+				]
+			},
+			{
+				"code": "eyecolor",
+				"type": "texture",
+				"textureRenderTo": {
+					"x": 57,
+					"y": 0
+				},
+				"variants": [
+					{
+						"code": "acid-green",
+						"texture": "entity/humanoid/seraphskinparts/eyes/acid-green"
+					},
+					{
+						"code": "aquamarine",
+						"texture": "entity/humanoid/seraphskinparts/eyes/aquamarine"
+					},
+					{
+						"code": "azure",
+						"texture": "entity/humanoid/seraphskinparts/eyes/azure"
+					},
+					{
+						"code": "bitter-lemon",
+						"texture": "entity/humanoid/seraphskinparts/eyes/bitter-lemon"
+					},
+					{
+						"code": "cadmium-orange",
+						"texture": "entity/humanoid/seraphskinparts/eyes/cadmium-orange"
+					},
+					{
+						"code": "citron",
+						"texture": "entity/humanoid/seraphskinparts/eyes/citron"
+					},
+					{
+						"code": "dark-green",
+						"texture": "entity/humanoid/seraphskinparts/eyes/dark-green"
+					},
+					{
+						"code": "forest-green",
+						"texture": "entity/humanoid/seraphskinparts/eyes/forest-green"
+					},
+					{
+						"code": "goldenrod",
+						"texture": "entity/humanoid/seraphskinparts/eyes/goldenrod"
+					},
+					{
+						"code": "jade",
+						"texture": "entity/humanoid/seraphskinparts/eyes/jade"
+					},
+					{
+						"code": "lavander",
+						"texture": "entity/humanoid/seraphskinparts/eyes/lavander"
+					},
+					{
+						"code": "malachite",
+						"texture": "entity/humanoid/seraphskinparts/eyes/malachite"
+					},
+					{
+						"code": "mantis",
+						"texture": "entity/humanoid/seraphskinparts/eyes/mantis"
+					},
+					{
+						"code": "midnight",
+						"texture": "entity/humanoid/seraphskinparts/eyes/midnight"
+					},
+					{
+						"code": "phthalo-blue",
+						"texture": "entity/humanoid/seraphskinparts/eyes/phthalo-blue"
+					},
+					{
+						"code": "purple",
+						"texture": "entity/humanoid/seraphskinparts/eyes/purple"
+					},
+					{
+						"code": "sand",
+						"texture": "entity/humanoid/seraphskinparts/eyes/sand"
+					},
+					{
+						"code": "sapphire",
+						"texture": "entity/humanoid/seraphskinparts/eyes/sapphire"
+					},
+
+					{
+						"code": "amethyst",
+						"texture": "entity/humanoid/seraphskinparts/eyes/amethyst"
+					},
+					{
+						"code": "blackopal",
+						"texture": "entity/humanoid/seraphskinparts/eyes/blackopal"
+					},
+					{
+						"code": "citrine",
+						"texture": "entity/humanoid/seraphskinparts/eyes/citrine"
+					},
+					{
+						"code": "opal",
+						"texture": "entity/humanoid/seraphskinparts/eyes/opal"
+					},
+					{
+						"code": "quartzrose",
+						"texture": "entity/humanoid/seraphskinparts/eyes/quartzrose"
+					},
+					{
+						"code": "smokyquartz",
+						"texture": "entity/humanoid/seraphskinparts/eyes/smokyquartz"
+					}
+				]
+			},
+			{
+				"code": "underwear",
+				"type": "texture",
+				"useDropDown": true,
+				"textureRenderTo": {
+					"x": 0,
+					"y": 0
+				},
+				"variants": [
+					{
+						"code": "twopiece",
+						"texture": "entity/humanoid/seraphskinparts/underwear/twopiece"
+					},
+					{
+						"code": "leotard",
+						"texture": "entity/humanoid/seraphskinparts/underwear/leotard"
+					},
+					{
+						"code": "breeches",
+						"texture": "entity/humanoid/seraphskinparts/underwear/breeches"
+					}
+				]
+			},
+			{
+				"code": "voicetype",
+				"type": "voice",
+				"useDropDown": true,
+				"variants": [
+					{
+						"code": "altoflute",
+						"sound": "sounds/voice/altoflute"
+					},
+					{
+						"code": "harmonica",
+						"sound": "sounds/voice/harmonica"
+					},
+					{
+						"code": "oboe",
+						"sound": "sounds/voice/oboe"
+					},
+					{
+						"code": "clarinet",
+						"sound": "sounds/voice/clarinet"
+					},
+					{
+						"code": "accordion",
+						"sound": "sounds/voice/accordion"
+					},
+					{
+						"code": "trumpet",
+						"sound": "sounds/voice/trumpet"
+					},
+					{
+						"code": "sax",
+						"sound": "sounds/voice/sax"
+					},
+					{
+						"code": "tuba",
+						"sound": "sounds/voice/tuba"
+					}
+				]
+			},
+			{
+				"code": "voicepitch",
+				"type": "voice",
+				"colbreak": true,
+				"useDropDown": true,
+				"variants": [
+					{ "code": "verylow" },
+					{ "code": "low" },
+					{ "code": "medium" },
+					{ "code": "high" }
+				]
+			},
+			{
+				"code": "hairbase",
+				"type": "shape",
+				"shapeTemplate": { "base": "entity/humanoid/seraphskinparts/hair-base/{code}" },
+				"variants": [
+					{ "code": "afro" },
+					{ "code": "bald" },
+					{ "code": "balding" },
+					{ "code": "bowlcut" },
+					{ "code": "boxbraids" },
+					{ "code": "combed" },
+					{ "code": "dreadlocks" },
+					{ "code": "dreadlocksdense" },
+					{ "code": "indigenousbalding" },
+					{ "code": "iroquois" },
+					{ "code": "kniaz" },
+					{ "code": "layered" },
+					{ "code": "longflowing" },
+					{ "code": "longcurls" },
+					{ "code": "longwithstrands" },
+					{ "code": "mediumcurls" },
+					{ "code": "mediumlength-bangs" },
+					{ "code": "messy" },
+					{ "code": "messy2" },
+					{ "code": "classic" },
+					{ "code": "rows" },
+					{ "code": "rowsdense" },
+					{ "code": "short" },
+					{ "code": "shortcurls" },
+					{ "code": "shortcurls2" },
+					{ "code": "short-parted" },
+					{ "code": "shortspiky" },
+					{ "code": "short-trimmed" },
+					{ "code": "tonsure" }
+				]
+			},
+			{
+				"code": "hairextra",
+				"type": "shape",
+				"shapeTemplate": { "base": "entity/humanoid/seraphskinparts/hair-extra/{code}" },
+				"variants": [
+					{ "code": "none" },
+					{ "code": "backbun" },
+					{ "code": "backbuncurls" },
+					{ "code": "backbunpuffy" },
+					{ "code": "bunboxbraid" },
+					{ "code": "braidedup" },
+					{ "code": "classicponytail" },
+					{ "code": "cobrasidebraids" },
+					{ "code": "elaboratestickbun" },
+					{ "code": "headsidebraid" },
+					{ "code": "largestickbun" },
+					{ "code": "knots" },
+					{ "code": "neatbraid" },
+					{ "code": "ponytail" },
+					{ "code": "ponytailcurly" },
+					{ "code": "ponytailcrest" },
+					{ "code": "rolledbraidwithbun" },
+					{ "code": "shortmessybraid" },
+					{ "code": "segmentedtopknot" },
+					{ "code": "sidebraids" },
+					{ "code": "sidebuns" },
+					{ "code": "sidebunscurly" },
+					{ "code": "sidepuffs" },
+					{ "code": "siderolls" },
+					{ "code": "skepbun" },
+					{ "code": "snood" },
+					{ "code": "toproll" },
+					{ "code": "backroll" },
+					{ "code": "backrollbun" },
+					{ "code": "thickroll" },
+					{ "code": "fishtailbraid" },
+					{ "code": "steppesidetails" },
+					{ "code": "steppebraidloop" },
+					{ "code": "steppebraids" },
+					{ "code": "thicklongfrenchbraid" },
+					{ "code": "tiedback" },
+					{ "code": "tieddreads" },
+					{ "code": "tiedtopknot" },
+					{ "code": "topbun" },
+					{ "code": "topbuncurly" },
+					{ "code": "topbunvoluminous" },
+					{ "code": "topknot" },
+					{ "code": "unkempt" },
+					{ "code": "vikingtopbraid" }
+				]
+			},
+			{
+				"code": "facialexpression",
+				"type": "shape",
+				"variants": [
+					{
+						"code": "angry",
+						"shape": { "base": "entity/humanoid/seraphskinparts/face/angry" }
+					},
+					{
+						"code": "grin",
+						"shape": { "base": "entity/humanoid/seraphskinparts/face/grin" }
+					},
+					{
+						"code": "smirk",
+						"shape": { "base": "entity/humanoid/seraphskinparts/face/smirk" }
+					},
+					{
+						"code": "kind",
+						"shape": { "base": "entity/humanoid/seraphskinparts/face/kind" }
+					},
+					{
+						"code": "upset",
+						"shape": { "base": "entity/humanoid/seraphskinparts/face/upset" }
+					},
+					{
+						"code": "neutral",
+						"shape": { "base": "entity/humanoid/seraphskinparts/face/neutral" }
+					},
+					{
+						"code": "sad",
+						"shape": { "base": "entity/humanoid/seraphskinparts/face/sad" }
+					},
+					{
+						"code": "serious",
+						"shape": { "base": "entity/humanoid/seraphskinparts/face/serious" }
+					},
+					{
+						"code": "tired",
+						"shape": { "base": "entity/humanoid/seraphskinparts/face/tired" }
+					},
+					{
+						"code": "very-sad",
+						"shape": { "base": "entity/humanoid/seraphskinparts/face/very-sad" }
+					},
+					{
+						"code": "exhausted",
+						"shape": { "base": "entity/humanoid/seraphskinparts/face/exhausted" }
+					},
+					{
+						"code": "mellow",
+						"shape": { "base": "entity/humanoid/seraphskinparts/face/mellow" }
+					},
+					{
+						"code": "adequate",
+						"shape": { "base": "entity/humanoid/seraphskinparts/face/adequate" }
+					},
+					{
+						"code": "caring",
+						"shape": { "base": "entity/humanoid/seraphskinparts/face/caring" }
+					},
+					{
+						"code": "determined",
+						"shape": { "base": "entity/humanoid/seraphskinparts/face/determined" }
+					},
+					{
+						"code": "fierce",
+						"shape": { "base": "entity/humanoid/seraphskinparts/face/fierce" }
+					},
+					{
+						"code": "thoughtful",
+						"shape": { "base": "entity/humanoid/seraphskinparts/face/thoughtful" }
+					},
+					{
+						"code": "weary",
+						"shape": { "base": "entity/humanoid/seraphskinparts/face/weary" }
+					},
+					{
+						"code": "indifferent",
+						"shape": { "base": "entity/humanoid/seraphskinparts/face/indifferent" }
+					}
+				]
+			},
+			{
+				"code": "mustache",
+				"type": "shape",
+				"shapeTemplate": { "base": "entity/humanoid/seraphskinparts/hair-face/{code}" },
+				"variants": [
+					{ "code": "none" },
+					{ "code": "mst-line01-pencil" },
+					{ "code": "mst-line05-seargent" },
+					{ "code": "mst-line10-sheriff" },
+					{ "code": "mst-line15-eccentric" },
+					{ "code": "mst-line20-seagull" },
+					{ "code": "mst-u01-horseshoe" },
+					{ "code": "mst-u05-stirrups" },
+					{ "code": "mst-walrus05-neat" },
+					{ "code": "mst-walrus30-fat" },
+					{ "code": "mst-whiskbroom" }
+				]
+			},
+			{
+				"code": "beard",
+				"type": "shape",
+				"shapeTemplate": { "base": "entity/humanoid/seraphskinparts/hair-face/{code}" },
+				"variants": [
+					{ "code": "none" },
+					{ "code": "brd-stubble" },
+					{ "code": "brd-box05-anchor" },
+					{ "code": "brd-box01-chincurtain" },
+					{ "code": "brd-box07-ducktail" },
+					{ "code": "brd-box10-short" },
+					{ "code": "brd-box20-full" },
+					{ "code": "brd-braid05-single" },
+					{ "code": "brd-braid10-double" },
+					{ "code": "brd-braid15-triple" },
+					{ "code": "brd-chin01-mouche" },
+					{ "code": "brd-chin05-chinpatch" },
+					{ "code": "brd-chin10-chinpuff" },
+					{ "code": "brd-chin15-goatee" },
+					{ "code": "brd-chin20-goateehorns" },
+					{ "code": "brd-full01-trimmedfull" },
+					{ "code": "brd-full05-cleanfull" },
+					{ "code": "brd-full10-shaggy" },
+					{ "code": "brd-mut05-friendly" },
+					{ "code": "brd-mut10-muttonchops" },
+					{ "code": "brd-mut15-wildchops" },
+					{ "code": "brd-side05-sideburns" },
+					{ "code": "brd-side15-sidewhiskers" },
+					{ "code": "brd-wisp10-wiseman" }
+				]
+			},
+			{
+				"code": "haircolor",
+				"type": "texture",
+				"textureTarget": "hair",
+				"textureTemplate": "entity/humanoid/seraphskinparts/hair/{code}",
+				"variants": [
+					{ "code": "lightgray" },
+					{ "code": "silverchalice" },
+					{ "code": "slategray" },
+					{ "code": "eerieblack" },
+					{ "code": "mossgreen" },
+					{ "code": "seagreen" },
+					{ "code": "wintergreendream" },
+					{ "code": "steelblue" },
+					{ "code": "queenblue" },
+					{ "code": "indigodye" },
+					{ "code": "heliotropegray" },
+					{ "code": "palatinatepurple" },
+					{ "code": "darkpurple" },
+					{ "code": "wheat" },
+					{ "code": "ecru" },
+					{ "code": "sanddune" },
+					{ "code": "harvestgold" },
+					{ "code": "cordovan" },
+					{ "code": "rosewood" },
+					{ "code": "russet" },
+					{ "code": "liver" },
+					{ "code": "blackolive" },
+					{ "code": "darklava" },
+					{ "code": "dimlavender" },
+					{ "code": "gunmetal" },
+					{ "code": "opal" },
+					{ "code": "pinegreen" },
+					{ "code": "oldburgundy" }
+				]
+			}
+		]
+	},
+	"client": {
+		"renderer": "PlayerShape",
+		"shape": { "base": "entity/humanoid/seraph-faceless" },
+		"texture": { "base": "entity/humanoid/seraph-naked-hairless" },
+		"behaviors": [
+			{ "code": "repulseagents" },
+			{ "code": "nametag" },
+			{ "code": "playerphysics" },
+			{ "code": "interpolateposition" },
+			{ "code": "playerrevivable" },
+			{ "code": "aimingaccuracy" },
+			{ "code": "tiredness" },
+			{ "code": "extraskinnable" },
+			{ "code": "bodytemperature" },
+			{ "code": "breathe" },
+			{ "code": "drunktyping" },
+			{ "code": "idleanimations" },
+			{ "code": "playerinventory" }
+		],
+		"animations": [
+			{
+				"code": "ushigatana-dash",
+				"animation": "ushigatana-dash",
+				"blendMode": "Add",
+				"mulWithWalkSpeed": false,
+				"animationSpeed": 2.0
+			},
+			{
+				"code": "dash-forward",
+				"animation": "dash-forward",
+				"blendMode": "Add",
+				"mulWithWalkSpeed": false,
+				"animationSpeed": 1.0
+			},
+			{
+				"code": "dash-forward-retract",
+				"animation": "dash-forward-retract",
+				"blendMode": "Add",
+				"mulWithWalkSpeed": false,
+				"animationSpeed": 1.0
+			},
+			{
+				"code": "dash-forward-freeze",
+				"animation": "dash-forward-freeze",
+				"blendMode": "Add",
+				"mulWithWalkSpeed": false,
+				"animationSpeed": 1.0
+			},
+			{
+				"code": "walk",
+				"animation": "walk",
+				"blendMode": "Average",
+				"mulWithWalkSpeed": true,
+				"animationSpeed": 1.3,
+				"triggeredBy": {
+					"onControls": [ "Move" ],
+					"matchExact": true
+				}
+			},
+			{
+				"code": "walk-fp",
+				"animation": "walk-fp",
+				"blendMode": "Average",
+				"mulWithWalkSpeed": true,
+				"animationSpeed": 1.3
+			},
+			{
+				"code": "idle",
+				"animation": "idle1",
+				"clientSide": true,
+				"blendMode": "Average",
+				"triggeredBy": {
+					"onControls": [ "Idle" ],
+					"matchExact": true,
+					"defaultAnim": true
+				}
+			},
+			{
+				"code": "idle-fp",
+				"animation": "idle1-fp",
+				"clientSide": true,
+				"blendMode": "Average"
+			},
+			{
+				"code": "helditemready",
+				"animation": "helditemready",
+				"clientSide": true,
+				"weightCapFactor": 0.85,
+				"easeInSpeed": 10,
+				"easeOutSpeed": 5,
+				// Prevent anything but the upper arm R from affecting the player pose. A value of 0 seems to break things (seraph goes invisible when mounted and playing this anim)
+				"weight": 0.001,
+				"blendMode": "AddAverage",
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage"
+				}
+			},
+			{
+				"code": "helditemready-fp",
+				"animation": "helditemready-fp",
+				"clientSide": true,
+				"weightCapFactor": 0.85,
+				"easeInSpeed": 5,
+				"easeOutSpeed": 5,
+				// Prevent anything but the upper arm R from affecting the player pose
+				"weight": 0,
+				"blendMode": "AddAverage",
+				"elementWeight": {
+					"UpperArmR": 80,
+					"LowerArmR": 80,
+					"ItemAnchor": 80
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+			{
+				"code": "helditemreadyslant",
+				"animation": "helditemreadyslant",
+				"clientSide": true,
+				"weightCapFactor": 0.85,
+				"easeInSpeed": 10,
+				"easeOutSpeed": 5,
+				// Prevent anything but the upper arm R from affecting the player pose
+				"weight": 0,
+				"blendMode": "AddAverage",
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"ItemAnchor": 80
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+			{
+				"code": "helditemreadyslant-fp",
+				"animation": "helditemreadyslant-fp",
+				"clientSide": true,
+				"weightCapFactor": 0.85,
+				"easeInSpeed": 5,
+				"easeOutSpeed": 5,
+				// Prevent anything but the upper arm R from affecting the player pose
+				"weight": 0,
+				"blendMode": "AddAverage",
+				"elementWeight": {
+					"UpperArmR": 80,
+					"LowerArmR": 80,
+					"ItemAnchor": 80
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+			{
+				"code": "helditemreadybucket",
+				"animation": "helditemreadybucket",
+				"clientSide": true,
+				"weightCapFactor": 0.85,
+				"easeInSpeed": 10,
+				"easeOutSpeed": 5,
+				// Prevent anything but the upper arm R from affecting the player pose
+				"weight": 0,
+				"blendMode": "AddAverage",
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"ItemAnchor": 80
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+			{
+				"code": "helditemreadybucket-fp",
+				"animation": "helditemreadybucket-fp",
+				"clientSide": true,
+				"weightCapFactor": 0.85,
+				"easeInSpeed": 5,
+				"easeOutSpeed": 5,
+				// Prevent anything but the upper arm R from affecting the player pose
+				"weight": 0,
+				"blendMode": "AddAverage",
+				"elementWeight": {
+					"UpperArmR": 80,
+					"LowerArmR": 80,
+					"ItemAnchor": 80
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+			{
+				"code": "sitflooridle",
+				"animation": "sitflooridle",
+				"blendMode": "Average",
+				"triggeredBy": {
+					"onControls": [ "Idle", "FloorSitting" ],
+					"matchExact": true
+				},
+				"easeInSpeed": 2,
+				"elementWeight": {
+					"LowerTorso": 80,
+					"UpperTorso": 80,
+					"UpperFootR": 80,
+					"UpperFootL": 80,
+					"LowerFootR": 80,
+					"LowerFootL": 80
+				},
+				"elementBlendMode": {
+					"LowerTorso": "Average",
+					"UpperTorso": "Average",
+					"UpperFootR": "Average",
+					"UpperFootL": "Average",
+					"LowerFootR": "Average",
+					"LowerFootL": "Average"
+				}
+			},
+			{
+				"code": "sitboatidle",
+				"animation": "sitboatidle",
+				"clientSide": true,
+				"blendMode": "Average",
+				"easeInSpeed": 2,
+				"elementWeight": {
+					"LowerTorso": 80,
+					"UpperTorso": 80,
+					"UpperFootR": 80,
+					"UpperFootL": 80,
+					"LowerFootR": 80,
+					"LowerFootL": 80
+				},
+				"elementBlendMode": {
+					"LowerTorso": "Average",
+					"UpperTorso": "Average",
+					"UpperFootR": "Average",
+					"UpperFootL": "Average",
+					"LowerFootR": "Average",
+					"LowerFootL": "Average"
+				}
+			},
+			{
+				"code": "sitflooredge",
+				"animation": "sitidle",
+				"clientSide": true,
+				"blendMode": "Average",
+				"easeInSpeed": 2,
+				"elementWeight": {
+					"LowerTorso": 80,
+					"UpperTorso": 80,
+					"UpperFootR": 80,
+					"UpperFootL": 80,
+					"LowerFootR": 80,
+					"LowerFootL": 80
+				},
+				"elementBlendMode": {
+					"LowerTorso": "Average",
+					"UpperTorso": "Average",
+					"UpperFootR": "Average",
+					"UpperFootL": "Average",
+					"LowerFootR": "Average",
+					"LowerFootL": "Average"
+				}
+			},
+			{
+				"code": "sprint",
+				"animation": "sprint",
+				"animationSpeed": 0.6,
+				"mulWithWalkSpeed": true,
+				"triggeredBy": {
+					"onControls": [ "Move", "SprintMode" ],
+					"matchExact": true
+				},
+				"blendMode": "Average",
+				"elementWeight": {
+					"UpperFootR": 2,
+					"UpperFootL": 2,
+					"LowerFootR": 2,
+					"LowerFootL": 2,
+					"UpperArmR": 2,
+					"LowerArmR": 2,
+					"UpperArmL": 2,
+					"LowerArmL": 2
+				}
+			},
+			{
+				"code": "sprint-fp",
+				"animation": "sprint-fp",
+				"animationSpeed": 0.6,
+				"mulWithWalkSpeed": true,
+				"blendMode": "Average",
+				"elementWeight": {
+					"UpperFootR": 2,
+					"UpperFootL": 2,
+					"LowerFootR": 2,
+					"LowerFootL": 2,
+					"UpperArmR": 2,
+					"LowerArmR": 2,
+					"UpperArmL": 2,
+					"LowerArmL": 2
+				},
+				"elementBlendMode": {
+					"UpperFootR": "Average",
+					"UpperFootL": "Average",
+					"LowerFootR": "Average",
+					"LowerFootL": "Average",
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "sneakwalk",
+				"animation": "sneakwalk",
+				"animationSpeed": 3,
+				"weight": 2,
+				"mulWithWalkSpeed": true,
+				"triggeredBy": {
+					"onControls": [ "Move", "SneakMode" ],
+					"matchExact": true
+				},
+				"blendMode": "Average"
+			},
+			{
+				"code": "sneakwalk-fp",
+				"animation": "sneakwalk-fp",
+				"animationSpeed": 3,
+				"weight": 2,
+				"mulWithWalkSpeed": true,
+				"blendMode": "Average"
+			},
+			{
+				"code": "sneakidle",
+				"animation": "sneakidle",
+				"weight": 2,
+				"triggeredBy": {
+					"onControls": [ "Idle", "SneakMode" ],
+					"matchExact": true
+				},
+				"blendMode": "Average"
+			},
+			{
+				"code": "sneakidle-fp",
+				"animation": "sneakidle-fp",
+				"weight": 2,
+				"blendMode": "Average"
+			},
+			{
+				"code": "riding",
+				"animation": "riding",
+				"weight": 2,
+				"blendMode": "AddAverage",
+				"elementWeight": {
+					"UpperFootL": 40,
+					"LowerFootL": 40,
+					"UpperFootR": 40,
+					"LowerFootR": 40
+				},
+				"elementBlendMode": {
+					"UpperFootL": "AddAverage",
+					"LowerFootL": "AddAverage",
+					"UpperFootR": "AddAverage",
+					"LowerFootR": "AddAverage"
+				}
+			},
+			{
+				"code": "creativefly",
+				"animation": "creativefly",
+				"triggeredBy": { "onControls": [ "Fly" ] },
+				"blendMode": "Average"
+			},
+			{
+				"code": "creativefly-fp",
+				"animation": "creativefly-fp",
+				"blendMode": "Average"
+			},
+			{
+				"code": "glide",
+				"animation": "glide",
+				"triggeredBy": { "onControls": [ "Glide" ] },
+				"blendMode": "Average"
+			},
+			{
+				"code": "glide-fp",
+				"animation": "glide-fp",
+				"blendMode": "Average"
+			},
+			{
+				"code": "swim",
+				"animation": "swim",
+				"triggeredBy": {
+					"onControls": [ "Move", "Swim" ],
+					"matchExact": true
+				},
+				"blendMode": "Average"
+			},
+			{
+				"code": "swim-fp",
+				"animation": "swim-fp",
+				"blendMode": "Average"
+			},
+			{
+				"code": "swimidle",
+				"animation": "swimidle",
+				"animationSpeed": 0.5,
+				"triggeredBy": {
+					"onControls": [ "Idle", "Swim" ],
+					"matchExact": true
+				},
+				"blendMode": "Average"
+			},
+			{
+				"code": "land",
+				"animation": "creativefly",
+				"triggeredBy": { "onControls": [ "Fall" ] },
+				"blendMode": "Average"
+			},
+			{
+				"code": "land-fp",
+				"animation": "creativefly-fp",
+				"blendMode": "Average"
+			},
+			{
+				"code": "die",
+				"animation": "die",
+				"blendMode": "Average",
+				"triggeredBy": { "onControls": [ "Dead" ] },
+				"animationSpeed": 1.5
+			},
+			{
+				"code": "heavyimpact",
+				"animation": "heavyimpact",
+				"blendMode": "Average"
+			},
+			{
+				"code": "jump",
+				"animation": "newjump",
+				"triggeredBy": {
+					"onControls": [ "Idle", "Jump" ],
+					"matchExact": true
+				},
+				"blendMode": "Average"
+			},
+			{
+				"code": "climbup",
+				"animation": "ladderup",
+				"triggeredBy": {
+					"onControls": [ "Move", "Climb" ],
+					"matchExact": true
+				},
+				"blendMode": "Average"
+			},
+			{
+				"code": "climbidle",
+				"animation": "LadderIdle",
+				"triggeredBy": {
+					"onControls": [ "Idle", "Climb" ],
+					"matchExact": true
+				},
+				"blendMode": "Average"
+			},
+			{
+				"code": "sleep",
+				"animation": "lie",
+				"blendMode": "Add"
+			},
+			{
+				"code": "coldidle",
+				"animation": "coldidle",
+				"blendMode": "AddAverage",
+				"elementWeight": {
+					"UpperArmR": 40,
+					"LowerArmR": 40,
+					"UpperArmL": 40,
+					"LowerArmL": 200
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "coldidle-fp",
+				"animation": "coldidle-fp",
+				"blendMode": "AddAverage",
+				"elementWeight": {
+					"UpperArmR": 40,
+					"LowerArmR": 40,
+					"UpperArmL": 40,
+					"LowerArmL": 200
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "protecteyes",
+				"animation": "protecteyes",
+				"clientSide": true,
+				"blendMode": "Add",
+				"easeInSpeed": 1,
+				"elementWeight": {
+					"UpperArmR": 40,
+					"LowerArmR": 40
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage"
+				}
+			},
+			{
+				"code": "protecteyes-fp",
+				"animation": "protecteyes-fp",
+				"clientSide": true,
+				"blendMode": "Add",
+				"easeInSpeed": 1,
+				"elementWeight": {
+					"UpperArmR": 300,
+					"LowerArmR": 300
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage"
+				}
+			},
+			{
+				"code": "coldidleheld",
+				"animation": "coldidleheld",
+				"blendMode": "AddAverage"
+			},
+			{
+				"code": "holdunderarm",
+				"animation": "holdunderarm",
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage"
+				}
+			},
+			{
+				"code": "holdunderarm-fp",
+				"animation": "holdunderarm-fp",
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage"
+				}
+			},
+			{
+				"code": "holdinglanternrighthand",
+				"animation": "holdinglanternrighthand",
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 100,
+					"LowerArmR": 100
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage"
+				}
+			},
+			{
+				"code": "holdinglanternrighthand-fp",
+				"animation": "holdinglanternrighthand-fp",
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 100,
+					"LowerArmR": 100
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage"
+				}
+			},
+			{
+				"code": "holdinglanternlefthand",
+				"animation": "holdinglanternlefthand",
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmL": 100,
+					"LowerArmL": 100
+				},
+				"elementBlendMode": {
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "holdinglanternlefthand-fp",
+				"animation": "holdinglanternlefthand-fp",
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmL": 100,
+					"LowerArmL": 100
+				},
+				"elementBlendMode": {
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+
+
+			{
+				"code": "hurt",
+				"animation": "hurt",
+				"animationSpeed": 3,
+				"blendMode": "Add"
+			},
+			{
+				"code": "holdbothhands",
+				"animation": "holdbothhands",
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 100,
+					"LowerArmR": 100,
+					"UpperArmL": 100,
+					"LowerArmL": 100
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "holdbothhands-fp",
+				"animation": "holdbothhands-fp",
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 100,
+					"LowerArmR": 100,
+					"UpperArmL": 100,
+					"LowerArmL": 100
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "holdbothhands-tongs1",
+				"animation": "holdbothhands-tongs1",
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 100,
+					"LowerArmR": 100,
+					"UpperArmL": 100,
+					"LowerArmL": 100,
+					"ItemAnchorL": 100
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "holdbothhands-tongs1-fp",
+				"animation": "holdbothhands-tongs1-fp",
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 100,
+					"LowerArmR": 100,
+					"UpperArmL": 100,
+					"LowerArmL": 100,
+					"ItemAnchorL": 100
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+
+			{
+				"code": "holdbothhands-tongsnarrow",
+				"animation": "holdbothhands-tongs1",
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 100,
+					"LowerArmR": 100,
+					"UpperArmL": 100,
+					"LowerArmL": 100,
+					"ItemAnchorL": 100
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "holdbothhands-tongsnarrow-fp",
+				"animation": "holdbothhands-tongs1-fp",
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 100,
+					"LowerArmR": 100,
+					"UpperArmL": 100,
+					"LowerArmL": 100,
+					"ItemAnchorL": 100
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+
+
+			{
+				"code": "holdbothhands-tongsmedium",
+				"animation": "holdbothhands-tongs1",
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 100,
+					"LowerArmR": 100,
+					"UpperArmL": 100,
+					"LowerArmL": 100,
+					"ItemAnchorL": 100
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "holdbothhands-tongsmedium-fp",
+				"animation": "holdbothhands-tongs1-fp",
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 100,
+					"LowerArmR": 100,
+					"UpperArmL": 100,
+					"LowerArmL": 100,
+					"ItemAnchorL": 100
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+
+
+			{
+				"code": "holdbothhands-tongswide",
+				"animation": "holdbothhands-tongs1",
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 100,
+					"LowerArmR": 100,
+					"UpperArmL": 100,
+					"LowerArmL": 100,
+					"ItemAnchorL": 100
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "holdbothhands-tongswide-fp",
+				"animation": "holdbothhands-tongs1-fp",
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 100,
+					"LowerArmR": 100,
+					"UpperArmL": 100,
+					"LowerArmL": 100,
+					"ItemAnchorL": 100
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+
+
+
+
+			{
+				"code": "holdbothhandslarge",
+				"animation": "holdbothhandslarge",
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 12,
+					"LowerArmL": 12
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "holdbothhandslarge-fp",
+				"animation": "holdbothhandslarge-fp",
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 100,
+					"LowerArmR": 100,
+					"UpperArmL": 100,
+					"LowerArmL": 100
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "bowaim",
+				"animation": "bowaim",
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 90,
+					"LowerArmR": 90,
+					"UpperArmL": 90,
+					"LowerArmL": 90,
+					"ItemAnchor": 90
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+			{
+				"code": "bowaimcrude",
+				"animation": "bowaimcrude",
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 90,
+					"LowerArmR": 90,
+					"UpperArmL": 90,
+					"LowerArmL": 90
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "bowaimlong",
+				"animation": "bowaimlong",
+				"blendMode": "Add",
+				"elementWeight": {
+					"Neck": 90,
+					"Head": 90,
+					"UpperTorso": 90,
+					"UpperArmR": 90,
+					"LowerArmR": 90,
+					"UpperArmL": 90,
+					"LowerArmL": 90,
+					"ItemAnchor": 90
+				},
+				"elementBlendMode": {
+					"UpperTorso": "AddAverage",
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "bowaimrecurve",
+				"animation": "bowaimrecurve",
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 90,
+					"LowerArmR": 90,
+					"UpperArmL": 90,
+					"LowerArmL": 90,
+					"ItemAnchor": 90
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+			{
+				"code": "bowhit",
+				"animation": "bowhit",
+				"easeInSpeed": 999,
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "aim",
+				"animation": "throwaim",
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "throw",
+				"animation": "throw",
+				"blendMode": "Add",
+				"easeInSpeed": 999,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "slingaimgreek",
+				"animation": "slingaimgreek",
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "slingthrowgreek",
+				"animation": "slingthrowgreek",
+				"blendMode": "Add",
+				"easeInSpeed": 999,
+				"easeOutSpeed": 2.5,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "slingaimbalearic",
+				"animation": "slingaimbalearic",
+				"blendMode": "Add",
+				"animationSpeed": 1.5,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "slingaimbalearic-fp",
+				"animation": "slingaimbalearic-fp",
+				"blendMode": "Add",
+				"animationSpeed": 1.5,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "slingthrowbalearic",
+				"animation": "slingthrowbalearic",
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "hit",
+				"animation": "hit",
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "smithing",
+				"animation": "smithing",
+				"animationSpeed": 1.33,
+				"holdEyePosAfterEasein": 0,
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "smithing-fp",
+				"animation": "smithing-fp",
+				"animationSpeed": 1.33,
+				"holdEyePosAfterEasein": 0,
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "pickaxe",
+				"animation": "pickaxe",
+				"animationSpeed": 2,
+				"holdEyePosAfterEasein": 0,
+				"blendMode": "Add",
+				"attributes": {
+					"soundAtFrame": 21,
+					"damageAtFrame": 22,
+					"authorative": true
+				},
+				"elementWeight": {
+					"UpperArmR": 40,
+					"LowerArmR": 40,
+					"UpperArmL": 0.2,
+					"LowerArmL": 0.2,
+					"ItemAnchor": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+			{
+				"code": "pickaxe-fp",
+				"animation": "pickaxe-fp",
+				"animationSpeed": 2,
+				"holdEyePosAfterEasein": 0,
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 40,
+					"LowerArmR": 40,
+					"UpperArmL": 0.2,
+					"LowerArmL": 0.2,
+					"ItemAnchor": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+
+			{
+				"code": "hammerhit",
+				"animation": "hammerhit",
+				"animationSpeed": 1.33,
+				"holdEyePosAfterEasein": 0,
+				"blendMode": "Add",
+				"attributes": {
+					"soundAtFrame": 16,
+					"damageAtFrame": 20,
+					"authorative": true
+				},
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 0.2,
+					"LowerArmL": 0.2
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "hammerhit-fp",
+				"animation": "hammerhit-fp",
+				"animationSpeed": 1.33,
+				"holdEyePosAfterEasein": 0,
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 0.2,
+					"LowerArmL": 0.2
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "smithingwide",
+				"animation": "smithingwide",
+				"animationSpeed": 1.33,
+				"holdEyePosAfterEasein": 0,
+				"blendMode": "Add",
+				"attributes": {
+					"soundAtFrame": 16,
+					"damageAtFrame": 20,
+					"authorative": true
+				},
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 0.2,
+					"LowerArmL": 0.2
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "smithingwide-fp",
+				"animation": "smithingwide-fp",
+				"animationSpeed": 1.33,
+				"holdEyePosAfterEasein": 0,
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 0.2,
+					"LowerArmL": 0.2
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "knap",
+				"animation": "knap",
+				"animationSpeed": 1.2,
+				"blendMode": "AddAverage",
+				"holdEyePosAfterEasein": 0.1,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"LowerTorso": "Average",
+					"UpperTorso": "Average"
+				}
+			},
+			{
+				"code": "knap-ifp",
+				"animation": "knap-ifp",
+				"animationSpeed": 1.2,
+				"blendMode": "AddAverage",
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"LowerTorso": 0.4,
+					"UpperTorso": 0.4
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"LowerTorso": "Average",
+					"UpperTorso": "Average"
+				}
+			},
+			{
+				"code": "clayform",
+				"animation": "knap",
+				"animationSpeed": 1.2,
+				"blendMode": "AddAverage",
+				"holdEyePosAfterEasein": 0.1,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"LowerTorso": "Average",
+					"UpperTorso": "Average"
+				}
+			},
+			{
+				"code": "clayform-fp",
+				"animation": "knap",
+				"animationSpeed": 1.2,
+				"blendMode": "AddAverage",
+				"holdEyePosAfterEasein": 0.1,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"LowerTorso": "Average",
+					"UpperTorso": "Average"
+				}
+			},
+			{
+				"code": "clayform-ifp",
+				"animation": "knap-ifp",
+				"animationSpeed": 1.2,
+				"blendMode": "AddAverage",
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"LowerTorso": 0.4,
+					"UpperTorso": 0.4
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"LowerTorso": "Average",
+					"UpperTorso": "Average"
+				}
+			},
+			{
+				"code": "knap-fp",
+				"animation": "knap-fp",
+				"animationSpeed": 1.2,
+				"blendMode": "AddAverage",
+				"weight": 0,
+				"holdEyePosAfterEasein": 0.1,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"LowerTorso": 0.4,
+					"UpperTorso": 0.4,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"LowerTorso": "Average",
+					"UpperTorso": "Average",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+
+				}
+			},
+			{
+				"code": "breaktool",
+				"animation": "breaktool",
+				"animationSpeed": 1.5,
+				"blendMode": "Add",
+				"holdEyePosAfterEasein": 0.99,
+				"attributes": {
+					"soundAtFrame": 8,
+					"damageAtFrame": 12,
+					"authorative": true
+				},
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "breaktool-fp",
+				"animation": "breaktool-fp",
+				"animationSpeed": 1.5,
+				"blendMode": "Add",
+				"holdEyePosAfterEasein": 0.99,
+				"elementWeight": {
+					"UpperArmR": 80,
+					"LowerArmR": 80,
+					"UpperArmL": 80,
+					"LowerArmL": 80
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "breakhand",
+				"animation": "breakhand",
+				"animationSpeed": 1.8,
+				"holdEyePosAfterEasein": 0.9,
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "breakhand-fp",
+				"animation": "breakhand-fp",
+				"animationSpeed": 1.8,
+				"holdEyePosAfterEasein": 0.9,
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "falx",
+				"animation": "falx",
+				"animationSpeed": 1.3,
+				"blendMode": "Add",
+				"attributes": {
+					"soundAtFrame": 8,
+					"damageAtFrame": 12,
+					"authorative": true
+				},
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "falx-fp",
+				"animation": "falx-fp",
+				"animationSpeed": 1.3,
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "swordhit",
+				"animation": "swordhit",
+				"blendMode": "Add",
+				"attributes": {
+					"soundAtFrame": 5,
+					"damageAtFrame": 13,
+					"authorative": true
+				},
+				"animationSpeed": 0.7,
+				"easeOutSpeed": 60,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "cleaverhit",
+				"animation": "cleaverhit",
+				"blendMode": "Add",
+				"attributes": {
+					"soundAtFrame": 12,
+					"damageAtFrame": 15,
+					"authorative": true
+				},
+				"animationSpeed": 1,
+				"easeInSpeed": 10,
+				"easeOutSpeed": 10,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "cleaverhit-fp",
+				"animation": "cleaverhit-fp",
+				"blendMode": "Add",
+				"animationSpeed": 1,
+				"easeInSpeed": 10,
+				"easeOutSpeed": 10,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "axechop",
+				"animation": "axechop",
+				"blendMode": "Add",
+				"animationSpeed": 1.65,
+				"holdEyePosAfterEasein": 0.3,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "axechop-fp",
+				"animation": "axechop-fp",
+				"blendMode": "Add",
+				"animationSpeed": 1.65,
+				"holdEyePosAfterEasein": 0.3,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+
+
+			{
+				"code": "axehit",
+				"animation": "axehit",
+				"blendMode": "Add",
+				"animationSpeed": 1.65,
+				"holdEyePosAfterEasein": 0.3,
+				"attributes": {
+					"soundAtFrame": 24,
+					"damageAtFrame": 28,
+					"authorative": true
+				},
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "axehit-fp",
+				"animation": "axehit-fp",
+				"blendMode": "Add",
+				"animationSpeed": 1.65,
+				"holdEyePosAfterEasein": 0.3,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+
+			{
+				"code": "axeheld",
+				"animation": "axeheld",
+				"blendMode": "Add",
+				"animationSpeed": 1,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "axeheld-fp",
+				"animation": "axeheld-fp",
+				"blendMode": "Add",
+				"animationSpeed": 1,
+				"elementWeight": {
+					"ItemAnchor": 20
+				},
+				"elementBlendMode": {
+					"ItemAnchor": "AddAverage"
+				}
+			},
+			{
+				"code": "axeready",
+				"animation": "axeready",
+				"blendMode": "Add",
+				"animationSpeed": 0.5,
+				"elementWeight": {
+					"UpperArmR": 80,
+					"LowerArmR": 80,
+					"UpperArmL": 80,
+					"LowerArmL": 80
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "axeready-fp",
+				"animation": "axeready-fp",
+				"blendMode": "Add",
+				"animationSpeed": 0.5,
+				"elementWeight": {
+					"UpperArmR": 60,
+					"LowerArmR": 60,
+					"UpperArmL": 60,
+					"LowerArmL": 60
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "hoe",
+				"animation": "hoe",
+				"blendMode": "Add",
+				"animationSpeed": 1,
+				"holdEyePosAfterEasein": 0.85,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "hoe-fp",
+				"animation": "hoe-fp",
+				"blendMode": "Add",
+				"animationSpeed": 1,
+				"holdEyePosAfterEasein": 0.85,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "water",
+				"animation": "water",
+				"blendMode": "Add",
+				"animationSpeed": 1.5,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20,
+					"ItemAnchor": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+			{
+				"code": "water-fp",
+				"animation": "water-fp",
+				"blendMode": "Add",
+				"animationSpeed": 1.5,
+				"elementWeight": {
+					"UpperArmR": 60,
+					"LowerArmR": 60,
+					"UpperArmL": 60,
+					"LowerArmL": 60,
+					"ItemAnchor": 60
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+			{
+				"code": "shoveldig",
+				"animation": "shoveldig",
+				"blendMode": "Add",
+				"animationSpeed": 1,
+				"holdEyePosAfterEasein": 0.4,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20,
+					"ItemAnchor": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+			{
+				"code": "shoveldig-fp",
+				"animation": "shoveldig-fp",
+				"blendMode": "Add",
+				"animationSpeed": 1,
+				"holdEyePosAfterEasein": 0.4,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "shovelready",
+				"animation": "shovelready",
+				"blendMode": "Add",
+				"easeInSpeed": 10,
+				"animationSpeed": 0.5,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20,
+					"ItemAnchor": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+			{
+				"code": "shovelready-fp",
+				"animation": "shovelready-fp",
+				"blendMode": "Add",
+				"easeInSpeed": 10,
+				"animationSpeed": 0.4,
+				"elementWeight": {
+					"UpperArmR": 10,
+					"LowerArmR": 10,
+					"UpperArmL": 10,
+					"LowerArmL": 10,
+					"ItemAnchor": 10
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+			{
+				"code": "shovelidle",
+				"animation": "shovelidle",
+				"blendMode": "Add",
+				"animationSpeed": 0.4,
+				"easeInSpeed": 2,
+				"elementWeight": {
+					"UpperArmR": 10,
+					"LowerArmR": 10,
+					"ItemAnchor": 10
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+			{
+				"code": "shovelidle-fp",
+				"animation": "shovelidle-fp",
+				"blendMode": "Add",
+				"easeInSpeed": 5,
+				"animationSpeed": 0.5,
+				"elementWeight": {
+					"UpperArmR": 10,
+					"LowerArmR": 10,
+					"ItemAnchor": 10
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+			{
+				"code": "spearhit",
+				"animation": "spearhit",
+				"blendMode": "Add",
+				"animationSpeed": 1.3,
+				"attributes": {
+					"soundAtFrame": 5,
+					"damageAtFrame": 10,
+					"authorative": true
+				},
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "spearhit-fp",
+				"animation": "spearhit-fp",
+				"blendMode": "Add",
+				"animationSpeed": 1.3,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+
+
+
+			{
+				"code": "hackingspear-callback",
+				"animation": "hackingspear-callback",
+				"blendMode": "Add",
+				"animationSpeed": 1.3,
+				"attributes": {
+					"soundAtFrame": 5,
+					"damageAtFrame": 10,
+					"authorative": true
+				},
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "hackingspear-callback-fp",
+				"animation": "hackingspear-callback-fp",
+				"blendMode": "Add",
+				"animationSpeed": 1.3,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+
+
+
+
+
+
+
+			{
+				"code": "spearready",
+				"animation": "spearready",
+				"blendMode": "Add",
+				"animationSpeed": 0.5,
+				"elementWeight": {
+					"UpperArmR": 10,
+					"LowerArmR": 10
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage"
+				}
+			},
+			{
+				"code": "spearready-fp",
+				"animation": "spearready-fp",
+				"blendMode": "Add",
+				"animationSpeed": 0.5,
+				"elementWeight": {
+					"UpperArmR": 10,
+					"LowerArmR": 10
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage"
+				}
+			},
+			{
+				"code": "spearidle",
+				"animation": "spearidle",
+				"blendMode": "Add",
+				"animationSpeed": 1,
+				"elementWeight": {
+					"UpperArmR": 10,
+					"LowerArmR": 10
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage"
+				}
+			},
+			{
+				"code": "spearidle-fp",
+				"animation": "spearidle-fp",
+				"blendMode": "Add",
+				"animationSpeed": 1,
+				"elementWeight": {
+					"LowerTorso": 100,
+					"UpperTorso": 100,
+					"UpperArmR": 100,
+					"LowerArmR": 100
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage"
+				}
+			},
+			{
+				"code": "scythe",
+				"animation": "scythe",
+				"blendMode": "Add",
+				"animationSpeed": 0.5,
+				"easeoutSpeed": 10,
+				"holdEyePosAfterEasein": 0.1,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "scythe-fp",
+				"animation": "scythe-fp",
+				"blendMode": "Add",
+				"animationSpeed": 0.5,
+				"easeoutSpeed": 10,
+				"holdEyePosAfterEasein": 0.1,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "scytheIdle",
+				"animation": "scytheIdle",
+				"animationSpeed": 1,
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 15,
+					"LowerArmR": 15
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage"
+				}
+			},
+			{
+				"code": "scytheIdle-fp",
+				"animation": "scytheIdle-fp",
+				"animationSpeed": 1,
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 50,
+					"LowerArmR": 50
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage"
+				}
+			},
+			{
+				"code": "scytheReady",
+				"animation": "scytheReady",
+				"blendMode": "Add",
+				"animationSpeed": 0.5,
+				"elementWeight": {
+					"UpperArmR": 80,
+					"LowerArmR": 80,
+					"UpperArmL": 80,
+					"LowerArmL": 80,
+					"ItemAnchor": 80
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+			{
+				"code": "scytheReady-fp",
+				"animation": "scytheReady-fp",
+				"blendMode": "Add",
+				"animationSpeed": 0.5,
+				"elementWeight": {
+					"UpperArmR": 80,
+					"LowerArmR": 80,
+					"UpperArmL": 80,
+					"LowerArmL": 80,
+					"ItemAnchor": 80
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+			{
+				"code": "hammerandchisel",
+				"animation": "hammerandchisel",
+				"blendMode": "Add",
+				"animationSpeed": 2.5,
+				"holdEyePosAfterEasein": 0.1,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "hammerandchisel-ifp",
+				"animation": "hammerandchisel-ifp",
+				"blendMode": "Add",
+				"animationSpeed": 1,
+				"holdEyePosAfterEasein": 0.1,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "shears",
+				"animation": "shears",
+				"blendMode": "Add",
+				"animationSpeed": 1.5,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+
+			{
+				"code": "shears-fp",
+				"animation": "shears-fp",
+				"blendMode": "Add",
+				"animationSpeed": 1.5,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+
+			{
+				"code": "placeblock",
+				"animation": "placeblock",
+				"animationSpeed": 1.2,
+				"easeOutSpeed": 3,
+				"holdEyePosAfterEasein": 0,
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 8,
+					"LowerArmR": 8,
+					"UpperArmL": 8,
+					"LowerArmL": 8
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+
+			{
+				"code": "interactstatic-beams",
+				"animation": "interactstatic",
+				"animationSpeed": 1,
+				"holdEyePosAfterEasein": 0,
+				"easeInSpeed": 10,
+				"easeOutSpeed": 6,
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 8,
+					"LowerArmR": 8,
+					"UpperArmL": 0.2,
+					"LowerArmL": 0.2
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "interactstatic",
+				"animation": "interactstatic",
+				"animationSpeed": 1,
+				"easeInSpeed": 10,
+				"easeOutSpeed": 6,
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 8,
+					"LowerArmR": 8,
+					"UpperArmL": 0.2,
+					"LowerArmL": 0.2
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "interactstatic-fp",
+				"animation": "interactstatic-fp",
+				"animationSpeed": 1,
+				"easeInSpeed": 10,
+				"easeOutSpeed": 6,
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 8,
+					"LowerArmR": 8,
+					"UpperArmL": 0.2,
+					"LowerArmL": 0.2
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "snowshovel",
+				"animation": "snowshovel",
+				"animationSpeed": 1,
+				"easeInSpeed": 10,
+				"easeOutSpeed": 6,
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20,
+					"ItemAnchor": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+			{
+				"code": "snowshovel-fp",
+				"animation": "snowshovel-fp",
+				"animationSpeed": 1,
+				"easeInSpeed": 10,
+				"easeOutSpeed": 6,
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20,
+					"ItemAnchor": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+			{
+				"code": "bladegrinding",
+				"animation": "bladegrinding",
+				"animationSpeed": 1,
+				"easeInSpeed": 10,
+				"easeOutSpeed": 6,
+				"blendMode": "AddAverage",
+				"elementWeight": {
+					"LowerTorso": 2,
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20,
+					"ItemAnchor": 20
+				}
+			},
+			{
+				"code": "bladegrinding-fp",
+				"animation": "bladegrinding-fp",
+				"animationSpeed": 1,
+				"easeInSpeed": 4,
+				"easeOutSpeed": 6,
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20,
+					"ItemAnchor": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+
+
+			{
+				"code": "interactstaticlong",
+				"animation": "interactstaticlong",
+				"animationSpeed": 1,
+				"easeInSpeed": 10,
+				"easeOutSpeed": 6,
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 8,
+					"LowerArmR": 8,
+					"UpperArmL": 0.2,
+					"LowerArmL": 0.2,
+					"ItemAnchor": 8
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+			{
+				"code": "interactstaticlong-fp",
+				"animation": "interactstaticlong-fp",
+				"animationSpeed": 1,
+				"easeInSpeed": 10,
+				"easeOutSpeed": 6,
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 8,
+					"LowerArmR": 8,
+					"UpperArmL": 0.2,
+					"LowerArmL": 0.2,
+					"ItemAnchor": 8
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+			{
+				"code": "twohandplaceblock",
+				"animation": "twohandplaceblock",
+				"easeOutSpeed": 3,
+				"holdEyePosAfterEasein": 0,
+				"animationSpeed": 2,
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 8,
+					"LowerArmR": 8,
+					"UpperArmL": 8,
+					"LowerArmL": 8
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+
+			{
+				"code": "twohandplaceblock-fp",
+				"animation": "twohandplaceblock-fp",
+				"easeOutSpeed": 3,
+				"holdEyePosAfterEasein": 0,
+				"animationSpeed": 2,
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 8,
+					"LowerArmR": 8,
+					"UpperArmL": 8,
+					"LowerArmL": 8
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+
+			{
+				"code": "eat",
+				"animation": "eat",
+				"animationSpeed": 1,
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 15,
+					"LowerArmR": 15
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage"
+				}
+			},
+
+			{
+				"code": "eat-fp",
+				"animation": "eat-fp",
+				"animationSpeed": 1,
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 15,
+					"LowerArmR": 15
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage"
+				}
+			},
+
+			{
+				"code": "wave",
+				"animation": "wave",
+				"animationSpeed": 1.3,
+				"easeInSpeed": 1,
+				"blendMode": "AddAverage",
+				"weight": 1,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 10,
+					"LowerArmL": 5,
+					"Neck": 20,
+					"Head": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"Neck": "AddAverage",
+					"Head": "AddAverage"
+				}
+			},
+			{
+				"code": "wave-fp",
+				"animation": "wave-fp",
+				"animationSpeed": 1.3,
+				"easeInSpeed": 1,
+				"blendMode": "AddAverage",
+				"weight": 1,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 10,
+					"LowerArmL": 5,
+					"Neck": 20,
+					"Head": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"Neck": "AddAverage",
+					"Head": "AddAverage"
+				}
+			},
+			{
+				"code": "nod",
+				"animation": "nod",
+				"animationSpeed": 1.3,
+				"blendMode": "AddAverage",
+				"weight": 1,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20,
+					"Neck": 20,
+					"Head": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"Neck": "AddAverage",
+					"Head": "AddAverage"
+				}
+			},
+			{
+				"code": "nod-fp",
+				"animation": "nod-fp",
+				"animationSpeed": 1.3,
+				"blendMode": "AddAverage",
+				"weight": 1,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20,
+					"Neck": 20,
+					"Head": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"Neck": "AddAverage",
+					"Head": "AddAverage"
+				}
+			},
+			{
+				"code": "bow",
+				"animation": "bow",
+				"animationSpeed": 1,
+				"blendMode": "AddAverage",
+				"weight": 1,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20,
+					"Neck": 20,
+					"Head": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"Neck": "AddAverage",
+					"Head": "AddAverage"
+				}
+			},
+			{
+				"code": "bow-fp",
+				"animation": "bow-fp",
+				"animationSpeed": 1,
+				"blendMode": "AddAverage",
+				"weight": 1,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20,
+					"Neck": 20,
+					"Head": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"Neck": "AddAverage",
+					"Head": "AddAverage"
+				}
+			},
+			{
+				"code": "facepalm",
+				"animation": "facepalm",
+				"animationSpeed": 1.1,
+				"blendMode": "AddAverage",
+				"weight": 1,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20,
+					"Neck": 20,
+					"Head": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"Neck": "AddAverage",
+					"Head": "AddAverage"
+				}
+			},
+			{
+				"code": "facepalm-fp",
+				"animation": "facepalm-fp",
+				"animationSpeed": 1.1,
+				"blendMode": "AddAverage",
+				"weight": 1,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20,
+					"Neck": 20,
+					"Head": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"Neck": "AddAverage",
+					"Head": "AddAverage"
+				}
+			},
+			{
+				"code": "cry",
+				"animation": "cry",
+				"animationSpeed": 1.3,
+				"blendMode": "AddAverage",
+				"weight": 1,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20,
+					"Neck": 20,
+					"Head": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"Neck": "AddAverage",
+					"Head": "AddAverage"
+				}
+			},
+			{
+				"code": "cry-fp",
+				"animation": "cry-fp",
+				"animationSpeed": 1.3,
+				"blendMode": "AddAverage",
+				"weight": 1,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20,
+					"Neck": 20,
+					"Head": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"Neck": "AddAverage",
+					"Head": "AddAverage"
+				}
+			},
+			{
+				"code": "shrug",
+				"animation": "shrug",
+				"animationSpeed": 1.3,
+				"blendMode": "AddAverage",
+				"weight": 1,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20,
+					"Neck": 20,
+					"Head": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"Neck": "AddAverage",
+					"Head": "AddAverage"
+				}
+			},
+			{
+				"code": "shrug-fp",
+				"animation": "shrug-fp",
+				"animationSpeed": 1.3,
+				"blendMode": "AddAverage",
+				"weight": 1,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20,
+					"Neck": 20,
+					"Head": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"Neck": "AddAverage",
+					"Head": "AddAverage"
+				}
+			},
+			{
+				"code": "cheer",
+				"animation": "cheer",
+				"animationSpeed": 1.1,
+				"blendMode": "AddAverage",
+				"weight": 1,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20,
+					"Neck": 20,
+					"Head": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"Neck": "AddAverage",
+					"Head": "AddAverage"
+				}
+			},
+			{
+				"code": "cheer-fp",
+				"animation": "cheer-fp",
+				"animationSpeed": 1.1,
+				"blendMode": "AddAverage",
+				"weight": 1,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20,
+					"Neck": 20,
+					"Head": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"Neck": "AddAverage",
+					"Head": "AddAverage"
+				}
+			},
+			{
+				"code": "laugh",
+				"animation": "laugh",
+				"animationSpeed": 1.1,
+				"blendMode": "AddAverage",
+				"weight": 1,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20,
+					"Neck": 20,
+					"Head": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"Neck": "AddAverage",
+					"Head": "AddAverage"
+				}
+			},
+			{
+				"code": "laugh-fp",
+				"animation": "laugh-fp",
+				"animationSpeed": 1.1,
+				"blendMode": "AddAverage",
+				"weight": 1,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20,
+					"Neck": 20,
+					"Head": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"Neck": "AddAverage",
+					"Head": "AddAverage"
+				}
+			},
+			{
+				"code": "rage",
+				"animation": "rage",
+				"animationSpeed": 1.1,
+				"blendMode": "AddAverage",
+				"weight": 1,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20,
+					"Neck": 20,
+					"Head": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"Neck": "AddAverage",
+					"Head": "AddAverage"
+				}
+			},
+			{
+				"code": "rage-fp",
+				"animation": "rage-fp",
+				"animationSpeed": 1.1,
+				"blendMode": "AddAverage",
+				"weight": 1,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20,
+					"Neck": 20,
+					"Head": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"Neck": "AddAverage",
+					"Head": "AddAverage"
+				}
+			},
+			{
+				"code": "panning",
+				"animation": "panning",
+				"animationSpeed": 1.5,
+				"blendMode": "Add",
+				"weight": 2,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20,
+					"Neck": 20,
+					"Head": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"Neck": "AddAverage",
+					"Head": "AddAverage"
+				}
+			},
+			{
+				"code": "panning-fp",
+				"animation": "panning-fp",
+				"animationSpeed": 1.5,
+				"blendMode": "Add",
+				"weight": 2,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20,
+					"Neck": 20,
+					"Head": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"Neck": "AddAverage",
+					"Head": "AddAverage"
+				}
+			},
+			{
+				"code": "pour",
+				"animation": "pour",
+				"animationSpeed": 1,
+				"easeInSpeed": 3,
+				"easeOutSpeed": 5,
+				"blendMode": "AddAverage",
+				"weight": 2,
+				"elementWeight": {
+					"LowerTorso": 5,
+					"UpperArmR": 10,
+					"LowerArmR": 10,
+					"UpperArmL": 10,
+					"LowerArmL": 10,
+					"Neck": 10,
+					"Head": 10
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"Neck": "AddAverage",
+					"Head": "AddAverage"
+				}
+			},
+			{
+				"code": "pour-fp",
+				"animation": "pour-fp",
+				"animationSpeed": 1,
+				"easeInSpeed": 3,
+				"weightCapFactor": 0.85,
+				"easeOutSpeed": 5,
+				"blendMode": "AddAverage",
+				"weight": 2,
+				"elementWeight": {
+					"UpperTorso": 50,
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20,
+					"ItemAnchorL": 20
+				}
+			},
+			{
+				"code": "hammerandchisel",
+				"animation": "hammerandchisel",
+				"animationSpeed": 1,
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20,
+					"Neck": 20,
+					"Head": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"Neck": "AddAverage",
+					"Head": "AddAverage"
+				}
+			},
+			{
+				"code": "petlarge",
+				"animation": "petlarge",
+				"animationSpeed": 1,
+				"blendMode": "AddAverage",
+				"weight": 1,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20,
+					"Neck": 20,
+					"Head": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"Neck": "AddAverage",
+					"Head": "AddAverage"
+				}
+			},
+			{
+				"code": "petsmall",
+				"animation": "petsmall",
+				"animationSpeed": 1,
+				"blendMode": "AddAverage",
+				"weight": 1,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20,
+					"Neck": 20,
+					"Head": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"Neck": "AddAverage",
+					"Head": "AddAverage"
+				}
+			},
+			{
+				"code": "crudeOarIdle",
+				"animation": "crudeOarIdle",
+				"animationSpeed": 1,
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 15,
+					"LowerArmR": 15
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage"
+				}
+			},
+			{
+				"code": "crudeOarIdle-fp",
+				"animation": "crudeOarIdle-fp",
+				"animationSpeed": 1,
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 15,
+					"LowerArmR": 15
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage"
+				}
+			},
+			{
+				"code": "crudeOarStandingReady",
+				"animation": "crudeOarStandingReady",
+				"blendMode": "Add",
+				"animationSpeed": 0.5,
+				"elementWeight": {
+					"UpperArmR": 80,
+					"LowerArmR": 80,
+					"UpperArmL": 80,
+					"LowerArmL": 80,
+					"ItemAnchor": 80
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "crudeOarStandingReady-fp",
+				"animation": "crudeOarStandingReady-fp",
+				"blendMode": "Add",
+				"animationSpeed": 0.5,
+				"elementWeight": {
+					"UpperArmR": 80,
+					"LowerArmR": 80,
+					"UpperArmL": 80,
+					"LowerArmL": 80,
+					"ItemAnchor": 80
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+			{
+				"code": "crudeOarHit",
+				"animation": "crudeOarHit",
+				"blendMode": "Add",
+				"animationSpeed": 1.75,
+				"holdEyePosAfterEasein": 0.3,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "crudeOarHit-fp",
+				"animation": "crudeOarHit-fp",
+				"blendMode": "Add",
+				"animationSpeed": 1.75,
+				"holdEyePosAfterEasein": 0.3,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "crudeOarForward",
+				"animation": "crudeOarForward",
+				"animationSpeed": 0.75,
+				"blendMode": "Add",
+				"elementWeight": {
+					"Head": 1000,
+					"UpperTorso": 1000,
+					"UpperArmR": 1000,
+					"LowerArmR": 1000,
+					"UpperArmL": 1000,
+					"LowerArmL": 1000,
+					"ItemAnchor": 1000
+				},
+				"elementBlendMode": {
+					"Head": "AddAverage",
+					"UpperTorso": "AddAverage",
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+			{
+				"code": "crudeOarForward-fp",
+				"animation": "crudeOarForward-fp",
+				"animationSpeed": 0.75,
+				"blendMode": "Add",
+				"elementWeight": {
+					"Head": 1000,
+					"UpperTorso": 1000,
+					"UpperArmR": 1000,
+					"LowerArmR": 1000,
+					"UpperArmL": 1000,
+					"LowerArmL": 1000,
+					"ItemAnchor": 1000
+				},
+				"elementBlendMode": {
+					"Head": "AddAverage",
+					"UpperTorso": "AddAverage",
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+			{
+				"code": "crudeOarBackward",
+				"animation": "crudeOarBackward",
+				"animationSpeed": 0.75,
+				"blendMode": "Add",
+				"elementWeight": {
+					"Head": 1000,
+					"UpperTorso": 1000,
+					"UpperArmR": 1000,
+					"LowerArmR": 1000,
+					"UpperArmL": 1000,
+					"LowerArmL": 1000,
+					"ItemAnchor": 1000
+				},
+				"elementBlendMode": {
+					"Head": "AddAverage",
+					"UpperTorso": "AddAverage",
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+			{
+				"code": "crudeOarBackward-fp",
+				"animation": "crudeOarBackward-fp",
+				"animationSpeed": 0.75,
+				"blendMode": "Add",
+				"elementWeight": {
+					"Head": 1000,
+					"UpperTorso": 1000,
+					"UpperArmR": 1000,
+					"LowerArmR": 1000,
+					"UpperArmL": 1000,
+					"LowerArmL": 1000,
+					"ItemAnchor": 1000
+				},
+				"elementBlendMode": {
+					"Head": "AddAverage",
+					"UpperTorso": "AddAverage",
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+			{
+				"code": "crudeOarReady",
+				"animation": "crudeOarReady",
+				"animationSpeed": 1,
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 1000,
+					"LowerArmR": 1000,
+					"UpperArmL": 1000,
+					"LowerArmL": 1000,
+					"ItemAnchor": 1000
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+			{
+				"code": "crudeOarReady-fp",
+				"animation": "crudeOarReady-fp",
+				"animationSpeed": 1,
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 1000,
+					"LowerArmR": 1000,
+					"UpperArmL": 1000,
+					"LowerArmL": 1000,
+					"ItemAnchor": 1000
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+			{
+				"code": "yawn",
+				"animation": "yawn",
+				"blendMode": "Add",
+				"easeInSpeed": 1,
+				"easeOutSpeed": 2,
+				"animationSpeed": 1,
+				"elementWeight": {
+					"UpperArmR": 30,
+					"LowerArmR": 30,
+					"LowerTorso": 10,
+					"UpperTorso": 10
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"LowerTorso": "AddAverage",
+					"UpperTorso": "AddAverage"
+				}
+			},
+			{
+				"code": "yawn-fp",
+				"animation": "yawn-fp",
+				"blendMode": "Add",
+				"easeInSpeed": 1,
+				"easeOutSpeed": 2,
+				"animationSpeed": 1,
+				"elementWeight": {
+					"UpperArmR": 30,
+					"LowerArmR": 30,
+					"LowerTorso": 10,
+					"UpperTorso": 10
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"LowerTorso": "AddAverage",
+					"UpperTorso": "AddAverage"
+				}
+			},
+			{
+				"code": "stretch",
+				"animation": "stretch",
+				"blendMode": "Add",
+				"easeInSpeed": 1,
+				"easeOutSpeed": 2,
+				"animationSpeed": 1,
+				"elementWeight": {
+					"UpperArmR": 30,
+					"LowerArmR": 30,
+					"UpperArmL": 30,
+					"LowerArmL": 30
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "stretch-fp",
+				"animation": "stretch-fp",
+				"blendMode": "Add",
+				"easeInSpeed": 1,
+				"easeOutSpeed": 2,
+				"animationSpeed": 1,
+				"elementWeight": {
+					"UpperArmR": 30,
+					"LowerArmR": 30,
+					"UpperArmL": 30,
+					"LowerArmL": 30
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "cough",
+				"animation": "cough",
+				"blendMode": "Add",
+				"easeInSpeed": 1,
+				"easeOutSpeed": 1,
+				"animationSpeed": 1,
+				"elementWeight": {
+					"UpperArmR": 60,
+					"LowerArmR": 60,
+					"UpperTorso": 60
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperTorso": "AddAverage"
+				}
+			},
+			{
+				"code": "cough-fp",
+				"animation": "cough-fp",
+				"blendMode": "Add",
+				"easeInSpeed": 1,
+				"easeOutSpeed": 2,
+				"animationSpeed": 1,
+				"elementWeight": {
+					"UpperArmR": 10,
+					"LowerArmR": 10,
+					"UpperTorso": 10
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperTorso": "AddAverage"
+				}
+			},
+			{
+				"code": "headscratch",
+				"animation": "headscratch",
+				"blendMode": "Add",
+				"easeInSpeed": 0.5,
+				"easeOutSpeed": 3,
+				"animationSpeed": 0.7,
+				"elementWeight": {
+					"UpperArmL": 90,
+					"LowerArmL": 90
+				},
+				"elementBlendMode": {
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "lookaround",
+				"animation": "lookaround",
+				"blendMode": "Add",
+				"easeInSpeed": 1,
+				"easeOutSpeed": 2,
+				"animationSpeed": 0.7,
+				"elementWeight": {
+					"Neck": 30,
+					"Head": 30
+				},
+				"elementBlendMode": {
+					"Neck": "AddAverage",
+					"Head": "AddAverage"
+				}
+			},
+
+			{
+				"code": "raiseshield-left",
+				"animation": "raiseshield-left",
+				"blendMode": "Add",
+				"easeInSpeed": 1,
+				"elementWeight": {
+					"UpperArmL": 100,
+					"LowerArmL": 100
+				},
+				"elementBlendMode": {
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "raiseshield-left-fp",
+				"animation": "raiseshield-left-fp",
+				"blendMode": "Add",
+				"easeInSpeed": 0.5,
+				"elementWeight": {
+					"UpperArmL": 1000,
+					"LowerArmL": 1000
+				},
+				"elementBlendMode": {
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "raiseshield-right",
+				"animation": "raiseshield-right",
+				"blendMode": "Add",
+				"easeInSpeed": 1,
+				"elementWeight": {
+					"UpperArmR": 100,
+					"LowerArmR": 100
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage"
+				}
+			},
+			{
+				"code": "raiseshield-right-fp",
+				"animation": "raiseshield-right-fp",
+				"blendMode": "Add",
+				"easeInSpeed": 1,
+				"elementWeight": {
+					"UpperArmR": 1000,
+					"LowerArmR": 1000
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage"
+				}
+			},
+			{
+				"code": "knifecut",
+				"animation": "knifecut",
+				"blendMode": "Add",
+				"easeInSpeed": 7,
+				"animationSpeed": 1.5,
+				// Prevent every other element from affecting the player pose
+				"weight": 0,
+				"elementWeight": {
+					"UpperArmR": 40,
+					"LowerArmR": 40,
+					"UpperArmL": 40,
+					"LowerArmL": 40,
+					"ItemAnchor": 40
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage"
+				}
+			},
+			{
+				"code": "knifecut-fp",
+				"animation": "knifecut-fp",
+				"blendMode": "Add",
+				"easeInSpeed": 7,
+				"animationSpeed": 1.5,
+				"weightCapFactor": 0.85,
+				// Prevent every other element from affecting the player pose
+				"weight": 0,
+				"elementWeight": {
+					"UpperArmR": 40,
+					"LowerArmR": 40,
+					"UpperArmL": 40,
+					"LowerArmL": 40,
+					"ItemAnchor": 40
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+			{
+				"code": "knifescrape",
+				"animation": "knifescrape",
+				"blendMode": "Add",
+				"easeInSpeed": 7,
+				"animationSpeed": 1,
+				// Prevent every other element from affecting the player pose
+				"weight": 0,
+				"elementWeight": {
+					"UpperArmR": 90,
+					"LowerArmR": 90,
+					"UpperArmL": 1000,
+					"LowerArmL": 1000,
+					"ItemAnchor": 90
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage"
+				}
+			},
+
+			{
+				"code": "saw",
+				"animation": "saw",
+				"blendMode": "Add",
+				"easeInSpeed": 7,
+				"animationSpeed": 1.5,
+				// Prevent every other element from affecting the player pose
+				"weight": 0,
+				"elementWeight": {
+					"UpperArmR": 40,
+					"LowerArmR": 40,
+					"UpperArmL": 40,
+					"LowerArmL": 40,
+					"ItemAnchor": 40
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage"
+				},
+				"animationSound": {
+					"frame": 10,
+					"location": "block/chop*",
+					"range": 16
+				}
+			},
+			{
+				"code": "saw-fp",
+				"animation": "saw-fp",
+				"blendMode": "Add",
+				"easeInSpeed": 7,
+				"animationSpeed": 1.5,
+				"weightCapFactor": 0.85,
+				// Prevent every other element from affecting the player pose
+				"weight": 0,
+				"elementWeight": {
+					"UpperArmR": 40,
+					"LowerArmR": 40,
+					"UpperArmL": 40,
+					"LowerArmL": 40,
+					"ItemAnchor": 40
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+
+
+			{
+				"code": "knifestab",
+				"animation": "knifestab",
+				"animationSpeed": 1.3,
+				"blendMode": "Add",
+				"attributes": {
+					"soundAtFrame": 8,
+					"damageAtFrame": 12,
+					"authorative": true
+				},
+				"elementWeight": {
+					"UpperArmR": 40,
+					"LowerArmR": 40,
+					"UpperArmL": 40,
+					"LowerArmL": 40,
+					"ItemAnchor": 40
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+			{
+				"code": "knifestab-fp",
+				"animation": "knifestab-fp",
+				"animationSpeed": 1.3,
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 40,
+					"LowerArmR": 40,
+					"UpperArmL": 40,
+					"LowerArmL": 40,
+					"ItemAnchor": 40
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+			{
+				"code": "startfire",
+				"animation": "startfire",
+				"animationSpeed": 4,
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 80,
+					"LowerArmR": 80,
+					"UpperArmL": 80,
+					"LowerArmL": 80,
+					"ItemAnchor": 80
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+			{
+				"code": "startfire-fp",
+				"animation": "startfire-fp",
+				"animationSpeed": 4,
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 80,
+					"LowerArmR": 80,
+					"UpperArmL": 80,
+					"LowerArmL": 80,
+					"ItemAnchor": 80
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+			{
+				"code": "shieldBlockL",
+				"animation": "shieldBlockL",
+				"blendMode": "Add",
+				"easeInSpeed": 30,
+				"elementWeight": {
+					"UpperArmL": 400,
+					"LowerArmL": 400
+				},
+				"elementBlendMode": {
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "shieldBlockR",
+				"animation": "shieldBlockR",
+				"blendMode": "Add",
+				"easeInSpeed": 30,
+				"elementWeight": {
+					"UpperArmR": 400,
+					"LowerArmR": 400
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage"
+				}
+			},
+			{
+				"code": "chiselready",
+				"animation": "chiselready",
+				"blendMode": "Add",
+				"animationSpeed": 1,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "chiselready-fp",
+				"animation": "chiselready-fp",
+				"blendMode": "Add",
+				"animationSpeed": 1,
+				"elementWeight": {
+					"UpperArmR": 40,
+					"LowerArmR": 40,
+					"UpperArmL": 40,
+					"LowerArmL": 40
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "chiselhit",
+				"animation": "chiselhit",
+				"blendMode": "Add",
+				"animationSpeed": 1,
+				"elementWeight": {
+					"LowerArmL": 40
+				},
+				"elementBlendMode": {
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "chiselhit-fp",
+				"animation": "chiselhit-fp",
+				"blendMode": "Add",
+				"animationSpeed": 1,
+				"elementWeight": {
+					"LowerArmL": 40
+				},
+				"elementBlendMode": {
+					"LowerArmL": "AddAverage"
+				}
+			},
+
+			{
+				"code": "squeezehoneycomb",
+				"animation": "squeezehoneycomb",
+				"blendMode": "Add",
+				"easeInSpeed": 7,
+				"animationSpeed": 1.5,
+				"weightCapFactor": 0.85,
+				// Prevent every other element from affecting the player pose
+				"weight": 0,
+				"elementWeight": {
+					"UpperArmR": 40,
+					"LowerArmR": 40,
+					"UpperArmL": 40,
+					"LowerArmL": 40,
+					"ItemAnchor": 40
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+
+			{
+				"code": "squeezehoneycomb-fp",
+				"animation": "squeezehoneycomb-fp",
+				"blendMode": "Add",
+				"easeInSpeed": 7,
+				"animationSpeed": 1.5,
+				"weightCapFactor": 0.85,
+				// Prevent every other element from affecting the player pose
+				"weight": 0,
+				"elementWeight": {
+					"UpperArmR": 40,
+					"LowerArmR": 40,
+					"UpperArmL": 40,
+					"LowerArmL": 40,
+					"ItemAnchor": 40
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+
+			{
+				"code": "insertgear",
+				"animation": "insertgear",
+				"blendMode": "Add",
+				"easeInSpeed": 7,
+				"animationSpeed": 1.5,
+				"weightCapFactor": 0.85,
+				// Prevent every other element from affecting the player pose
+				"weight": 0,
+				"elementWeight": {
+					"UpperTorso": 40,
+					"UpperArmR": 40,
+					"LowerArmR": 40,
+					"UpperArmL": 40,
+					"LowerArmL": 40,
+					"ItemAnchor": 60
+				},
+				"elementBlendMode": {
+					"UpperTorso": "AddAverage",
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+			{
+				"code": "insertgear-fp",
+				"animation": "insertgear-fp",
+				"blendMode": "Add",
+				"easeInSpeed": 7,
+				"animationSpeed": 1.5,
+				"weightCapFactor": 0.85,
+				// Prevent every other element from affecting the player pose
+				"weight": 0,
+				"elementWeight": {
+					"UpperArmR": 40,
+					"LowerArmR": 40,
+					"UpperArmL": 40,
+					"LowerArmL": 40,
+					"ItemAnchor": 60
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+			{
+				"code": "bugnet",
+				"animation": "bugnet",
+				"blendMode": "Add",
+				"animationSpeed": 1.2,
+				"elementWeight": {
+					"UpperArmR": 40,
+					"LowerArmR": 40,
+					"ItemAnchor": 40
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+			{
+				"code": "bugnet-fp",
+				"animation": "bugnet-fp",
+				"blendMode": "Add",
+				"animationSpeed": 1.2,
+				"elementWeight": {
+					"UpperArmR": 40,
+					"LowerArmR": 40,
+					"ItemAnchor": 40
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"ItemAnchor": "AddAverage"
+				}
+			},
+			{
+				"code": "flutecall",
+				"animation": "flutecall",
+				"blendMode": "AddAverage",
+				"animationSpeed": 1.0,
+				"elementWeight": {
+					"Head": 500,
+					"Neck": 500,
+					"UpperTorso": 500,
+					"UpperArmL": 500,
+					"LowerArmL": 500,
+					"UpperArmR": 500,
+					"LowerArmR": 500,
+					"ItemAnchor": 500
+				}
+			},
+			{
+				"code": "flutecall-fp",
+				"animation": "flutecall-fp",
+				"blendMode": "AddAverage",
+				"animationSpeed": 1.0,
+				"elementWeight": {
+					"UpperTorso": 500,
+					"UpperArmL": 500,
+					"LowerArmL": 500,
+					"UpperArmR": 500,
+					"LowerArmR": 500,
+					"ItemAnchor": 500
+				}
+			},
+			{
+				"code": "fluteready",
+				"animation": "fluteready",
+				"blendMode": "AddAverage",
+				"animationSpeed": 1.0,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"ItemAnchor": 20
+				}
+			},
+			{
+				"code": "fluteready-fp",
+				"animation": "fluteready-fp",
+				"blendMode": "AddAverage",
+				"animationSpeed": 1.0,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"ItemAnchor": 20
+				}
+			},
+			{
+				"code": "rideelk-holdweapon",
+				"animation": "rideelk-holdweapon",
+				"blendMode": "AddAverage",
+				"animationSpeed": 1.0,
+				"elementWeight": {
+					"Neck": 40,
+					"UpperTorso": 40,
+					"UpperArmR": 40,
+					"LowerArmR": 40,
+					"ItemAnchor": 40
+				}
+			},
+			{
+				"code": "fishingpole-throw",
+				"animation": "fishingpole-throw",
+				"blendMode": "AddAverage",
+				"animationSpeed": 1.75,
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				}
+			},
+			{
+				"code": "fishingpole-throw-fp",
+				"animation": "fishingpole-throw-fp",
+				"animationSpeed": 1.75,
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 50,
+					"LowerArmR": 50,
+					"UpperArmL": 50,
+					"LowerArmL": 50
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+
+			{
+				"code": "fishingpole-idle",
+				"animation": "fishingpole-idle",
+				"animationSpeed": 1,
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 20,
+					"LowerArmR": 20,
+					"UpperArmL": 20,
+					"LowerArmL": 20
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+			{
+				"code": "fishingpole-idle-fp",
+				"animation": "fishingpole-idle-fp",
+				"animationSpeed": 1,
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 50,
+					"LowerArmR": 50,
+					"UpperArmL": 50,
+					"LowerArmL": 50
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			},
+
+			{
+				"code": "wormgrunting",
+				"animation": "wormgrunting",
+				"blendMode": "AddAverage",
+				"animationSpeed": 1,
+				"weight": 50
+			},
+			{
+				"code": "wormgrunting-fp",
+				"animation": "wormgrunting-fp",
+				"animationSpeed": 1,
+				"blendMode": "Add",
+				"elementWeight": {
+					"UpperArmR": 50,
+					"LowerArmR": 50,
+					"UpperArmL": 50,
+					"LowerArmL": 50
+				},
+				"elementBlendMode": {
+					"UpperArmR": "AddAverage",
+					"LowerArmR": "AddAverage",
+					"UpperArmL": "AddAverage",
+					"LowerArmL": "AddAverage"
+				}
+			}
+		]
+	},
+	"server": {
+		"behaviors": [
+			{ "code": "repulseagents" },
+			{ "code": "nametag" },
+			{ "code": "playerphysics" },
+			{ "code": "collectitems" },
+			{
+				"code": "health",
+				"currenthealth": 15.0,
+				"maxhealth": 15.0,
+				"smallHurtSoundCode": "smallhurt"
+			},
+			{
+				"code": "hunger",
+				"currentsaturation": 1500.0,
+				"maxsaturation": 1500.0,
+				"saturationlossdelay": 180.0
+			},
+			{ "code": "breathe" },
+			{ "code": "playerrevivable" },
+			{ "code": "aimingaccuracy" },
+			{ "code": "tiredness" },
+			{ "code": "bodytemperature" },
+			{ "code": "extraskinnable" },
+			{ "code": "idleanimations" },
+			{ "code": "playerinventory" },
+			{ "code": "entitystatetags" }
+		]
+	},
+	"sounds": {
+		"hurt": "player/hurt",
+		"death": "player/death",
+		"swim": "player/swim",
+		"eat": "player/eat",
+		"drink": "player/drink*"
+	}
+}

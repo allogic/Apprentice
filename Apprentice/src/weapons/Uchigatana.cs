@@ -1,44 +1,36 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Newtonsoft.Json.Linq;
+using System;
 
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
 using Vintagestory.API.MathTools;
-using Vintagestory.API.Util;
-using Vintagestory.Client.NoObf;
-using Vintagestory.GameContent;
+using VSImGui.Debug;
 
 namespace Apprentice.Weapon
 {
-	internal class AnimationStuff
+	internal class UshigatanaDialog : GuiDialog
 	{
-		private static void AnimationStuffHandling(ICoreClientAPI api, long entityId)
+		public override string ToggleKeyCombinationCode => "ushigatana_dialog";
+
+		public UshigatanaDialog(ICoreClientAPI api) : base(api)
 		{
-			Entity? entity = api.World.GetEntityById(entityId);
-			EntityShapeRenderer? renderer = entity?.Properties.Client.Renderer as EntityShapeRenderer;
+			ElementBounds bgBounds = ElementBounds.Fill.WithFixedPadding(GuiStyle.ElementToDialogPadding);
+			bgBounds.BothSizing = ElementSizing.FitToChildren;
+			bgBounds.WithChildren(ElementBounds.Fixed(10, 10, 250, 800));
 
-			IAnimationManager? animManager = entity?.AnimManager;
-
-			IDictionary<string, AnimationMetaData>? animMetaDataByName = animManager?.ActiveAnimationsByAnimCode;
-
-			animMetaDataByName?["test"].AnimationSpeed = 0.5F;
-
-			RunningAnimation? runAnim = animManager?.GetAnimationState("runAnim");
-
-			IAnimator? animator = animManager?.Animator;
-
-			// ElementPose elemPose = animator?.GetPosebyName("Root");
-
-			// animator?.CalculateMatrices = true;
-
-			// AttachmentPointAndPose? rootPose = animator.GetAttachmentPointPose("Root");
-
-			// rootPose.
-
-			// animManager.
-
-			// renderer.
+			// Create the dialog
+			SingleComposer = capi.Gui.CreateCompo("Ushigatana", ElementStdBounds.AutosizedMainDialog.WithAlignment(EnumDialogArea.LeftTop))
+				.AddShadedDialogBG(bgBounds)
+				.AddDialogTitleBar("Ushigatana Controls", () => { TryClose(); })
+				.AddSlider(value => { return true; }, ElementBounds.Fixed(10, 60, 230, 50))
+				.AddSlider(value => { return true; }, ElementBounds.Fixed(10, 120, 230, 50))
+				.AddSlider(value => { return true; }, ElementBounds.Fixed(10, 180, 230, 50))
+				.Compose();
+				//.AddStaticText("This", CairoFont.WhiteDetailText(), ElementBounds.Fixed(10, 60, 230, 50))
+				//.AddToggleButton("Hello", CairoFont.WhiteDetailText(), value => { }, ElementBounds.Fixed(0, 40, 250, 800))
+				//.AddToggleButton("Hello", CairoFont.WhiteDetailText(), value => { }, ElementBounds.Fixed(0, 40, 250, 800))
+				//.AddToggleButton("Hello", CairoFont.WhiteDetailText(), value => { }, ElementBounds.Fixed(0, 40, 250, 800))
 		}
 	}
 
@@ -312,49 +304,138 @@ namespace Apprentice.Weapon
 		private readonly AssetLocation dashSound2 = new("apprentice", "sounds/dash-2");
 		private readonly AssetLocation dashRecoverSound1 = new("apprentice", "sounds/dash-recover-1");
 		private readonly AssetLocation dashRecoverSound2 = new("apprentice", "sounds/dash-recover-2");
+		private readonly AssetLocation ushigatanaDashSound = new("apprentice", "sounds/ushigatana-dash");
 
 		private readonly ICoreClientAPI clientApi;
 		private readonly IInputAPI inputApi;
-		private readonly IAnimationManager animManager;
 
-		private const float animationStep = 1.0F / 60;
-		private const float animationFrames = animationStep * 30.0F;
-		private const float animationSpeed = 15.0F;
+		private enum SequenceState
+		{
+			SEQUENCE_STATE_IDLE,
+			SEQUENCE_STATE_START,
+			SEQUENCE_STATE_DASH,
+			SEQUENCE_STATE_RETRACT,
+			SEQUENCE_STATE_STOP,
+		}
 
-		private const float impulseAirbourne = 0.28F;
-		private const float impulseGrounded = 0.8F;
+		private SequenceState sequenceState = SequenceState.SEQUENCE_STATE_IDLE;
 
-		private const int dashCooldownMs = 800;
-		private const int dashBlurEnableMs = 250;
+		private EntityPlayer? entityPlayer = null;
+		private LineGizmo? lineGizmo = null;
+		private DashBlur? dashBlur = null;
+		private UshigatanaDialog? debugDialog = null;
 
-		EntityPlayer? entityPlayer = null;
-		LineGizmo? lineGizmo = null;
-		DashBlur? dashBlur = null;
-
-		private bool isInit = true;
-		private bool isPlaying = false;
-
-		private float animationFrame = 0.0F;
+		private bool isPhysicActive = false;
 		private bool dashOnCooldown = false;
+
+		private int physicFps = 30;
+		private int physicFrames = 60;
+		private float physicSpeed = 8.356F;
+
+		private float impulseAirbourne = 0.28F;
+		private float impulseGrounded = 1.4F;
+
+		private int dashCooldownMs = 800;
+		private int dashBlurEnableMs = 250;
+
+		private float physicFrame = 0.0F;
+		private int animationFrame = 0;
+
+		private int dashForwardFrameCount = 10;
+		private int dashForwardRetractFrameCount = 17;
+
 		private Vec3d dashDirection = Vec3d.Zero;
 
-		private RunningAnimation runningAnimation = new();
-		private RunningAnimation sprintAnimation = new();
+		private AnimationMetaData idle1Data = new AnimationMetaData()
+		{
+			Animation = "Idle1",
+			Code = "idle1",
+			Weight = 1.0F,
+			SupressDefaultAnimation = true,
+			ClientSide = true,
+			AnimationSpeed = 1.0F,
+			BlendMode = EnumAnimationBlendMode.Add,
+			ElementWeight = {
+				{ "root", 1.0F },
+			},
+			ElementBlendMode = {
+				{ "root", EnumAnimationBlendMode.Add },
+			},
+		};
+		private AnimationMetaData dashForwardData = new AnimationMetaData()
+		{
+			Animation = "dash-forward",
+			Code = "dash-forward",
+			Weight = 1.0F,
+			SupressDefaultAnimation = true,
+			ClientSide = true,
+			AnimationSpeed = 4.0F,
+			BlendMode = EnumAnimationBlendMode.Add,
+			ElementWeight = {
+				{ "root", 1.0F },
+			},
+			ElementBlendMode = {
+				{ "root", EnumAnimationBlendMode.Add },
+			},
+		};
+		private AnimationMetaData dashForwardRetractData = new AnimationMetaData()
+		{
+			Animation = "dash-forward-retract",
+			Code = "dash-forward-retract",
+			Weight = 1.0F,
+			SupressDefaultAnimation = true,
+			ClientSide = true,
+			AnimationSpeed = 1.0F,
+			BlendMode = EnumAnimationBlendMode.Add,
+			ElementWeight = {
+				{ "root", 1.0F },
+			},
+			ElementBlendMode = {
+				{ "root", EnumAnimationBlendMode.Add },
+			},
+		};
+		private AnimationMetaData swordHitData = new AnimationMetaData() // Maybe go full custom..
+		{
+			Animation = "swordhit",
+			Code = "swordhit",
+			EaseInSpeed = 8.0F,
+			EaseOutSpeed = 8.0F,
+			Weight = 1.0F,
+			SupressDefaultAnimation = true,
+			ClientSide = true,
+			AnimationSpeed = 2.2F,
+			BlendMode = EnumAnimationBlendMode.AddAverage,
+			ElementWeight = {
+				{ "UpperArmR", 20.0F },
+				{ "LowerArmR", 20.0F },
+				{ "UpperArmL", 20.0F },
+				{ "LowerArmL", 20.0F }
+			},
+			ElementBlendMode = {
+				{ "UpperArmR", EnumAnimationBlendMode.AddAverage },
+				{ "LowerArmR", EnumAnimationBlendMode.AddAverage },
+				{ "UpperArmL", EnumAnimationBlendMode.AddAverage },
+				{ "LowerArmL", EnumAnimationBlendMode.AddAverage }
+			},
+		};
 
-		private Animation currAnimation = new();
+		// TODO: add "SpearIdle" animation
 
 		public UchigatanaDashBehaviour(ICoreClientAPI api, Entity entity) : base(entity)
 		{
 			clientApi = api;
 			inputApi = api.Input;
-			animManager = entity.AnimManager;
 
 			entityPlayer = api.World.Player.Entity;
 			lineGizmo = new(api, 1000);
 			dashBlur = new(api);
+			debugDialog = new(api); // TODO: remove me..
 
-			inputApi.RegisterHotKey("play_blood_scythe_anim", "Play a test sequence", GlKeys.ShiftLeft, HotkeyType.MovementControls);
-			inputApi.SetHotKeyHandler("play_blood_scythe_anim", OnReset);
+			inputApi.RegisterHotKey("ushigatana_dash_anim", "", GlKeys.ShiftLeft, HotkeyType.MovementControls);
+			inputApi.SetHotKeyHandler("ushigatana_dash_anim", OnReset);
+
+			api.Input.RegisterHotKey("ushigatana_dialog", "", GlKeys.P, HotkeyType.GUIOrOtherControls);
+			api.Input.SetHotKeyHandler("ushigatana_dialog", OnToggleDebugDialog);
 		}
 
 		public override string PropertyName()
@@ -364,159 +445,181 @@ namespace Apprentice.Weapon
 		public override void OnGameTick(float deltaTime)
 		{
 			if (entityPlayer == null) return;
+			if (dashBlur == null) return;
 
 			EntityPos transform = entityPlayer.Pos;
+			EntityControls controls = clientApi.World.Player.Entity.Controls;
 
-			if (isPlaying)
+#if DEBUG
+			DebugWidgets.IntSlider("Ushigatana", "General", "dashCooldownMs", 0, 5000, () => { return dashCooldownMs; }, (v) => { dashCooldownMs = v; });
+			DebugWidgets.IntSlider("Ushigatana", "General", "dashBlurEnableMs", 0, 5000, () => { return dashBlurEnableMs; }, (v) => { dashBlurEnableMs = v; });
+
+			DebugWidgets.IntSlider("Ushigatana", "Physic", "physicFps", 0, 120, () => { return physicFps; }, (v) => { physicFps = v; });
+			DebugWidgets.IntSlider("Ushigatana", "Physic", "physicFrames", 0, 120, () => { return physicFrames; }, (v) => { physicFrames = v; });
+			DebugWidgets.FloatSlider("Ushigatana", "Physic", "physicSpeed", -50.0F, 50.0F, () => { return physicSpeed; }, (v) => { physicSpeed = v; });
+			DebugWidgets.FloatSlider("Ushigatana", "Physic", "impulseAirbourne", -10.0F, 10.0F, () => { return impulseAirbourne; }, (v) => { impulseAirbourne = v; });
+			DebugWidgets.FloatSlider("Ushigatana", "Physic", "impulseGrounded", -10.0F, 10.0F, () => { return impulseGrounded; }, (v) => { impulseGrounded = v; });
+
+			DebugWidgets.IntSlider("Ushigatana", "Animation", "dashForwardFrameFrames", 0, 1000, () => { return dashForwardFrameCount; }, (v) => { dashForwardFrameCount = v; });
+			DebugWidgets.IntSlider("Ushigatana", "Animation", "dashForwardRetractFrames", 0, 1000, () => { return dashForwardRetractFrameCount; }, (v) => { dashForwardRetractFrameCount = v; });
+#endif // DEBUG
+
+			// Disable controls while in dash
+			if (sequenceState != SequenceState.SEQUENCE_STATE_IDLE)
 			{
-				if (isInit)
-				{
-					isInit = false;
+				controls.Forward = false;
+				controls.Backward = false;
+				controls.Left = false;
+				controls.Right = false;
+			}
 
-					animationFrame = 0.0F;
-
-					Vec3d worldUp = new(0, 1, 0);
-
-					Vec3d localForward = transform.GetViewVector().ToVec3d();
-					Vec3d localBack = localForward.Clone().Mul(-1);
-					Vec3d localRight = worldUp.Cross(localForward).Normalize();
-					Vec3d localLeft = localRight.Clone().Mul(-1);
-
-					EntityControls controls = clientApi.World.Player.Entity.Controls;
-
-					dashDirection = Vec3d.Zero;
-
-					if (controls.Forward) dashDirection += localForward;
-					if (controls.Backward) dashDirection += localBack;
-					if (controls.Left) dashDirection += localRight;
-					if (controls.Right) dashDirection += localLeft;
-
-					dashDirection.Y = 0.0F;
-
-					if (dashDirection.LengthSq() > 0)
+			switch (sequenceState)
+			{
+				case SequenceState.SEQUENCE_STATE_IDLE:
 					{
-						dashDirection.Normalize();
+						break;
 					}
-
-					if (lineGizmo != null)
+				case SequenceState.SEQUENCE_STATE_START:
 					{
-						lineGizmo.Reset();
-						lineGizmo.AddLine(
-							(float)transform.X,        (float)transform.Y,        (float)transform.Z,
-							(float)transform.Motion.X, (float)transform.Motion.Y, (float)transform.Motion.Z,
-							ColorUtil.ToRgba(0xFF, 0xFF, 0x00, 0x00));
-						lineGizmo.Commit();
+						isPhysicActive = true;
+
+						physicFrame = 0.0F;
+						animationFrame = 0;
+
+						// Compute dash direction
+						Vec3d worldUp = new(0, 1, 0);
+						Vec3d localForward = transform.GetViewVector().ToVec3d();
+						Vec3d localBack = localForward.Clone().Mul(-1);
+						Vec3d localRight = worldUp.Cross(localForward).Normalize();
+						Vec3d localLeft = localRight.Clone().Mul(-1);
+						dashDirection = Vec3d.Zero;
+						if (controls.Forward) dashDirection += localForward;
+						if (controls.Backward) dashDirection += localBack;
+						if (controls.Left) dashDirection += localRight;
+						if (controls.Right) dashDirection += localLeft;
+						dashDirection.Y = 0.0F;
+						if (dashDirection.LengthSq() > 0)
+						{
+							dashDirection.Normalize();
+						}
+						else
+						{
+							// Default forward dash if no key would be held..
+							dashDirection = new Vec3d(localForward.X, 0.0F, localForward.Z);
+							dashDirection.Normalize();
+						}
+
+						// TODO
+						// if (lineGizmo != null)
+						// {
+						// 	lineGizmo.Reset();
+						// 	lineGizmo.AddLine(
+						// 		(float)transform.X,        (float)transform.Y,        (float)transform.Z,
+						// 		(float)transform.Motion.X, (float)transform.Motion.Y, (float)transform.Motion.Z,
+						// 		ColorUtil.ToRgba(0xFF, 0xFF, 0x00, 0x00));
+						// 	lineGizmo.Commit();
+						// }
+
+						// Start dash animation
+						entity.AnimManager.StopAllAnimations();
+						entity.AnimManager.StartAnimation(dashForwardData);
+						RunningAnimation animation = entity.AnimManager.GetAnimationState(dashForwardData.Code);
+						animation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
+						animation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
+
+						sequenceState = SequenceState.SEQUENCE_STATE_DASH;
+
+						break;
 					}
-
-					// BlockSelection? blockSelection = null;
-					// EntitySelection? entitySelection = null;
-					// entity.World.RayTraceForSelection(entity.Pos.XYZ, target, ref blockSelection, ref entitySelection);
-
-					// animManager.LoadAnimator();
-					// animManager.OnAnimationReceived
-
-					sprintAnimation = animManager.GetAnimationState("walk");
-					sprintAnimation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Stop;
-
-					runningAnimation = animManager.GetAnimationState("swordhit");
-					runningAnimation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Stop;
-
-					// IAnimator? animator = animManager.Animator;
-					// animator.ActiveAnimationCount
-
-					// RunningAnimation[] animations = entity.AnimManager.Animator.Animations;
-					// int animationCount = entity.AnimManager.Animator.Animations.Length;
-					// for (int i = 0; i < animationCount; i++)
-					// {
-					// 	animations[i].
-					// }
-
-					// entity.AnimManager.StartAnimation(new AnimationMetaData()
-					// {
-					// 	Animation = "walk",
-					// 	Code = "walk",
-					// 	Weight = 0.5F,
-					// 	SupressDefaultAnimation = true,
-					// 	ClientSide = true,
-					// 	AnimationSpeed = 0.7F,
-					// 	BlendMode = EnumAnimationBlendMode.Add,
-					// 	ElementWeight = {
-					// 		{ "root", 100.0F },
-					// 	},
-					// 	ElementBlendMode = {
-					// 		{ "root", EnumAnimationBlendMode.Add },
-					// 	},
-					// });
-
-					entity.AnimManager.StartAnimation(new AnimationMetaData()
+				case SequenceState.SEQUENCE_STATE_DASH:
 					{
-						Animation = "jump",
-						Code = "newjump",
-						Weight = 0.5F,
-						SupressDefaultAnimation = true,
-						ClientSide = true,
-						AnimationSpeed = 0.5F,
-						BlendMode = EnumAnimationBlendMode.Add,
-						ElementWeight = {
-							{ "root", 100.0F },
-						},
-						ElementBlendMode = {
-							{ "root", EnumAnimationBlendMode.Add },
-						},
-					});
+						// Check exit condition
+						if (animationFrame >= dashForwardFrameCount)
+						{
+							animationFrame = 0;
 
-					entity.AnimManager.StartAnimation(new AnimationMetaData()
+							sequenceState = SequenceState.SEQUENCE_STATE_RETRACT;
+
+							// Start idle animation
+							entity.AnimManager.StopAllAnimations();
+							entity.AnimManager.StartAnimation(dashForwardRetractData);
+							RunningAnimation animation = entity.AnimManager.GetAnimationState(dashForwardRetractData.Code);
+							animation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Repeat;
+							animation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.Stop;
+						}
+
+						// Increment animation frame
+						animationFrame++;
+
+						break;
+					}
+				case SequenceState.SEQUENCE_STATE_RETRACT:
 					{
-						Animation = "swordhit",
-						Code = "swordhit",
-						EaseInSpeed = 8.0F,
-						EaseOutSpeed = 8.0F,
-						Weight = 1.0F,
-						SupressDefaultAnimation = true,
-						ClientSide = true,
-						AnimationSpeed = 2.2F,
-						BlendMode = EnumAnimationBlendMode.AddAverage,
-						ElementWeight = {
-							{ "UpperArmR", 20.0F },
-							{ "LowerArmR", 20.0F },
-							{ "UpperArmL", 20.0F },
-							{ "LowerArmL", 20.0F }
-						},
-						ElementBlendMode = {
-							{ "UpperArmR", EnumAnimationBlendMode.AddAverage },
-							{ "LowerArmR", EnumAnimationBlendMode.AddAverage },
-							{ "UpperArmL", EnumAnimationBlendMode.AddAverage },
-							{ "LowerArmL", EnumAnimationBlendMode.AddAverage }
-						},
-					});
-				}
+						// Check exit condition
+						if (transform.Motion.Length() < 0.01F)
+						{
+							sequenceState = SequenceState.SEQUENCE_STATE_STOP;
 
+							// Start idle animation
+							entity.AnimManager.StopAllAnimations();
+							entity.AnimManager.StartAnimation(idle1Data);
+							// RunningAnimation animation = entity.AnimManager.GetAnimationState(idle1Data.Code);
+							// animation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Repeat;
+							// animation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.Stop;
+						}
+
+						// if (animationFrame >= dashForwardRetractFrameCount)
+						// {
+						// 	animationFrame = 0;
+						// }
+
+						// Increment animation frame
+						animationFrame++;
+
+						break;
+					}
+				case SequenceState.SEQUENCE_STATE_STOP:
+					{
+						sequenceState = SequenceState.SEQUENCE_STATE_IDLE;
+
+						break;
+					}
+			}
+
+			if (isPhysicActive)
+			{
+				// Apply physics
+				float totalFrames = (1.0F / physicFps) * physicFrames;
 				float impulseAttenuator = entity.OnGround
 					? impulseGrounded
 					: impulseAirbourne;
-
-				Vec3d force = dashDirection * EaseOutElastic(animationFrame / animationFrames) * impulseAttenuator;
-
+				dashDirection.Y = 0.0F;
+				Vec3d force = dashDirection * EaseOutElastic(physicFrame / totalFrames) * impulseAttenuator;
+				force.Y += EaseOutCirc(physicFrame / totalFrames) * 0.01F;
 				transform.Motion.Add(force);
 
-				animationFrame += animationStep * animationSpeed;
-
-				if (animationFrame >= animationFrames)
+				// Advance animation
+				physicFrame += (1.0F / physicFps) * physicSpeed;
+				if (physicFrame >= totalFrames)
 				{
-					isPlaying = false;
-					isInit = true;
+					isPhysicActive = false;
 				}
 
-				dashBlur?.BlurIntensity = (float)transform.Motion.Length();
+				// Apply blur motion vector
+				dashBlur.BlurIntensity = (float)transform.Motion.Length();
 			}
 		}
 
 		// Pirate's Life https://easings.net/
-		float EaseInCirc(float x)
+		private float EaseInCirc(float x)
 		{
 			return 1.0F - (float)Math.Sqrt(1.0F - (float)Math.Pow(x, 2.0F));
 		}
-		float EaseInOutElastic(float x)
+		private float EaseOutCirc(float x)
+		{
+			return (float)Math.Sqrt(1.0F - (float)Math.Pow(x - 1.0F, 2.0F));
+		}
+		private float EaseInOutElastic(float x)
 		{
 			float c5 = (2.0F * (float)Math.PI) / 4.5F;
 			return x == 0.0F
@@ -524,10 +627,10 @@ namespace Apprentice.Weapon
 				: x == 1.0F
 				? 1.0F
 				: x < 0.5F
-				? -((float)Math.Pow(2.0F,  20.0F * x - 10.0F) * (float)Math.Sin((20.0F * x - 11.125F) * c5)) / 2.0F
-				:  ((float)Math.Pow(2.0F, -20.0F * x + 10.0F) * (float)Math.Sin((20.0F * x - 11.125F) * c5)) / 2.0F + 1.0F;
+				? -((float)Math.Pow(2.0F, 20.0F * x - 10.0F) * (float)Math.Sin((20.0F * x - 11.125F) * c5)) / 2.0F
+				: ((float)Math.Pow(2.0F, -20.0F * x + 10.0F) * (float)Math.Sin((20.0F * x - 11.125F) * c5)) / 2.0F + 1.0F;
 		}
-		float EaseOutElastic(float x)
+		private float EaseOutElastic(float x)
 		{
 			float c4 = (2.0F * (float)Math.PI) / 3.0F;
 			return x == 0.0F
@@ -537,28 +640,43 @@ namespace Apprentice.Weapon
 				: (float)Math.Pow(2.0F, -10.0F * x) * (float)Math.Sin((x * 10.0F - 0.75F) * c4) + 1.0F;
 		}
 
+		private bool OnToggleDebugDialog(KeyCombination comb)
+		{
+			if (debugDialog == null) return true;
+			if (debugDialog.IsOpened()) debugDialog.TryClose();
+			else debugDialog.TryOpen();
+			return true;
+		}
 		private bool OnReset(KeyCombination combination)
 		{
 			if (entityPlayer == null) return true;
 			if (dashOnCooldown) return true;
 			if (dashBlur == null) return true;
+			if (entityPlayer.OnGround == false) return true;
 
+			sequenceState = SequenceState.SEQUENCE_STATE_START;
+
+			// Set dash on cooldown
 			dashOnCooldown = true;
-			isPlaying = true;
-			isInit = true;
 
+			// Enable motion blur
 			dashBlur.BlurEnable = true;
 
-			clientApi.World.AddCameraShake(2.0F);
+			// TODO: Refactor this stuff..
+			//  |
+			//  V
 
 			clientApi.World.PlaySoundAt(dashSound1, new BlockPos(entityPlayer.Pos.XYZInt, 0), 0.0, null, true, 64.0F, 1.0F);
+			clientApi.World.PlaySoundAt(ushigatanaDashSound, new BlockPos(entityPlayer.Pos.XYZInt, 0), 0.0, null, false, 64.0F, 6.0F);
 
+			// Disable cooldown
 			clientApi.World.RegisterCallback(_ =>
 			{
 				dashOnCooldown = false;
 				clientApi.World.PlaySoundAt(dashRecoverSound1, new BlockPos(entityPlayer.Pos.XYZInt, 0), 0.0, null, true, 64.0F, 1.0F);
 			}, dashCooldownMs);
 
+			// Disable motion blur
 			clientApi.World.RegisterCallback(_ =>
 			{
 				dashBlur.BlurEnable = false;
