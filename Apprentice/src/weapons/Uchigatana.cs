@@ -328,12 +328,14 @@ namespace Apprentice.Weapon
 		private bool isPhysicActive = false;
 		private bool dashOnCooldown = false;
 
+		private float stopVelocityEpsilon = 0.1F;
+
 		private int physicFps = 30;
 		private int physicFrames = 60;
 		private float physicSpeed = 8.356F;
 
-		private float horizontalImpulse = 1.4F;
-		private float verticalImpulse = 0.04F;
+		private float horizontalImpulse = 0.2F;
+		private float verticalImpulse = 0.03F;
 
 		private int dashCooldownMs = 800;
 		private int dashBlurEnableMs = 250;
@@ -401,9 +403,9 @@ namespace Apprentice.Weapon
 			EaseInSpeed = 8.0F,
 			EaseOutSpeed = 8.0F,
 			Weight = 1.0F,
-			SupressDefaultAnimation = true,
+			SupressDefaultAnimation = false,
 			ClientSide = true,
-			AnimationSpeed = 2.2F,
+			AnimationSpeed = 0.5F,
 			BlendMode = EnumAnimationBlendMode.AddAverage,
 			ElementWeight = {
 				{ "UpperArmR", 20.0F },
@@ -457,7 +459,7 @@ namespace Apprentice.Weapon
 			DebugWidgets.IntSlider("Ushigatana", "Physic", "physicFps", 0, 120, () => { return physicFps; }, (v) => { physicFps = v; });
 			DebugWidgets.IntSlider("Ushigatana", "Physic", "physicFrames", 0, 120, () => { return physicFrames; }, (v) => { physicFrames = v; });
 			DebugWidgets.FloatSlider("Ushigatana", "Physic", "physicSpeed", -50.0F, 50.0F, () => { return physicSpeed; }, (v) => { physicSpeed = v; });
-			DebugWidgets.FloatSlider("Ushigatana", "Physic", "horizontalImpulse", -50.0F, 50.0F, () => { return horizontalImpulse; }, (v) => { horizontalImpulse = v; });
+			DebugWidgets.FloatSlider("Ushigatana", "Physic", "horizontalImpulse", -1.0F, 1.0F, () => { return horizontalImpulse; }, (v) => { horizontalImpulse = v; });
 			DebugWidgets.FloatSlider("Ushigatana", "Physic", "verticalImpulse", -0.1F, 0.1F, () => { return verticalImpulse; }, (v) => { verticalImpulse = v; });
 
 			DebugWidgets.IntSlider("Ushigatana", "Animation", "dashForwardFrameFrames", 0, 1000, () => { return dashForwardFrameCount; }, (v) => { dashForwardFrameCount = v; });
@@ -567,7 +569,7 @@ namespace Apprentice.Weapon
 				case SequenceState.SEQUENCE_STATE_RETRACT:
 					{
 						// Check exit condition
-						if (transform.Motion.Length() < 0.01F)
+						if (transform.Motion.Length() < stopVelocityEpsilon)
 						{
 							sequenceState = SequenceState.SEQUENCE_STATE_STOP;
 
