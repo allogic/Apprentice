@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks.Dataflow;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
@@ -37,33 +38,9 @@ namespace Apprentice.Weapon
 		}
 	}
 
-	internal class UshigatanaDialog : GuiDialog
-	{
-		public override string ToggleKeyCombinationCode => "ushigatana_dialog";
-
-		public UshigatanaDialog(ICoreClientAPI api) : base(api)
-		{
-			ElementBounds bgBounds = ElementBounds.Fill.WithFixedPadding(GuiStyle.ElementToDialogPadding);
-			bgBounds.BothSizing = ElementSizing.FitToChildren;
-			bgBounds.WithChildren(ElementBounds.Fixed(10, 10, 250, 800));
-
-			// Create the dialog
-			SingleComposer = capi.Gui.CreateCompo("Ushigatana", ElementStdBounds.AutosizedMainDialog.WithAlignment(EnumDialogArea.LeftTop))
-				.AddShadedDialogBG(bgBounds)
-				.AddDialogTitleBar("Ushigatana Controls", () => { TryClose(); })
-				.AddSlider(value => { return true; }, ElementBounds.Fixed(10, 60, 230, 50))
-				.AddSlider(value => { return true; }, ElementBounds.Fixed(10, 120, 230, 50))
-				.AddSlider(value => { return true; }, ElementBounds.Fixed(10, 180, 230, 50))
-				.Compose();
-			//.AddStaticText("This", CairoFont.WhiteDetailText(), ElementBounds.Fixed(10, 60, 230, 50))
-			//.AddToggleButton("Hello", CairoFont.WhiteDetailText(), value => { }, ElementBounds.Fixed(0, 40, 250, 800))
-			//.AddToggleButton("Hello", CairoFont.WhiteDetailText(), value => { }, ElementBounds.Fixed(0, 40, 250, 800))
-			//.AddToggleButton("Hello", CairoFont.WhiteDetailText(), value => { }, ElementBounds.Fixed(0, 40, 250, 800))
-		}
-	}
-
 	internal class LineGizmo : IRenderer
 	{
+		private readonly ICoreClientAPI clientApi;
 		private readonly IClientEventAPI eventApi;
 		private readonly IRenderAPI renderApi;
 		private readonly IShaderAPI shaderApi;
@@ -78,6 +55,7 @@ namespace Apprentice.Weapon
 
 		public LineGizmo(ICoreClientAPI api, int numLines)
 		{
+			clientApi = api;
 			eventApi = api.Event;
 			renderApi = api.Render;
 			shaderApi = api.Shader;
@@ -94,23 +72,28 @@ namespace Apprentice.Weapon
 			mesh = new(numLines * 2, numLines * 2, false, false, true, false);
 			mesh?.mode = EnumDrawMode.Lines;
 
-			eventApi.RegisterRenderer(this, EnumRenderStage.Done);
+			eventApi.RegisterRenderer(this, EnumRenderStage.Opaque);
 		}
 
 		public void OnRenderFrame(float deltaTime, EnumRenderStage stage)
 		{
-			if (stage != EnumRenderStage.Done) return;
+			if (stage != EnumRenderStage.Opaque) return;
 
 			if (meshRef == null) return;
 
 			renderApi.GlDisableCullFace();
+			renderApi.GlToggleBlend(false);
 
-			// Draw tha gizmo
+			renderApi.LineWidth = 10;
+
+			// Draw the gizmo
 			lineProgram.Use();
-			// lineProgram.Uniform("color", 0); // TODO
+			lineProgram.UniformMatrix("projectionMatrix", renderApi.CurrentProjectionMatrix);
+			lineProgram.UniformMatrix("viewMatrix", renderApi.CurrentModelviewMatrix);
 			renderApi.RenderMesh(meshRef);
 			lineProgram.Stop();
 
+			renderApi.GlToggleBlend(true);
 			renderApi.GlEnableCullFace();
 		}
 
@@ -121,10 +104,74 @@ namespace Apprentice.Weapon
 		{
 			if (mesh == null) return;
 
+			int vertexCount = mesh.VerticesCount;
 			mesh.AddVertexSkipTex(x0, y0, z0, color);
 			mesh.AddVertexSkipTex(x1, y1, z1, color);
-			mesh.AddIndex(0);
-			mesh.AddIndex(1);
+			mesh.AddIndex(vertexCount + 0);
+			mesh.AddIndex(vertexCount + 1);
+		}
+		public void AddBox(
+			float x0, float y0, float z0,
+			float sx, float sy, float sz,
+			int color)
+		{
+			if (mesh == null) return;
+
+			int vertexCount = mesh.VerticesCount;
+
+			mesh.AddVertexSkipTex(x0, y0, z0, color);
+			mesh.AddVertexSkipTex(x0 + sx, y0, z0, color);
+			mesh.AddVertexSkipTex(x0 + sx, y0, z0, color);
+			mesh.AddVertexSkipTex(x0 + sx, y0 + sy, z0, color);
+			mesh.AddVertexSkipTex(x0 + sx, y0 + sy, z0, color);
+			mesh.AddVertexSkipTex(x0, y0 + sy, z0, color);
+			mesh.AddVertexSkipTex(x0, y0 + sy, z0, color);
+			mesh.AddVertexSkipTex(x0, y0, z0, color);
+
+			mesh.AddVertexSkipTex(x0, y0, z0 + sz, color);
+			mesh.AddVertexSkipTex(x0 + sx, y0, z0 + sz, color);
+			mesh.AddVertexSkipTex(x0 + sx, y0, z0 + sz, color);
+			mesh.AddVertexSkipTex(x0 + sx, y0 + sy, z0 + sz, color);
+			mesh.AddVertexSkipTex(x0 + sx, y0 + sy, z0 + sz, color);
+			mesh.AddVertexSkipTex(x0, y0 + sy, z0 + sz, color);
+			mesh.AddVertexSkipTex(x0, y0 + sy, z0 + sz, color);
+			mesh.AddVertexSkipTex(x0, y0, z0 + sz, color);
+
+			mesh.AddVertexSkipTex(x0, y0, z0, color);
+			mesh.AddVertexSkipTex(x0, y0, z0 + sz, color);
+			mesh.AddVertexSkipTex(x0 + sx, y0, z0, color);
+			mesh.AddVertexSkipTex(x0 + sx, y0, z0 + sz, color);
+			mesh.AddVertexSkipTex(x0 + sx, y0 + sy, z0, color);
+			mesh.AddVertexSkipTex(x0 + sx, y0 + sy, z0 + sz, color);
+			mesh.AddVertexSkipTex(x0, y0 + sy, z0, color);
+			mesh.AddVertexSkipTex(x0, y0 + sy, z0 + sz, color);
+
+			mesh.AddIndex(vertexCount + 0);
+			mesh.AddIndex(vertexCount + 1);
+			mesh.AddIndex(vertexCount + 2);
+			mesh.AddIndex(vertexCount + 3);
+			mesh.AddIndex(vertexCount + 4);
+			mesh.AddIndex(vertexCount + 5);
+			mesh.AddIndex(vertexCount + 6);
+			mesh.AddIndex(vertexCount + 7);
+
+			mesh.AddIndex(vertexCount + 8);
+			mesh.AddIndex(vertexCount + 9);
+			mesh.AddIndex(vertexCount + 10);
+			mesh.AddIndex(vertexCount + 11);
+			mesh.AddIndex(vertexCount + 12);
+			mesh.AddIndex(vertexCount + 13);
+			mesh.AddIndex(vertexCount + 14);
+			mesh.AddIndex(vertexCount + 15);
+
+			mesh.AddIndex(vertexCount + 16);
+			mesh.AddIndex(vertexCount + 17);
+			mesh.AddIndex(vertexCount + 18);
+			mesh.AddIndex(vertexCount + 19);
+			mesh.AddIndex(vertexCount + 20);
+			mesh.AddIndex(vertexCount + 21);
+			mesh.AddIndex(vertexCount + 22);
+			mesh.AddIndex(vertexCount + 23);
 		}
 		public void AddCircle(
 			float x, float y, float z,
@@ -143,16 +190,11 @@ namespace Apprentice.Weapon
 		{
 			if (mesh == null) return;
 
-			meshRef?.Dispose();
 			meshRef = renderApi.UploadMesh(mesh);
 		}
 		public void Dispose()
 		{
-			eventApi.UnregisterRenderer(this, EnumRenderStage.AfterFinalComposition);
-
-			lineProgram.Dispose();
-
-			meshRef?.Dispose();
+			eventApi.UnregisterRenderer(this, EnumRenderStage.Opaque);
 		}
 	}
 	internal class DashBlur : IRenderer
@@ -318,60 +360,8 @@ namespace Apprentice.Weapon
 			renderApi.GLDeleteTexture(blitTexture.TextureId);
 			renderApi.GLDeleteTexture(accTextureA.TextureId);
 			renderApi.GLDeleteTexture(accTextureB.TextureId);
-
-			blurProgram.Dispose();
-			blitProgram.Dispose();
-
-			meshRef?.Dispose();
 		}
 	}
-
-	/*
-	[HarmonyPatch(typeof(AnimationManager), nameof(AnimationManager.StartAnimation), [typeof(AnimationMetaData)])]
-	public static class AnimationManager_StartAnimation_Overload0
-	{
-		public static class AnimationBlocker
-		{
-			private static readonly HashSet<AnimationManager> blocked = new();
-
-			public static void Block(AnimationManager manager) { blocked.Add(manager); }
-			public static void Unblock(AnimationManager manager) { blocked.Remove(manager); }
-			public static bool IsBlocked(AnimationManager manager) { return blocked.Contains(manager); }
-		}
-
-		public static bool Prefix(AnimationManager instance, AnimationMetaData animdata)
-		{
-			if (AnimationBlocker.IsBlocked(instance))
-			{
-				return false;
-			}
-
-			return true;
-		}
-	}
-	[HarmonyPatch(typeof(AnimationManager), nameof(AnimationManager.StartAnimation), [typeof(string)])]
-	public static class AnimationManager_StartAnimation_Overload1
-	{
-		public static class AnimationBlocker
-		{
-			private static readonly HashSet<AnimationManager> blocked = new();
-
-			public static void Block(AnimationManager manager) { blocked.Add(manager); }
-			public static void Unblock(AnimationManager manager) { blocked.Remove(manager); }
-			public static bool IsBlocked(AnimationManager manager) { return blocked.Contains(manager); }
-		}
-
-		public static bool Prefix(AnimationManager instance, string configCode)
-		{
-			if (AnimationBlocker.IsBlocked(instance))
-			{
-				return false;
-			}
-
-			return true;
-		}
-	}
-	*/
 
 	internal class UchigatanaDashBehaviour : EntityBehavior
 	{
@@ -436,7 +426,6 @@ namespace Apprentice.Weapon
 
 		private LineGizmo? lineGizmo = null;
 		private DashBlur? dashBlur = null;
-		private UshigatanaDialog? debugDialog = null;
 		private Harmony? harmonyInstance = null;
 
 		private bool isPhysicActive = false;
@@ -532,7 +521,7 @@ namespace Apprentice.Weapon
 				{ "root", EnumAnimationBlendMode.Add },
 			},
 		};
-
+		// TODO
 		private AnimationMetaData bowAimLongData = new AnimationMetaData()
 		{
 			Animation = "BowAimLong",
@@ -550,23 +539,6 @@ namespace Apprentice.Weapon
 			},
 		};
 
-		// private AnimationMetaData ushigatanaSwingRightToLeftData = new AnimationMetaData()
-		// {
-		// 	Animation = "ushigatana-swing-right-to-left",
-		// 	Code = "ushigatana-swing-right-to-left",
-		// 	Weight = 1.0F,
-		// 	SupressDefaultAnimation = true,
-		// 	ClientSide = true,
-		// 	AnimationSpeed = 1.0F,
-		// 	BlendMode = EnumAnimationBlendMode.AddAverage,
-		// 	ElementWeight = {
-		// 		{ "UpperTorso", 20.0F },
-		// 	},
-		// 	ElementBlendMode = {
-		// 		{ "UpperTorso", EnumAnimationBlendMode.AddAverage },
-		// 	},
-		// };
-
 		public UchigatanaDashBehaviour(Entity entity) : base(entity)
 		{
 			if (clientApi == null) return;
@@ -574,7 +546,6 @@ namespace Apprentice.Weapon
 			// TODO: fix api injection
 			lineGizmo = new(clientApi, 1000);
 			dashBlur = new(clientApi);
-			debugDialog = new(clientApi); // TODO: refactor me..
 			harmonyInstance = new("Vintagestory.API.Common");
 
 			// Apply all harmony patches
@@ -583,11 +554,9 @@ namespace Apprentice.Weapon
 
 			// Register hotkey's
 			clientApi.Input.RegisterHotKey("ushigatana_dash_anim", "", GlKeys.ShiftLeft, HotkeyType.MovementControls);
-			clientApi.Input.RegisterHotKey("ushigatana_dialog", "", GlKeys.P, HotkeyType.GUIOrOtherControls);
 
 			// Register hotkey handler's
 			clientApi.Input.SetHotKeyHandler("ushigatana_dash_anim", OnDashReset);
-			clientApi.Input.SetHotKeyHandler("ushigatana_dialog", OnToggleDebugDialog);
 		}
 
 		public override string PropertyName()
@@ -597,6 +566,7 @@ namespace Apprentice.Weapon
 		public override void OnGameTick(float deltaTime)
 		{
 			if (clientApi == null) return;
+			if (lineGizmo == null) return;
 			if (dashBlur == null) return;
 			if (harmonyInstance == null) return;
 
@@ -709,16 +679,13 @@ namespace Apprentice.Weapon
 							dashDirection.Y = 0.0F;
 						}
 
-#if false
-						if (lineGizmo != null)
-						{
-							lineGizmo.Reset();
-							lineGizmo.AddLine(
-								(float)transform.X,        (float)transform.Y,        (float)transform.Z,
-								(float)transform.Motion.X, (float)transform.Motion.Y, (float)transform.Motion.Z,
-								ColorUtil.ToRgba(0xFF, 0xFF, 0x00, 0x00));
-							lineGizmo.Commit();
-						}
+#if DEBUG
+						// Add start point position
+						lineGizmo.AddBox(
+							(float)transform.X, (float)transform.Y, (float)transform.Z,
+							0.5F, 0.5F, 0.5F,
+							ColorUtil.ToRgba(0xFF, 0xFF, 0xFF, 0xFF)
+						);
 #endif
 
 						// Enable whitelist in the original animation manager
@@ -842,6 +809,15 @@ namespace Apprentice.Weapon
 						// Disable whitelist in the original animation manager
 						enableAnimationWhitelist = false;
 
+#if DEBUG
+						// Add end point position
+						lineGizmo.AddBox(
+							(float)transform.X, (float)transform.Y, (float)transform.Z,
+							0.5F, 0.5F, 0.5F,
+							ColorUtil.ToRgba(0xFF, 0xFF, 0xFF, 0xFF)
+						);
+#endif
+
 						break;
 					}
 			}
@@ -886,16 +862,32 @@ namespace Apprentice.Weapon
 			{
 				dashBlur.BlurIntensity = (float)transform.Motion.Length() * motionBlurIntensity;
 			}
+
+#if DEBUG
+			if (sequenceState != SequenceState.SEQUENCE_STATE_IDLE)
+			{
+				// Track motion trajectory
+				lineGizmo.AddLine(
+					(float)transform.X,
+					(float)transform.Y,
+					(float)transform.Z,
+					(float)transform.X + (float)transform.Motion.X * 10.0F,
+					(float)transform.Y + (float)transform.Motion.Y * 10.0F,
+					(float)transform.Z + (float)transform.Motion.Z * 10.0F,
+					ColorUtil.ToRgba(0xFF, 0xFF, 0xFF, 0xFF)
+				);
+
+				// Upload memory
+				lineGizmo.Commit();
+			}
+#endif
+
 		}
 
 		// Pirate's Life https://easings.net/
 		private float EaseInCirc(float x)
 		{
 			return 1.0F - (float)Math.Sqrt(1.0F - (float)Math.Pow(x, 2.0F));
-		}
-		private float EaseOutCirc(float x)
-		{
-			return (float)Math.Sqrt(1.0F - (float)Math.Pow(x - 1.0F, 2.0F));
 		}
 		private float EaseInOutElastic(float x)
 		{
@@ -908,6 +900,10 @@ namespace Apprentice.Weapon
 				? -((float)Math.Pow(2.0F, 20.0F * x - 10.0F) * (float)Math.Sin((20.0F * x - 11.125F) * c5)) / 2.0F
 				: ((float)Math.Pow(2.0F, -20.0F * x + 10.0F) * (float)Math.Sin((20.0F * x - 11.125F) * c5)) / 2.0F + 1.0F;
 		}
+		private float EaseOutCirc(float x)
+		{
+			return (float)Math.Sqrt(1.0F - (float)Math.Pow(x - 1.0F, 2.0F));
+		}
 		private float EaseOutElastic(float x)
 		{
 			float c4 = (2.0F * (float)Math.PI) / 3.0F;
@@ -918,13 +914,6 @@ namespace Apprentice.Weapon
 				: (float)Math.Pow(2.0F, -10.0F * x) * (float)Math.Sin((x * 10.0F - 0.75F) * c4) + 1.0F;
 		}
 
-		private bool OnToggleDebugDialog(KeyCombination comb)
-		{
-			if (debugDialog == null) return true;
-			if (debugDialog.IsOpened()) debugDialog.TryClose();
-			else debugDialog.TryOpen();
-			return true;
-		}
 		private bool OnDashReset(KeyCombination combination)
 		{
 			if (clientApi == null) return true;
@@ -988,7 +977,6 @@ namespace Apprentice.Weapon
 			return true;
 		}
 	}
-
 	internal class TrueThirdPersonBehaviour : EntityBehavior
 	{
 		public static ICoreClientAPI? clientApi = null;
@@ -1022,7 +1010,7 @@ namespace Apprentice.Weapon
 				localOffset = MathUtil.RotateAroundAxis(localOffset, localForward, cameraRootRotation.Z);
 
 				// Apply our offset
-				__instance.OriginPosition = localOffset;
+				// __instance.OriginPosition = localOffset; // TODO
 				__instance.CameraMatrix = __instance.GetCameraMatrix(camEyePosInRef(__instance), camEyePosInRef(__instance), __instance.Yaw, __instance.Pitch, intersectionTester);
 				__instance.CameraEyePos.Set(camEyePosOutTmpRef(__instance));
 				__instance.CameraMatrixOrigin = __instance.GetCameraMatrix(originPosRef(__instance), camEyePosInRef(__instance), __instance.Yaw, __instance.Pitch, intersectionTester);
