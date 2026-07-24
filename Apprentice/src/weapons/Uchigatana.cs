@@ -420,14 +420,20 @@ namespace Apprentice.Weapon
 		private bool isDoubleDashActive = false;
 		private bool dashAllowed = true;
 		private bool doubleDashAllowed = true;
-		private bool groundedWhileOnCooldown = false;
 
 		private float physicSpeedFactor = 8.356F;
 		private float horizontalImpulseGrounded = 1.0F;
 		private float horizontalImpulseAirbourne = 0.036F;
-		private float verticalImpulseFirstDash = 0.025F;
-		private float verticalImpulseSecondDash = 0.04F;
+		private float verticalImpulseGrounded = 0.02F;
+		private float verticalImpulseAirbourne = 0.04F;
 		private float airbourneDashDirectionSpeedFactor = 1.0F;
+
+		private float animationSpeedDashForward = 2.5F;
+		private float animationSpeedDashBack = 2.5F;
+		private float animationSpeedDashLeft = 2.5F;
+		private float animationSpeedDashRight = 2.5F;
+
+		private float motionBlurIntensity = 2.75F;
 
 		private int dashCooldownMs = 1500;
 
@@ -435,7 +441,7 @@ namespace Apprentice.Weapon
 		private int animationFrame = 0;
 
 		private int dashForwardFrameCount = 18;
-		private int dashForwardRetractFrameCount = 42;
+		private int dashForwardRetractFrameCount = 0;
 
 		private Vec3d initialDashDirection = new(0, 0, 0);
 		private Vec3d dashDirection = new(0, 0, 0);
@@ -448,7 +454,7 @@ namespace Apprentice.Weapon
 			Weight = 1.0F,
 			SupressDefaultAnimation = true,
 			ClientSide = true,
-			AnimationSpeed = 4.0F,
+			AnimationSpeed = 1.0F,
 			BlendMode = EnumAnimationBlendMode.Add,
 			ElementWeight = {
 				{ "root", 1.0F },
@@ -464,7 +470,7 @@ namespace Apprentice.Weapon
 			Weight = 1.0F,
 			SupressDefaultAnimation = true,
 			ClientSide = true,
-			AnimationSpeed = 4.0F,
+			AnimationSpeed = 1.0F,
 			BlendMode = EnumAnimationBlendMode.Add,
 			ElementWeight = {
 				{ "root", 1.0F },
@@ -480,7 +486,7 @@ namespace Apprentice.Weapon
 			Weight = 1.0F,
 			SupressDefaultAnimation = true,
 			ClientSide = true,
-			AnimationSpeed = 4.0F,
+			AnimationSpeed = 1.0F,
 			BlendMode = EnumAnimationBlendMode.Add,
 			ElementWeight = {
 				{ "root", 1.0F },
@@ -496,7 +502,7 @@ namespace Apprentice.Weapon
 			Weight = 1.0F,
 			SupressDefaultAnimation = true,
 			ClientSide = true,
-			AnimationSpeed = 4.0F,
+			AnimationSpeed = 1.0F,
 			BlendMode = EnumAnimationBlendMode.Add,
 			ElementWeight = {
 				{ "root", 1.0F },
@@ -582,18 +588,24 @@ namespace Apprentice.Weapon
 			EntityControls controls = entityPlayer.Controls;
 			EntityPos transform = entityPlayer.Pos;
 
-#if false
+#if true
 			DebugWidgets.IntSlider("Ushigatana", "General", "dashCooldownMs", 0, 5000, () => { return dashCooldownMs; }, (v) => { dashCooldownMs = v; });
+
+			DebugWidgets.FloatSlider("Ushigatana", "Shader", "motionBlurIntensity", 0.0F, 10.0F, () => { return motionBlurIntensity; }, (v) => { motionBlurIntensity = v; });
 
 			DebugWidgets.FloatSlider("Ushigatana", "Physic", "physicSpeedFactor", -50.0F, 50.0F, () => { return physicSpeedFactor; }, (v) => { physicSpeedFactor = v; });
 			DebugWidgets.FloatSlider("Ushigatana", "Physic", "horizontalImpulseGrounded", -10.0F, 10.0F, () => { return horizontalImpulseGrounded; }, (v) => { horizontalImpulseGrounded = v; });
 			DebugWidgets.FloatSlider("Ushigatana", "Physic", "horizontalImpulseAirbourne", -1.0F, 1.0F, () => { return horizontalImpulseAirbourne; }, (v) => { horizontalImpulseAirbourne = v; });
-			DebugWidgets.FloatSlider("Ushigatana", "Physic", "verticalImpulseFirstDash", -0.1F, 0.1F, () => { return verticalImpulseFirstDash; }, (v) => { verticalImpulseFirstDash = v; });
-			DebugWidgets.FloatSlider("Ushigatana", "Physic", "verticalImpulseSecondDash", -0.1F, 0.1F, () => { return verticalImpulseSecondDash; }, (v) => { verticalImpulseSecondDash = v; });
+			DebugWidgets.FloatSlider("Ushigatana", "Physic", "verticalImpulseGrounded", -0.1F, 0.1F, () => { return verticalImpulseGrounded; }, (v) => { verticalImpulseGrounded = v; });
+			DebugWidgets.FloatSlider("Ushigatana", "Physic", "verticalImpulseAirbourne", -0.1F, 0.1F, () => { return verticalImpulseAirbourne; }, (v) => { verticalImpulseAirbourne = v; });
 			DebugWidgets.FloatSlider("Ushigatana", "Physic", "airbourneDashDirectionSpeedFactor", -10.0F, 10.0F, () => { return airbourneDashDirectionSpeedFactor; }, (v) => { airbourneDashDirectionSpeedFactor = v; });
 
 			DebugWidgets.IntSlider("Ushigatana", "Animation", "dashForwardFrameFrames", 0, 100, () => { return dashForwardFrameCount; }, (v) => { dashForwardFrameCount = v; });
 			DebugWidgets.IntSlider("Ushigatana", "Animation", "dashForwardRetractFrames", 0, 100, () => { return dashForwardRetractFrameCount; }, (v) => { dashForwardRetractFrameCount = v; });
+			DebugWidgets.FloatSlider("Ushigatana", "Animation", "animationSpeedDashForward", 0.0F, 20.0F, () => { return animationSpeedDashForward; }, (v) => { animationSpeedDashForward = v; });
+			DebugWidgets.FloatSlider("Ushigatana", "Animation", "animationSpeedDashBack", 0.0F, 20.0F, () => { return animationSpeedDashBack; }, (v) => { animationSpeedDashBack = v; });
+			DebugWidgets.FloatSlider("Ushigatana", "Animation", "animationSpeedDashLeft", 0.0F, 20.0F, () => { return animationSpeedDashLeft; }, (v) => { animationSpeedDashLeft = v; });
+			DebugWidgets.FloatSlider("Ushigatana", "Animation", "animationSpeedDashRight", 0.0F, 20.0F, () => { return animationSpeedDashRight; }, (v) => { animationSpeedDashRight = v; });
 #endif
 
 			// TODO: need adjustments..
@@ -668,6 +680,10 @@ namespace Apprentice.Weapon
 								dashDirection.Normalize();
 							}
 
+							// Reset up direction
+							dashDirection.Y = 0.0F;
+
+							// Store initial dash direction
 							initialDashDirection = dashDirection;
 						}
 
@@ -697,6 +713,9 @@ namespace Apprentice.Weapon
 						// Start dash animation based on quadrant angle
 						if ((angle > -45.0F) && (angle < 45.0F))
 						{
+							// Set runtime animation data
+							dashForwardData.AnimationSpeed = animationSpeedDashForward;
+
 							// Dash forward
 							entity.AnimManager.StartAnimation(dashForwardData);
 							RunningAnimation dashForwardAnimation = entity.AnimManager.GetAnimationState(dashForwardData.Code);
@@ -705,6 +724,9 @@ namespace Apprentice.Weapon
 						}
 						else if ((angle > 45.0F) && (angle < 135.0F))
 						{
+							// Set runtime animation data
+							dashLeftData.AnimationSpeed = animationSpeedDashLeft;
+
 							// Dash left
 							entity.AnimManager.StartAnimation(dashLeftData);
 							RunningAnimation dashForwardAnimation = entity.AnimManager.GetAnimationState(dashLeftData.Code);
@@ -713,6 +735,9 @@ namespace Apprentice.Weapon
 						}
 						else if ((angle < -45.0F) && (angle > -135.0F))
 						{
+							// Set runtime animation data
+							dashRightData.AnimationSpeed = animationSpeedDashRight;
+
 							// Dash right
 							entity.AnimManager.StartAnimation(dashRightData);
 							RunningAnimation dashForwardAnimation = entity.AnimManager.GetAnimationState(dashRightData.Code);
@@ -721,15 +746,15 @@ namespace Apprentice.Weapon
 						}
 						else
 						{
+							// Set runtime animation data
+							dashBackData.AnimationSpeed = animationSpeedDashBack;
+
 							// Dash back
 							entity.AnimManager.StartAnimation(dashBackData);
 							RunningAnimation dashForwardAnimation = entity.AnimManager.GetAnimationState(dashBackData.Code);
 							dashForwardAnimation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
 							dashForwardAnimation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
 						}
-
-						// Enable motion blur
-						dashBlur.BlurEnable = true;
 
 						sequenceState = SequenceState.SEQUENCE_STATE_DASH;
 
@@ -812,8 +837,8 @@ namespace Apprentice.Weapon
 
 				// Compute vertical force
 				force += isDoubleDashActive
-					? EaseOutCirc(physicFrame) * verticalImpulseSecondDash * worldUp
-					: EaseOutElastic(physicFrame) * verticalImpulseFirstDash * worldUp;
+					? EaseOutCirc(physicFrame) * verticalImpulseGrounded * worldUp
+					: EaseOutElastic(physicFrame) * verticalImpulseAirbourne * worldUp;
 
 				// Apply force
 				transform.Motion.Add(force);
@@ -824,9 +849,12 @@ namespace Apprentice.Weapon
 				{
 					isPhysicActive = false;
 				}
+			}
 
-				// Apply blur intensity based on motion vector
-				dashBlur.BlurIntensity = (float)transform.Motion.Length();
+			// Apply blur intensity based on motion vector
+			if (sequenceState != SequenceState.SEQUENCE_STATE_IDLE)
+			{
+				dashBlur.BlurIntensity = (float)transform.Motion.Length() * motionBlurIntensity;
 			}
 		}
 
@@ -869,6 +897,8 @@ namespace Apprentice.Weapon
 		}
 		private bool OnDashReset(KeyCombination combination)
 		{
+			if (dashBlur == null) return true;
+
 			EntityPlayer entityPlayer = clientApi.World.Player.Entity;
 			EntityPos entityPos = entityPlayer.Pos;
 			BlockPos soundPos = new(entityPlayer.Pos.XYZInt, 0);
@@ -881,10 +911,12 @@ namespace Apprentice.Weapon
 				isDoubleDashActive = false;
 				dashAllowed = false;
 				doubleDashAllowed = true;
-				groundedWhileOnCooldown = false;
 
 				// Enable sequence
 				sequenceState = SequenceState.SEQUENCE_STATE_START;
+
+				// Enable motion blur
+				dashBlur.BlurEnable = true;
 
 				// Play dash dounds
 				clientApi.World.PlaySoundAt(dashSound1, soundPos, 0.0, null, true, 64.0F, 1.0F);
@@ -902,17 +934,23 @@ namespace Apprentice.Weapon
 				// Check for double dashes
 				if (doubleDashAllowed)
 				{
-					// Reset state
-					isPhysicActive = true;
-					isDoubleDashActive = true;
-					doubleDashAllowed = false;
+					if (sequenceState == SequenceState.SEQUENCE_STATE_IDLE)
+					{
+						// Reset state
+						isPhysicActive = true;
+						isDoubleDashActive = true;
+						doubleDashAllowed = false;
 
-					// Enable sequence
-					sequenceState = SequenceState.SEQUENCE_STATE_START;
+						// Enable sequence
+						sequenceState = SequenceState.SEQUENCE_STATE_START;
 
-					// Play dash dounds
-					clientApi.World.PlaySoundAt(dashSound2, soundPos, 0.0, null, true, 64.0F, 1.0F);
-					clientApi.World.PlaySoundAt(ushigatanaDashSound, soundPos, 0.0, null, false, 64.0F, 6.0F);
+						// Enable motion blur
+						dashBlur.BlurEnable = true;
+
+						// Play dash dounds
+						clientApi.World.PlaySoundAt(dashSound2, soundPos, 0.0, null, true, 64.0F, 1.0F);
+						clientApi.World.PlaySoundAt(ushigatanaDashSound, soundPos, 0.0, null, false, 64.0F, 6.0F);
+					}
 				}
 			}
 
