@@ -353,7 +353,9 @@ namespace Apprentice.Weapon
 
 		private static IList<string> whitelistedAnimationCodes = [
 			"dash-forward",
-			"dash-forward-retract",
+			"dash-back",
+			"dash-left",
+			"dash-right",
 		];
 
 		internal class UshigatanaAnimationManager
@@ -439,22 +441,6 @@ namespace Apprentice.Weapon
 		private Vec3d dashDirection = new(0, 0, 0);
 		private Vec3d worldUp = new(0, 1, 0);
 
-		private AnimationMetaData idle1Data = new AnimationMetaData()
-		{
-			Animation = "Idle1",
-			Code = "idle1",
-			Weight = 1.0F,
-			SupressDefaultAnimation = true,
-			ClientSide = true,
-			AnimationSpeed = 1.0F,
-			BlendMode = EnumAnimationBlendMode.Add,
-			ElementWeight = {
-				{ "root", 1.0F },
-			},
-			ElementBlendMode = {
-				{ "root", EnumAnimationBlendMode.Add },
-			},
-		};
 		private AnimationMetaData dashForwardData = new AnimationMetaData()
 		{
 			Animation = "dash-forward",
@@ -471,6 +457,55 @@ namespace Apprentice.Weapon
 				{ "root", EnumAnimationBlendMode.Add },
 			},
 		};
+		private AnimationMetaData dashBackData = new AnimationMetaData()
+		{
+			Animation = "dash-back",
+			Code = "dash-back",
+			Weight = 1.0F,
+			SupressDefaultAnimation = true,
+			ClientSide = true,
+			AnimationSpeed = 4.0F,
+			BlendMode = EnumAnimationBlendMode.Add,
+			ElementWeight = {
+				{ "root", 1.0F },
+			},
+			ElementBlendMode = {
+				{ "root", EnumAnimationBlendMode.Add },
+			},
+		};
+		private AnimationMetaData dashLeftData = new AnimationMetaData()
+		{
+			Animation = "dash-left",
+			Code = "dash-left",
+			Weight = 1.0F,
+			SupressDefaultAnimation = true,
+			ClientSide = true,
+			AnimationSpeed = 4.0F,
+			BlendMode = EnumAnimationBlendMode.Add,
+			ElementWeight = {
+				{ "root", 1.0F },
+			},
+			ElementBlendMode = {
+				{ "root", EnumAnimationBlendMode.Add },
+			},
+		};
+		private AnimationMetaData dashRightData = new AnimationMetaData()
+		{
+			Animation = "dash-right",
+			Code = "dash-right",
+			Weight = 1.0F,
+			SupressDefaultAnimation = true,
+			ClientSide = true,
+			AnimationSpeed = 4.0F,
+			BlendMode = EnumAnimationBlendMode.Add,
+			ElementWeight = {
+				{ "root", 1.0F },
+			},
+			ElementBlendMode = {
+				{ "root", EnumAnimationBlendMode.Add },
+			},
+		};
+
 		private AnimationMetaData dashForwardRetractData = new AnimationMetaData()
 		{
 			Animation = "dash-forward-retract",
@@ -487,22 +522,23 @@ namespace Apprentice.Weapon
 				{ "root", EnumAnimationBlendMode.Add },
 			},
 		};
-		private AnimationMetaData ushigatanaSwingRightToLeftData = new AnimationMetaData()
-		{
-			Animation = "ushigatana-swing-right-to-left",
-			Code = "ushigatana-swing-right-to-left",
-			Weight = 1.0F,
-			SupressDefaultAnimation = true,
-			ClientSide = true,
-			AnimationSpeed = 1.0F,
-			BlendMode = EnumAnimationBlendMode.AddAverage,
-			ElementWeight = {
-				{ "UpperTorso", 20.0F },
-			},
-			ElementBlendMode = {
-				{ "UpperTorso", EnumAnimationBlendMode.AddAverage },
-			},
-		};
+
+		// private AnimationMetaData ushigatanaSwingRightToLeftData = new AnimationMetaData()
+		// {
+		// 	Animation = "ushigatana-swing-right-to-left",
+		// 	Code = "ushigatana-swing-right-to-left",
+		// 	Weight = 1.0F,
+		// 	SupressDefaultAnimation = true,
+		// 	ClientSide = true,
+		// 	AnimationSpeed = 1.0F,
+		// 	BlendMode = EnumAnimationBlendMode.AddAverage,
+		// 	ElementWeight = {
+		// 		{ "UpperTorso", 20.0F },
+		// 	},
+		// 	ElementBlendMode = {
+		// 		{ "UpperTorso", EnumAnimationBlendMode.AddAverage },
+		// 	},
+		// };
 
 		public UchigatanaDashBehaviour(ICoreClientAPI api, Entity entity) : base(entity)
 		{
@@ -526,12 +562,10 @@ namespace Apprentice.Weapon
 
 			// Register hotkey's
 			inputApi.RegisterHotKey("ushigatana_dash_anim", "", GlKeys.ShiftLeft, HotkeyType.MovementControls);
-			inputApi.RegisterHotKey("ushigatana_dash_attack_anim", "", GlKeys.L, HotkeyType.MovementControls);
 			inputApi.RegisterHotKey("ushigatana_dialog", "", GlKeys.P, HotkeyType.GUIOrOtherControls);
 
 			// Register hotkey handler's
 			inputApi.SetHotKeyHandler("ushigatana_dash_anim", OnDashReset);
-			inputApi.SetHotKeyHandler("ushigatana_dash_attack_anim", OnAttackReset);
 			inputApi.SetHotKeyHandler("ushigatana_dialog", OnToggleDebugDialog);
 		}
 
@@ -562,21 +596,22 @@ namespace Apprentice.Weapon
 			DebugWidgets.IntSlider("Ushigatana", "Animation", "dashForwardRetractFrames", 0, 100, () => { return dashForwardRetractFrameCount; }, (v) => { dashForwardRetractFrameCount = v; });
 #endif
 
+			// TODO: need adjustments..
 			// Check if we are allowed to execute double jump and
 			// we havent touched the ground since the start of our dash
-			if (isDoubleDashActive)
-			{
-				if (entityPlayer.OnGround)
-				{
-					if (groundedWhileOnCooldown == false)
-					{
-						groundedWhileOnCooldown = true;
-
-						// Goto idle instead
-						sequenceState = SequenceState.SEQUENCE_STATE_IDLE;
-					}
-				}
-			}
+			// if (isDoubleDashActive)
+			// {
+			// 	if (entityPlayer.OnGround)
+			// 	{
+			// 		if (groundedWhileOnCooldown == false)
+			// 		{
+			// 			groundedWhileOnCooldown = true;
+			// 
+			// 			// Goto idle instead
+			// 			sequenceState = SequenceState.SEQUENCE_STATE_STOP;
+			// 		}
+			// 	}
+			// }
 
 			switch (sequenceState)
 			{
@@ -654,11 +689,44 @@ namespace Apprentice.Weapon
 						// Stop all animations
 						entity.AnimManager.StopAllAnimations();
 
-						// Start dash animation
-						entity.AnimManager.StartAnimation(dashForwardData);
-						RunningAnimation dashForwardAnimation = entity.AnimManager.GetAnimationState(dashForwardData.Code);
-						dashForwardAnimation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
-						dashForwardAnimation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
+						// Compute quadrant angle of motion vector
+						double x = transform.Motion.Dot(localRight);
+						double y = transform.Motion.Dot(localForward);
+						double angle = Math.Atan2(x, y) * 57.29577951308232286465F;
+
+						// Start dash animation based on quadrant angle
+						if ((angle > -45.0F) && (angle < 45.0F))
+						{
+							// Dash forward
+							entity.AnimManager.StartAnimation(dashForwardData);
+							RunningAnimation dashForwardAnimation = entity.AnimManager.GetAnimationState(dashForwardData.Code);
+							dashForwardAnimation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
+							dashForwardAnimation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
+						}
+						else if ((angle > 45.0F) && (angle < 135.0F))
+						{
+							// Dash left
+							entity.AnimManager.StartAnimation(dashLeftData);
+							RunningAnimation dashForwardAnimation = entity.AnimManager.GetAnimationState(dashLeftData.Code);
+							dashForwardAnimation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
+							dashForwardAnimation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
+						}
+						else if ((angle < -45.0F) && (angle > -135.0F))
+						{
+							// Dash right
+							entity.AnimManager.StartAnimation(dashRightData);
+							RunningAnimation dashForwardAnimation = entity.AnimManager.GetAnimationState(dashRightData.Code);
+							dashForwardAnimation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
+							dashForwardAnimation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
+						}
+						else
+						{
+							// Dash back
+							entity.AnimManager.StartAnimation(dashBackData);
+							RunningAnimation dashForwardAnimation = entity.AnimManager.GetAnimationState(dashBackData.Code);
+							dashForwardAnimation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
+							dashForwardAnimation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
+						}
 
 						// Enable motion blur
 						dashBlur.BlurEnable = true;
@@ -679,11 +747,11 @@ namespace Apprentice.Weapon
 							// Stop all animations
 							entity.AnimManager.StopAllAnimations();
 
-							// Start idle animation
-							entity.AnimManager.StartAnimation(dashForwardRetractData);
-							RunningAnimation animation = entity.AnimManager.GetAnimationState(dashForwardRetractData.Code);
-							animation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Repeat;
-							animation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.Stop;
+							// Start retract animation
+							// entity.AnimManager.StartAnimation(dashForwardRetractData);
+							// RunningAnimation animation = entity.AnimManager.GetAnimationState(dashForwardRetractData.Code);
+							// animation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Repeat;
+							// animation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.Stop;
 						}
 
 						// Increment animation frame
@@ -702,12 +770,6 @@ namespace Apprentice.Weapon
 
 							// Stop all animations
 							entity.AnimManager.StopAllAnimations();
-
-							// Start idle animation
-							entity.AnimManager.StartAnimation(idle1Data);
-							RunningAnimation animation = entity.AnimManager.GetAnimationState(idle1Data.Code);
-							animation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Repeat;
-							animation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.Stop;
 						}
 
 						// Increment animation frame
@@ -803,16 +865,6 @@ namespace Apprentice.Weapon
 			if (debugDialog == null) return true;
 			if (debugDialog.IsOpened()) debugDialog.TryClose();
 			else debugDialog.TryOpen();
-			return true;
-		}
-		private bool OnAttackReset(KeyCombination combination)
-		{
-			// Start swing animation
-			entity.AnimManager.StartAnimation(ushigatanaSwingRightToLeftData);
-			RunningAnimation ushigatanaSwingRightToLeftAnimation = entity.AnimManager.GetAnimationState(ushigatanaSwingRightToLeftData.Code);
-			ushigatanaSwingRightToLeftAnimation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
-			ushigatanaSwingRightToLeftAnimation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
-
 			return true;
 		}
 		private bool OnDashReset(KeyCombination combination)
