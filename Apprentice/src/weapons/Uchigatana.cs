@@ -588,7 +588,7 @@ namespace Apprentice.Weapon
 			EntityControls controls = entityPlayer.Controls;
 			EntityPos transform = entityPlayer.Pos;
 
-#if false
+#if true
 			DebugWidgets.IntSlider("Ushigatana", "General", "dashCooldownMs", 0, 5000, () => { return dashCooldownMs; }, (v) => { dashCooldownMs = v; });
 
 			DebugWidgets.FloatSlider("Ushigatana", "Shader", "motionBlurIntensity", 0.0F, 10.0F, () => { return motionBlurIntensity; }, (v) => { motionBlurIntensity = v; });
