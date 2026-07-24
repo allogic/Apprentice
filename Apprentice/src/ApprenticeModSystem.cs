@@ -679,6 +679,9 @@ namespace Apprentice
 				api.Logger.Error(exception);
 			}
 
+			UchigatanaDashBehaviour.clientApi = api;
+			TrueThirdPersonBehaviour.clientApi = api;
+
 			capi?.Event.PlayerJoin += OnPlayerJoin; // Pls let me life..!
 		}
 
@@ -756,8 +759,8 @@ namespace Apprentice
 		{
 			if (capi != null)
 			{
-				byPlayer.Entity.AddBehavior(new UchigatanaDashBehaviour(capi, byPlayer.Entity));
-				byPlayer.Entity.AddBehavior(new TrueThirdPersonBehaviour(capi, byPlayer.Entity));
+				byPlayer.Entity.AddBehavior(new UchigatanaDashBehaviour(byPlayer.Entity));
+				byPlayer.Entity.AddBehavior(new TrueThirdPersonBehaviour(byPlayer.Entity));
 			}
 		}
 		private void OnExperienceNotification(ExperienceNotificationPacket packet)

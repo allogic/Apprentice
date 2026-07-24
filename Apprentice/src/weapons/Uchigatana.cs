@@ -1,16 +1,42 @@
 ﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
 using Vintagestory.API.MathTools;
-
+using Vintagestory.Client.NoObf;
 using VSImGui.Debug;
 
 namespace Apprentice.Weapon
 {
+	internal class MathUtil
+	{
+		public static readonly Vec3d WORLD_RIGHT = new(1, 0, 0);
+		public static readonly Vec3d WORLD_UP = new(0, 1, 0);
+		public static readonly Vec3d WORLD_FORWARD = new(0, 0, 1);
+		public static readonly Vec3d WORLD_LEFT = new(-1, 0, 0);
+		public static readonly Vec3d WORLD_DOWN = new(0, -1, 0);
+		public static readonly Vec3d WORLD_BACK = new(0, 0, -1);
+
+		public static readonly float RAD_TO_DEG = 57.29577951308232286465F;
+		public static readonly float DEG_TO_RAD = 0.017453292519943295470F;
+
+		public static Vec3d RotateAroundAxis(Vec3d v, Vec3d axis, double angle)
+		{
+			axis = axis.Clone().Normalize();
+
+			double cos = Math.Cos(angle);
+			double sin = Math.Sin(angle);
+
+			Vec3d term1 = v * cos;
+			Vec3d term2 = axis.Cross(v) * sin;
+			Vec3d term3 = axis * (axis.Dot(v) * (1.0 - cos));
+
+			return term1 + term2 + term3;
+		}
+	}
+
 	internal class UshigatanaDialog : GuiDialog
 	{
 		public override string ToggleKeyCombinationCode => "ushigatana_dialog";
@@ -349,40 +375,45 @@ namespace Apprentice.Weapon
 
 	internal class UchigatanaDashBehaviour : EntityBehavior
 	{
+		public static ICoreClientAPI? clientApi = null;
+
 		private static bool enableAnimationWhitelist = false;
 
 		private static IList<string> whitelistedAnimationCodes = [
+			// Custom
 			"dash-forward",
 			"dash-back",
 			"dash-left",
 			"dash-right",
+
+			// Game
+			"bowaimlong",
 		];
 
-		internal class UshigatanaAnimationManager
+		[HarmonyPatch(typeof(AnimationManager), nameof(AnimationManager.StartAnimation), [typeof(AnimationMetaData)])]
+		class AnimationManager_StartAnimation0_Patch
 		{
-			public static bool StartAnimation(AnimationMetaData animdata)
+			public static bool Prefix(AnimationManager __instance, AnimationMetaData animdata)
 			{
 				if (enableAnimationWhitelist)
 				{
-					if (whitelistedAnimationCodes.Contains(animdata.Code))
-					{
-						return true;
-					}
+					return whitelistedAnimationCodes.Contains(animdata.Code);
 				}
 
-				return false;
+				return true; // Don't skip the original method
 			}
-			public static bool StartAnimation(string configCode)
+		}
+		[HarmonyPatch(typeof(AnimationManager), nameof(AnimationManager.StartAnimation), [typeof(string)])]
+		class AnimationManager_StartAnimation1_Patch
+		{
+			public static bool Prefix(AnimationManager __instance, string configCode)
 			{
 				if (enableAnimationWhitelist)
 				{
-					if (whitelistedAnimationCodes.Contains(configCode))
-					{
-						return true;
-					}
+					return whitelistedAnimationCodes.Contains(configCode);
 				}
 
-				return false;
+				return true; // Don't skip the original method
 			}
 		}
 
@@ -391,9 +422,6 @@ namespace Apprentice.Weapon
 		private readonly AssetLocation dashRecoverSound1 = new("apprentice", "sounds/dash-recover-1");
 		private readonly AssetLocation dashRecoverSound2 = new("apprentice", "sounds/dash-recover-2");
 		private readonly AssetLocation ushigatanaDashSound = new("apprentice", "sounds/ushigatana-dash");
-
-		private readonly ICoreClientAPI clientApi;
-		private readonly IInputAPI inputApi;
 
 		private enum SequenceState
 		{
@@ -410,11 +438,6 @@ namespace Apprentice.Weapon
 		private DashBlur? dashBlur = null;
 		private UshigatanaDialog? debugDialog = null;
 		private Harmony? harmonyInstance = null;
-
-		private MethodInfo? originalStartAnimationOverload0 = null;
-		private MethodInfo? originalStartAnimationOverload1 = null;
-		private MethodInfo? patchedStartAnimationOverload0 = null;
-		private MethodInfo? patchedStartAnimationOverload1 = null;
 
 		private bool isPhysicActive = false;
 		private bool isDoubleDashActive = false;
@@ -443,9 +466,7 @@ namespace Apprentice.Weapon
 		private int dashForwardFrameCount = 18;
 		private int dashForwardRetractFrameCount = 0;
 
-		private Vec3d initialDashDirection = new(0, 0, 0);
 		private Vec3d dashDirection = new(0, 0, 0);
-		private Vec3d worldUp = new(0, 1, 0);
 
 		private AnimationMetaData dashForwardData = new AnimationMetaData()
 		{
@@ -512,20 +533,20 @@ namespace Apprentice.Weapon
 			},
 		};
 
-		private AnimationMetaData dashForwardRetractData = new AnimationMetaData()
+		private AnimationMetaData bowAimLongData = new AnimationMetaData()
 		{
-			Animation = "dash-forward-retract",
-			Code = "dash-forward-retract",
+			Animation = "BowAimLong",
+			Code = "bowaimlong",
 			Weight = 1.0F,
 			SupressDefaultAnimation = true,
 			ClientSide = true,
-			AnimationSpeed = 1.0F,
+			AnimationSpeed = 0.5F,
 			BlendMode = EnumAnimationBlendMode.Add,
 			ElementWeight = {
-				{ "root", 1.0F },
+				{ "UpperTorso", 1.0F },
 			},
 			ElementBlendMode = {
-				{ "root", EnumAnimationBlendMode.Add },
+				{ "UpperTorso", EnumAnimationBlendMode.Add },
 			},
 		};
 
@@ -546,33 +567,27 @@ namespace Apprentice.Weapon
 		// 	},
 		// };
 
-		public UchigatanaDashBehaviour(ICoreClientAPI api, Entity entity) : base(entity)
+		public UchigatanaDashBehaviour(Entity entity) : base(entity)
 		{
-			clientApi = api;
-			inputApi = api.Input;
+			if (clientApi == null) return;
 
-			lineGizmo = new(api, 1000);
-			dashBlur = new(api);
-			debugDialog = new(api); // TODO: refactor me..
+			// TODO: fix api injection
+			lineGizmo = new(clientApi, 1000);
+			dashBlur = new(clientApi);
+			debugDialog = new(clientApi); // TODO: refactor me..
 			harmonyInstance = new("Vintagestory.API.Common");
 
-			// Find original functions that could cause problems
-			originalStartAnimationOverload0 = typeof(AnimationManager).GetMethod("StartAnimation", [typeof(AnimationMetaData)]);
-			originalStartAnimationOverload1 = typeof(AnimationManager).GetMethod("StartAnimation", [typeof(string)]);
-			patchedStartAnimationOverload0 = typeof(UshigatanaAnimationManager).GetMethod("StartAnimation", [typeof(AnimationMetaData)]);
-			patchedStartAnimationOverload1 = typeof(UshigatanaAnimationManager).GetMethod("StartAnimation", [typeof(string)]);
-
-			// Enable animation patches
-			harmonyInstance.Patch(originalStartAnimationOverload0, patchedStartAnimationOverload0);
-			harmonyInstance.Patch(originalStartAnimationOverload1, patchedStartAnimationOverload1);
+			// Apply all harmony patches
+			harmonyInstance.CreateClassProcessor(typeof(AnimationManager_StartAnimation0_Patch)).Patch();
+			harmonyInstance.CreateClassProcessor(typeof(AnimationManager_StartAnimation1_Patch)).Patch();
 
 			// Register hotkey's
-			inputApi.RegisterHotKey("ushigatana_dash_anim", "", GlKeys.ShiftLeft, HotkeyType.MovementControls);
-			inputApi.RegisterHotKey("ushigatana_dialog", "", GlKeys.P, HotkeyType.GUIOrOtherControls);
+			clientApi.Input.RegisterHotKey("ushigatana_dash_anim", "", GlKeys.ShiftLeft, HotkeyType.MovementControls);
+			clientApi.Input.RegisterHotKey("ushigatana_dialog", "", GlKeys.P, HotkeyType.GUIOrOtherControls);
 
 			// Register hotkey handler's
-			inputApi.SetHotKeyHandler("ushigatana_dash_anim", OnDashReset);
-			inputApi.SetHotKeyHandler("ushigatana_dialog", OnToggleDebugDialog);
+			clientApi.Input.SetHotKeyHandler("ushigatana_dash_anim", OnDashReset);
+			clientApi.Input.SetHotKeyHandler("ushigatana_dialog", OnToggleDebugDialog);
 		}
 
 		public override string PropertyName()
@@ -581,6 +596,7 @@ namespace Apprentice.Weapon
 		}
 		public override void OnGameTick(float deltaTime)
 		{
+			if (clientApi == null) return;
 			if (dashBlur == null) return;
 			if (harmonyInstance == null) return;
 
@@ -640,19 +656,28 @@ namespace Apprentice.Weapon
 						// Compute local direction
 						Vec3d localForward = transform.GetViewVector().ToVec3d();
 						Vec3d localBack = localForward.Clone().Mul(-1);
-						Vec3d localRight = worldUp.Cross(localForward).Normalize();
+						Vec3d localRight = MathUtil.WORLD_UP.Cross(localForward).Normalize();
 						Vec3d localLeft = localRight.Clone().Mul(-1);
 
 						if (isDoubleDashActive)
 						{
 							// Reset dash direction
-							dashDirection = initialDashDirection;
+							dashDirection = Vec3d.Zero;
 
 							// Apply local input direction
 							if (controls.Forward) dashDirection += airbourneDashDirectionSpeedFactor * localForward;
 							if (controls.Backward) dashDirection += airbourneDashDirectionSpeedFactor * localBack;
 							if (controls.Left) dashDirection += airbourneDashDirectionSpeedFactor * localRight;
 							if (controls.Right) dashDirection += airbourneDashDirectionSpeedFactor * localLeft;
+
+							// Normalize direction
+							if (dashDirection.LengthSq() > 0)
+							{
+								dashDirection.Normalize();
+							}
+
+							// Reset up direction
+							dashDirection.Y = 0.0F;
 						}
 						else
 						{
@@ -682,9 +707,6 @@ namespace Apprentice.Weapon
 
 							// Reset up direction
 							dashDirection.Y = 0.0F;
-
-							// Store initial dash direction
-							initialDashDirection = dashDirection;
 						}
 
 #if false
@@ -708,7 +730,7 @@ namespace Apprentice.Weapon
 						// Compute quadrant angle of motion vector
 						double x = transform.Motion.Dot(localRight);
 						double y = transform.Motion.Dot(localForward);
-						double angle = Math.Atan2(x, y) * 57.29577951308232286465F;
+						double angle = Math.Atan2(x, y) * MathUtil.RAD_TO_DEG;
 
 						// Start dash animation based on quadrant angle
 						if ((angle > -45.0F) && (angle < 45.0F))
@@ -718,9 +740,9 @@ namespace Apprentice.Weapon
 
 							// Dash forward
 							entity.AnimManager.StartAnimation(dashForwardData);
-							RunningAnimation dashForwardAnimation = entity.AnimManager.GetAnimationState(dashForwardData.Code);
-							dashForwardAnimation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
-							dashForwardAnimation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
+							RunningAnimation animation = entity.AnimManager.GetAnimationState(dashForwardData.Code);
+							animation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
+							animation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
 						}
 						else if ((angle > 45.0F) && (angle < 135.0F))
 						{
@@ -729,9 +751,9 @@ namespace Apprentice.Weapon
 
 							// Dash left
 							entity.AnimManager.StartAnimation(dashLeftData);
-							RunningAnimation dashForwardAnimation = entity.AnimManager.GetAnimationState(dashLeftData.Code);
-							dashForwardAnimation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
-							dashForwardAnimation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
+							RunningAnimation animation = entity.AnimManager.GetAnimationState(dashLeftData.Code);
+							animation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
+							animation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
 						}
 						else if ((angle < -45.0F) && (angle > -135.0F))
 						{
@@ -740,9 +762,9 @@ namespace Apprentice.Weapon
 
 							// Dash right
 							entity.AnimManager.StartAnimation(dashRightData);
-							RunningAnimation dashForwardAnimation = entity.AnimManager.GetAnimationState(dashRightData.Code);
-							dashForwardAnimation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
-							dashForwardAnimation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
+							RunningAnimation animation = entity.AnimManager.GetAnimationState(dashRightData.Code);
+							animation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
+							animation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
 						}
 						else
 						{
@@ -751,9 +773,17 @@ namespace Apprentice.Weapon
 
 							// Dash back
 							entity.AnimManager.StartAnimation(dashBackData);
-							RunningAnimation dashForwardAnimation = entity.AnimManager.GetAnimationState(dashBackData.Code);
-							dashForwardAnimation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
-							dashForwardAnimation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
+							RunningAnimation animation = entity.AnimManager.GetAnimationState(dashBackData.Code);
+							animation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
+							animation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
+						}
+
+						{
+							// Blend bow windup on top
+							entity.AnimManager.StartAnimation(bowAimLongData);
+							RunningAnimation animation = entity.AnimManager.GetAnimationState(bowAimLongData.Code);
+							animation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
+							animation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
 						}
 
 						sequenceState = SequenceState.SEQUENCE_STATE_DASH;
@@ -794,7 +824,7 @@ namespace Apprentice.Weapon
 							sequenceState = SequenceState.SEQUENCE_STATE_STOP;
 
 							// Stop all animations
-							entity.AnimManager.StopAllAnimations();
+							// entity.AnimManager.StopAllAnimations();
 						}
 
 						// Increment animation frame
@@ -837,8 +867,8 @@ namespace Apprentice.Weapon
 
 				// Compute vertical force
 				force += isDoubleDashActive
-					? EaseOutCirc(physicFrame) * verticalImpulseGrounded * worldUp
-					: EaseOutElastic(physicFrame) * verticalImpulseAirbourne * worldUp;
+					? EaseOutCirc(physicFrame) * verticalImpulseGrounded * MathUtil.WORLD_UP
+					: EaseOutElastic(physicFrame) * verticalImpulseAirbourne * MathUtil.WORLD_UP;
 
 				// Apply force
 				transform.Motion.Add(force);
@@ -897,6 +927,7 @@ namespace Apprentice.Weapon
 		}
 		private bool OnDashReset(KeyCombination combination)
 		{
+			if (clientApi == null) return true;
 			if (dashBlur == null) return true;
 
 			EntityPlayer entityPlayer = clientApi.World.Player.Entity;
@@ -960,15 +991,103 @@ namespace Apprentice.Weapon
 
 	internal class TrueThirdPersonBehaviour : EntityBehavior
 	{
-		private readonly ICoreClientAPI clientApi;
+		public static ICoreClientAPI? clientApi = null;
 
-		EntityPlayer? entityPlayer = null;
+		private static readonly AccessTools.FieldRef<Camera, Vec3d> camEyePosInRef = AccessTools.FieldRefAccess<Camera, Vec3d>("camEyePosIn");
+		private static readonly AccessTools.FieldRef<Camera, Vec3d> originPosRef = AccessTools.FieldRefAccess<Camera, Vec3d>("originPos");
+		private static readonly AccessTools.FieldRef<Camera, Vec3d> camEyePosOutTmpRef = AccessTools.FieldRefAccess<Camera, Vec3d>("camEyePosOutTmp");
 
-		public TrueThirdPersonBehaviour(ICoreClientAPI api, Entity entity) : base(entity)
+		private static Vec3f cameraRootPosition = new(0, 0, 0);
+		private static Vec3f cameraRootRotation = new(0, 0, 0);
+
+		[HarmonyPatch(typeof(Camera), nameof(Camera.Update), [typeof(float), typeof(AABBIntersectionTest)])]
+		internal class Camera_Update_Patch
 		{
-			clientApi = api;
+			public static bool Prefix(Camera __instance, float deltaTime, AABBIntersectionTest intersectionTester)
+			{
+				if (clientApi == null) return true; // Don't skip the original method
 
-			entityPlayer = api.World.Player.Entity;
+				EntityPlayer entityPlayer = clientApi.World.Player.Entity;
+				EntityPos transform = entityPlayer.Pos;
+
+				// Compute local direction
+				Vec3d localForward = transform.GetViewVector().ToVec3d();
+				Vec3d localRight = MathUtil.WORLD_UP.Cross(localForward).Normalize();
+				Vec3d localUp = localForward.Cross(localRight);
+
+				// Compute local offset
+				Vec3d localOffset = cameraRootPosition.ToVec3d();
+				localOffset = MathUtil.RotateAroundAxis(localOffset, localRight, cameraRootRotation.X);
+				localOffset = MathUtil.RotateAroundAxis(localOffset, localUp, cameraRootRotation.Y);
+				localOffset = MathUtil.RotateAroundAxis(localOffset, localForward, cameraRootRotation.Z);
+
+				// Apply our offset
+				__instance.OriginPosition = localOffset;
+				__instance.CameraMatrix = __instance.GetCameraMatrix(camEyePosInRef(__instance), camEyePosInRef(__instance), __instance.Yaw, __instance.Pitch, intersectionTester);
+				__instance.CameraEyePos.Set(camEyePosOutTmpRef(__instance));
+				__instance.CameraMatrixOrigin = __instance.GetCameraMatrix(originPosRef(__instance), camEyePosInRef(__instance), __instance.Yaw, __instance.Pitch, intersectionTester);
+
+				double[] cameraMatrixOrigin = __instance.CameraMatrixOrigin;
+				double[] cameraMatrixOrigin2 = __instance.CameraMatrixOrigin;
+
+				// Compute rolled matrix
+				double[] array = new double[3];
+				array[0] = 1.0;
+				Mat4d.Rotate(cameraMatrixOrigin, cameraMatrixOrigin2, __instance.Roll, array);
+				for (int i = 0; i < 16; i++)
+				{
+					__instance.CameraMatrixOriginf[i] = (float)__instance.CameraMatrixOrigin[i];
+				}
+
+				return false; // Skip the original method
+			}
+		}
+
+		[HarmonyPatch(typeof(Camera), nameof(Camera.GetCameraMatrix), [typeof(Vec3d), typeof(Vec3d), typeof(double), typeof(double), typeof(AABBIntersectionTest)])]
+		internal class Camera_GetCameraMatrix_Patch
+		{
+			public static bool Prefix(Camera __instance, Vec3d camEyePosIn, Vec3d worldPos, double yaw, double pitch, AABBIntersectionTest intersectionTester, ref double[] __result)
+			{
+				if (clientApi == null) return true; // Don't skip the original method
+
+				EntityPlayer entityPlayer = clientApi.World.Player.Entity;
+				EntityPos transform = entityPlayer.Pos;
+
+				// Compute local direction
+				Vec3d localForward = transform.GetViewVector().ToVec3d();
+				Vec3d localRight = MathUtil.WORLD_UP.Cross(localForward).Normalize();
+				Vec3d localUp = localForward.Cross(localRight);
+
+				// Compute camera position
+				Vec3d eye = camEyePosIn;
+				// eye += localRight * cameraOffset.X;
+				// eye += localUp * cameraOffset.Y;
+				// eye += localForward * cameraOffset.Z;
+				Vec3d up = MathUtil.WORLD_UP;
+				Vec3d center = eye + entityPlayer.Pos.GetViewVector().ToVec3d();
+
+				__result = [
+					1, 0, 0, 0,
+					0, 1, 0, 0,
+					0, 0, 1, 0,
+					0, 0, 0, 1,
+				];
+
+				Mat4d.LookAt(__result, eye.ToDoubleArray(), center.ToDoubleArray(), up.ToDoubleArray());
+
+				return false; // Skip the original method
+			}
+		}
+
+		private Harmony? harmonyInstance = null;
+
+		public TrueThirdPersonBehaviour(Entity entity) : base(entity)
+		{
+			harmonyInstance = new("Vintagestory.Client.NoObf");
+
+			// Apply all harmony patches
+			harmonyInstance.CreateClassProcessor(typeof(Camera_Update_Patch)).Patch();
+			// harmonyInstance.CreateClassProcessor(typeof(Camera_GetCameraMatrix_Patch)).Patch();
 		}
 
 		public override string PropertyName()
@@ -977,12 +1096,20 @@ namespace Apprentice.Weapon
 		}
 		public override void OnGameTick(float deltaTime)
 		{
-			if (entityPlayer == null) return;
+			if (clientApi == null) return;
+			if (harmonyInstance == null) return;
 
+			EntityPlayer entityPlayer = clientApi.World.Player.Entity;
+			EntityControls controls = entityPlayer.Controls;
 			EntityPos transform = entityPlayer.Pos;
 
-			transform.HeadPitch = 45.0F;
-			transform.HeadYaw = 0.0F;
+#if true
+			DebugWidgets.Float3Drag("TrueThirdPerson", "Camera", "cameraRootPosition", () => { return cameraRootPosition; }, (v) => { cameraRootPosition = v; });
+			DebugWidgets.Float3Drag("TrueThirdPerson", "Camera", "cameraRootRotation", () => { return cameraRootRotation; }, (v) => { cameraRootRotation = v; });
+#endif
+
+			// transform.HeadPitch = 45.0F;
+			// transform.HeadYaw = 0.0F;
 
 			// clientApi.World.Player.CameraRoll = 45.0F;
 			// clientApi.World.Player.camera
