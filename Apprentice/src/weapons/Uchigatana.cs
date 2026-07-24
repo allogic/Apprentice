@@ -1,14 +1,15 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
+
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
 using Vintagestory.API.MathTools;
 using Vintagestory.Client.NoObf;
+
+using HarmonyLib;
+
 using VSImGui.Debug;
-using static Apprentice.Weapon.UchigatanaDashBehaviour;
 
 namespace Apprentice.Weapon
 {
@@ -363,25 +364,30 @@ namespace Apprentice.Weapon
 			"bowaimlong",
 		];
 
-		internal class UshigatanaAnimationManager
+		[HarmonyPatch(typeof(AnimationManager), nameof(AnimationManager.StartAnimation), [typeof(AnimationMetaData)])]
+		class AnimationManagerPatch0Patch
 		{
-			public static bool StartAnimation(AnimationMetaData animdata)
+			public static bool Prefix(AnimationMetaData animdata)
 			{
 				if (enableAnimationWhitelist)
 				{
 					return whitelistedAnimationCodes.Contains(animdata.Code);
 				}
 
-				return true;
+				return true; // Don't skip the original method
 			}
-			public static bool StartAnimation(string configCode)
+		}
+		[HarmonyPatch(typeof(AnimationManager), nameof(AnimationManager.StartAnimation), [typeof(string)])]
+		class AnimationManagerPatch1Patch
+		{
+			public static bool Prefix(string configCode)
 			{
 				if (enableAnimationWhitelist)
 				{
 					return whitelistedAnimationCodes.Contains(configCode);
 				}
 
-				return true;
+				return true; // Don't skip the original method
 			}
 		}
 
@@ -409,11 +415,6 @@ namespace Apprentice.Weapon
 		private DashBlur? dashBlur = null;
 		private UshigatanaDialog? debugDialog = null;
 		private Harmony? harmonyInstance = null;
-
-		private MethodInfo? originalStartAnimationOverload0 = null;
-		private MethodInfo? originalStartAnimationOverload1 = null;
-		private MethodInfo? patchedStartAnimationOverload0 = null;
-		private MethodInfo? patchedStartAnimationOverload1 = null;
 
 		private bool isPhysicActive = false;
 		private bool isDoubleDashActive = false;
@@ -555,15 +556,9 @@ namespace Apprentice.Weapon
 			debugDialog = new(api); // TODO: refactor me..
 			harmonyInstance = new("Vintagestory.API.Common");
 
-			// Find original functions that could cause problems
-			originalStartAnimationOverload0 = typeof(AnimationManager).GetMethod("StartAnimation", [typeof(AnimationMetaData)]);
-			originalStartAnimationOverload1 = typeof(AnimationManager).GetMethod("StartAnimation", [typeof(string)]);
-			patchedStartAnimationOverload0 = typeof(UshigatanaAnimationManager).GetMethod("StartAnimation", [typeof(AnimationMetaData)]);
-			patchedStartAnimationOverload1 = typeof(UshigatanaAnimationManager).GetMethod("StartAnimation", [typeof(string)]);
-
-			// Enable animation patches
-			harmonyInstance.Patch(originalStartAnimationOverload0, patchedStartAnimationOverload0);
-			harmonyInstance.Patch(originalStartAnimationOverload1, patchedStartAnimationOverload1);
+			// Apply all harmony patches
+			harmonyInstance.CreateClassProcessor(typeof(AnimationManagerPatch0Patch)).Patch();
+			harmonyInstance.CreateClassProcessor(typeof(AnimationManagerPatch1Patch)).Patch();
 
 			// Register hotkey's
 			inputApi.RegisterHotKey("ushigatana_dash_anim", "", GlKeys.ShiftLeft, HotkeyType.MovementControls);
@@ -967,6 +962,25 @@ namespace Apprentice.Weapon
 
 	internal class TrueThirdPersonBehaviour : EntityBehavior
 	{
+		[HarmonyPatch(typeof(Camera), nameof(Camera.GetCameraMatrix), [typeof(Vec3d), typeof(Vec3d), typeof(double), typeof(double), typeof(AABBIntersectionTest)])]
+		class CameraMatrixPatch
+		{
+			static bool Prefix(Vec3d camEyePosIn, Vec3d worldPos, double yaw, double pitch, AABBIntersectionTest intersectionTester, ref double[] __result)
+			{
+#if false
+				__result = [
+					1, 0, 0, 0,
+					0, 1, 0, 0,
+					0, 0, 1, 0,
+					0, 0, 0, 1,
+				];
+#endif
+
+				// return false; // Skip the original method
+				return true;
+			}
+		}
+
 		internal class TrueThirdPersonCamera
 		{
 			public static double[] GetCameraMatrix(Vec3d camEyePosIn, Vec3d worldPos, double yaw, double pitch, AABBIntersectionTest intersectionTester)
@@ -1033,21 +1047,14 @@ namespace Apprentice.Weapon
 
 		private Harmony? harmonyInstance = null;
 
-		private MethodInfo? originalGetCameraMatrixOverload0 = null;
-		private MethodInfo? patchedGetCameraMatrixOverload0 = null;
-
 		public TrueThirdPersonBehaviour(ICoreClientAPI api, Entity entity) : base(entity)
 		{
 			clientApi = api;
 
-			harmonyInstance = new("Vintagestory.API.Common");
+			harmonyInstance = new("Vintagestory.Client.NoObf");
 
-			// Find original functions that could cause problems
-			originalGetCameraMatrixOverload0 = typeof(Camera).GetMethod("GetCameraMatrix", [typeof(Vec3d), typeof(Vec3d), typeof(double), typeof(double), typeof(AABBIntersectionTest)]);
-			patchedGetCameraMatrixOverload0 = typeof(TrueThirdPersonCamera).GetMethod("GetCameraMatrix", [typeof(Vec3d), typeof(Vec3d), typeof(double), typeof(double), typeof(AABBIntersectionTest)]);
-
-			// Enable camera patches
-			harmonyInstance.Patch(originalGetCameraMatrixOverload0, patchedGetCameraMatrixOverload0);
+			// Apply all harmony patches
+			harmonyInstance.CreateClassProcessor(typeof(CameraMatrixPatch)).Patch();
 		}
 
 		public override string PropertyName()
