@@ -6,8 +6,9 @@ using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
 using Vintagestory.API.MathTools;
-
+using Vintagestory.Client.NoObf;
 using VSImGui.Debug;
+using static Apprentice.Weapon.UchigatanaDashBehaviour;
 
 namespace Apprentice.Weapon
 {
@@ -352,10 +353,14 @@ namespace Apprentice.Weapon
 		private static bool enableAnimationWhitelist = false;
 
 		private static IList<string> whitelistedAnimationCodes = [
+			// Custom
 			"dash-forward",
 			"dash-back",
 			"dash-left",
 			"dash-right",
+
+			// Game
+			"bowaimlong",
 		];
 
 		internal class UshigatanaAnimationManager
@@ -364,25 +369,19 @@ namespace Apprentice.Weapon
 			{
 				if (enableAnimationWhitelist)
 				{
-					if (whitelistedAnimationCodes.Contains(animdata.Code))
-					{
-						return true;
-					}
+					return whitelistedAnimationCodes.Contains(animdata.Code);
 				}
 
-				return false;
+				return true;
 			}
 			public static bool StartAnimation(string configCode)
 			{
 				if (enableAnimationWhitelist)
 				{
-					if (whitelistedAnimationCodes.Contains(configCode))
-					{
-						return true;
-					}
+					return whitelistedAnimationCodes.Contains(configCode);
 				}
 
-				return false;
+				return true;
 			}
 		}
 
@@ -512,20 +511,20 @@ namespace Apprentice.Weapon
 			},
 		};
 
-		private AnimationMetaData dashForwardRetractData = new AnimationMetaData()
+		private AnimationMetaData bowAimLongData = new AnimationMetaData()
 		{
-			Animation = "dash-forward-retract",
-			Code = "dash-forward-retract",
+			Animation = "BowAimLong",
+			Code = "bowaimlong",
 			Weight = 1.0F,
 			SupressDefaultAnimation = true,
 			ClientSide = true,
-			AnimationSpeed = 1.0F,
+			AnimationSpeed = 0.5F,
 			BlendMode = EnumAnimationBlendMode.Add,
 			ElementWeight = {
-				{ "root", 1.0F },
+				{ "UpperTorso", 1.0F },
 			},
 			ElementBlendMode = {
-				{ "root", EnumAnimationBlendMode.Add },
+				{ "UpperTorso", EnumAnimationBlendMode.Add },
 			},
 		};
 
@@ -718,9 +717,9 @@ namespace Apprentice.Weapon
 
 							// Dash forward
 							entity.AnimManager.StartAnimation(dashForwardData);
-							RunningAnimation dashForwardAnimation = entity.AnimManager.GetAnimationState(dashForwardData.Code);
-							dashForwardAnimation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
-							dashForwardAnimation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
+							RunningAnimation animation = entity.AnimManager.GetAnimationState(dashForwardData.Code);
+							animation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
+							animation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
 						}
 						else if ((angle > 45.0F) && (angle < 135.0F))
 						{
@@ -729,9 +728,9 @@ namespace Apprentice.Weapon
 
 							// Dash left
 							entity.AnimManager.StartAnimation(dashLeftData);
-							RunningAnimation dashForwardAnimation = entity.AnimManager.GetAnimationState(dashLeftData.Code);
-							dashForwardAnimation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
-							dashForwardAnimation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
+							RunningAnimation animation = entity.AnimManager.GetAnimationState(dashLeftData.Code);
+							animation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
+							animation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
 						}
 						else if ((angle < -45.0F) && (angle > -135.0F))
 						{
@@ -740,9 +739,9 @@ namespace Apprentice.Weapon
 
 							// Dash right
 							entity.AnimManager.StartAnimation(dashRightData);
-							RunningAnimation dashForwardAnimation = entity.AnimManager.GetAnimationState(dashRightData.Code);
-							dashForwardAnimation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
-							dashForwardAnimation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
+							RunningAnimation animation = entity.AnimManager.GetAnimationState(dashRightData.Code);
+							animation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
+							animation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
 						}
 						else
 						{
@@ -751,9 +750,17 @@ namespace Apprentice.Weapon
 
 							// Dash back
 							entity.AnimManager.StartAnimation(dashBackData);
-							RunningAnimation dashForwardAnimation = entity.AnimManager.GetAnimationState(dashBackData.Code);
-							dashForwardAnimation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
-							dashForwardAnimation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
+							RunningAnimation animation = entity.AnimManager.GetAnimationState(dashBackData.Code);
+							animation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
+							animation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
+						}
+
+						{
+							// Blend bow windup on top
+							entity.AnimManager.StartAnimation(bowAimLongData);
+							RunningAnimation animation = entity.AnimManager.GetAnimationState(bowAimLongData.Code);
+							animation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
+							animation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
 						}
 
 						sequenceState = SequenceState.SEQUENCE_STATE_DASH;
@@ -794,7 +801,7 @@ namespace Apprentice.Weapon
 							sequenceState = SequenceState.SEQUENCE_STATE_STOP;
 
 							// Stop all animations
-							entity.AnimManager.StopAllAnimations();
+							// entity.AnimManager.StopAllAnimations();
 						}
 
 						// Increment animation frame
@@ -960,15 +967,87 @@ namespace Apprentice.Weapon
 
 	internal class TrueThirdPersonBehaviour : EntityBehavior
 	{
+		internal class TrueThirdPersonCamera
+		{
+			public static double[] GetCameraMatrix(Vec3d camEyePosIn, Vec3d worldPos, double yaw, double pitch, AABBIntersectionTest intersectionTester)
+			{
+				/*
+				ICoreAPI api = cworld.Api;
+
+				this.camTargetTmp.X = camEyePosIn.X + plr.LocalEyePos.X;
+				this.camTargetTmp.Y = camEyePosIn.Y + plr.LocalEyePos.Y;
+				this.camTargetTmp.Z = camEyePosIn.Z + plr.LocalEyePos.Z;
+
+				if (camEyePosIn == this.OriginPosition || !cworld.Player.ImmersiveFpMode)
+				{
+					return this.lookatFp(plr, camEyePosIn);
+				}
+
+				float cameraSize = 0.5f;
+				RenderAPIGame rpi = (cworld as ClientMain).api.renderapi;
+
+				if (cworld.Player.WorldData.NoClip || this.cameraStuck)
+				{
+					this.eyePosAbs.Set(this.camTargetTmp);
+					rpi.CameraStuck = cworld.CollisionTester.IsColliding(cworld.BlockAccessor, new Cuboidf(cameraSize), this.eyePosAbs, false);
+					return this.lookatFp(plr, camEyePosIn);
+				}
+
+				if (this.camTargetTmp.DistanceTo(this.eyePosAbs) > 1f)
+				{
+					this.eyePosAbs.Set(this.camTargetTmp);
+				}
+				else
+				{
+					Vec3d cameraMotion = this.camTargetTmp - this.eyePosAbs;
+					EnumCollideFlags flags = this.UpdateCameraMotion(cworld, this.eyePosAbs, cameraMotion.Mul(1.01), cameraSize);
+					this.eyePosAbs.Add(cameraMotion.Mul(0.99));
+					plr.LocalEyePos.Set(this.eyePosAbs.X - camEyePosIn.X, this.eyePosAbs.Y - camEyePosIn.Y, this.eyePosAbs.Z - camEyePosIn.Z);
+					rpi.CameraStuck = (flags > (EnumCollideFlags)0);
+					if (flags != (EnumCollideFlags)0)
+					{
+						if ((double)cworld.Player.CameraPitch > 3.769911289215088)
+						{
+							plr.LocalEyePos.Y += ((double)cworld.Player.CameraPitch - 3.769911289215088) / 8.0;
+						}
+						this.cameraStuck = cworld.CollisionTester.IsColliding(cworld.BlockAccessor, new Cuboidf(cameraSize * 0.99f), this.eyePosAbs, false);
+					}
+				}
+
+				this.camEyePosOutTmp.X = this.eyePosAbs.X;
+				this.camEyePosOutTmp.Y = this.eyePosAbs.Y;
+				this.camEyePosOutTmp.Z = this.eyePosAbs.Z;
+				this.to.Set(this.camEyePosOutTmp.X + this.forwardVec.X, this.camEyePosOutTmp.Y + this.forwardVec.Y, this.camEyePosOutTmp.Z + this.forwardVec.Z);
+
+				double[] array = new double[16];
+				Mat4d.LookAt(array, from.ToDoubleArray(), to.ToDoubleArray(), this.upVec3);
+				return array;
+				*/
+
+				// return this.lookAt(this.camTargetTmp, this.to);
+				return new double[16];
+			}
+		}
+
 		private readonly ICoreClientAPI clientApi;
 
-		EntityPlayer? entityPlayer = null;
+		private Harmony? harmonyInstance = null;
+
+		private MethodInfo? originalGetCameraMatrixOverload0 = null;
+		private MethodInfo? patchedGetCameraMatrixOverload0 = null;
 
 		public TrueThirdPersonBehaviour(ICoreClientAPI api, Entity entity) : base(entity)
 		{
 			clientApi = api;
 
-			entityPlayer = api.World.Player.Entity;
+			harmonyInstance = new("Vintagestory.API.Common");
+
+			// Find original functions that could cause problems
+			originalGetCameraMatrixOverload0 = typeof(Camera).GetMethod("GetCameraMatrix", [typeof(Vec3d), typeof(Vec3d), typeof(double), typeof(double), typeof(AABBIntersectionTest)]);
+			patchedGetCameraMatrixOverload0 = typeof(TrueThirdPersonCamera).GetMethod("GetCameraMatrix", [typeof(Vec3d), typeof(Vec3d), typeof(double), typeof(double), typeof(AABBIntersectionTest)]);
+
+			// Enable camera patches
+			harmonyInstance.Patch(originalGetCameraMatrixOverload0, patchedGetCameraMatrixOverload0);
 		}
 
 		public override string PropertyName()
@@ -977,12 +1056,14 @@ namespace Apprentice.Weapon
 		}
 		public override void OnGameTick(float deltaTime)
 		{
-			if (entityPlayer == null) return;
+			if (harmonyInstance == null) return;
 
+			EntityPlayer entityPlayer = clientApi.World.Player.Entity;
+			EntityControls controls = entityPlayer.Controls;
 			EntityPos transform = entityPlayer.Pos;
 
-			transform.HeadPitch = 45.0F;
-			transform.HeadYaw = 0.0F;
+			// transform.HeadPitch = 45.0F;
+			// transform.HeadYaw = 0.0F;
 
 			// clientApi.World.Player.CameraRoll = 45.0F;
 			// clientApi.World.Player.camera
