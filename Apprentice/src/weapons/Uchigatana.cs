@@ -1,5 +1,7 @@
-﻿using System;
-
+﻿using HarmonyLib;
+using System;
+using System.Collections.Generic;
+using System.Reflection;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
@@ -27,10 +29,10 @@ namespace Apprentice.Weapon
 				.AddSlider(value => { return true; }, ElementBounds.Fixed(10, 120, 230, 50))
 				.AddSlider(value => { return true; }, ElementBounds.Fixed(10, 180, 230, 50))
 				.Compose();
-				//.AddStaticText("This", CairoFont.WhiteDetailText(), ElementBounds.Fixed(10, 60, 230, 50))
-				//.AddToggleButton("Hello", CairoFont.WhiteDetailText(), value => { }, ElementBounds.Fixed(0, 40, 250, 800))
-				//.AddToggleButton("Hello", CairoFont.WhiteDetailText(), value => { }, ElementBounds.Fixed(0, 40, 250, 800))
-				//.AddToggleButton("Hello", CairoFont.WhiteDetailText(), value => { }, ElementBounds.Fixed(0, 40, 250, 800))
+			//.AddStaticText("This", CairoFont.WhiteDetailText(), ElementBounds.Fixed(10, 60, 230, 50))
+			//.AddToggleButton("Hello", CairoFont.WhiteDetailText(), value => { }, ElementBounds.Fixed(0, 40, 250, 800))
+			//.AddToggleButton("Hello", CairoFont.WhiteDetailText(), value => { }, ElementBounds.Fixed(0, 40, 250, 800))
+			//.AddToggleButton("Hello", CairoFont.WhiteDetailText(), value => { }, ElementBounds.Fixed(0, 40, 250, 800))
 		}
 	}
 
@@ -298,8 +300,92 @@ namespace Apprentice.Weapon
 		}
 	}
 
+	/*
+	[HarmonyPatch(typeof(AnimationManager), nameof(AnimationManager.StartAnimation), [typeof(AnimationMetaData)])]
+	public static class AnimationManager_StartAnimation_Overload0
+	{
+		public static class AnimationBlocker
+		{
+			private static readonly HashSet<AnimationManager> blocked = new();
+
+			public static void Block(AnimationManager manager) { blocked.Add(manager); }
+			public static void Unblock(AnimationManager manager) { blocked.Remove(manager); }
+			public static bool IsBlocked(AnimationManager manager) { return blocked.Contains(manager); }
+		}
+
+		public static bool Prefix(AnimationManager instance, AnimationMetaData animdata)
+		{
+			if (AnimationBlocker.IsBlocked(instance))
+			{
+				return false;
+			}
+
+			return true;
+		}
+	}
+	[HarmonyPatch(typeof(AnimationManager), nameof(AnimationManager.StartAnimation), [typeof(string)])]
+	public static class AnimationManager_StartAnimation_Overload1
+	{
+		public static class AnimationBlocker
+		{
+			private static readonly HashSet<AnimationManager> blocked = new();
+
+			public static void Block(AnimationManager manager) { blocked.Add(manager); }
+			public static void Unblock(AnimationManager manager) { blocked.Remove(manager); }
+			public static bool IsBlocked(AnimationManager manager) { return blocked.Contains(manager); }
+		}
+
+		public static bool Prefix(AnimationManager instance, string configCode)
+		{
+			if (AnimationBlocker.IsBlocked(instance))
+			{
+				return false;
+			}
+
+			return true;
+		}
+	}
+	*/
+
 	internal class UchigatanaDashBehaviour : EntityBehavior
 	{
+		private static bool enableAnimationWhitelist = false;
+
+		private static IList<string> whitelistedAnimationCodes = [
+			"dash-forward",
+			"dash-back",
+			"dash-left",
+			"dash-right",
+		];
+
+		internal class UshigatanaAnimationManager
+		{
+			public static bool StartAnimation(AnimationMetaData animdata)
+			{
+				if (enableAnimationWhitelist)
+				{
+					if (whitelistedAnimationCodes.Contains(animdata.Code))
+					{
+						return true;
+					}
+				}
+
+				return false;
+			}
+			public static bool StartAnimation(string configCode)
+			{
+				if (enableAnimationWhitelist)
+				{
+					if (whitelistedAnimationCodes.Contains(configCode))
+					{
+						return true;
+					}
+				}
+
+				return false;
+			}
+		}
+
 		private readonly AssetLocation dashSound1 = new("apprentice", "sounds/dash-1");
 		private readonly AssetLocation dashSound2 = new("apprentice", "sounds/dash-2");
 		private readonly AssetLocation dashRecoverSound1 = new("apprentice", "sounds/dash-recover-1");
@@ -320,35 +406,51 @@ namespace Apprentice.Weapon
 
 		private SequenceState sequenceState = SequenceState.SEQUENCE_STATE_IDLE;
 
-		private EntityPlayer? entityPlayer = null;
 		private LineGizmo? lineGizmo = null;
 		private DashBlur? dashBlur = null;
 		private UshigatanaDialog? debugDialog = null;
+		private Harmony? harmonyInstance = null;
+
+		private MethodInfo? originalStartAnimationOverload0 = null;
+		private MethodInfo? originalStartAnimationOverload1 = null;
+		private MethodInfo? patchedStartAnimationOverload0 = null;
+		private MethodInfo? patchedStartAnimationOverload1 = null;
 
 		private bool isPhysicActive = false;
-		private bool dashOnCooldown = false;
+		private bool isDoubleDashActive = false;
+		private bool dashAllowed = true;
+		private bool doubleDashAllowed = true;
 
-		private float stopVelocityEpsilon = 0.1F; // Obsolete..
-		private float physicSpeed = 8.356F;
+		private float physicSpeedFactor = 8.356F;
 		private float horizontalImpulseGrounded = 1.0F;
 		private float horizontalImpulseAirbourne = 0.036F;
-		private float verticalImpulse = 0.025F;
+		private float verticalImpulseGrounded = 0.02F;
+		private float verticalImpulseAirbourne = 0.04F;
+		private float airbourneDashDirectionSpeedFactor = 1.0F;
 
-		private int dashCooldownMs = 800;
-		private int dashBlurEnableMs = 250;
+		private float animationSpeedDashForward = 2.5F;
+		private float animationSpeedDashBack = 2.5F;
+		private float animationSpeedDashLeft = 2.5F;
+		private float animationSpeedDashRight = 2.5F;
+
+		private float motionBlurIntensity = 2.75F;
+
+		private int dashCooldownMs = 1500;
 
 		private float physicFrame = 0.0F;
 		private int animationFrame = 0;
 
 		private int dashForwardFrameCount = 18;
-		private int dashForwardRetractFrameCount = 42;
+		private int dashForwardRetractFrameCount = 0;
 
-		private Vec3d dashDirection = Vec3d.Zero;
+		private Vec3d initialDashDirection = new(0, 0, 0);
+		private Vec3d dashDirection = new(0, 0, 0);
+		private Vec3d worldUp = new(0, 1, 0);
 
-		private AnimationMetaData idle1Data = new AnimationMetaData()
+		private AnimationMetaData dashForwardData = new AnimationMetaData()
 		{
-			Animation = "Idle1",
-			Code = "idle1",
+			Animation = "dash-forward",
+			Code = "dash-forward",
 			Weight = 1.0F,
 			SupressDefaultAnimation = true,
 			ClientSide = true,
@@ -361,14 +463,14 @@ namespace Apprentice.Weapon
 				{ "root", EnumAnimationBlendMode.Add },
 			},
 		};
-		private AnimationMetaData dashForwardData = new AnimationMetaData()
+		private AnimationMetaData dashBackData = new AnimationMetaData()
 		{
-			Animation = "dash-forward",
-			Code = "dash-forward",
+			Animation = "dash-back",
+			Code = "dash-back",
 			Weight = 1.0F,
 			SupressDefaultAnimation = true,
 			ClientSide = true,
-			AnimationSpeed = 4.0F,
+			AnimationSpeed = 1.0F,
 			BlendMode = EnumAnimationBlendMode.Add,
 			ElementWeight = {
 				{ "root", 1.0F },
@@ -377,6 +479,39 @@ namespace Apprentice.Weapon
 				{ "root", EnumAnimationBlendMode.Add },
 			},
 		};
+		private AnimationMetaData dashLeftData = new AnimationMetaData()
+		{
+			Animation = "dash-left",
+			Code = "dash-left",
+			Weight = 1.0F,
+			SupressDefaultAnimation = true,
+			ClientSide = true,
+			AnimationSpeed = 1.0F,
+			BlendMode = EnumAnimationBlendMode.Add,
+			ElementWeight = {
+				{ "root", 1.0F },
+			},
+			ElementBlendMode = {
+				{ "root", EnumAnimationBlendMode.Add },
+			},
+		};
+		private AnimationMetaData dashRightData = new AnimationMetaData()
+		{
+			Animation = "dash-right",
+			Code = "dash-right",
+			Weight = 1.0F,
+			SupressDefaultAnimation = true,
+			ClientSide = true,
+			AnimationSpeed = 1.0F,
+			BlendMode = EnumAnimationBlendMode.Add,
+			ElementWeight = {
+				{ "root", 1.0F },
+			},
+			ElementBlendMode = {
+				{ "root", EnumAnimationBlendMode.Add },
+			},
+		};
+
 		private AnimationMetaData dashForwardRetractData = new AnimationMetaData()
 		{
 			Animation = "dash-forward-retract",
@@ -393,41 +528,51 @@ namespace Apprentice.Weapon
 				{ "root", EnumAnimationBlendMode.Add },
 			},
 		};
-		private AnimationMetaData ushigatanaSwingRightToLeftData = new AnimationMetaData()
-		{
-			Animation = "ushigatana-swing-right-to-left",
-			Code = "ushigatana-swing-right-to-left",
-			Weight = 1.0F,
-			SupressDefaultAnimation = true,
-			ClientSide = true,
-			AnimationSpeed = 1.0F,
-			BlendMode = EnumAnimationBlendMode.AddAverage,
-			ElementWeight = {
-				{ "UpperTorso", 20.0F },
-			},
-			ElementBlendMode = {
-				{ "UpperTorso", EnumAnimationBlendMode.AddAverage },
-			},
-		};
+
+		// private AnimationMetaData ushigatanaSwingRightToLeftData = new AnimationMetaData()
+		// {
+		// 	Animation = "ushigatana-swing-right-to-left",
+		// 	Code = "ushigatana-swing-right-to-left",
+		// 	Weight = 1.0F,
+		// 	SupressDefaultAnimation = true,
+		// 	ClientSide = true,
+		// 	AnimationSpeed = 1.0F,
+		// 	BlendMode = EnumAnimationBlendMode.AddAverage,
+		// 	ElementWeight = {
+		// 		{ "UpperTorso", 20.0F },
+		// 	},
+		// 	ElementBlendMode = {
+		// 		{ "UpperTorso", EnumAnimationBlendMode.AddAverage },
+		// 	},
+		// };
 
 		public UchigatanaDashBehaviour(ICoreClientAPI api, Entity entity) : base(entity)
 		{
 			clientApi = api;
 			inputApi = api.Input;
 
-			entityPlayer = api.World.Player.Entity;
 			lineGizmo = new(api, 1000);
 			dashBlur = new(api);
-			debugDialog = new(api); // TODO: remove me..
+			debugDialog = new(api); // TODO: refactor me..
+			harmonyInstance = new("Vintagestory.API.Common");
 
+			// Find original functions that could cause problems
+			originalStartAnimationOverload0 = typeof(AnimationManager).GetMethod("StartAnimation", [typeof(AnimationMetaData)]);
+			originalStartAnimationOverload1 = typeof(AnimationManager).GetMethod("StartAnimation", [typeof(string)]);
+			patchedStartAnimationOverload0 = typeof(UshigatanaAnimationManager).GetMethod("StartAnimation", [typeof(AnimationMetaData)]);
+			patchedStartAnimationOverload1 = typeof(UshigatanaAnimationManager).GetMethod("StartAnimation", [typeof(string)]);
+
+			// Enable animation patches
+			harmonyInstance.Patch(originalStartAnimationOverload0, patchedStartAnimationOverload0);
+			harmonyInstance.Patch(originalStartAnimationOverload1, patchedStartAnimationOverload1);
+
+			// Register hotkey's
 			inputApi.RegisterHotKey("ushigatana_dash_anim", "", GlKeys.ShiftLeft, HotkeyType.MovementControls);
+			inputApi.RegisterHotKey("ushigatana_dialog", "", GlKeys.P, HotkeyType.GUIOrOtherControls);
+
+			// Register hotkey handler's
 			inputApi.SetHotKeyHandler("ushigatana_dash_anim", OnDashReset);
-
-			inputApi.RegisterHotKey("ushigatana_dash_attack_anim", "", GlKeys.L, HotkeyType.MovementControls);
-			inputApi.SetHotKeyHandler("ushigatana_dash_attack_anim", OnAttackReset);
-
-			api.Input.RegisterHotKey("ushigatana_dialog", "", GlKeys.P, HotkeyType.GUIOrOtherControls);
-			api.Input.SetHotKeyHandler("ushigatana_dialog", OnToggleDebugDialog);
+			inputApi.SetHotKeyHandler("ushigatana_dialog", OnToggleDebugDialog);
 		}
 
 		public override string PropertyName()
@@ -436,24 +581,49 @@ namespace Apprentice.Weapon
 		}
 		public override void OnGameTick(float deltaTime)
 		{
-			if (entityPlayer == null) return;
 			if (dashBlur == null) return;
+			if (harmonyInstance == null) return;
 
+			EntityPlayer entityPlayer = clientApi.World.Player.Entity;
+			EntityControls controls = entityPlayer.Controls;
 			EntityPos transform = entityPlayer.Pos;
-			EntityControls controls = clientApi.World.Player.Entity.Controls;
 
 #if false
 			DebugWidgets.IntSlider("Ushigatana", "General", "dashCooldownMs", 0, 5000, () => { return dashCooldownMs; }, (v) => { dashCooldownMs = v; });
-			DebugWidgets.IntSlider("Ushigatana", "General", "dashBlurEnableMs", 0, 5000, () => { return dashBlurEnableMs; }, (v) => { dashBlurEnableMs = v; });
 
-			DebugWidgets.FloatSlider("Ushigatana", "Physic", "physicSpeed", -50.0F, 50.0F, () => { return physicSpeed; }, (v) => { physicSpeed = v; });
+			DebugWidgets.FloatSlider("Ushigatana", "Shader", "motionBlurIntensity", 0.0F, 10.0F, () => { return motionBlurIntensity; }, (v) => { motionBlurIntensity = v; });
+
+			DebugWidgets.FloatSlider("Ushigatana", "Physic", "physicSpeedFactor", -50.0F, 50.0F, () => { return physicSpeedFactor; }, (v) => { physicSpeedFactor = v; });
 			DebugWidgets.FloatSlider("Ushigatana", "Physic", "horizontalImpulseGrounded", -10.0F, 10.0F, () => { return horizontalImpulseGrounded; }, (v) => { horizontalImpulseGrounded = v; });
 			DebugWidgets.FloatSlider("Ushigatana", "Physic", "horizontalImpulseAirbourne", -1.0F, 1.0F, () => { return horizontalImpulseAirbourne; }, (v) => { horizontalImpulseAirbourne = v; });
-			DebugWidgets.FloatSlider("Ushigatana", "Physic", "verticalImpulse", -0.1F, 0.1F, () => { return verticalImpulse; }, (v) => { verticalImpulse = v; });
+			DebugWidgets.FloatSlider("Ushigatana", "Physic", "verticalImpulseGrounded", -0.1F, 0.1F, () => { return verticalImpulseGrounded; }, (v) => { verticalImpulseGrounded = v; });
+			DebugWidgets.FloatSlider("Ushigatana", "Physic", "verticalImpulseAirbourne", -0.1F, 0.1F, () => { return verticalImpulseAirbourne; }, (v) => { verticalImpulseAirbourne = v; });
+			DebugWidgets.FloatSlider("Ushigatana", "Physic", "airbourneDashDirectionSpeedFactor", -10.0F, 10.0F, () => { return airbourneDashDirectionSpeedFactor; }, (v) => { airbourneDashDirectionSpeedFactor = v; });
 
-			DebugWidgets.IntSlider("Ushigatana", "Animation", "dashForwardFrameFrames", 0, 1000, () => { return dashForwardFrameCount; }, (v) => { dashForwardFrameCount = v; });
-			DebugWidgets.IntSlider("Ushigatana", "Animation", "dashForwardRetractFrames", 0, 1000, () => { return dashForwardRetractFrameCount; }, (v) => { dashForwardRetractFrameCount = v; });
-#endif // DEBUG
+			DebugWidgets.IntSlider("Ushigatana", "Animation", "dashForwardFrameFrames", 0, 100, () => { return dashForwardFrameCount; }, (v) => { dashForwardFrameCount = v; });
+			DebugWidgets.IntSlider("Ushigatana", "Animation", "dashForwardRetractFrames", 0, 100, () => { return dashForwardRetractFrameCount; }, (v) => { dashForwardRetractFrameCount = v; });
+			DebugWidgets.FloatSlider("Ushigatana", "Animation", "animationSpeedDashForward", 0.0F, 20.0F, () => { return animationSpeedDashForward; }, (v) => { animationSpeedDashForward = v; });
+			DebugWidgets.FloatSlider("Ushigatana", "Animation", "animationSpeedDashBack", 0.0F, 20.0F, () => { return animationSpeedDashBack; }, (v) => { animationSpeedDashBack = v; });
+			DebugWidgets.FloatSlider("Ushigatana", "Animation", "animationSpeedDashLeft", 0.0F, 20.0F, () => { return animationSpeedDashLeft; }, (v) => { animationSpeedDashLeft = v; });
+			DebugWidgets.FloatSlider("Ushigatana", "Animation", "animationSpeedDashRight", 0.0F, 20.0F, () => { return animationSpeedDashRight; }, (v) => { animationSpeedDashRight = v; });
+#endif
+
+			// TODO: need adjustments..
+			// Check if we are allowed to execute double jump and
+			// we havent touched the ground since the start of our dash
+			// if (isDoubleDashActive)
+			// {
+			// 	if (entityPlayer.OnGround)
+			// 	{
+			// 		if (groundedWhileOnCooldown == false)
+			// 		{
+			// 			groundedWhileOnCooldown = true;
+			// 
+			// 			// Goto idle instead
+			// 			sequenceState = SequenceState.SEQUENCE_STATE_STOP;
+			// 		}
+			// 	}
+			// }
 
 			switch (sequenceState)
 			{
@@ -463,56 +633,128 @@ namespace Apprentice.Weapon
 					}
 				case SequenceState.SEQUENCE_STATE_START:
 					{
-						isPhysicActive = true;
-
+						// Reset frame counter
 						physicFrame = 0.0F;
 						animationFrame = 0;
 
-						// Enable motion blur
-						dashBlur.BlurEnable = true;
-
-						// Compute dash direction
-						Vec3d worldUp = new(0, 1, 0);
+						// Compute local direction
 						Vec3d localForward = transform.GetViewVector().ToVec3d();
 						Vec3d localBack = localForward.Clone().Mul(-1);
 						Vec3d localRight = worldUp.Cross(localForward).Normalize();
 						Vec3d localLeft = localRight.Clone().Mul(-1);
-						dashDirection = Vec3d.Zero;
-						if (controls.Forward) dashDirection += localForward;
-						if (controls.Backward) dashDirection += localBack;
-						if (controls.Left) dashDirection += localRight;
-						if (controls.Right) dashDirection += localLeft;
-						dashDirection.Y = 0.0F;
-						if (dashDirection.LengthSq() > 0)
+
+						if (isDoubleDashActive)
 						{
-							dashDirection.Normalize();
+							// Reset dash direction
+							dashDirection = initialDashDirection;
+
+							// Apply local input direction
+							if (controls.Forward) dashDirection += airbourneDashDirectionSpeedFactor * localForward;
+							if (controls.Backward) dashDirection += airbourneDashDirectionSpeedFactor * localBack;
+							if (controls.Left) dashDirection += airbourneDashDirectionSpeedFactor * localRight;
+							if (controls.Right) dashDirection += airbourneDashDirectionSpeedFactor * localLeft;
 						}
 						else
 						{
-							// Default forward dash if no key would be held..
-							dashDirection = new Vec3d(localForward.X, 0.0F, localForward.Z);
-							dashDirection.Normalize();
+							// Reset dash direction
+							dashDirection = Vec3d.Zero;
+
+							// Apply local input direction
+							if (controls.Forward) dashDirection += localForward;
+							if (controls.Backward) dashDirection += localBack;
+							if (controls.Left) dashDirection += localRight;
+							if (controls.Right) dashDirection += localLeft;
+
+							// Reset up direction
+							dashDirection.Y = 0.0F;
+
+							// Normalize direction
+							if (dashDirection.LengthSq() > 0)
+							{
+								dashDirection.Normalize();
+							}
+							else
+							{
+								// Default forward dash if no key would be held..
+								dashDirection = new Vec3d(localForward.X, 0.0F, localForward.Z);
+								dashDirection.Normalize();
+							}
+
+							// Reset up direction
+							dashDirection.Y = 0.0F;
+
+							// Store initial dash direction
+							initialDashDirection = dashDirection;
 						}
 
-						// TODO
-						// if (lineGizmo != null)
-						// {
-						// 	lineGizmo.Reset();
-						// 	lineGizmo.AddLine(
-						// 		(float)transform.X,        (float)transform.Y,        (float)transform.Z,
-						// 		(float)transform.Motion.X, (float)transform.Motion.Y, (float)transform.Motion.Z,
-						// 		ColorUtil.ToRgba(0xFF, 0xFF, 0x00, 0x00));
-						// 	lineGizmo.Commit();
-						// }
+#if false
+						if (lineGizmo != null)
+						{
+							lineGizmo.Reset();
+							lineGizmo.AddLine(
+								(float)transform.X,        (float)transform.Y,        (float)transform.Z,
+								(float)transform.Motion.X, (float)transform.Motion.Y, (float)transform.Motion.Z,
+								ColorUtil.ToRgba(0xFF, 0xFF, 0x00, 0x00));
+							lineGizmo.Commit();
+						}
+#endif
+
+						// Enable whitelist in the original animation manager
+						enableAnimationWhitelist = true;
 
 						// Stop all animations
 						entity.AnimManager.StopAllAnimations();
 
-						// Start dash animation
-						entity.AnimManager.StartAnimation(dashForwardData);
-						RunningAnimation dashForwardAnimation = entity.AnimManager.GetAnimationState(dashForwardData.Code);
-						dashForwardAnimation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
-						dashForwardAnimation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
+						// Compute quadrant angle of motion vector
+						double x = transform.Motion.Dot(localRight);
+						double y = transform.Motion.Dot(localForward);
+						double angle = Math.Atan2(x, y) * 57.29577951308232286465F;
+
+						// Start dash animation based on quadrant angle
+						if ((angle > -45.0F) && (angle < 45.0F))
+						{
+							// Set runtime animation data
+							dashForwardData.AnimationSpeed = animationSpeedDashForward;
+
+							// Dash forward
+							entity.AnimManager.StartAnimation(dashForwardData);
+							RunningAnimation dashForwardAnimation = entity.AnimManager.GetAnimationState(dashForwardData.Code);
+							dashForwardAnimation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
+							dashForwardAnimation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
+						}
+						else if ((angle > 45.0F) && (angle < 135.0F))
+						{
+							// Set runtime animation data
+							dashLeftData.AnimationSpeed = animationSpeedDashLeft;
+
+							// Dash left
+							entity.AnimManager.StartAnimation(dashLeftData);
+							RunningAnimation dashForwardAnimation = entity.AnimManager.GetAnimationState(dashLeftData.Code);
+							dashForwardAnimation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
+							dashForwardAnimation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
+						}
+						else if ((angle < -45.0F) && (angle > -135.0F))
+						{
+							// Set runtime animation data
+							dashRightData.AnimationSpeed = animationSpeedDashRight;
+
+							// Dash right
+							entity.AnimManager.StartAnimation(dashRightData);
+							RunningAnimation dashForwardAnimation = entity.AnimManager.GetAnimationState(dashRightData.Code);
+							dashForwardAnimation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
+							dashForwardAnimation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
+						}
+						else
+						{
+							// Set runtime animation data
+							dashBackData.AnimationSpeed = animationSpeedDashBack;
+
+							// Dash back
+							entity.AnimManager.StartAnimation(dashBackData);
+							RunningAnimation dashForwardAnimation = entity.AnimManager.GetAnimationState(dashBackData.Code);
+							dashForwardAnimation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
+							dashForwardAnimation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
+						}
 
 						sequenceState = SequenceState.SEQUENCE_STATE_DASH;
 
@@ -530,11 +772,11 @@ namespace Apprentice.Weapon
 							// Stop all animations
 							entity.AnimManager.StopAllAnimations();
 
-							// Start idle animation
-							entity.AnimManager.StartAnimation(dashForwardRetractData);
-							RunningAnimation animation = entity.AnimManager.GetAnimationState(dashForwardRetractData.Code);
-							animation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Repeat;
-							animation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.Stop;
+							// Start retract animation
+							// entity.AnimManager.StartAnimation(dashForwardRetractData);
+							// RunningAnimation animation = entity.AnimManager.GetAnimationState(dashForwardRetractData.Code);
+							// animation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Repeat;
+							// animation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.Stop;
 						}
 
 						// Increment animation frame
@@ -553,12 +795,6 @@ namespace Apprentice.Weapon
 
 							// Stop all animations
 							entity.AnimManager.StopAllAnimations();
-
-							// Start idle animation
-							entity.AnimManager.StartAnimation(idle1Data);
-							RunningAnimation animation = entity.AnimManager.GetAnimationState(idle1Data.Code);
-							animation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Repeat;
-							animation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.Stop;
 						}
 
 						// Increment animation frame
@@ -573,11 +809,14 @@ namespace Apprentice.Weapon
 						// Disable motion blur
 						dashBlur.BlurEnable = false;
 
+						// Disable whitelist in the original animation manager
+						enableAnimationWhitelist = false;
+
 						break;
 					}
 			}
 
-			// Disable controls while in dash
+			// Disable controls while in dash (TODO: Revalidate this..)
 			if (sequenceState != SequenceState.SEQUENCE_STATE_IDLE)
 			{
 				controls.Forward = false;
@@ -586,26 +825,36 @@ namespace Apprentice.Weapon
 				controls.Right = false;
 			}
 
+			// Apply some physics
 			if (isPhysicActive)
 			{
-				// Apply physics
 				Vec3d force = Vec3d.Zero;
-				float horizontalImpulse = entityPlayer.OnGround
-					? horizontalImpulseGrounded
-					: horizontalImpulseAirbourne;
-				force += EaseOutElastic(physicFrame) * horizontalImpulse * dashDirection;
-				force.Y += EaseOutElastic(physicFrame) * verticalImpulse;
+
+				// Compute horizontal force
+				force += entityPlayer.OnGround
+					? EaseOutElastic(physicFrame) * horizontalImpulseGrounded * dashDirection
+					: EaseOutElastic(physicFrame) * horizontalImpulseAirbourne * dashDirection;
+
+				// Compute vertical force
+				force += isDoubleDashActive
+					? EaseOutCirc(physicFrame) * verticalImpulseGrounded * worldUp
+					: EaseOutElastic(physicFrame) * verticalImpulseAirbourne * worldUp;
+
+				// Apply force
 				transform.Motion.Add(force);
 
 				// Advance animation
-				physicFrame += physicSpeed * deltaTime;
+				physicFrame += physicSpeedFactor * deltaTime;
 				if (physicFrame >= 1.0F)
 				{
 					isPhysicActive = false;
 				}
+			}
 
-				// Apply blur motion vector
-				dashBlur.BlurIntensity = (float)transform.Motion.Length();
+			// Apply blur intensity based on motion vector
+			if (sequenceState != SequenceState.SEQUENCE_STATE_IDLE)
+			{
+				dashBlur.BlurIntensity = (float)transform.Motion.Length() * motionBlurIntensity;
 			}
 		}
 
@@ -646,39 +895,64 @@ namespace Apprentice.Weapon
 			else debugDialog.TryOpen();
 			return true;
 		}
-		private bool OnAttackReset(KeyCombination combination)
-		{
-			// Start swing animation
-			entity.AnimManager.StartAnimation(ushigatanaSwingRightToLeftData);
-			RunningAnimation ushigatanaSwingRightToLeftAnimation = entity.AnimManager.GetAnimationState(ushigatanaSwingRightToLeftData.Code);
-			ushigatanaSwingRightToLeftAnimation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
-			ushigatanaSwingRightToLeftAnimation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
-
-			return true;
-		}
 		private bool OnDashReset(KeyCombination combination)
 		{
-			if (entityPlayer == null) return true;
-			if (dashOnCooldown) return true;
+			if (dashBlur == null) return true;
 
-			sequenceState = SequenceState.SEQUENCE_STATE_START;
+			EntityPlayer entityPlayer = clientApi.World.Player.Entity;
+			EntityPos entityPos = entityPlayer.Pos;
+			BlockPos soundPos = new(entityPlayer.Pos.XYZInt, 0);
 
-			// Set dash on cooldown
-			dashOnCooldown = true;
-
-			// TODO: Refactor this stuff..
-			//  |
-			//  V
-
-			clientApi.World.PlaySoundAt(dashSound1, new BlockPos(entityPlayer.Pos.XYZInt, 0), 0.0, null, true, 64.0F, 1.0F);
-			clientApi.World.PlaySoundAt(ushigatanaDashSound, new BlockPos(entityPlayer.Pos.XYZInt, 0), 0.0, null, false, 64.0F, 6.0F);
-
-			// Disable cooldown
-			clientApi.World.RegisterCallback(_ =>
+			// Check for dashes
+			if (dashAllowed)
 			{
-				dashOnCooldown = false;
-				clientApi.World.PlaySoundAt(dashRecoverSound1, new BlockPos(entityPlayer.Pos.XYZInt, 0), 0.0, null, true, 64.0F, 1.0F);
-			}, dashCooldownMs);
+				// Reset state
+				isPhysicActive = true;
+				isDoubleDashActive = false;
+				dashAllowed = false;
+				doubleDashAllowed = true;
+
+				// Enable sequence
+				sequenceState = SequenceState.SEQUENCE_STATE_START;
+
+				// Enable motion blur
+				dashBlur.BlurEnable = true;
+
+				// Play dash dounds
+				clientApi.World.PlaySoundAt(dashSound1, soundPos, 0.0, null, true, 64.0F, 1.0F);
+				clientApi.World.PlaySoundAt(ushigatanaDashSound, soundPos, 0.0, null, false, 64.0F, 6.0F);
+
+				// Register fixed dash recover action
+				clientApi.World.RegisterCallback(_ =>
+				{
+					dashAllowed = true;
+					clientApi.World.PlaySoundAt(dashRecoverSound1, soundPos, 0.0, null, true, 64.0F, 1.0F);
+				}, dashCooldownMs);
+			}
+			else
+			{
+				// Check for double dashes
+				if (doubleDashAllowed)
+				{
+					if (sequenceState == SequenceState.SEQUENCE_STATE_IDLE)
+					{
+						// Reset state
+						isPhysicActive = true;
+						isDoubleDashActive = true;
+						doubleDashAllowed = false;
+
+						// Enable sequence
+						sequenceState = SequenceState.SEQUENCE_STATE_START;
+
+						// Enable motion blur
+						dashBlur.BlurEnable = true;
+
+						// Play dash dounds
+						clientApi.World.PlaySoundAt(dashSound2, soundPos, 0.0, null, true, 64.0F, 1.0F);
+						clientApi.World.PlaySoundAt(ushigatanaDashSound, soundPos, 0.0, null, false, 64.0F, 6.0F);
+					}
+				}
+			}
 
 			return true;
 		}

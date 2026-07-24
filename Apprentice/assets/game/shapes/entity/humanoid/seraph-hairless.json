@@ -1480,6 +1480,210 @@
 		},
 
 		{
+			"name": "dash-left",
+			"code": "dash-left",
+			"quantityframes": 1,
+			"onActivityStopped": "EaseOut",
+			"onAnimationEnd": "Repeat",
+			"keyframes": [
+				{
+					"frame": 0,
+					"elements": {
+						"LowerTorso": {
+							"offsetX": 0.0,
+							"offsetY": 1.0,
+							"offsetZ": 4.0,
+							"rotationX": 22.5,
+							"rotationY": 0.0,
+							"rotationZ": 0.0
+						},
+						"UpperTorso": {
+							"rotationX": -22.5,
+							"rotationY": 0.0,
+							"rotationZ": 0.0
+						},
+						"UpperFootL": {
+							"rotationX": -5.0,
+							"rotationY": 22.5,
+							"rotationZ": -45.0
+						},
+						"LowerFootL": {
+							"rotationX": 22.5,
+							"rotationY": 0.0,
+							"rotationZ": 67.5
+						},
+						"LowerFootR": {
+							"rotationX": 22.5,
+							"rotationY": 0.0,
+							"rotationZ": 0.0
+						},
+						"UpperArmR": {
+							"rotationX": 67.5,
+							"rotationY": 0.0,
+							"rotationZ": 0.0
+						},
+						"UpperArmL": {
+							"rotationX": -22.5,
+							"rotationY": 22.5,
+							"rotationZ": -90.0
+						},
+						"LowerArmL": {
+							"rotationX": 90.0,
+							"rotationY": 0.0,
+							"rotationZ": 0.0
+						},
+						"LowerArmR": {
+							"rotationX": 0.0,
+							"rotationY": 0.0,
+							"rotationZ": -45.0
+						},
+						"UpperFootR": {
+							"rotationX": 0.0,
+							"rotationY": -22.5,
+							"rotationZ": 0.0
+						}
+					}
+				}
+			]
+		},
+
+		{
+			"name": "dash-right",
+			"code": "dash-right",
+			"quantityframes": 1,
+			"onActivityStopped": "EaseOut",
+			"onAnimationEnd": "Repeat",
+			"keyframes": [
+				{
+					"frame": 0,
+					"elements": {
+						"LowerTorso": {
+							"offsetX": 0.0,
+							"offsetY": -1.0,
+							"offsetZ": -4.0,
+							"rotationX": -22.5,
+							"rotationY": 0.0,
+							"rotationZ": 0.0
+						},
+						"UpperTorso": {
+							"rotationX": 22.5,
+							"rotationY": 0.0,
+							"rotationZ": 0.0
+						},
+						"UpperArmR": {
+							"rotationX": 45.0,
+							"rotationY": 0.0,
+							"rotationZ": -67.5
+						},
+						"LowerArmR": {
+							"rotationX": 0.0,
+							"rotationY": 22.5,
+							"rotationZ": -90.0
+						},
+						"UpperArmL": {
+							"rotationX": -67.5,
+							"rotationY": 0.0,
+							"rotationZ": 0.0
+						},
+						"LowerArmL": {
+							"rotationX": 0.0,
+							"rotationY": -22.5,
+							"rotationZ": -45.0
+						},
+						"UpperFootL": {
+							"rotationX": -22.5,
+							"rotationY": 0.0,
+							"rotationZ": 0.0
+						},
+						"LowerFootL": {
+							"rotationX": 0.0,
+							"rotationY": 0.0,
+							"rotationZ": 22.5
+						},
+						"UpperFootR": {
+							"rotationX": -5.0,
+							"rotationY": -22.5,
+							"rotationZ": -45.0
+						},
+						"LowerFootR": {
+							"rotationX": 0.0,
+							"rotationY": 0.0,
+							"rotationZ": 90.0
+						}
+					}
+				}
+			]
+		},
+
+		{
+			"name": "dash-back",
+			"code": "dash-back",
+			"quantityframes": 1,
+			"onActivityStopped": "EaseOut",
+			"onAnimationEnd": "Repeat",
+			"keyframes": [
+				{
+					"frame": 0,
+					"elements": {
+						"LowerTorso": {
+							"offsetX": 4.0,
+							"offsetY": 2.0,
+							"offsetZ": 0.0,
+							"rotationX": 0.0,
+							"rotationY": 0.0,
+							"rotationZ": -45.0
+						},
+						"UpperTorso": {
+							"rotationX": 0.0,
+							"rotationY": 0.0,
+							"rotationZ": 45.0
+						},
+						"UpperFootL": {
+							"rotationX": -22.5,
+							"rotationY": 45.0,
+							"rotationZ": -22.5
+						},
+						"LowerFootL": {
+							"rotationX": 0.0,
+							"rotationY": 0.0,
+							"rotationZ": 90.0
+						},
+						"UpperFootR": {
+							"rotationX": 0.0,
+							"rotationY": -22.5,
+							"rotationZ": -22.5
+						},
+						"LowerFootR": {
+							"rotationX": 0.0,
+							"rotationY": 0.0,
+							"rotationZ": 22.5
+						},
+						"UpperArmR": {
+							"rotationX": 0.0,
+							"rotationY": -22.5,
+							"rotationZ": -67.5
+						},
+						"LowerArmR": {
+							"rotationX": 0.0,
+							"rotationY": 0.0,
+							"rotationZ": -45.0
+						},
+						"UpperArmL": {
+							"rotationX": -22.5,
+							"rotationY": 0.0,
+							"rotationZ": 0.0
+						},
+						"LowerArmL": {
+							"rotationX": 0.0,
+							"rotationY": 0.0,
+							"rotationZ": -45.0
+						}
+					}
+				}
+			]
+		},
+
+		{
 			"name": "Walk",
 			"code": "walk",
 			"quantityframes": 25,

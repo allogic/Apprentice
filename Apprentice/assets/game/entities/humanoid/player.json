@@ -579,6 +579,27 @@
 				"animationSpeed": 1.0
 			},
 			{
+				"code": "dash-back",
+				"animation": "dash-back",
+				"blendMode": "Add",
+				"mulWithWalkSpeed": false,
+				"animationSpeed": 1.0
+			},
+			{
+				"code": "dash-left",
+				"animation": "dash-left",
+				"blendMode": "Add",
+				"mulWithWalkSpeed": false,
+				"animationSpeed": 1.0
+			},
+			{
+				"code": "dash-right",
+				"animation": "dash-right",
+				"blendMode": "Add",
+				"mulWithWalkSpeed": false,
+				"animationSpeed": 1.0
+			},
+			{
 				"code": "dash-forward-retract",
 				"animation": "dash-forward-retract",
 				"blendMode": "Add",

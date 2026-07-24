@@ -1,15 +1,16 @@
 {
-    "$schema": "https://moddbcdn.vintagestory.at/schema/modinfo.latest.json",
-    "type": "Code",
-    "modid": "apprentice",
-    "name": "Apprentice",
-    "authors": [
-        "Kanista"
-    ],
-    "description": "Character progression, race-first creation, Grandmaster discoveries, advanced metals, arrow poison, and danger regions.",
-    "website": "https://github.com/allogic/Apprentice",
-  "version": "2.7.0-dev.20260723.86",
-    "dependencies": {
-        "game": "1.22.3"
-    }
+	"$schema": "https://moddbcdn.vintagestory.at/schema/modinfo.latest.json",
+	"type": "Code",
+	"modid": "apprentice",
+	"name": "Apprentice",
+	"authors": [
+		"Kanista",
+		"allogic"
+	],
+	"description": "Character progression, race-first creation, Grandmaster discoveries, advanced metals, arrow poison, and danger regions.",
+	"website": "https://github.com/allogic/Apprentice",
+	"version": "3.0.0",
+	"dependencies": {
+		"game": "1.22.3"
+	}
 }
