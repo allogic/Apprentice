@@ -986,10 +986,11 @@ namespace Apprentice.Weapon
 		private static readonly AccessTools.FieldRef<Camera, Vec3d> camEyePosInRef = AccessTools.FieldRefAccess<Camera, Vec3d>("camEyePosIn");
 		private static readonly AccessTools.FieldRef<Camera, Vec3d> originPosRef = AccessTools.FieldRefAccess<Camera, Vec3d>("originPos");
 		private static readonly AccessTools.FieldRef<Camera, Vec3d> camEyePosOutTmpRef = AccessTools.FieldRefAccess<Camera, Vec3d>("camEyePosOutTmp");
+		private static readonly AccessTools.FieldRef<Camera, EnumCameraMode> cameraModeRef = AccessTools.FieldRefAccess<Camera, EnumCameraMode>("CameraMode");
 
 		private static LineGizmo? lineGizmo = null;
 
-		private static Vec3f cameraRootPosition = new(-0.7F, 0.0F, 1.75F);
+		private static Vec3f cameraRootPosition = new(-0.5F, 0.0F, -1.5F);
 		private static Vec3f cameraRootRotation = new(0, 0, 0);
 
 		[HarmonyPatch(typeof(Camera), nameof(Camera.Update), [typeof(float), typeof(AABBIntersectionTest)])]
@@ -1003,6 +1004,9 @@ namespace Apprentice.Weapon
 				EntityPlayer entityPlayer = clientApi.World.Player.Entity;
 				EntityPos transform = entityPlayer.Pos;
 
+				// Set third person mode forever
+				cameraModeRef(__instance) = EnumCameraMode.ThirdPerson;
+
 				// Compute local direction
 				Vec3d localForward = transform.GetViewVector().ToVec3d();
 				Vec3d localRight = MathUtil.WORLD_UP.Cross(localForward).Normalize();
@@ -1010,7 +1014,7 @@ namespace Apprentice.Weapon
 
 				// Compute local offset
 				Vec3d localOffset = cameraRootPosition.ToVec3d();
-				//localOffset = MathUtil.RotateAroundAxis(localOffset, MathUtil.WORLD_RIGHT, transform.Pitch);
+				localOffset = MathUtil.RotateAroundAxis(localOffset, MathUtil.WORLD_RIGHT, transform.Pitch);
 				localOffset = MathUtil.RotateAroundAxis(localOffset, MathUtil.WORLD_UP, transform.Yaw);
 				//localOffset = MathUtil.RotateAroundAxis(localOffset, localForward, transform.Roll);
 
