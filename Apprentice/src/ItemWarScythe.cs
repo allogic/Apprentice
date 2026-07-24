@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using Vintagestory.API.Common;
@@ -17,10 +18,11 @@ namespace Apprentice
             "apprenticeWarScytheTimelineTime";
         private const string AttackWindowAttribute =
             "apprenticeWarScytheAttackWindow";
-        private const string ImpactAppliedAttribute =
-            "apprenticeWarScytheImpactApplied";
         private const string ReleaseDeferredAttribute =
             "apprenticeWarScytheReleaseDeferred";
+
+        private readonly Dictionary<long, SweepAttackState>
+            sweepStates = new();
 
         public override void OnLoaded(ICoreAPI api)
         {
@@ -62,10 +64,26 @@ namespace Apprentice
                 ref handHandling
             );
 
+            // The native shoulder-rest track owns the Rest state. Stop it for
+            // the committed action so the reference controller can move from
+            // the last captured Rest pose into Ready without two pose owners
+            // competing for the same arm and item-anchor elements.
+            OneShotMeleeAnimation.Stop(
+                byEntity,
+                HeldRightTpIdleAnimation
+            );
+            OneShotMeleeAnimation.Stop(
+                byEntity,
+                "scytheIdle-fp"
+            );
+
             byEntity.Attributes.SetFloat(TimelineTimeAttribute, -0.0001f);
             byEntity.Attributes.SetBool(AttackWindowAttribute, false);
-            byEntity.Attributes.SetBool(ImpactAppliedAttribute, false);
             byEntity.Attributes.SetBool(ReleaseDeferredAttribute, false);
+            if (api.Side == EnumAppSide.Server)
+            {
+                sweepStates.Remove(byEntity.EntityId);
+            }
 
             if (api.Side == EnumAppSide.Client)
             {
@@ -110,6 +128,10 @@ namespace Apprentice
 
             byEntity.Attributes.SetBool(AttackWindowAttribute, false);
             byEntity.Attributes.SetBool(ReleaseDeferredAttribute, false);
+            if (api.Side == EnumAppSide.Server)
+            {
+                sweepStates.Remove(byEntity.EntityId);
+            }
             if (api.Side == EnumAppSide.Client)
             {
                 ApprenticeModSystem system = GetApprenticeSystem();
@@ -157,12 +179,16 @@ namespace Apprentice
             AdvanceTimeline(secondsUsed, byEntity, slot, definition);
             byEntity.Attributes.SetBool(AttackWindowAttribute, false);
             byEntity.Attributes.SetBool(ReleaseDeferredAttribute, false);
+            if (api.Side == EnumAppSide.Server)
+            {
+                sweepStates.Remove(byEntity.EntityId);
+            }
 
             if (api.Side == EnumAppSide.Client)
             {
                 ApprenticeModSystem system = GetApprenticeSystem();
                 system.NoteWarScytheLifecycle(byEntity, "held-stop");
-                system.StopWarScytheAnimation(byEntity);
+                system.CompleteWarScytheAnimation(byEntity);
             }
         }
 
@@ -177,6 +203,7 @@ namespace Apprentice
                 -0.0001f
             );
             float current = Math.Max(previous, secondsUsed);
+            float cursor = previous;
 
             foreach (ApprenticeAnimationCallback callback in
                 definition.Callbacks)
@@ -185,39 +212,44 @@ namespace Apprentice
                     definition.EaseInSeconds + callback.TimeSeconds;
                 if (previous < callbackTime && current >= callbackTime)
                 {
-                    ProcessTimelineCallback(
-                        callback.Code,
+                    AdvanceSweepDamage(
+                        cursor,
+                        callbackTime,
                         byEntity,
                         slot
                     );
+                    ProcessTimelineCallback(
+                        callback.Code,
+                        byEntity,
+                        definition
+                    );
+                    cursor = callbackTime;
                 }
             }
 
+            AdvanceSweepDamage(cursor, current, byEntity, slot);
             byEntity.Attributes.SetFloat(TimelineTimeAttribute, current);
         }
 
         private void ProcessTimelineCallback(
             string callback,
             EntityAgent byEntity,
-            ItemSlot slot)
+            ApprenticeAnimationDefinition definition)
         {
             switch (callback)
             {
                 case "attack-start":
                     byEntity.Attributes.SetBool(AttackWindowAttribute, true);
+                    if (api.Side == EnumAppSide.Server)
+                    {
+                        BeginSweep(byEntity, definition);
+                    }
                     break;
 
                 case "attack-sample":
-                    if (api.Side == EnumAppSide.Server &&
-                        byEntity.Attributes.GetBool(AttackWindowAttribute) &&
-                        !byEntity.Attributes.GetBool(ImpactAppliedAttribute))
-                    {
-                        ApplyAreaDamage(byEntity, slot);
-                        byEntity.Attributes.SetBool(
-                            ImpactAppliedAttribute,
-                            true
-                        );
-                    }
+                    // Damage is sampled continuously across the cutting arc.
+                    // This callback remains in the authored contract as the
+                    // center-of-sweep diagnostic marker.
                     break;
 
                 case "attack-stop":
@@ -226,11 +258,74 @@ namespace Apprentice
                         AttackWindowAttribute,
                         false
                     );
+                    if (api.Side == EnumAppSide.Server)
+                    {
+                        sweepStates.Remove(byEntity.EntityId);
+                    }
                     break;
             }
         }
 
-        private void ApplyAreaDamage(EntityAgent byEntity, ItemSlot slot)
+        private void BeginSweep(
+            EntityAgent byEntity,
+            ApprenticeAnimationDefinition definition)
+        {
+            ApprenticeAnimationCallback? start =
+                definition.Callbacks.FirstOrDefault(callback =>
+                    callback.Code == "attack-start"
+                );
+            ApprenticeAnimationCallback? stop =
+                definition.Callbacks.FirstOrDefault(callback =>
+                    callback.Code == "attack-stop"
+                );
+            if (start == null || stop == null ||
+                stop.TimeSeconds <= start.TimeSeconds)
+            {
+                sweepStates.Remove(byEntity.EntityId);
+                return;
+            }
+
+            sweepStates[byEntity.EntityId] = new SweepAttackState(
+                definition.EaseInSeconds + start.TimeSeconds,
+                definition.EaseInSeconds + stop.TimeSeconds
+            );
+        }
+
+        private void AdvanceSweepDamage(
+            float fromActionSeconds,
+            float toActionSeconds,
+            EntityAgent byEntity,
+            ItemSlot slot)
+        {
+            if (api.Side != EnumAppSide.Server ||
+                toActionSeconds <= fromActionSeconds ||
+                !byEntity.Attributes.GetBool(AttackWindowAttribute) ||
+                !sweepStates.TryGetValue(
+                    byEntity.EntityId,
+                    out SweepAttackState? state))
+            {
+                return;
+            }
+
+            float from = Math.Max(
+                fromActionSeconds,
+                state.StartActionSeconds
+            );
+            float to = Math.Min(
+                toActionSeconds,
+                state.StopActionSeconds
+            );
+            if (to <= from) return;
+
+            ApplySweepDamage(byEntity, slot, state, from, to);
+        }
+
+        private void ApplySweepDamage(
+            EntityAgent byEntity,
+            ItemSlot slot,
+            SweepAttackState state,
+            float fromActionSeconds,
+            float toActionSeconds)
         {
             if (api.Side != EnumAppSide.Server || slot.Empty ||
                 slot.Itemstack?.Item is not ItemWarScythe)
@@ -240,21 +335,92 @@ namespace Apprentice
 
             float damage = Attributes?["aoeDamage"].AsFloat(7.5f) ?? 7.5f;
             float radius = Attributes?["aoeRadius"].AsFloat(3.5f) ?? 3.5f;
-            float arcDegrees = Attributes?["aoeArcDegrees"].AsFloat(120f) ?? 120f;
+            float arcDegrees = Math.Clamp(
+                Attributes?["aoeArcDegrees"].AsFloat(180f) ?? 180f,
+                1f,
+                180f
+            );
             int maxTargets = Math.Max(
                 1,
                 Attributes?["aoeMaxTargets"].AsInt(6) ?? 6
             );
+            if (state.AcceptedHits >= maxTargets) return;
+
+            float halfArc = arcDegrees * 0.5f;
+            float sweepStartDegrees = Math.Clamp(
+                Attributes?["aoeSweepStartDegrees"]
+                    .AsFloat(-halfArc) ?? -halfArc,
+                -halfArc,
+                halfArc
+            );
+            float sweepEndDegrees = Math.Clamp(
+                Attributes?["aoeSweepEndDegrees"]
+                    .AsFloat(halfArc) ?? halfArc,
+                -halfArc,
+                halfArc
+            );
+            if (Math.Abs(sweepEndDegrees - sweepStartDegrees) < 0.001f)
+            {
+                sweepStartDegrees = -halfArc;
+                sweepEndDegrees = halfArc;
+            }
+            float sweepHalfWidthDegrees = Math.Clamp(
+                Attributes?["aoeSweepHalfWidthDegrees"]
+                    .AsFloat(8f) ?? 8f,
+                0.5f,
+                30f
+            );
             int damageTier = Attributes?["damageTier"].AsInt(5) ?? 5;
 
-            Vec3d origin = byEntity.Pos.XYZ.AddCopy(0, byEntity.LocalEyePos.Y * 0.45, 0);
+            double duration = Math.Max(
+                0.001,
+                state.StopActionSeconds -
+                    state.StartActionSeconds
+            );
+            double fromProgress = Math.Clamp(
+                (fromActionSeconds -
+                    state.StartActionSeconds) / duration,
+                0,
+                1
+            );
+            double toProgress = Math.Clamp(
+                (toActionSeconds -
+                    state.StartActionSeconds) / duration,
+                0,
+                1
+            );
+            double fromAngle =
+                sweepStartDegrees +
+                (sweepEndDegrees - sweepStartDegrees) *
+                fromProgress;
+            double toAngle =
+                sweepStartDegrees +
+                (sweepEndDegrees - sweepStartDegrees) *
+                toProgress;
+            double minimumSweepAngle = Math.Max(
+                -halfArc,
+                Math.Min(fromAngle, toAngle) -
+                    sweepHalfWidthDegrees
+            );
+            double maximumSweepAngle = Math.Min(
+                halfArc,
+                Math.Max(fromAngle, toAngle) +
+                    sweepHalfWidthDegrees
+            );
+
+            Vec3d origin = byEntity.Pos.XYZ.AddCopy(
+                0,
+                byEntity.LocalEyePos.Y * 0.45,
+                0
+            );
             Vec3f look3f = byEntity.Pos.GetViewVector();
             Vec3d forward = new Vec3d(look3f.X, 0, look3f.Z);
             if (forward.LengthSq() < 0.0001) return;
             forward.Normalize();
 
-            double minimumDot = Math.Cos(arcDegrees * GameMath.DEG2RAD * 0.5);
-            Entity[] targets = api.World.GetEntitiesAround(
+            bool ascending =
+                sweepEndDegrees > sweepStartDegrees;
+            var targets = api.World.GetEntitiesAround(
                     origin,
                     radius,
                     radius,
@@ -263,9 +429,9 @@ namespace Apprentice
                 .Select(entity => new
                 {
                     Entity = entity,
-                    Offset = entity.Pos.XYZ.SubCopy(origin)
+                    Offset = entity.Pos.XYZ.SubCopy(origin),
                 })
-                .Where(candidate =>
+                .Select(candidate =>
                 {
                     Vec3d horizontal = new Vec3d(
                         candidate.Offset.X,
@@ -273,16 +439,50 @@ namespace Apprentice
                         candidate.Offset.Z
                     );
                     double distance = horizontal.Length();
-                    if (distance < 0.001) return false;
+                    if (distance < 0.001 || distance > radius)
+                    {
+                        return new
+                        {
+                            candidate.Entity,
+                            Angle = double.NaN,
+                            Distance = distance
+                        };
+                    }
                     horizontal.Mul(1 / distance);
-                    return horizontal.Dot(forward) >= minimumDot;
+                    double dot = Math.Clamp(
+                        horizontal.Dot(forward),
+                        -1,
+                        1
+                    );
+                    double cross =
+                        forward.X * horizontal.Z -
+                        forward.Z * horizontal.X;
+                    double angle =
+                        Math.Atan2(cross, dot) *
+                        GameMath.RAD2DEG;
+                    return new
+                    {
+                        candidate.Entity,
+                        Angle = angle,
+                        Distance = distance
+                    };
                 })
-                .OrderBy(candidate => candidate.Offset.LengthSq())
-                .Take(maxTargets)
-                .Select(candidate => candidate.Entity)
+                .Where(candidate =>
+                    !double.IsNaN(candidate.Angle) &&
+                    candidate.Angle >= minimumSweepAngle &&
+                    candidate.Angle <= maximumSweepAngle &&
+                    !state.HitEntityIds.Contains(
+                        candidate.Entity.EntityId
+                    )
+                )
+                .OrderBy(candidate =>
+                    ascending
+                        ? candidate.Angle
+                        : -candidate.Angle
+                )
+                .ThenBy(candidate => candidate.Distance)
                 .ToArray();
 
-            int acceptedHits = 0;
             DamageSource source = new DamageSource
             {
                 Source = EnumDamageSource.Player,
@@ -291,14 +491,20 @@ namespace Apprentice
                 DamageTier = damageTier
             };
 
-            foreach (Entity target in targets)
+            foreach (var candidate in targets)
             {
-                if (target.ReceiveDamage(source, damage)) acceptedHits++;
-            }
+                if (state.AcceptedHits >= maxTargets) break;
 
-            if (acceptedHits > 0)
-            {
-                DamageItem(api.World, byEntity, slot, 1);
+                Entity target = candidate.Entity;
+                state.HitEntityIds.Add(target.EntityId);
+                if (!target.ReceiveDamage(source, damage)) continue;
+
+                state.AcceptedHits++;
+                if (!state.DurabilityApplied)
+                {
+                    DamageItem(api.World, byEntity, slot, 1);
+                    state.DurabilityApplied = true;
+                }
             }
         }
 
@@ -312,5 +518,22 @@ namespace Apprentice
 
         private ApprenticeModSystem GetApprenticeSystem() =>
             api.ModLoader.GetModSystem<ApprenticeModSystem>(true);
+
+        private sealed class SweepAttackState
+        {
+            public SweepAttackState(
+                float startActionSeconds,
+                float stopActionSeconds)
+            {
+                StartActionSeconds = startActionSeconds;
+                StopActionSeconds = stopActionSeconds;
+            }
+
+            public float StartActionSeconds { get; }
+            public float StopActionSeconds { get; }
+            public HashSet<long> HitEntityIds { get; } = new();
+            public int AcceptedHits { get; set; }
+            public bool DurabilityApplied { get; set; }
+        }
     }
 }

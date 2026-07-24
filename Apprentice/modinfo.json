@@ -11,6 +11,7 @@
 	"website": "https://github.com/allogic/Apprentice",
 	"version": "3.0.0",
 	"dependencies": {
-		"game": "1.22.3"
+		"game": "1.22.3",
+		"vsimgui": "1.2.7"
 	}
 }

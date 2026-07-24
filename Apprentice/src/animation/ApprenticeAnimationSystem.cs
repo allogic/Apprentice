@@ -154,18 +154,17 @@ namespace Apprentice
             localSequences[entity.EntityId] = sequence;
 
             EnsureLocalBehaviors(player);
-            AnimationRequest firstPersonRequest =
-                CreateRequest(
-                    callback => Trace(
-                        entity.EntityId,
-                        sequence,
-                        callback
-                    )
-                );
-            firstPersonBehavior!.Play(firstPersonRequest, stack.Item.Id);
-            GetThirdPersonBehavior(player).Play(
-                CreateRequest(callbackHandler: null),
-                stack.Item.Id
+            firstPersonBehavior!.PlayAttack(
+                stack.Item.Id,
+                callback => Trace(
+                    entity.EntityId,
+                    sequence,
+                    callback
+                )
+            );
+            GetThirdPersonBehavior(player).PlayAttack(
+                stack.Item.Id,
+                callbackHandler: null
             );
 
             activeStates[entity.EntityId] = new ActiveRuntimeState(
@@ -203,6 +202,53 @@ namespace Apprentice
                 stop: true
             ));
             Trace(entity.EntityId, state.Sequence, "stop");
+        }
+
+        public void CompleteLocal(EntityAgent entity)
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            int itemId;
+            int sequence;
+            if (activeStates.TryGetValue(
+                entity.EntityId,
+                out ActiveRuntimeState? state))
+            {
+                itemId = state.ItemId;
+                sequence = state.Sequence;
+                activeStates.Remove(entity.EntityId);
+            }
+            else if (entity is EntityPlayer player &&
+                localSequences.TryGetValue(
+                    entity.EntityId,
+                    out sequence) &&
+                TryGetHeldWarScythe(player, out ItemStack stack))
+            {
+                itemId = stack.Item.Id;
+            }
+            else
+            {
+                return;
+            }
+
+            firstPersonBehavior?.CompleteAction();
+            if (thirdPersonBehaviors.TryGetValue(
+                entity.EntityId,
+                out WarScythePoseBehavior? third))
+            {
+                third.CompleteAction();
+            }
+
+            channel.SendPacket(CreatePacket(
+                entity.EntityId,
+                itemId,
+                sequence,
+                stop: true
+            ));
+            Trace(entity.EntityId, sequence, "action-complete");
         }
 
         public void EnterEditorMode()
@@ -268,8 +314,10 @@ namespace Apprentice
             {
                 EnsureLocalBehaviors(player);
                 firstPersonBehavior!.Advance(deltaTime);
+                firstPersonBehavior.BeginBasePoseCapture();
             }
             third.Advance(deltaTime);
+            third.BeginBasePoseCapture();
         }
 
         internal void OnReferenceFrame(
@@ -313,14 +361,28 @@ namespace Apprentice
             string callbacks = callbackTrace.Count == 0
                 ? "none"
                 : string.Join(" | ", callbackTrace);
+            string firstPersonState =
+                firstPersonBehavior?.StateName ?? "uninitialized";
+            string thirdPersonStates =
+                thirdPersonBehaviors.Count == 0
+                    ? "none"
+                    : string.Join(
+                        ",",
+                        thirdPersonBehaviors
+                            .OrderBy(entry => entry.Key)
+                            .Select(entry =>
+                                $"{entry.Key}:{entry.Value.StateName}")
+                    );
             return string.Format(
                 CultureInfo.InvariantCulture,
-                "War Scythe animation: pipeline=OverhaulLib-reference AnimationJson->Animation->Animator->Composer->OnFrameInvoke->ElementPose; hookEnabled={0}; insertionPoints={1}; hookReached={2}; FPowner={3}; TPowners={4}; activeEntities={5}; editorPreview={6}; category={7}; duration={8:0.###}s; appliedElements={9}; callbacks=[{10}]; lastGeometry=[{11}]",
+                "War Scythe animation: pipeline=OverhaulLib-reference AnimationJson->Animation->Animator->Composer->OnFrameInvoke->ElementPose; hookEnabled={0}; insertionPoints={1}; hookReached={2}; FPowner={3}; TPowners={4}; FPstate={5}; TPstates=[{6}]; activeEntities={7}; editorPreview={8}; category={9}; duration={10:0.###}s; appliedElements={11}; callbacks=[{12}]; lastGeometry=[{13}]",
                 ApprenticeAnimationHook.Enabled,
                 ApprenticeAnimationHook.InjectionPointCount,
                 hookReached,
                 firstPersonBehavior != null,
                 thirdPersonBehaviors.Count,
+                firstPersonState,
+                thirdPersonStates,
                 activeStates.Count,
                 editor.PreviewActive,
                 definition.Category,
@@ -381,9 +443,7 @@ namespace Apprentice
                         out int activeSequence) &&
                     activeSequence == packet.Sequence)
                 {
-                    GetThirdPersonBehavior(player).Stop(
-                        definition.Category
-                    );
+                    GetThirdPersonBehavior(player).CompleteAction();
                     activeStates.Remove(packet.EntityId);
                     Trace(
                         packet.EntityId,
@@ -404,9 +464,9 @@ namespace Apprentice
 
             lastAcceptedSequences[packet.EntityId] =
                 packet.Sequence;
-            GetThirdPersonBehavior(player).Play(
-                CreateRequest(callbackHandler: null),
-                stack.Item.Id
+            GetThirdPersonBehavior(player).PlayAttack(
+                stack.Item.Id,
+                callbackHandler: null
             );
             activeStates[packet.EntityId] = new ActiveRuntimeState(
                 stack.Item.Id,
@@ -501,25 +561,35 @@ namespace Apprentice
                 activeStates.Remove(entityId);
                 Trace(entityId, state.Sequence, "finish");
             }
+
+            if (editor.PreviewActive) return;
+
+            foreach (WarScythePoseBehavior behavior in
+                thirdPersonBehaviors.Values)
+            {
+                RequestNativeRestWhenReady(behavior, now);
+            }
+            if (firstPersonBehavior != null)
+            {
+                RequestNativeRestWhenReady(firstPersonBehavior, now);
+            }
         }
 
-        private AnimationRequest CreateRequest(
-            Action<string>? callbackHandler) =>
-            new(
-                definition.Animation,
-                animationSpeed: 1f,
-                weight: 1f,
-                category: definition.Category,
-                easeOutDuration: TimeSpan.FromSeconds(
-                    definition.EaseOutSeconds
-                ),
-                easeInDuration: TimeSpan.FromSeconds(
-                    definition.EaseInSeconds
-                ),
-                easeOut: true,
-                finishCallback: null,
-                callbackHandler: callbackHandler
-            );
+        private void RequestNativeRestWhenReady(
+            WarScythePoseBehavior behavior,
+            long now)
+        {
+            EntityPlayer player = behavior.Player;
+            if (activeStates.ContainsKey(player.EntityId) ||
+                !behavior.IsReadyForRest(now) ||
+                !player.Alive ||
+                !TryGetHeldWarScythe(player, out _))
+            {
+                return;
+            }
+
+            behavior.RequestReturnToRest();
+        }
 
         private void EnsureLocalBehaviors(EntityPlayer player)
         {
@@ -672,13 +742,31 @@ namespace Apprentice
 
         private sealed class WarScythePoseBehavior
         {
+            private const int CompleteCaptureMask = 0b11_1111;
+
             private readonly ICoreClientAPI api;
             private readonly bool firstPerson;
             private readonly ApprenticeAnimationDefinition definition;
             private readonly Composer composer;
+            private readonly PlayerItemFrame readyFrame;
+            private readonly Apprentice.AnimationReference.Animation
+                readyIdleAnimation;
             private PlayerItemFrame currentFrame =
                 PlayerItemFrame.Empty;
+            private AnimationElement capturedItemAnchor;
+            private AnimationElement capturedItemAnchorL;
+            private AnimationElement capturedUpperArmR;
+            private AnimationElement capturedLowerArmR;
+            private AnimationElement capturedUpperArmL;
+            private AnimationElement capturedLowerArmL;
+            private Action<string>? swingCallbackHandler;
+            private WarScythePoseState state =
+                WarScythePoseState.Rest;
+            private int captureMask;
             private int activeItemId;
+            private long readySinceMs;
+            private bool restRequested;
+            private bool missingBasePoseLogged;
 
             public WarScythePoseBehavior(
                 ICoreClientAPI api,
@@ -695,17 +783,80 @@ namespace Apprentice
                     particleEffectsManager: null,
                     player: player
                 );
+                readyFrame = definition.Animation.StillFrame(0);
+                readyIdleAnimation = CreateReadyIdleAnimation(
+                    readyFrame
+                );
             }
 
             public EntityPlayer Player { get; }
             public PlayerItemFrame? FrameOverride { get; set; }
+            public string StateName => state.ToString();
+            private string NativeRestAnimation =>
+                firstPerson
+                    ? "scytheIdle-fp"
+                    : "scytheIdle";
 
-            public void Play(
-                AnimationRequest request,
-                int itemId)
+            public void PlayAttack(
+                int itemId,
+                Action<string>? callbackHandler)
             {
                 activeItemId = itemId;
-                composer.Play(request);
+                readySinceMs = 0;
+                restRequested = false;
+                swingCallbackHandler = callbackHandler;
+                Player.StopAnimation(NativeRestAnimation);
+
+                if (state == WarScythePoseState.ReadyIdle)
+                {
+                    QueueSwing();
+                    return;
+                }
+
+                PlayerItemFrame start =
+                    ResolveTransitionStart();
+                state = WarScythePoseState.ToReadyBeforeSwing;
+                composer.Play(CreateRequest(
+                    CreateTransition(
+                        start,
+                        readyFrame,
+                        TimeSpan.FromSeconds(
+                            definition.EaseInSeconds
+                        )
+                    ),
+                    finishCallback: BeginSwing,
+                    callbackHandler: null
+                ));
+            }
+
+            public void CompleteAction()
+            {
+                // The reference phase chain owns completion. A normal held
+                // action stop must not erase Ready; cancellation still calls
+                // Stop/StopAll and releases the category immediately.
+            }
+
+            public bool IsReadyForRest(long now) =>
+                state == WarScythePoseState.ReadyIdle &&
+                readySinceMs > 0 &&
+                now - readySinceMs >=
+                    definition.ReadyIdleDelaySeconds * 1000f;
+
+            public void RequestReturnToRest()
+            {
+                if (state == WarScythePoseState.ReadyIdle &&
+                    !restRequested)
+                {
+                    restRequested = true;
+                    Player.AnimManager.StartAnimation(
+                        NativeRestAnimation
+                    );
+                }
+            }
+
+            public void BeginBasePoseCapture()
+            {
+                captureMask = 0;
             }
 
             public void Stop(string category)
@@ -713,6 +864,10 @@ namespace Apprentice
                 composer.Stop(category);
                 activeItemId = 0;
                 currentFrame = PlayerItemFrame.Empty;
+                swingCallbackHandler = null;
+                readySinceMs = 0;
+                restRequested = false;
+                state = WarScythePoseState.Rest;
             }
 
             public void StopAll()
@@ -721,6 +876,10 @@ namespace Apprentice
                 activeItemId = 0;
                 currentFrame = PlayerItemFrame.Empty;
                 FrameOverride = null;
+                swingCallbackHandler = null;
+                readySinceMs = 0;
+                restRequested = false;
+                state = WarScythePoseState.Rest;
             }
 
             public void Advance(float deltaTime)
@@ -732,7 +891,7 @@ namespace Apprentice
                 if (activeItemId != 0 &&
                     (!Player.Alive ||
                     heldItem?.Id != activeItemId ||
-                    heldItem.Code?.ToString() !=
+                    heldItem?.Code?.ToString() !=
                         definition.HeldItemCode))
                 {
                     StopAll();
@@ -747,6 +906,10 @@ namespace Apprentice
                 if (!composer.AnyActiveAnimations())
                 {
                     activeItemId = 0;
+                    if (state == WarScythePoseState.ToRest)
+                    {
+                        state = WarScythePoseState.Rest;
+                    }
                 }
             }
 
@@ -763,13 +926,7 @@ namespace Apprentice
                     return false;
                 }
 
-                PlayerItemFrame? selected =
-                    FrameOverride ??
-                    (composer.AnyActiveAnimations()
-                        ? currentFrame
-                        : null);
-                if (selected == null ||
-                    pose.ForElement?.Name is not string name ||
+                if (pose.ForElement?.Name is not string name ||
                     !Enum.TryParse(
                         name,
                         ignoreCase: false,
@@ -788,6 +945,21 @@ namespace Apprentice
                     EnumAnimatedElement.LowerArmL;
                 if (!controlled) return false;
 
+                CaptureBasePose(element, pose);
+                if (captureMask == CompleteCaptureMask &&
+                    restRequested &&
+                    state == WarScythePoseState.ReadyIdle)
+                {
+                    QueueReturnToRest(BuildCapturedBaseFrame());
+                }
+
+                PlayerItemFrame? selected =
+                    FrameOverride ??
+                    (composer.AnyActiveAnimations()
+                        ? currentFrame
+                        : null);
+                if (selected == null) return false;
+
                 Vector3 eyePosition = new(
                     (float)Player.LocalEyePos.X,
                     (float)Player.LocalEyePos.Y,
@@ -804,6 +976,355 @@ namespace Apprentice
                         composer.AnyActiveAnimations()
                 );
                 return true;
+            }
+
+            private PlayerItemFrame ResolveTransitionStart()
+            {
+                if (state != WarScythePoseState.Rest &&
+                    HasBothHands(currentFrame))
+                {
+                    return currentFrame;
+                }
+                if (captureMask == CompleteCaptureMask)
+                {
+                    return BuildCapturedBaseFrame();
+                }
+
+                if (!missingBasePoseLogged)
+                {
+                    missingBasePoseLogged = true;
+                    api.Logger.Warning(
+                        "[Apprentice] War Scythe {0} Rest pose was not captured before attack start; beginning from Ready without inventing pose values.",
+                        firstPerson ? "first-person" : "third-person"
+                    );
+                }
+                return readyFrame;
+            }
+
+            private bool BeginSwing()
+            {
+                QueueSwing();
+                return true;
+            }
+
+            private void QueueSwing()
+            {
+                state = WarScythePoseState.Swing;
+                composer.Play(CreateRequest(
+                    definition.Animation,
+                    finishCallback: BeginReturnToReady,
+                    callbackHandler: swingCallbackHandler
+                ));
+            }
+
+            private bool BeginReturnToReady()
+            {
+                state = WarScythePoseState.ToReadyAfterSwing;
+                composer.Play(CreateRequest(
+                    CreateTransition(
+                        definition.Animation.StillFrame(1),
+                        readyFrame,
+                        TimeSpan.FromSeconds(
+                            definition.EaseOutSeconds
+                        )
+                    ),
+                    finishCallback: HoldReady,
+                    callbackHandler: null
+                ));
+                return true;
+            }
+
+            private bool HoldReady()
+            {
+                state = WarScythePoseState.ReadyIdle;
+                readySinceMs = api.World.ElapsedMilliseconds;
+                restRequested = false;
+                Player.StopAnimation(NativeRestAnimation);
+                composer.Play(CreateRequest(
+                    readyIdleAnimation,
+                    finishCallback: RepeatReadyIdle,
+                    callbackHandler: null
+                ));
+                return true;
+            }
+
+            private bool RepeatReadyIdle()
+            {
+                if (state != WarScythePoseState.ReadyIdle ||
+                    restRequested)
+                {
+                    return false;
+                }
+
+                composer.Play(CreateRequest(
+                    readyIdleAnimation,
+                    finishCallback: RepeatReadyIdle,
+                    callbackHandler: null
+                ));
+                return true;
+            }
+
+            private void QueueReturnToRest(
+                PlayerItemFrame restFrame)
+            {
+                restRequested = false;
+                readySinceMs = 0;
+                state = WarScythePoseState.ToRest;
+                PlayerItemFrame transitionStart =
+                    HasBothHands(currentFrame)
+                        ? currentFrame
+                        : readyFrame;
+                composer.Play(CreateRequest(
+                    CreateTransition(
+                        transitionStart,
+                        restFrame,
+                        TimeSpan.FromSeconds(
+                            definition.ReadyToRestSeconds
+                        )
+                    ),
+                    finishCallback: FinishReturnToRest,
+                    callbackHandler: null
+                ));
+            }
+
+            private bool FinishReturnToRest()
+            {
+                state = WarScythePoseState.Rest;
+                swingCallbackHandler = null;
+                readySinceMs = 0;
+                return false;
+            }
+
+            private AnimationRequest CreateRequest(
+                Apprentice.AnimationReference.Animation animation,
+                Func<bool>? finishCallback,
+                Action<string>? callbackHandler) =>
+                new(
+                    animation,
+                    animationSpeed: 1f,
+                    weight: 1f,
+                    category: definition.Category,
+                    easeOutDuration: TimeSpan.FromMilliseconds(1),
+                    easeInDuration: TimeSpan.FromMilliseconds(1),
+                    easeOut: false,
+                    finishCallback: finishCallback,
+                    callbackHandler: callbackHandler
+                );
+
+            private static Apprentice.AnimationReference.Animation
+                CreateTransition(
+                    PlayerItemFrame from,
+                    PlayerItemFrame to,
+                    TimeSpan duration)
+            {
+                TimeSpan safeDuration = duration >
+                    TimeSpan.FromMilliseconds(1)
+                        ? duration
+                        : TimeSpan.FromMilliseconds(1);
+                TimeSpan midpointTime =
+                    TimeSpan.FromTicks(safeDuration.Ticks / 2);
+                PlayerFrame midpoint =
+                    PlayerFrame.Interpolate(
+                        from.Player,
+                        to.Player,
+                        0.5f
+                    );
+                return new Apprentice.AnimationReference.Animation(
+                    new[]
+                    {
+                        new PLayerKeyFrame(
+                            from.Player,
+                            TimeSpan.Zero,
+                            EasingFunctionType.Linear
+                        ),
+                        new PLayerKeyFrame(
+                            midpoint,
+                            midpointTime,
+                            EasingFunctionType.EaseInSine
+                        ),
+                        new PLayerKeyFrame(
+                            to.Player,
+                            safeDuration,
+                            EasingFunctionType.EaseOutSine
+                        )
+                    }
+                );
+            }
+
+            private static Apprentice.AnimationReference.Animation
+                CreateReadyIdleAnimation(
+                    PlayerItemFrame ready)
+            {
+                PlayerItemFrame breath =
+                    CreateReadyBreathFrame(ready);
+                Apprentice.AnimationReference.Animation animation =
+                    new(
+                        new[]
+                        {
+                            new PLayerKeyFrame(
+                                ready.Player,
+                                TimeSpan.Zero,
+                                EasingFunctionType.EaseInOutSine
+                            ),
+                            new PLayerKeyFrame(
+                                breath.Player,
+                                TimeSpan.FromMilliseconds(900),
+                                EasingFunctionType.EaseInOutSine
+                            ),
+                            new PLayerKeyFrame(
+                                ready.Player,
+                                TimeSpan.FromMilliseconds(1800),
+                                EasingFunctionType.EaseInOutSine
+                            )
+                        }
+                    );
+                animation.Hold = false;
+                return animation;
+            }
+
+            private static PlayerItemFrame CreateReadyBreathFrame(
+                PlayerItemFrame ready)
+            {
+                PlayerFrame source = ready.Player;
+                RightHandFrame right =
+                    source.RightHand ?? RightHandFrame.Zero;
+                LeftHandFrame left =
+                    source.LeftHand ?? LeftHandFrame.Zero;
+
+                PlayerFrame player = new(
+                    rightHand: new RightHandFrame(
+                        OffsetRotation(
+                            right.ItemAnchor,
+                            rotationZ: 0.5f
+                        ),
+                        OffsetRotation(
+                            right.LowerArmR,
+                            rotationX: 0.4f
+                        ),
+                        OffsetRotation(
+                            right.UpperArmR,
+                            rotationX: 0.8f
+                        )
+                    ),
+                    leftHand: new LeftHandFrame(
+                        left.ItemAnchorL,
+                        OffsetRotation(
+                            left.LowerArmL,
+                            rotationX: 0.4f
+                        ),
+                        OffsetRotation(
+                            left.UpperArmL,
+                            rotationX: 0.8f
+                        )
+                    ),
+                    otherParts: source.OtherParts,
+                    upperTorso: source.UpperTorso,
+                    detachedAnchorFrame:
+                        source.DetachedAnchorFrame,
+                    detachedAnchor: source.DetachedAnchor,
+                    switchArms: source.SwitchArms,
+                    pitchFollow: source.PitchFollow,
+                    fovMultiplier: source.FovMultiplier,
+                    bobbingAmplitude: source.BobbingAmplitude,
+                    detachedAnchorFollow:
+                        source.DetachedAnchorFollow,
+                    lowerTorso: source.LowerTorso
+                );
+                return new PlayerItemFrame(player, ready.Item);
+            }
+
+            private static AnimationElement OffsetRotation(
+                AnimationElement element,
+                float rotationX = 0,
+                float rotationY = 0,
+                float rotationZ = 0) =>
+                new(
+                    element.OffsetX,
+                    element.OffsetY,
+                    element.OffsetZ,
+                    Add(element.RotationX, rotationX),
+                    Add(element.RotationY, rotationY),
+                    Add(element.RotationZ, rotationZ)
+                );
+
+            private static float? Add(
+                float? value,
+                float offset) =>
+                value.HasValue || offset != 0
+                    ? value.GetValueOrDefault() + offset
+                    : null;
+
+            private void CaptureBasePose(
+                EnumAnimatedElement element,
+                ElementPose pose)
+            {
+                AnimationElement captured = new(
+                    pose.translateX * 16,
+                    pose.translateY * 16,
+                    pose.translateZ * 16,
+                    pose.degX,
+                    pose.degY,
+                    pose.degZ
+                );
+                switch (element)
+                {
+                    case EnumAnimatedElement.ItemAnchor:
+                        capturedItemAnchor = captured;
+                        captureMask |= 1 << 0;
+                        break;
+                    case EnumAnimatedElement.ItemAnchorL:
+                        capturedItemAnchorL = captured;
+                        captureMask |= 1 << 1;
+                        break;
+                    case EnumAnimatedElement.UpperArmR:
+                        capturedUpperArmR = captured;
+                        captureMask |= 1 << 2;
+                        break;
+                    case EnumAnimatedElement.LowerArmR:
+                        capturedLowerArmR = captured;
+                        captureMask |= 1 << 3;
+                        break;
+                    case EnumAnimatedElement.UpperArmL:
+                        capturedUpperArmL = captured;
+                        captureMask |= 1 << 4;
+                        break;
+                    case EnumAnimatedElement.LowerArmL:
+                        capturedLowerArmL = captured;
+                        captureMask |= 1 << 5;
+                        break;
+                }
+            }
+
+            private PlayerItemFrame BuildCapturedBaseFrame() =>
+                new(
+                    new PlayerFrame(
+                        rightHand: new RightHandFrame(
+                            capturedItemAnchor,
+                            capturedLowerArmR,
+                            capturedUpperArmR
+                        ),
+                        leftHand: new LeftHandFrame(
+                            capturedItemAnchorL,
+                            capturedLowerArmL,
+                            capturedUpperArmL
+                        )
+                    ),
+                    item: null
+                );
+
+            private static bool HasBothHands(
+                PlayerItemFrame frame) =>
+                frame.Player.RightHand.HasValue &&
+                frame.Player.LeftHand.HasValue;
+
+            private enum WarScythePoseState
+            {
+                Rest,
+                ToReadyBeforeSwing,
+                Swing,
+                ToReadyAfterSwing,
+                ReadyIdle,
+                ToRest
             }
         }
     }
