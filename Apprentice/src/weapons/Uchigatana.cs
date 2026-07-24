@@ -442,7 +442,7 @@ namespace Apprentice.Weapon
 			EntityPos transform = entityPlayer.Pos;
 			EntityControls controls = clientApi.World.Player.Entity.Controls;
 
-#if true
+#if false
 			DebugWidgets.IntSlider("Ushigatana", "General", "dashCooldownMs", 0, 5000, () => { return dashCooldownMs; }, (v) => { dashCooldownMs = v; });
 			DebugWidgets.IntSlider("Ushigatana", "General", "dashBlurEnableMs", 0, 5000, () => { return dashBlurEnableMs; }, (v) => { dashBlurEnableMs = v; });
 
