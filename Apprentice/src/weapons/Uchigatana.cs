@@ -544,9 +544,11 @@ namespace Apprentice.Weapon
 			if (clientApi == null) return;
 
 			// TODO: fix api injection
-			lineGizmo = new(clientApi, 1000);
 			dashBlur = new(clientApi);
 			harmonyInstance = new("Vintagestory.API.Common");
+#if DEBUG
+			lineGizmo = new(clientApi, 1000);
+#endif
 
 			// Apply all harmony patches
 			harmonyInstance.CreateClassProcessor(typeof(AnimationManager_StartAnimation0_Patch)).Patch();
@@ -985,7 +987,9 @@ namespace Apprentice.Weapon
 		private static readonly AccessTools.FieldRef<Camera, Vec3d> originPosRef = AccessTools.FieldRefAccess<Camera, Vec3d>("originPos");
 		private static readonly AccessTools.FieldRef<Camera, Vec3d> camEyePosOutTmpRef = AccessTools.FieldRefAccess<Camera, Vec3d>("camEyePosOutTmp");
 
-		private static Vec3f cameraRootPosition = new(0, 0, 0);
+		private static LineGizmo? lineGizmo = null;
+
+		private static Vec3f cameraRootPosition = new(-0.7F, 0.0F, 1.75F);
 		private static Vec3f cameraRootRotation = new(0, 0, 0);
 
 		[HarmonyPatch(typeof(Camera), nameof(Camera.Update), [typeof(float), typeof(AABBIntersectionTest)])]
@@ -994,6 +998,7 @@ namespace Apprentice.Weapon
 			public static bool Prefix(Camera __instance, float deltaTime, AABBIntersectionTest intersectionTester)
 			{
 				if (clientApi == null) return true; // Don't skip the original method
+				if (lineGizmo == null) return true; // Don't skip the original method
 
 				EntityPlayer entityPlayer = clientApi.World.Player.Entity;
 				EntityPos transform = entityPlayer.Pos;
@@ -1005,12 +1010,51 @@ namespace Apprentice.Weapon
 
 				// Compute local offset
 				Vec3d localOffset = cameraRootPosition.ToVec3d();
-				localOffset = MathUtil.RotateAroundAxis(localOffset, localRight, cameraRootRotation.X);
-				localOffset = MathUtil.RotateAroundAxis(localOffset, localUp, cameraRootRotation.Y);
-				localOffset = MathUtil.RotateAroundAxis(localOffset, localForward, cameraRootRotation.Z);
+				//localOffset = MathUtil.RotateAroundAxis(localOffset, MathUtil.WORLD_RIGHT, transform.Pitch);
+				localOffset = MathUtil.RotateAroundAxis(localOffset, MathUtil.WORLD_UP, transform.Yaw);
+				//localOffset = MathUtil.RotateAroundAxis(localOffset, localForward, transform.Roll);
+
+#if false
+				lineGizmo.Reset();
+
+				// Draw local right
+				lineGizmo.AddLine(
+					(float)transform.X,
+					(float)transform.Y,
+					(float)transform.Z,
+					(float)transform.X + (float)localRight.X * 10.0F,
+					(float)transform.Y + (float)localRight.Y * 10.0F,
+					(float)transform.Z + (float)localRight.Z * 10.0F,
+					ColorUtil.ToRgba(0xFF, 0xFF, 0x0, 0x0)
+				);
+
+				// Draw local up
+				lineGizmo.AddLine(
+					(float)transform.X,
+					(float)transform.Y,
+					(float)transform.Z,
+					(float)transform.X + (float)localUp.X * 10.0F,
+					(float)transform.Y + (float)localUp.Y * 10.0F,
+					(float)transform.Z + (float)localUp.Z * 10.0F,
+					ColorUtil.ToRgba(0xFF, 0x0, 0xFF, 0x0)
+				);
+
+				// Draw local forward
+				lineGizmo.AddLine(
+					(float)transform.X,
+					(float)transform.Y,
+					(float)transform.Z,
+					(float)transform.X + (float)localForward.X * 10.0F,
+					(float)transform.Y + (float)localForward.Y * 10.0F,
+					(float)transform.Z + (float)localForward.Z * 10.0F,
+					ColorUtil.ToRgba(0xFF, 0x0, 0x0, 0xFF)
+				);
+
+				lineGizmo.Commit();
+#endif
 
 				// Apply our offset
-				// __instance.OriginPosition = localOffset; // TODO
+				__instance.OriginPosition = localOffset;
 				__instance.CameraMatrix = __instance.GetCameraMatrix(camEyePosInRef(__instance), camEyePosInRef(__instance), __instance.Yaw, __instance.Pitch, intersectionTester);
 				__instance.CameraEyePos.Set(camEyePosOutTmpRef(__instance));
 				__instance.CameraMatrixOrigin = __instance.GetCameraMatrix(originPosRef(__instance), camEyePosInRef(__instance), __instance.Yaw, __instance.Pitch, intersectionTester);
@@ -1071,7 +1115,13 @@ namespace Apprentice.Weapon
 
 		public TrueThirdPersonBehaviour(Entity entity) : base(entity)
 		{
+			if (clientApi == null) return;
+
+			// TODO: fix api injection
 			harmonyInstance = new("Vintagestory.Client.NoObf");
+#if DEBUG
+			lineGizmo = new(clientApi, 1000);
+#endif
 
 			// Apply all harmony patches
 			harmonyInstance.CreateClassProcessor(typeof(Camera_Update_Patch)).Patch();
@@ -1095,15 +1145,6 @@ namespace Apprentice.Weapon
 			DebugWidgets.Float3Drag("TrueThirdPerson", "Camera", "cameraRootPosition", () => { return cameraRootPosition; }, (v) => { cameraRootPosition = v; });
 			DebugWidgets.Float3Drag("TrueThirdPerson", "Camera", "cameraRootRotation", () => { return cameraRootRotation; }, (v) => { cameraRootRotation = v; });
 #endif
-
-			// transform.HeadPitch = 45.0F;
-			// transform.HeadYaw = 0.0F;
-
-			// clientApi.World.Player.CameraRoll = 45.0F;
-			// clientApi.World.Player.camera
-
-			// clientApi.Render.CurrentModelviewMatrix
-			// clientApi.Render.CameraOffset.ScaleXYZ.X = 10.0F;
 		}
 	}
 }
