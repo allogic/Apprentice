@@ -581,9 +581,27 @@ namespace Apprentice
         {
             EntityPlayer player = behavior.Player;
             if (activeStates.ContainsKey(player.EntityId) ||
-                !behavior.IsReadyForRest(now) ||
                 !player.Alive ||
                 !TryGetHeldWarScythe(player, out _))
+            {
+                return;
+            }
+
+            bool local = IsLocalPlayer(player);
+            bool firstPersonView = local &&
+                api.World.Player?.CameraMode ==
+                    EnumCameraMode.FirstPerson;
+            if (behavior.IsFirstPerson != firstPersonView)
+            {
+                return;
+            }
+
+            if (behavior.IsRest)
+            {
+                behavior.EnsureNativeRest();
+                return;
+            }
+            if (!behavior.IsReadyForRest(now))
             {
                 return;
             }
@@ -743,11 +761,36 @@ namespace Apprentice
         private sealed class WarScythePoseBehavior
         {
             private const int CompleteCaptureMask = 0b11_1111;
+            private const int RestCaptureFrameCount = 2;
+            private const int NativeRestHandoffFrameCount = 3;
+
+            private static readonly float[] UpperTorsoXCurve =
+            {
+                -2.5f, -4.5f, -6.5f, -5f, -4.5f, -2.5f
+            };
+            private static readonly float[] UpperTorsoYCurve =
+            {
+                -5f, -10f, -6.5f, 2.5f, 13f, 6.5f
+            };
+            private static readonly float[] UpperTorsoZCurve =
+            {
+                2.5f, 4.5f, 5f, 4.5f, 4f, 2.5f
+            };
+            private static readonly float[] LowerTorsoYCurve =
+            {
+                -13f, -23f, -16f, 6.5f, 28f, 13f
+            };
+            private static readonly float[] LowerTorsoZCurve =
+            {
+                5f, 6.5f, 6.5f, 6.5f, 6.5f, 5f
+            };
 
             private readonly ICoreClientAPI api;
             private readonly bool firstPerson;
             private readonly ApprenticeAnimationDefinition definition;
             private readonly Composer composer;
+            private readonly Apprentice.AnimationReference.Animation
+                swingAnimation;
             private readonly PlayerItemFrame readyFrame;
             private readonly Apprentice.AnimationReference.Animation
                 readyIdleAnimation;
@@ -765,6 +808,8 @@ namespace Apprentice
             private int captureMask;
             private int activeItemId;
             private long readySinceMs;
+            private int restCaptureFramesRemaining;
+            private int nativeRestHandoffFramesRemaining;
             private bool restRequested;
             private bool missingBasePoseLogged;
 
@@ -783,7 +828,10 @@ namespace Apprentice
                     particleEffectsManager: null,
                     player: player
                 );
-                readyFrame = definition.Animation.StillFrame(0);
+                swingAnimation = CreateBodyWeightedSwingAnimation(
+                    definition.Animation
+                );
+                readyFrame = swingAnimation.StillFrame(0);
                 readyIdleAnimation = CreateReadyIdleAnimation(
                     readyFrame
                 );
@@ -792,10 +840,17 @@ namespace Apprentice
             public EntityPlayer Player { get; }
             public PlayerItemFrame? FrameOverride { get; set; }
             public string StateName => state.ToString();
+            public bool IsFirstPerson => firstPerson;
+            public bool IsRest =>
+                state == WarScythePoseState.Rest;
             private string NativeRestAnimation =>
                 firstPerson
                     ? "scytheIdle-fp"
                     : "scytheIdle";
+            private string OtherNativeRestAnimation =>
+                firstPerson
+                    ? "scytheIdle"
+                    : "scytheIdle-fp";
 
             public void PlayAttack(
                 int itemId,
@@ -803,6 +858,8 @@ namespace Apprentice
             {
                 activeItemId = itemId;
                 readySinceMs = 0;
+                restCaptureFramesRemaining = 0;
+                nativeRestHandoffFramesRemaining = 0;
                 restRequested = false;
                 swingCallbackHandler = callbackHandler;
                 Player.StopAnimation(NativeRestAnimation);
@@ -817,7 +874,7 @@ namespace Apprentice
                     ResolveTransitionStart();
                 state = WarScythePoseState.ToReadyBeforeSwing;
                 composer.Play(CreateRequest(
-                    CreateTransition(
+                    CreateDrawTransition(
                         start,
                         readyFrame,
                         TimeSpan.FromSeconds(
@@ -848,15 +905,40 @@ namespace Apprentice
                     !restRequested)
                 {
                     restRequested = true;
+                    restCaptureFramesRemaining =
+                        RestCaptureFrameCount;
+                    Player.StopAnimation(
+                        OtherNativeRestAnimation
+                    );
                     Player.AnimManager.StartAnimation(
                         NativeRestAnimation
                     );
                 }
             }
 
+            public void EnsureNativeRest()
+            {
+                if (Player.AnimManager.IsAnimationActive(
+                        NativeRestAnimation))
+                {
+                    return;
+                }
+
+                Player.StopAnimation(OtherNativeRestAnimation);
+                Player.AnimManager.StartAnimation(
+                    NativeRestAnimation
+                );
+            }
+
             public void BeginBasePoseCapture()
             {
                 captureMask = 0;
+                if (restRequested &&
+                    state == WarScythePoseState.ReadyIdle &&
+                    restCaptureFramesRemaining > 0)
+                {
+                    restCaptureFramesRemaining--;
+                }
             }
 
             public void Stop(string category)
@@ -866,6 +948,8 @@ namespace Apprentice
                 currentFrame = PlayerItemFrame.Empty;
                 swingCallbackHandler = null;
                 readySinceMs = 0;
+                restCaptureFramesRemaining = 0;
+                nativeRestHandoffFramesRemaining = 0;
                 restRequested = false;
                 state = WarScythePoseState.Rest;
             }
@@ -878,6 +962,8 @@ namespace Apprentice
                 FrameOverride = null;
                 swingCallbackHandler = null;
                 readySinceMs = 0;
+                restCaptureFramesRemaining = 0;
+                nativeRestHandoffFramesRemaining = 0;
                 restRequested = false;
                 state = WarScythePoseState.Rest;
             }
@@ -903,6 +989,19 @@ namespace Apprentice
                         Math.Max(0, deltaTime)
                     )
                 );
+                if (state ==
+                        WarScythePoseState.NativeRestHandoff &&
+                    nativeRestHandoffFramesRemaining > 0)
+                {
+                    nativeRestHandoffFramesRemaining--;
+                    if (nativeRestHandoffFramesRemaining == 0)
+                    {
+                        composer.Stop(definition.Category);
+                        currentFrame = PlayerItemFrame.Empty;
+                        activeItemId = 0;
+                        state = WarScythePoseState.Rest;
+                    }
+                }
                 if (!composer.AnyActiveAnimations())
                 {
                     activeItemId = 0;
@@ -942,13 +1041,16 @@ namespace Apprentice
                     EnumAnimatedElement.UpperArmR or
                     EnumAnimatedElement.LowerArmR or
                     EnumAnimatedElement.UpperArmL or
-                    EnumAnimatedElement.LowerArmL;
+                    EnumAnimatedElement.LowerArmL or
+                    EnumAnimatedElement.UpperTorso or
+                    EnumAnimatedElement.LowerTorso;
                 if (!controlled) return false;
 
                 CaptureBasePose(element, pose);
                 if (captureMask == CompleteCaptureMask &&
                     restRequested &&
-                    state == WarScythePoseState.ReadyIdle)
+                    state == WarScythePoseState.ReadyIdle &&
+                    restCaptureFramesRemaining == 0)
                 {
                     QueueReturnToRest(BuildCapturedBaseFrame());
                 }
@@ -965,6 +1067,21 @@ namespace Apprentice
                     (float)Player.LocalEyePos.Y,
                     (float)Player.LocalEyePos.Z
                 );
+                if (element == EnumAnimatedElement.UpperTorso)
+                {
+                    return ApplyAdditive(
+                        selected.Value.Player.UpperTorso,
+                        pose
+                    );
+                }
+                if (element == EnumAnimatedElement.LowerTorso)
+                {
+                    return ApplyAdditive(
+                        selected.Value.Player.LowerTorso,
+                        pose
+                    );
+                }
+
                 selected.Value.Apply(
                     pose,
                     element,
@@ -1011,7 +1128,7 @@ namespace Apprentice
             {
                 state = WarScythePoseState.Swing;
                 composer.Play(CreateRequest(
-                    definition.Animation,
+                    swingAnimation,
                     finishCallback: BeginReturnToReady,
                     callbackHandler: swingCallbackHandler
                 ));
@@ -1022,7 +1139,7 @@ namespace Apprentice
                 state = WarScythePoseState.ToReadyAfterSwing;
                 composer.Play(CreateRequest(
                     CreateTransition(
-                        definition.Animation.StillFrame(1),
+                        swingAnimation.StillFrame(1),
                         readyFrame,
                         TimeSpan.FromSeconds(
                             definition.EaseOutSeconds
@@ -1050,8 +1167,7 @@ namespace Apprentice
 
             private bool RepeatReadyIdle()
             {
-                if (state != WarScythePoseState.ReadyIdle ||
-                    restRequested)
+                if (state != WarScythePoseState.ReadyIdle)
                 {
                     return false;
                 }
@@ -1067,7 +1183,9 @@ namespace Apprentice
             private void QueueReturnToRest(
                 PlayerItemFrame restFrame)
             {
+                Player.StopAnimation(NativeRestAnimation);
                 restRequested = false;
+                restCaptureFramesRemaining = 0;
                 readySinceMs = 0;
                 state = WarScythePoseState.ToRest;
                 PlayerItemFrame transitionStart =
@@ -1075,7 +1193,7 @@ namespace Apprentice
                         ? currentFrame
                         : readyFrame;
                 composer.Play(CreateRequest(
-                    CreateTransition(
+                    CreateReturnToRestTransition(
                         transitionStart,
                         restFrame,
                         TimeSpan.FromSeconds(
@@ -1089,10 +1207,18 @@ namespace Apprentice
 
             private bool FinishReturnToRest()
             {
-                state = WarScythePoseState.Rest;
+                state = WarScythePoseState.NativeRestHandoff;
                 swingCallbackHandler = null;
                 readySinceMs = 0;
-                return false;
+                nativeRestHandoffFramesRemaining =
+                    NativeRestHandoffFrameCount;
+                Player.StopAnimation(
+                    OtherNativeRestAnimation
+                );
+                Player.AnimManager.StartAnimation(
+                    NativeRestAnimation
+                );
+                return true;
             }
 
             private AnimationRequest CreateRequest(
@@ -1117,16 +1243,19 @@ namespace Apprentice
                     PlayerItemFrame to,
                     TimeSpan duration)
             {
-                TimeSpan safeDuration = duration >
-                    TimeSpan.FromMilliseconds(1)
-                        ? duration
-                        : TimeSpan.FromMilliseconds(1);
+                TimeSpan safeDuration = SafeDuration(duration);
+                PlayerFrame target =
+                    InterpolatePlayerFrameShortest(
+                        from.Player,
+                        to.Player,
+                        1f
+                    );
                 TimeSpan midpointTime =
                     TimeSpan.FromTicks(safeDuration.Ticks / 2);
                 PlayerFrame midpoint =
-                    PlayerFrame.Interpolate(
+                    InterpolatePlayerFrameShortest(
                         from.Player,
-                        to.Player,
+                        target,
                         0.5f
                     );
                 return new Apprentice.AnimationReference.Animation(
@@ -1140,15 +1269,210 @@ namespace Apprentice
                         new PLayerKeyFrame(
                             midpoint,
                             midpointTime,
-                            EasingFunctionType.EaseInSine
+                            EasingFunctionType.EaseInOutSine
                         ),
                         new PLayerKeyFrame(
-                            to.Player,
+                            target,
                             safeDuration,
-                            EasingFunctionType.EaseOutSine
+                            EasingFunctionType.EaseInOutSine
                         )
                     }
                 );
+            }
+
+            private static Apprentice.AnimationReference.Animation
+                CreateDrawTransition(
+                    PlayerItemFrame from,
+                    PlayerItemFrame to,
+                    TimeSpan duration)
+            {
+                TimeSpan safeDuration = SafeDuration(duration);
+                PlayerFrame target =
+                    InterpolatePlayerFrameShortest(
+                        from.Player,
+                        to.Player,
+                        1f
+                    );
+                PlayerFrame firstClearance =
+                    CreateShoulderSeatedFrame(
+                        from.Player,
+                        target,
+                        pathProgress: 0.24f,
+                        socketProgress: 0.10f
+                    );
+                firstClearance = OffsetBodyRotation(
+                    firstClearance,
+                    upperY: -2f,
+                    upperZ: 1f,
+                    lowerY: -4f,
+                    lowerZ: 1f
+                );
+                PlayerFrame secondClearance =
+                    CreateShoulderSeatedFrame(
+                        from.Player,
+                        target,
+                        pathProgress: 0.72f,
+                        socketProgress: 0.55f
+                    );
+                secondClearance = OffsetBodyRotation(
+                    secondClearance,
+                    upperY: -1f,
+                    upperZ: 0.5f,
+                    lowerY: -2f,
+                    lowerZ: 0.5f
+                );
+
+                return new Apprentice.AnimationReference.Animation(
+                    new[]
+                    {
+                        new PLayerKeyFrame(
+                            from.Player,
+                            TimeSpan.Zero,
+                            EasingFunctionType.Linear
+                        ),
+                        new PLayerKeyFrame(
+                            firstClearance,
+                            AtFraction(safeDuration, 0.32f),
+                            EasingFunctionType.EaseInOutSine
+                        ),
+                        new PLayerKeyFrame(
+                            secondClearance,
+                            AtFraction(safeDuration, 0.68f),
+                            EasingFunctionType.EaseInOutSine
+                        ),
+                        new PLayerKeyFrame(
+                            target,
+                            safeDuration,
+                            EasingFunctionType.EaseInOutSine
+                        )
+                    }
+                );
+            }
+
+            private static Apprentice.AnimationReference.Animation
+                CreateReturnToRestTransition(
+                    PlayerItemFrame from,
+                    PlayerItemFrame to,
+                    TimeSpan duration)
+            {
+                TimeSpan safeDuration = SafeDuration(duration);
+                PlayerFrame target =
+                    InterpolatePlayerFrameShortest(
+                        from.Player,
+                        to.Player,
+                        1f
+                    );
+                PlayerFrame firstSocketFrame =
+                    CreateShoulderSeatedFrame(
+                        from.Player,
+                        target,
+                        pathProgress: 0.26f,
+                        socketProgress: 0.55f
+                    );
+                PlayerFrame secondSocketFrame =
+                    CreateShoulderSeatedFrame(
+                        from.Player,
+                        target,
+                        pathProgress: 0.76f,
+                        socketProgress: 0.92f
+                    );
+
+                return new Apprentice.AnimationReference.Animation(
+                    new[]
+                    {
+                        new PLayerKeyFrame(
+                            from.Player,
+                            TimeSpan.Zero,
+                            EasingFunctionType.Linear
+                        ),
+                        new PLayerKeyFrame(
+                            firstSocketFrame,
+                            AtFraction(safeDuration, 0.32f),
+                            EasingFunctionType.EaseInOutSine
+                        ),
+                        new PLayerKeyFrame(
+                            secondSocketFrame,
+                            AtFraction(safeDuration, 0.72f),
+                            EasingFunctionType.EaseInOutSine
+                        ),
+                        new PLayerKeyFrame(
+                            target,
+                            safeDuration,
+                            EasingFunctionType.EaseInOutSine
+                        )
+                    }
+                );
+            }
+
+            private static Apprentice.AnimationReference.Animation
+                CreateBodyWeightedSwingAnimation(
+                    Apprentice.AnimationReference.Animation source)
+            {
+                PLayerKeyFrame[] frames = source.PlayerKeyFrames
+                    .Select((frame, index) =>
+                    {
+                        float phase = source.PlayerKeyFrames.Count <= 1
+                            ? 0
+                            : (float)index /
+                                (source.PlayerKeyFrames.Count - 1);
+                        AnimationElement upper = new(
+                            0,
+                            0,
+                            0,
+                            SampleCurve(
+                                phase,
+                                UpperTorsoXCurve
+                            ),
+                            SampleCurve(
+                                phase,
+                                UpperTorsoYCurve
+                            ),
+                            SampleCurve(
+                                phase,
+                                UpperTorsoZCurve
+                            )
+                        );
+                        AnimationElement lower = new(
+                            0,
+                            0,
+                            0,
+                            0,
+                            SampleCurve(
+                                phase,
+                                LowerTorsoYCurve
+                            ),
+                            SampleCurve(
+                                phase,
+                                LowerTorsoZCurve
+                            )
+                        );
+                        return new PLayerKeyFrame(
+                            WithBodyPose(
+                                frame.Frame,
+                                upper,
+                                lower
+                            ),
+                            frame.Time,
+                            frame.EasingFunction,
+                            frame.EasingType,
+                            frame.FrameProgressRange
+                        );
+                    })
+                    .ToArray();
+
+                return new Apprentice.AnimationReference.Animation(
+                    frames,
+                    source.ItemKeyFrames,
+                    source.SoundFrames,
+                    source.ParticlesFrames,
+                    source.CallbackFrames
+                )
+                {
+                    Hold = source.Hold,
+                    ItemAnimationStart =
+                        source.ItemAnimationStart,
+                    ItemAnimationEnd = source.ItemAnimationEnd
+                };
             }
 
             private static Apprentice.AnimationReference.Animation
@@ -1195,30 +1519,35 @@ namespace Apprentice
                     rightHand: new RightHandFrame(
                         OffsetRotation(
                             right.ItemAnchor,
-                            rotationZ: 0.5f
+                            rotationZ: 1.15f
                         ),
                         OffsetRotation(
                             right.LowerArmR,
-                            rotationX: 0.4f
+                            rotationX: 0.75f
                         ),
                         OffsetRotation(
                             right.UpperArmR,
-                            rotationX: 0.8f
+                            rotationX: 1.35f
                         )
                     ),
                     leftHand: new LeftHandFrame(
                         left.ItemAnchorL,
                         OffsetRotation(
                             left.LowerArmL,
-                            rotationX: 0.4f
+                            rotationX: 0.75f
                         ),
                         OffsetRotation(
                             left.UpperArmL,
-                            rotationX: 0.8f
+                            rotationX: 1.35f
                         )
                     ),
                     otherParts: source.OtherParts,
-                    upperTorso: source.UpperTorso,
+                    upperTorso: OffsetRotation(
+                        source.UpperTorso ??
+                            AnimationElement.Zero,
+                        rotationX: 1.05f,
+                        rotationZ: 0.6f
+                    ),
                     detachedAnchorFrame:
                         source.DetachedAnchorFrame,
                     detachedAnchor: source.DetachedAnchor,
@@ -1228,10 +1557,339 @@ namespace Apprentice
                     bobbingAmplitude: source.BobbingAmplitude,
                     detachedAnchorFollow:
                         source.DetachedAnchorFollow,
-                    lowerTorso: source.LowerTorso
+                    lowerTorso: OffsetRotation(
+                        source.LowerTorso ??
+                            AnimationElement.Zero,
+                        rotationY: 1.1f,
+                        rotationZ: 0.3f
+                    )
                 );
                 return new PlayerItemFrame(player, ready.Item);
             }
+
+            private static PlayerFrame CreateShoulderSeatedFrame(
+                PlayerFrame from,
+                PlayerFrame to,
+                float pathProgress,
+                float socketProgress)
+            {
+                PlayerFrame result =
+                    InterpolatePlayerFrameShortest(
+                        from,
+                        to,
+                        pathProgress
+                    );
+                RightHandFrame? right = result.RightHand;
+                if (from.RightHand.HasValue &&
+                    to.RightHand.HasValue &&
+                    right.HasValue)
+                {
+                    RightHandFrame current = right.Value;
+                    right = new RightHandFrame(
+                        current.ItemAnchor,
+                        current.LowerArmR,
+                        InterpolateElementShortest(
+                            from.RightHand.Value.UpperArmR,
+                            to.RightHand.Value.UpperArmR,
+                            socketProgress,
+                            pathProgress
+                        )
+                    );
+                }
+
+                LeftHandFrame? left = result.LeftHand;
+                if (from.LeftHand.HasValue &&
+                    to.LeftHand.HasValue &&
+                    left.HasValue)
+                {
+                    LeftHandFrame current = left.Value;
+                    left = new LeftHandFrame(
+                        current.ItemAnchorL,
+                        current.LowerArmL,
+                        InterpolateElementShortest(
+                            from.LeftHand.Value.UpperArmL,
+                            to.LeftHand.Value.UpperArmL,
+                            socketProgress,
+                            pathProgress
+                        )
+                    );
+                }
+
+                return CopyPlayerFrame(
+                    result,
+                    right,
+                    left,
+                    result.UpperTorso,
+                    result.LowerTorso
+                );
+            }
+
+            private static PlayerFrame
+                InterpolatePlayerFrameShortest(
+                    PlayerFrame from,
+                    PlayerFrame to,
+                    float progress)
+            {
+                float amount = Math.Clamp(progress, 0, 1);
+                PlayerFrame result =
+                    PlayerFrame.Interpolate(from, to, amount);
+
+                RightHandFrame? right = result.RightHand;
+                if (from.RightHand.HasValue &&
+                    to.RightHand.HasValue)
+                {
+                    right = new RightHandFrame(
+                        InterpolateElementShortest(
+                            from.RightHand.Value.ItemAnchor,
+                            to.RightHand.Value.ItemAnchor,
+                            amount,
+                            amount
+                        ),
+                        InterpolateElementShortest(
+                            from.RightHand.Value.LowerArmR,
+                            to.RightHand.Value.LowerArmR,
+                            amount,
+                            amount
+                        ),
+                        InterpolateElementShortest(
+                            from.RightHand.Value.UpperArmR,
+                            to.RightHand.Value.UpperArmR,
+                            amount,
+                            amount
+                        )
+                    );
+                }
+
+                LeftHandFrame? left = result.LeftHand;
+                if (from.LeftHand.HasValue &&
+                    to.LeftHand.HasValue)
+                {
+                    left = new LeftHandFrame(
+                        InterpolateElementShortest(
+                            from.LeftHand.Value.ItemAnchorL,
+                            to.LeftHand.Value.ItemAnchorL,
+                            amount,
+                            amount
+                        ),
+                        InterpolateElementShortest(
+                            from.LeftHand.Value.LowerArmL,
+                            to.LeftHand.Value.LowerArmL,
+                            amount,
+                            amount
+                        ),
+                        InterpolateElementShortest(
+                            from.LeftHand.Value.UpperArmL,
+                            to.LeftHand.Value.UpperArmL,
+                            amount,
+                            amount
+                        )
+                    );
+                }
+
+                AnimationElement? upper =
+                    InterpolateOptionalElementShortest(
+                        from.UpperTorso,
+                        to.UpperTorso,
+                        amount
+                    );
+                AnimationElement? lower =
+                    InterpolateOptionalElementShortest(
+                        from.LowerTorso,
+                        to.LowerTorso,
+                        amount
+                    );
+                return CopyPlayerFrame(
+                    result,
+                    right,
+                    left,
+                    upper,
+                    lower
+                );
+            }
+
+            private static AnimationElement
+                InterpolateElementShortest(
+                    AnimationElement from,
+                    AnimationElement to,
+                    float translationProgress,
+                    float rotationProgress) =>
+                new(
+                    InterpolateValue(
+                        from.OffsetX,
+                        to.OffsetX,
+                        translationProgress
+                    ),
+                    InterpolateValue(
+                        from.OffsetY,
+                        to.OffsetY,
+                        translationProgress
+                    ),
+                    InterpolateValue(
+                        from.OffsetZ,
+                        to.OffsetZ,
+                        translationProgress
+                    ),
+                    InterpolateAngle(
+                        from.RotationX,
+                        to.RotationX,
+                        rotationProgress
+                    ),
+                    InterpolateAngle(
+                        from.RotationY,
+                        to.RotationY,
+                        rotationProgress
+                    ),
+                    InterpolateAngle(
+                        from.RotationZ,
+                        to.RotationZ,
+                        rotationProgress
+                    )
+                );
+
+            private static AnimationElement?
+                InterpolateOptionalElementShortest(
+                    AnimationElement? from,
+                    AnimationElement? to,
+                    float progress)
+            {
+                if (!from.HasValue && !to.HasValue)
+                {
+                    return null;
+                }
+                return InterpolateElementShortest(
+                    from ?? AnimationElement.Zero,
+                    to ?? AnimationElement.Zero,
+                    progress,
+                    progress
+                );
+            }
+
+            private static float? InterpolateValue(
+                float? from,
+                float? to,
+                float progress)
+            {
+                if (!from.HasValue && !to.HasValue)
+                {
+                    return null;
+                }
+                float amount = Math.Clamp(progress, 0, 1);
+                float start = from.GetValueOrDefault();
+                return start +
+                    (to.GetValueOrDefault() - start) * amount;
+            }
+
+            private static float? InterpolateAngle(
+                float? from,
+                float? to,
+                float progress)
+            {
+                if (!from.HasValue && !to.HasValue)
+                {
+                    return null;
+                }
+                float start = from.GetValueOrDefault();
+                float end = to.GetValueOrDefault();
+                float delta =
+                    (end - start + 180f) % 360f;
+                if (delta < 0) delta += 360f;
+                delta -= 180f;
+                return start +
+                    delta * Math.Clamp(progress, 0, 1);
+            }
+
+            private static PlayerFrame OffsetBodyRotation(
+                PlayerFrame source,
+                float upperY,
+                float upperZ,
+                float lowerY,
+                float lowerZ) =>
+                CopyPlayerFrame(
+                    source,
+                    source.RightHand,
+                    source.LeftHand,
+                    OffsetRotation(
+                        source.UpperTorso ??
+                            AnimationElement.Zero,
+                        rotationY: upperY,
+                        rotationZ: upperZ
+                    ),
+                    OffsetRotation(
+                        source.LowerTorso ??
+                            AnimationElement.Zero,
+                        rotationY: lowerY,
+                        rotationZ: lowerZ
+                    )
+                );
+
+            private static PlayerFrame WithBodyPose(
+                PlayerFrame source,
+                AnimationElement upper,
+                AnimationElement lower) =>
+                CopyPlayerFrame(
+                    source,
+                    source.RightHand,
+                    source.LeftHand,
+                    upper,
+                    lower
+                );
+
+            private static PlayerFrame CopyPlayerFrame(
+                PlayerFrame source,
+                RightHandFrame? right,
+                LeftHandFrame? left,
+                AnimationElement? upper,
+                AnimationElement? lower) =>
+                new(
+                    rightHand: right,
+                    leftHand: left,
+                    otherParts: source.OtherParts,
+                    upperTorso: upper,
+                    detachedAnchorFrame:
+                        source.DetachedAnchorFrame,
+                    detachedAnchor: source.DetachedAnchor,
+                    switchArms: source.SwitchArms,
+                    pitchFollow: source.PitchFollow,
+                    fovMultiplier: source.FovMultiplier,
+                    bobbingAmplitude: source.BobbingAmplitude,
+                    detachedAnchorFollow:
+                        source.DetachedAnchorFollow,
+                    lowerTorso: lower
+                );
+
+            private static float SampleCurve(
+                float progress,
+                IReadOnlyList<float> values)
+            {
+                if (values.Count == 0) return 0;
+                if (values.Count == 1) return values[0];
+
+                float position = Math.Clamp(progress, 0, 1) *
+                    (values.Count - 1);
+                int startIndex = (int)Math.Floor(position);
+                int endIndex = Math.Min(
+                    values.Count - 1,
+                    startIndex + 1
+                );
+                float amount = position - startIndex;
+                return values[startIndex] +
+                    (values[endIndex] - values[startIndex]) *
+                    amount;
+            }
+
+            private static TimeSpan SafeDuration(
+                TimeSpan duration) =>
+                duration > TimeSpan.FromMilliseconds(1)
+                    ? duration
+                    : TimeSpan.FromMilliseconds(1);
+
+            private static TimeSpan AtFraction(
+                TimeSpan duration,
+                float fraction) =>
+                TimeSpan.FromTicks(
+                    (long)(duration.Ticks *
+                        Math.Clamp(fraction, 0, 1))
+                );
 
             private static AnimationElement OffsetRotation(
                 AnimationElement element,
@@ -1253,6 +1911,28 @@ namespace Apprentice
                 value.HasValue || offset != 0
                     ? value.GetValueOrDefault() + offset
                     : null;
+
+            private static bool ApplyAdditive(
+                AnimationElement? element,
+                ElementPose pose)
+            {
+                if (!element.HasValue)
+                {
+                    return false;
+                }
+
+                AnimationElement value = element.Value;
+                pose.translateX +=
+                    value.OffsetX.GetValueOrDefault() / 16f;
+                pose.translateY +=
+                    value.OffsetY.GetValueOrDefault() / 16f;
+                pose.translateZ +=
+                    value.OffsetZ.GetValueOrDefault() / 16f;
+                pose.degX += value.RotationX.GetValueOrDefault();
+                pose.degY += value.RotationY.GetValueOrDefault();
+                pose.degZ += value.RotationZ.GetValueOrDefault();
+                return true;
+            }
 
             private void CaptureBasePose(
                 EnumAnimatedElement element,
@@ -1307,7 +1987,9 @@ namespace Apprentice
                             capturedItemAnchorL,
                             capturedLowerArmL,
                             capturedUpperArmL
-                        )
+                        ),
+                        upperTorso: AnimationElement.Zero,
+                        lowerTorso: AnimationElement.Zero
                     ),
                     item: null
                 );
@@ -1324,7 +2006,8 @@ namespace Apprentice
                 Swing,
                 ToReadyAfterSwing,
                 ReadyIdle,
-                ToRest
+                ToRest,
+                NativeRestHandoff
             }
         }
     }
