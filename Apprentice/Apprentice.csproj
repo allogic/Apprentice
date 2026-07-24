@@ -78,6 +78,7 @@
   <Compile Remove="src\animation\WarScytheOffhandIkSolver.cs" />
 </ItemGroup>
 <ItemGroup>
+  <PackageReference Include="VSImGui" Version="0.0.6" ExcludeAssets="runtime" />
   <PackageReference Include="VSImGui_DebugTools" Version="0.0.6" />
 </ItemGroup>
 

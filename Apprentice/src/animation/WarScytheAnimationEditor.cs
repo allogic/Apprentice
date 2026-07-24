@@ -15,6 +15,8 @@ using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
 using Vintagestory.API.Config;
 
+using Apprentice.ClientTools;
+
 namespace Apprentice
 {
     internal sealed class WarScytheAnimationEditor : IDisposable
@@ -46,7 +48,7 @@ namespace Apprentice
         private readonly string exportPath;
 
         private ApprenticeAnimationDefinition workingDefinition;
-        private WarScytheAnimationEditorDialog? dialog;
+        private WarScytheImGuiEditorWindow? window;
         private WarScytheGeometryTrace playbackTrace;
         private WarScytheGeometrySample latestGeometry;
         private string copiedFrame = string.Empty;
@@ -146,19 +148,16 @@ namespace Apprentice
             ControlledElements[selectedElementIndex];
         public ApprenticeAnimationDefinition WorkingDefinition =>
             workingDefinition;
+        public string WorkingPath => workingPath;
         public string ExportPath => exportPath;
 
         public bool ToggleDialog()
         {
             if (disposed) return false;
-            dialog ??= new WarScytheAnimationEditorDialog(
-                api,
-                this
-            );
 
-            if (dialog.IsOpened())
+            if (window?.IsOpen == true)
             {
-                dialog.TryClose();
+                window.Close();
                 return true;
             }
             if (!HasHeldWarScythe())
@@ -171,7 +170,25 @@ namespace Apprentice
                 return false;
             }
 
-            return dialog.TryOpen();
+            try
+            {
+                window ??= new WarScytheImGuiEditorWindow(
+                    api,
+                    this
+                );
+                return window.TryOpen();
+            }
+            catch (Exception exception)
+            {
+                ReportUiFailure(
+                    "Open VSImGui editor",
+                    exception
+                );
+                api.ShowChatMessage(
+                    "[Apprentice] The War Scythe editor requires the vsimgui 1.2.7 mod."
+                );
+                return false;
+            }
         }
 
         public void ActivatePreview()
@@ -212,7 +229,7 @@ namespace Apprentice
             {
                 statusMessage =
                     "Preview stopped because the War Scythe is no longer held.";
-                dialog?.TryClose();
+                window?.Close();
                 return;
             }
 
@@ -621,10 +638,7 @@ namespace Apprentice
 
         public void SaveWorking()
         {
-            WriteDefinition(
-                workingPath,
-                requireReadyPoseLoop: false
-            );
+            WriteDefinition(workingPath);
             statusMessage =
                 "Working reference JSON saved and copied to the clipboard.";
         }
@@ -637,12 +651,9 @@ namespace Apprentice
                 return;
             }
 
-            WriteDefinition(
-                exportPath,
-                requireReadyPoseLoop: true
-            );
+            WriteDefinition(exportPath);
             statusMessage =
-                "Accepted reference JSON exported to file and clipboard.";
+                "Accepted non-looping swing JSON exported to file and clipboard. Frame 1 is Ready; the distinct final frame is preserved.";
             api.Logger.Notification(
                 "[Apprentice] WARSCYTHE REFERENCE EDITOR EXPORT path={0}; elements={1}; playback=[{2}]",
                 exportPath,
@@ -775,9 +786,8 @@ namespace Apprentice
             playing = false;
             history.CancelPendingEdit();
             animationSystem.SetEditorFrameOverride(null);
-            dialog?.TryClose();
-            dialog?.Dispose();
-            dialog = null;
+            window?.Dispose();
+            window = null;
             markerRenderer.Dispose();
             editableAnimations.Clear();
             reachedElements.Clear();
@@ -833,15 +843,6 @@ namespace Apprentice
 
         private bool CanExport(out string reason)
         {
-            if (!workingDefinition.HasExactReadyPoseLoop(
-                    out string differingElement))
-            {
-                reason =
-                    "keyframe 1 and the final keyframe differ for " +
-                    differingElement;
-                return false;
-            }
-
             string[] missing = ControlledElements.Where(element =>
                 !reachedElements.Contains(element))
                 .ToArray();
@@ -947,32 +948,16 @@ namespace Apprentice
         private WarScytheGeometryTrace NewTrace() =>
             new(geometryProbe.Acceptance);
 
-        private void WriteDefinition(
-            string path,
-            bool requireReadyPoseLoop)
+        private void WriteDefinition(string path)
         {
             string json = workingDefinition.ToJson();
-            if (requireReadyPoseLoop)
-            {
-                _ = ApprenticeAnimationDefinition.ParseWarScythe(
-                    json,
-                    new AssetLocation(
-                        "apprentice",
-                        "editor/accepted-write-validation.json"
-                    )
-                );
-            }
-            else
-            {
-                _ = ApprenticeAnimationDefinition
-                    .ParseWarScytheDraft(
-                        json,
-                        new AssetLocation(
-                            "apprentice",
-                            "editor/working-write-validation.json"
-                        )
-                    );
-            }
+            _ = ApprenticeAnimationDefinition.ParseWarScythe(
+                json,
+                new AssetLocation(
+                    "apprentice",
+                    "editor/write-validation.json"
+                )
+            );
 
             Directory.CreateDirectory(
                 Path.GetDirectoryName(path) ??

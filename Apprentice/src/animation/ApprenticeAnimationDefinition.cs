@@ -21,8 +21,10 @@ namespace Apprentice
             "apprentice-mainhand";
         public const string ItemCode =
             "apprentice:warscythe";
-        public const float EaseInSecondsValue = 0.12f;
-        public const float EaseOutSecondsValue = 0.18f;
+        public const float EaseInSecondsValue = 0.40f;
+        public const float EaseOutSecondsValue = 0.30f;
+        public const float ReadyToRestSecondsValue = 0.40f;
+        public const float ReadyIdleDelaySecondsValue = 2.75f;
 
         private static readonly string[] RequiredElements =
         {
@@ -56,6 +58,10 @@ namespace Apprentice
         public string HeldItemCode => ItemCode;
         public float EaseInSeconds => EaseInSecondsValue;
         public float EaseOutSeconds => EaseOutSecondsValue;
+        public float ReadyToRestSeconds =>
+            ReadyToRestSecondsValue;
+        public float ReadyIdleDelaySeconds =>
+            ReadyIdleDelaySecondsValue;
         public float DurationSeconds =>
             (float)Animation.TotalDuration.TotalSeconds;
         public float TotalActionSeconds =>
@@ -101,12 +107,12 @@ namespace Apprentice
         internal static ApprenticeAnimationDefinition ParseWarScythe(
             string json,
             AssetLocation location) =>
-            Parse(json, location, requireReadyPoseLoop: true);
+            Parse(json, location);
 
         internal static ApprenticeAnimationDefinition ParseWarScytheDraft(
             string json,
             AssetLocation location) =>
-            Parse(json, location, requireReadyPoseLoop: false);
+            Parse(json, location);
 
         internal void ReplaceAnimation(Animation animation)
         {
@@ -129,42 +135,9 @@ namespace Apprentice
             }
         }
 
-        internal bool HasExactReadyPoseLoop(
-            out string differingElement)
-        {
-            int last = Animation.PlayerKeyFrames.Count - 1;
-            foreach (string elementName in RequiredElements)
-            {
-                AnimationElement first =
-                    ReferenceAnimationEditing.GetElement(
-                        Animation,
-                        0,
-                        elementName
-                    );
-                AnimationElement final =
-                    ReferenceAnimationEditing.GetElement(
-                        Animation,
-                        last,
-                        elementName
-                    );
-                if (!ReferenceAnimationEditing.NearlyEquals(
-                    first,
-                    final,
-                    0.0001f))
-                {
-                    differingElement = elementName;
-                    return false;
-                }
-            }
-
-            differingElement = string.Empty;
-            return true;
-        }
-
         private static ApprenticeAnimationDefinition Parse(
             string json,
-            AssetLocation location,
-            bool requireReadyPoseLoop)
+            AssetLocation location)
         {
             JObject root;
             try
@@ -216,19 +189,10 @@ namespace Apprentice
                             (float)animation.TotalDuration.TotalSeconds
                     ))
                     .ToArray();
-            ApprenticeAnimationDefinition result =
-                new(animation, callbacks);
-
-            if (requireReadyPoseLoop &&
-                !result.HasExactReadyPoseLoop(
-                    out string differingElement))
-            {
-                throw new InvalidOperationException(
-                    $"{location} must finish in the exact '{differingElement}' ready pose."
-                );
-            }
-
-            return result;
+            return new ApprenticeAnimationDefinition(
+                animation,
+                callbacks
+            );
         }
 
         private static void ValidateJson(

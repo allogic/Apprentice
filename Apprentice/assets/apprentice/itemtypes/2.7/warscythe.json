@@ -20,7 +20,10 @@
     "apprenticeFeature": "warscythe",
     "aoeDamage": 7.5,
     "aoeRadius": 3.5,
-    "aoeArcDegrees": 120,
+    "aoeArcDegrees": 180,
+    "aoeSweepStartDegrees": -90,
+    "aoeSweepEndDegrees": 90,
+    "aoeSweepHalfWidthDegrees": 8,
     "aoeMaxTargets": 6,
     "damageTier": 5,
     "heldItemPitchFollow": 1

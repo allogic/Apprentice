@@ -741,6 +741,11 @@ namespace Apprentice
 			animationSystem?.StopLocal(entity);
 		}
 
+		internal void CompleteWarScytheAnimation(EntityAgent entity)
+		{
+			animationSystem?.CompleteLocal(entity);
+		}
+
 		internal void NoteWarScytheLifecycle(
 			EntityAgent entity,
 			string eventCode)
