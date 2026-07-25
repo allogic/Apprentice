@@ -351,7 +351,7 @@ namespace Apprentice.Weapon
 
 		public void Dispose()
 		{
-			eventApi.UnregisterRenderer(this, EnumRenderStage.AfterFinalComposition);
+			eventApi.UnregisterRenderer(this, EnumRenderStage.Done);
 
 			renderApi.DestroyFrameBuffer(frameBufferARef);
 			renderApi.DestroyFrameBuffer(frameBufferBRef);
@@ -370,11 +370,14 @@ namespace Apprentice.Weapon
 		private static bool enableAnimationWhitelist = false;
 
 		private static IList<string> whitelistedAnimationCodes = [
-			// Custom
+			// Movement
 			"dash-forward",
 			"dash-back",
 			"dash-left",
 			"dash-right",
+
+			// Combat
+			"hold-weapon-combat-passive",
 
 			// Game
 			"bowaimlong",
@@ -387,7 +390,12 @@ namespace Apprentice.Weapon
 			{
 				if (enableAnimationWhitelist)
 				{
-					return whitelistedAnimationCodes.Contains(animdata.Code);
+					if (whitelistedAnimationCodes.Contains(animdata.Code))
+					{
+						return true;
+					}
+
+					return false;
 				}
 
 				return true; // Don't skip the original method
@@ -400,7 +408,12 @@ namespace Apprentice.Weapon
 			{
 				if (enableAnimationWhitelist)
 				{
-					return whitelistedAnimationCodes.Contains(configCode);
+					if (whitelistedAnimationCodes.Contains(configCode))
+					{
+						return true;
+					}
+
+					return false;
 				}
 
 				return true; // Don't skip the original method
@@ -455,8 +468,11 @@ namespace Apprentice.Weapon
 		private int dashForwardFrameCount = 18;
 		private int dashForwardRetractFrameCount = 0;
 
+		private bool attackToggle = false;
+
 		private Vec3d dashDirection = new(0, 0, 0);
 
+		// Movement Animations
 		private AnimationMetaData dashForwardData = new AnimationMetaData()
 		{
 			Animation = "dash-forward",
@@ -521,7 +537,26 @@ namespace Apprentice.Weapon
 				{ "root", EnumAnimationBlendMode.Add },
 			},
 		};
-		// TODO
+
+		// Combat Animations
+		private AnimationMetaData holdWeaponCombatPassiveData = new AnimationMetaData()
+		{
+			Animation = "hold-weapon-combat-passive",
+			Code = "hold-weapon-combat-passive",
+			Weight = 1.0F,
+			SupressDefaultAnimation = true,
+			ClientSide = true,
+			AnimationSpeed = 0.8F,
+			BlendMode = EnumAnimationBlendMode.Add,
+			ElementWeight = {
+				{ "UpperTorso", 1.0F },
+			},
+			ElementBlendMode = {
+				{ "UpperTorso", EnumAnimationBlendMode.Add },
+			},
+		};
+
+		// Game Animations
 		private AnimationMetaData bowAimLongData = new AnimationMetaData()
 		{
 			Animation = "BowAimLong",
@@ -555,10 +590,7 @@ namespace Apprentice.Weapon
 			harmonyInstance.CreateClassProcessor(typeof(AnimationManager_StartAnimation1_Patch)).Patch();
 
 			// Register hotkey's
-			clientApi.Input.RegisterHotKey("ushigatana_dash_anim", "", GlKeys.ShiftLeft, HotkeyType.MovementControls);
-
-			// Register hotkey handler's
-			clientApi.Input.SetHotKeyHandler("ushigatana_dash_anim", OnDashReset);
+			clientApi.Event.MouseDown += OnMouseDown;
 		}
 
 		public override string PropertyName()
@@ -670,12 +702,6 @@ namespace Apprentice.Weapon
 							{
 								dashDirection.Normalize();
 							}
-							else
-							{
-								// Default forward dash if no key would be held..
-								dashDirection = new Vec3d(localForward.X, 0.0F, localForward.Z);
-								dashDirection.Normalize();
-							}
 
 							// Reset up direction
 							dashDirection.Y = 0.0F;
@@ -693,8 +719,11 @@ namespace Apprentice.Weapon
 						// Enable whitelist in the original animation manager
 						enableAnimationWhitelist = true;
 
-						// Stop all animations
-						entity.AnimManager.StopAllAnimations();
+						// Stop dash animations only
+						if (entity.AnimManager.IsAnimationActive([dashForwardData.Code])) entity.AnimManager.StopAnimation(dashForwardData.Code);
+						if (entity.AnimManager.IsAnimationActive([dashBackData.Code])) entity.AnimManager.StopAnimation(dashBackData.Code);
+						if (entity.AnimManager.IsAnimationActive([dashRightData.Code])) entity.AnimManager.StopAnimation(dashRightData.Code);
+						if (entity.AnimManager.IsAnimationActive([dashLeftData.Code])) entity.AnimManager.StopAnimation(dashLeftData.Code);
 
 						// Compute quadrant angle of motion vector
 						double x = transform.Motion.Dot(localRight);
@@ -747,14 +776,6 @@ namespace Apprentice.Weapon
 							animation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
 						}
 
-						{
-							// Blend bow windup on top
-							entity.AnimManager.StartAnimation(bowAimLongData);
-							RunningAnimation animation = entity.AnimManager.GetAnimationState(bowAimLongData.Code);
-							animation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
-							animation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
-						}
-
 						sequenceState = SequenceState.SEQUENCE_STATE_DASH;
 
 						break;
@@ -768,8 +789,13 @@ namespace Apprentice.Weapon
 
 							sequenceState = SequenceState.SEQUENCE_STATE_RETRACT;
 
-							// Stop all animations
-							entity.AnimManager.StopAllAnimations();
+							// Stop dash animations only
+							if (entity.AnimManager.IsAnimationActive([dashForwardData.Code])) entity.AnimManager.StopAnimation(dashForwardData.Code);
+							if (entity.AnimManager.IsAnimationActive([dashBackData.Code])) entity.AnimManager.StopAnimation(dashBackData.Code);
+							if (entity.AnimManager.IsAnimationActive([dashRightData.Code])) entity.AnimManager.StopAnimation(dashRightData.Code);
+							if (entity.AnimManager.IsAnimationActive([dashLeftData.Code])) entity.AnimManager.StopAnimation(dashLeftData.Code);
+
+							// entity.AnimManager.StopAllAnimations();
 
 							// Start retract animation
 							// entity.AnimManager.StartAnimation(dashForwardRetractData);
@@ -809,7 +835,7 @@ namespace Apprentice.Weapon
 						dashBlur.BlurEnable = false;
 
 						// Disable whitelist in the original animation manager
-						enableAnimationWhitelist = false;
+						// enableAnimationWhitelist = false;
 
 #if DEBUG
 						// Add end point position
@@ -822,15 +848,6 @@ namespace Apprentice.Weapon
 
 						break;
 					}
-			}
-
-			// Disable controls while in dash (TODO: Revalidate this..)
-			if (sequenceState != SequenceState.SEQUENCE_STATE_IDLE)
-			{
-				controls.Forward = false;
-				controls.Backward = false;
-				controls.Left = false;
-				controls.Right = false;
 			}
 
 			// Apply some physics
@@ -857,6 +874,15 @@ namespace Apprentice.Weapon
 				{
 					isPhysicActive = false;
 				}
+			}
+
+			// Disable controls while in dash (TODO: Revalidate this..)
+			if (sequenceState != SequenceState.SEQUENCE_STATE_IDLE)
+			{
+				controls.Forward = false;
+				controls.Backward = false;
+				controls.Left = false;
+				controls.Right = false;
 			}
 
 			// Apply blur intensity based on motion vector
@@ -916,10 +942,10 @@ namespace Apprentice.Weapon
 				: (float)Math.Pow(2.0F, -10.0F * x) * (float)Math.Sin((x * 10.0F - 0.75F) * c4) + 1.0F;
 		}
 
-		private bool OnDashReset(KeyCombination combination)
+		private void OnDashReset()
 		{
-			if (clientApi == null) return true;
-			if (dashBlur == null) return true;
+			if (clientApi == null) return;
+			if (dashBlur == null) return;
 
 			EntityPlayer entityPlayer = clientApi.World.Player.Entity;
 			EntityPos entityPos = entityPlayer.Pos;
@@ -975,8 +1001,44 @@ namespace Apprentice.Weapon
 					}
 				}
 			}
+		}
+		private void OnAttackReset()
+		{
+			if (clientApi == null) return;
+			if (dashBlur == null) return;
 
-			return true;
+			EntityPlayer entityPlayer = clientApi.World.Player.Entity;
+			EntityPos entityPos = entityPlayer.Pos;
+			BlockPos soundPos = new(entityPlayer.Pos.XYZInt, 0);
+
+			attackToggle = !attackToggle;
+
+			if (attackToggle)
+			{
+				// Start attack windup
+				entity.AnimManager.StartAnimation(holdWeaponCombatPassiveData);
+				RunningAnimation animation = entity.AnimManager.GetAnimationState(holdWeaponCombatPassiveData.Code);
+				animation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
+				animation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
+			}
+			else
+			{
+				entity.AnimManager.StopAnimation(holdWeaponCombatPassiveData.Code);
+			}
+		}
+
+		private void OnMouseDown(MouseEvent e)
+		{
+			if (e.Button == EnumMouseButton.Left)
+			{
+				OnAttackReset();
+			}
+			else if (e.Button == EnumMouseButton.Right)
+			{
+				OnDashReset();
+			}
+
+			e.Handled = true;
 		}
 	}
 	internal class TrueThirdPersonBehaviour : EntityBehavior
