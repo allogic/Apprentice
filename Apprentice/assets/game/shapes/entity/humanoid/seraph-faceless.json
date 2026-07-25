@@ -1560,6 +1560,54 @@
 		},
 
 		{
+			"name": "hold-weapon-combat-passive",
+			"code": "hold-weapon-combat-passive",
+			"quantityframes": 1,
+			"onActivityStopped": "EaseOut",
+			"onAnimationEnd": "Repeat",
+			"keyframes": [
+				{
+					"frame": 0,
+					"elements": {
+						"UpperTorso": {
+							"rotationX": 0.0,
+							"rotationY": -22.5,
+							"rotationZ": 0.0
+						},
+						"UpperArmR": {
+							"offsetX": 0.0,
+							"offsetY": 0.0,
+							"offsetZ": 0.0,
+							"rotationX": 45.0,
+							"rotationY": -90.0,
+							"rotationZ": 0.0
+						},
+						"LowerArmL": {
+							"rotationX": 45.0,
+							"rotationY": 22.5,
+							"rotationZ": -22.5
+						},
+						"UpperArmL": {
+							"rotationX": 0.0,
+							"rotationY": 0.0,
+							"rotationZ": -80.0
+						},
+						"Neck": {
+							"rotationX": -22.5,
+							"rotationY": 22.5,
+							"rotationZ": 0.0
+						},
+						"LowerArmR": {
+							"rotationX": -90.0,
+							"rotationY": 45.0,
+							"rotationZ": -22.5
+						}
+					}
+				}
+			]
+		},
+
+		{
 			"name": "Walk",
 			"code": "walk",
 			"quantityframes": 25,

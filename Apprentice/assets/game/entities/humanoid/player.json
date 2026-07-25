@@ -621,6 +621,13 @@
 				"animationSpeed": 1.0
 			},
 			{
+				"code": "hold-weapon-combat-passive",
+				"animation": "hold-weapon-combat-passive",
+				"blendMode": "Add",
+				"mulWithWalkSpeed": false,
+				"animationSpeed": 1.0
+			},
+			{
 				"code": "walk",
 				"animation": "walk",
 				"blendMode": "Average",
