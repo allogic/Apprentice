@@ -80,8 +80,8 @@ namespace Apprentice
                     ItemStack? stack =
                         entity.RightHandItemSlot?.Itemstack;
                     if (!entity.Alive || stack?.Item == null ||
-                        stack.Item.Code?.ToString() !=
-                            definition.HeldItemCode ||
+                        !definition.IsSupportedHeldItemCode(
+                            stack.Item.Code?.ToString()) ||
                         packet.Sequence <= 0)
                     {
                         return;
@@ -520,7 +520,9 @@ namespace Apprentice
                 {
                     try
                     {
-                        if (geometryProbe.TrySample(
+                        if (stack.Item.Code?.ToString() ==
+                                definition.HeldItemCode &&
+                            geometryProbe.TrySample(
                             player,
                             stack,
                             out WarScytheGeometrySample geometry))
@@ -663,8 +665,9 @@ namespace Apprentice
         {
             ItemStack? current =
                 entity.RightHandItemSlot?.Itemstack;
-            if (current?.Item?.Code?.ToString() ==
-                definition.HeldItemCode)
+            if (current != null &&
+                definition.IsSupportedHeldItemCode(
+                    current.Item?.Code?.ToString()))
             {
                 stack = current;
                 return true;
@@ -977,8 +980,8 @@ namespace Apprentice
                 if (activeItemId != 0 &&
                     (!Player.Alive ||
                     heldItem?.Id != activeItemId ||
-                    heldItem?.Code?.ToString() !=
-                        definition.HeldItemCode))
+                    !definition.IsSupportedHeldItemCode(
+                        heldItem?.Code?.ToString())))
                 {
                     StopAll();
                     return;

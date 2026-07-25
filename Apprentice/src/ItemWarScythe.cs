@@ -12,7 +12,7 @@ namespace Apprentice
     /// Combat-only scythe. It uses the vanilla scythe presentation lifecycle
     /// without inheriting ItemScythe's grass and crop harvesting behavior.
     /// </summary>
-    public sealed class ItemWarScythe : Item
+    public class ItemWarScythe : Item
     {
         private const string TimelineTimeAttribute =
             "apprenticeWarScytheTimelineTime";
@@ -500,11 +500,6 @@ namespace Apprentice
                 if (!target.ReceiveDamage(source, damage)) continue;
 
                 state.AcceptedHits++;
-                if (!state.DurabilityApplied)
-                {
-                    DamageItem(api.World, byEntity, slot, 1);
-                    state.DurabilityApplied = true;
-                }
             }
         }
 
@@ -533,7 +528,6 @@ namespace Apprentice
             public float StopActionSeconds { get; }
             public HashSet<long> HitEntityIds { get; } = new();
             public int AcceptedHits { get; set; }
-            public bool DurabilityApplied { get; set; }
         }
     }
 }

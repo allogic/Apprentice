@@ -30,9 +30,20 @@ namespace Apprentice
 			ref int amount)
 		{
 			if (world.Side != EnumAppSide.Server ||
-				byEntity is not EntityPlayer entityPlayer ||
-				entityPlayer.Player is not IServerPlayer player ||
 				amount <= 0)
+			{
+				return;
+			}
+
+			if (LegendaryWeaponRuntime.IsLegendary(
+					itemSlot?.Itemstack))
+			{
+				amount = 0;
+				return;
+			}
+
+			if (byEntity is not EntityPlayer entityPlayer ||
+				entityPlayer.Player is not IServerPlayer player)
 			{
 				return;
 			}

@@ -1,0 +1,53 @@
+{
+  "code": "hiddenpoisondagger",
+  "class": "ApprenticeHiddenPoisonDagger",
+  "tool": "sword",
+  "attackRange": 2.15,
+  "attackpower": 4.5,
+  "heldTpIdleAnimation": "knifeidle",
+  "heldRightReadyAnimation": "knifeidle",
+  "heldTpHitAnimation": "knifestab",
+  "tags": ["apprentice-content", "legendary"],
+  "maxstacksize": 1,
+  "storageFlags": 5,
+  "shape": {
+    "base": "apprentice:item/2.7/hidden-poison-dagger"
+  },
+  "creativeinventory": {
+    "general": ["*"],
+    "items": ["*"],
+    "tools": ["*"]
+  },
+  "attributes": {
+    "apprenticeLegendary": true,
+    "apprenticeFeature": "hidden-poison-dagger",
+    "attackPower": 4.5,
+    "attackRange": 2.15,
+    "damageTier": 5,
+    "swingDuration": 0.56,
+    "heldItemPitchFollow": 1
+  },
+  "guiTransform": {
+    "translation": {"x": 0, "y": 0.15, "z": 0},
+    "rotation": {"x": -35, "y": 22, "z": 42},
+    "origin": {"x": 0.5, "y": 0.5, "z": 0.5},
+    "scale": 1.55
+  },
+  "tpHandTransform": {
+    "translation": {"x": -0.82, "y": -0.35, "z": -0.72},
+    "rotation": {"x": 10, "y": -4, "z": -92},
+    "origin": {"x": 0.5, "y": 0.18, "z": 0.5},
+    "scale": 0.95
+  },
+  "fpHandTransform": {
+    "translation": {"x": 0.05, "y": -0.15, "z": 0},
+    "rotation": {"x": -20, "y": 0, "z": -18},
+    "origin": {"x": 0.5, "y": 0.18, "z": 0.5},
+    "scale": 1.5
+  },
+  "groundTransform": {
+    "rotation": {"x": 90, "y": 0, "z": 28},
+    "origin": {"x": 0.5, "y": 0.5, "z": 0.5},
+    "scale": 1.25
+  }
+}

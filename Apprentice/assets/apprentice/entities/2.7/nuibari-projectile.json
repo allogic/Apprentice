@@ -1,0 +1,37 @@
+{
+  "code": "nuibari-projectile",
+  "class": "ApprenticeUncollectableLegendaryProjectile",
+  "hitboxSize": {"x": 0.09, "y": 0.09},
+  "attributes": {
+    "isProjectile": true,
+    "collectible": false
+  },
+  "client": {
+    "renderer": "Shape",
+    "shape": {
+      "base": "apprentice:item/2.7/nuibari-thrown",
+      "offsetX": -0.8125
+    },
+    "behaviors": [
+      {
+        "code": "passivephysics",
+        "groundDragFactor": 1,
+        "airDragFactor": 0.08,
+        "gravityFactor": 0.32
+      },
+      {"code": "interpolateposition"}
+    ]
+  },
+  "server": {
+    "behaviors": [
+      {
+        "code": "passivephysics",
+        "groundDragFactor": 1,
+        "airDragFactor": 0.08,
+        "gravityFactor": 0.32
+      },
+      {"code": "despawn", "minSeconds": 600}
+    ]
+  },
+  "sounds": {}
+}

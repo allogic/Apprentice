@@ -18,7 +18,7 @@ namespace Apprentice
 	{
 		private const string PlaytestVersion = "2.7.0-dev.20260723.86";
 		private const string BowAssetFingerprint = "BOW-DARKWOOD-OXBLOOD-C-AXIS2-EDIT1-UV1-DRAW5";
-		private const string ReviewedAssetFingerprint = "ITEMS-RUNEBOUND5-GILDED2-SUNLANCE2-KITS-HANDANCHOR-TRAP-CHAIN-SHIELD-SIDEWAYS-FISHING-NATIVE-METALS-APPRENTICE2";
+		private const string ReviewedAssetFingerprint = "ITEMS-RUNEBOUND5-GILDED2-SUNLANCE2-KITS-HANDANCHOR-TRAP-CHAIN-SHIELD-SIDEWAYS-FISHING-NATIVE-METALS-APPRENTICE2-LEGENDARY9";
 		private static readonly string[] ExpectedBowShapeCodes =
 		{
 			"apprentice:item/2.7/composite-bow",
@@ -47,6 +47,20 @@ namespace Apprentice
 			"textures/item/2.7/manaburn-edge.png",
 			"textures/item/2.7/manaburn-horn.png",
 			"textures/item/2.7/manaburn-grip.png",
+			"shapes/item/2.7/hidden-poison-dagger.json",
+			"shapes/item/2.7/blood-cleaver.json",
+			"shapes/item/2.7/katana.json",
+			"shapes/item/2.7/war-axe.json",
+			"shapes/item/2.7/unending-despair.json",
+			"shapes/item/2.7/fire-lance.json",
+			"shapes/item/2.7/stealth-dagger.json",
+			"shapes/item/2.7/shapesplitter.json",
+			"shapes/item/2.7/nuibari.json",
+			"shapes/item/2.7/nuibari-thrown.json",
+			"entities/2.7/unending-despair-projectile.json",
+			"entities/2.7/fire-lance-projectile.json",
+			"entities/2.7/nuibari-projectile.json",
+			"entities/2.7/shapesplitter-echo.json",
 			"shapes/item/2.7/tower-shield.json",
 			"shapes/item/2.7/master-fishing-rod.json",
 			"shapes/item/2.7/grandmaster-spear.json",
@@ -81,6 +95,7 @@ namespace Apprentice
 		private InteractionEventBridge? interactionEventBridge = null;
 		private DangerTierSystem? dangerTierSystem = null;
 		private PoisonEffectSystem? poisonEffectSystem = null;
+		private LegendaryWeaponSystem? legendaryWeaponSystem = null;
 		private EcologyWorldgenSystem? ecologyWorldgenSystem = null;
 
 		private InterfaceManager? interfaceManager = null;
@@ -149,6 +164,42 @@ namespace Apprentice
 			api.RegisterItemClass(
 				"ApprenticeManaburnSword",
 				typeof(ItemManaburnSword)
+			);
+			api.RegisterItemClass(
+				"ApprenticeLegendaryMelee",
+				typeof(ItemLegendaryMelee)
+			);
+			api.RegisterItemClass(
+				"ApprenticeHiddenPoisonDagger",
+				typeof(ItemHiddenPoisonDagger)
+			);
+			api.RegisterItemClass(
+				"ApprenticeStealthDagger",
+				typeof(ItemStealthDagger)
+			);
+			api.RegisterItemClass(
+				"ApprenticeShapeSplitter",
+				typeof(ItemShapeSplitter)
+			);
+			api.RegisterItemClass(
+				"ApprenticeUnendingDespair",
+				typeof(ItemUnendingDespair)
+			);
+			api.RegisterItemClass(
+				"ApprenticeFireLance",
+				typeof(ItemFireLance)
+			);
+			api.RegisterItemClass(
+				"ApprenticeNuibari",
+				typeof(ItemNuibari)
+			);
+			api.RegisterEntity(
+				"ApprenticeLegendaryEcho",
+				typeof(EntityLegendaryEcho)
+			);
+			api.RegisterEntity(
+				"ApprenticeUncollectableLegendaryProjectile",
+				typeof(EntityUncollectableLegendaryProjectile)
 			);
 			api.RegisterBlockClass(
 				"ApprenticeAdvancedTrap",
@@ -241,6 +292,25 @@ namespace Apprentice
 							typeof(PoisonInfoPatch),
 							nameof(PoisonInfoPatch.Postfix)
 						)
+					);
+					poisonInfoHarmony.Patch(
+						typeof(Vintagestory.API.Common.Entities.Entity).GetMethod(
+							nameof(Vintagestory.API.Common.Entities.Entity.GetInfoText),
+							BindingFlags.Instance | BindingFlags.Public,
+							binder: null,
+							types: Type.EmptyTypes,
+							modifiers: null
+						) ?? throw new MissingMethodException(
+							"Entity.GetInfoText()"
+						),
+						postfix: new HarmonyMethod(
+							typeof(LegendaryInfoPatch),
+							nameof(LegendaryInfoPatch.Postfix)
+						)
+					);
+					LegendaryClientPatches.Install(
+						poisonInfoHarmony,
+						(ICoreClientAPI)api
 					);
 				}
 				catch (Exception exception)
@@ -577,6 +647,8 @@ namespace Apprentice
 				OnDangerHeatmapRequest
 			);
 			poisonEffectSystem = new PoisonEffectSystem(api, contentRegistry);
+			legendaryWeaponSystem =
+				new LegendaryWeaponSystem(api);
 			ecologyWorldgenSystem = new EcologyWorldgenSystem(api, contentRegistry);
 			ApprenticeAnimationSystem.RegisterServerHandler(
 				api,
@@ -696,6 +768,7 @@ namespace Apprentice
 			interactionEventBridge?.Dispose();
 			dangerTierSystem?.Dispose();
 			poisonEffectSystem?.Dispose();
+			legendaryWeaponSystem?.Dispose();
 			ecologyWorldgenSystem?.Dispose();
 			skillTreeManager?.Dispose();
 			classesManager?.Dispose();
@@ -709,6 +782,7 @@ namespace Apprentice
 			interactionEventBridge = null;
 			dangerTierSystem = null;
 			poisonEffectSystem = null;
+			legendaryWeaponSystem = null;
 			ecologyWorldgenSystem = null;
 			experienceManager = null;
 			skillTreeManager = null;

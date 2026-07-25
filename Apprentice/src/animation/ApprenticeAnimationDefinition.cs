@@ -21,6 +21,10 @@ namespace Apprentice
             "apprentice-mainhand";
         public const string ItemCode =
             "apprentice:warscythe";
+        public const string BloodCleaverItemCode =
+            "apprentice:bloodcleaver";
+        public const string WarAxeItemCode =
+            "apprentice:waraxe";
         public const float EaseInSecondsValue = 0.40f;
         public const float EaseOutSecondsValue = 0.30f;
         public const float ReadyToRestSecondsValue = 0.40f;
@@ -70,6 +74,12 @@ namespace Apprentice
         {
             get;
         }
+
+        public bool IsSupportedHeldItemCode(
+            string? itemCode) =>
+            itemCode == ItemCode ||
+            itemCode == BloodCleaverItemCode ||
+            itemCode == WarAxeItemCode;
 
         public ApprenticeAnimationDefinition DeepClone() =>
             new(

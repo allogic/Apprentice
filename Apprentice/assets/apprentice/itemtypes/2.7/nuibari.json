@@ -1,0 +1,55 @@
+{
+  "code": "nuibari",
+  "class": "ApprenticeNuibari",
+  "tool": "sword",
+  "attackRange": 3.1,
+  "attackpower": 10,
+  "heldTpIdleAnimation": "swordidle",
+  "heldRightReadyAnimation": "swordidle",
+  "heldTpHitAnimation": "swordhit2",
+  "behaviors": [{"name": "AnimationAuthoritative"}],
+  "tags": ["apprentice-content", "legendary"],
+  "maxstacksize": 1,
+  "storageFlags": 5,
+  "shape": {"base": "apprentice:item/2.7/nuibari"},
+  "creativeinventory": {
+    "general": ["*"],
+    "items": ["*"],
+    "tools": ["*"]
+  },
+  "attributes": {
+    "apprenticeLegendary": true,
+    "apprenticeFeature": "nuibari",
+    "attackPower": 10,
+    "attackRange": 3.1,
+    "damage": 8,
+    "damageTier": 5,
+    "collectible": false,
+    "dropOnImpactChance": 0,
+    "spearEntityCode": "apprentice:nuibari-projectile",
+    "heldItemPitchFollow": 1
+  },
+  "guiTransform": {
+    "translation": {"x": 0, "y": 0.1, "z": 0},
+    "rotation": {"x": -16, "y": 28, "z": 42},
+    "origin": {"x": 0.5, "y": 0.4, "z": 0.5},
+    "scale": 0.92
+  },
+  "tpHandTransform": {
+    "translation": {"x": -0.85, "y": -0.42, "z": -0.74},
+    "rotation": {"x": 4, "y": 1, "z": -92},
+    "origin": {"x": 0.5, "y": 0.2, "z": 0.5},
+    "scale": 0.82
+  },
+  "fpHandTransform": {
+    "translation": {"x": 0.08, "y": -0.12, "z": 0.02},
+    "rotation": {"x": -18, "y": 4, "z": -20},
+    "origin": {"x": 0.5, "y": 0.2, "z": 0.5},
+    "scale": 1.42
+  },
+  "groundTransform": {
+    "rotation": {"x": 90, "y": 0, "z": 22},
+    "origin": {"x": 0.5, "y": 0.5, "z": 0.5},
+    "scale": 1.1
+  }
+}

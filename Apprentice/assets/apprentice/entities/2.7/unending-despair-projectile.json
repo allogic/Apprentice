@@ -1,0 +1,37 @@
+{
+  "code": "unending-despair-projectile",
+  "class": "ApprenticeUncollectableLegendaryProjectile",
+  "hitboxSize": {"x": 0.125, "y": 0.125},
+  "attributes": {
+    "isProjectile": true,
+    "collectible": false
+  },
+  "client": {
+    "renderer": "Shape",
+    "shape": {
+      "base": "apprentice:item/2.7/unending-despair",
+      "offsetX": -0.8125
+    },
+    "behaviors": [
+      {
+        "code": "passivephysics",
+        "groundDragFactor": 1,
+        "airDragFactor": 0.18,
+        "gravityFactor": 0.58
+      },
+      {"code": "interpolateposition"}
+    ]
+  },
+  "server": {
+    "behaviors": [
+      {
+        "code": "passivephysics",
+        "groundDragFactor": 1,
+        "airDragFactor": 0.18,
+        "gravityFactor": 0.58
+      },
+      {"code": "despawn", "minSeconds": 8}
+    ]
+  },
+  "sounds": {}
+}
