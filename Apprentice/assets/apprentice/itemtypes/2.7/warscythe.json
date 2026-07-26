@@ -1,7 +1,6 @@
 {
   "code": "warscythe",
   "class": "ApprenticeWarScythe",
-  "damagedby": ["attacking"],
   "tool": "sword",
   "attackRange": 3.5,
   "attackpower": 7.5,
@@ -15,8 +14,8 @@
     "items": ["*"],
     "tools": ["*"]
   },
-  "durability": 1000,
   "attributes": {
+    "apprenticeLegendary": true,
     "apprenticeFeature": "warscythe",
     "aoeDamage": 7.5,
     "aoeRadius": 3.5,

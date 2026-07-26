@@ -1,0 +1,53 @@
+{
+  "code": "waraxe",
+  "class": "ApprenticeWarScythe",
+  "tool": "axe",
+  "attackRange": 3.2,
+  "attackpower": 14,
+  "heldTpIdleAnimation": "scytheIdle",
+  "tags": ["apprentice-content", "legendary"],
+  "maxstacksize": 1,
+  "storageFlags": 5,
+  "shape": {"base": "apprentice:item/2.7/war-axe"},
+  "creativeinventory": {
+    "general": ["*"],
+    "items": ["*"],
+    "tools": ["*"]
+  },
+  "attributes": {
+    "apprenticeLegendary": true,
+    "apprenticeFeature": "war-axe",
+    "aoeDamage": 14,
+    "aoeRadius": 3.2,
+    "aoeArcDegrees": 95,
+    "aoeSweepStartDegrees": 47.5,
+    "aoeSweepEndDegrees": -47.5,
+    "aoeSweepHalfWidthDegrees": 7,
+    "aoeMaxTargets": 3,
+    "damageTier": 5,
+    "heldItemPitchFollow": 1
+  },
+  "guiTransform": {
+    "translation": {"x": 0, "y": 0.25, "z": 0},
+    "rotation": {"x": -22, "y": 18, "z": 38},
+    "origin": {"x": 0.5, "y": 0.45, "z": 0.5},
+    "scale": 0.7
+  },
+  "tpHandTransform": {
+    "translation": {"x": -0.78, "y": -0.34, "z": -0.66},
+    "rotation": {"x": 22, "y": -2, "z": -92},
+    "origin": {"x": 0.5, "y": 0.25, "z": 0.5},
+    "scale": 0.72
+  },
+  "fpHandTransform": {
+    "translation": {"x": 0.1, "y": -0.16, "z": 0.04},
+    "rotation": {"x": -12, "y": 8, "z": -22},
+    "origin": {"x": 0.5, "y": 0.25, "z": 0.5},
+    "scale": 1.28
+  },
+  "groundTransform": {
+    "rotation": {"x": 90, "y": 0, "z": 16},
+    "origin": {"x": 0.5, "y": 0.5, "z": 0.5},
+    "scale": 0.82
+  }
+}

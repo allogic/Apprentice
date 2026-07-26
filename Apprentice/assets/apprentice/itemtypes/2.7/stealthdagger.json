@@ -1,0 +1,51 @@
+{
+  "code": "stealthdagger",
+  "class": "ApprenticeStealthDagger",
+  "tool": "sword",
+  "attackRange": 2.25,
+  "attackpower": 6,
+  "heldTpIdleAnimation": "knifeidle",
+  "heldRightReadyAnimation": "knifeidle",
+  "heldTpHitAnimation": "knifestab",
+  "tags": ["apprentice-content", "legendary"],
+  "maxstacksize": 1,
+  "storageFlags": 5,
+  "shape": {"base": "apprentice:item/2.7/stealth-dagger"},
+  "creativeinventory": {
+    "general": ["*"],
+    "items": ["*"],
+    "tools": ["*"]
+  },
+  "attributes": {
+    "apprenticeLegendary": true,
+    "apprenticeFeature": "stealth-dagger",
+    "attackPower": 6,
+    "attackRange": 2.25,
+    "damageTier": 5,
+    "swingDuration": 0.58,
+    "heldItemPitchFollow": 1
+  },
+  "guiTransform": {
+    "translation": {"x": 0, "y": 0.1, "z": 0},
+    "rotation": {"x": -28, "y": 30, "z": 46},
+    "origin": {"x": 0.5, "y": 0.45, "z": 0.5},
+    "scale": 1.32
+  },
+  "tpHandTransform": {
+    "translation": {"x": -0.84, "y": -0.4, "z": -0.74},
+    "rotation": {"x": 8, "y": -2, "z": -92},
+    "origin": {"x": 0.5, "y": 0.2, "z": 0.5},
+    "scale": 0.88
+  },
+  "fpHandTransform": {
+    "translation": {"x": 0.06, "y": -0.14, "z": 0.02},
+    "rotation": {"x": -18, "y": 0, "z": -18},
+    "origin": {"x": 0.5, "y": 0.2, "z": 0.5},
+    "scale": 1.45
+  },
+  "groundTransform": {
+    "rotation": {"x": 90, "y": 0, "z": 30},
+    "origin": {"x": 0.5, "y": 0.5, "z": 0.5},
+    "scale": 1.18
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "code": "shapesplitter-echo",
+  "class": "ApprenticeLegendaryEcho",
+  "tags": ["humanoid"],
+  "hitboxSize": {"x": 0.55, "y": 1.8},
+  "eyeHeight": 1.7,
+  "attributes": {
+    "isInteractable": false,
+    "knockbackResistance": 1
+  },
+  "client": {
+    "renderer": "Shape",
+    "glowLevel": 90,
+    "shape": {
+      "base": "game:entity/humanoid/seraph-faceless"
+    },
+    "texture": {
+      "base": "game:entity/humanoid/seraph-naked-hairless"
+    },
+    "behaviors": [
+      {
+        "code": "passivephysics",
+        "groundDragFactor": 0.2,
+        "airDragFactor": 0.08,
+        "gravityFactor": 1
+      },
+      {"code": "interpolateposition"}
+    ]
+  },
+  "server": {
+    "behaviors": [
+      {
+        "code": "passivephysics",
+        "groundDragFactor": 0.2,
+        "airDragFactor": 0.08,
+        "gravityFactor": 1
+      }
+    ]
+  },
+  "sounds": {}
+}

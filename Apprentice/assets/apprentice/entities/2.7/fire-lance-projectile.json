@@ -1,0 +1,38 @@
+{
+  "code": "fire-lance-projectile",
+  "class": "EntityProjectile",
+  "hitboxSize": {"x": 0.15, "y": 0.15},
+  "attributes": {
+    "isProjectile": true,
+    "collectible": true
+  },
+  "client": {
+    "renderer": "Shape",
+    "glowLevel": 170,
+    "shape": {
+      "base": "apprentice:item/2.7/fire-lance",
+      "offsetX": -0.8125
+    },
+    "behaviors": [
+      {
+        "code": "passivephysics",
+        "groundDragFactor": 1,
+        "airDragFactor": 0.16,
+        "gravityFactor": 0.52
+      },
+      {"code": "interpolateposition"}
+    ]
+  },
+  "server": {
+    "behaviors": [
+      {
+        "code": "passivephysics",
+        "groundDragFactor": 1,
+        "airDragFactor": 0.16,
+        "gravityFactor": 0.52
+      },
+      {"code": "despawn", "minSeconds": 600}
+    ]
+  },
+  "sounds": {}
+}

@@ -1,0 +1,51 @@
+{
+  "code": "shapesplitter",
+  "class": "ApprenticeShapeSplitter",
+  "tool": "sword",
+  "attackRange": 3,
+  "attackpower": 11.5,
+  "heldTpIdleAnimation": "swordidle",
+  "heldRightReadyAnimation": "swordidle",
+  "heldTpHitAnimation": "swordhit",
+  "tags": ["apprentice-content", "legendary"],
+  "maxstacksize": 1,
+  "storageFlags": 5,
+  "shape": {"base": "apprentice:item/2.7/shapesplitter"},
+  "creativeinventory": {
+    "general": ["*"],
+    "items": ["*"],
+    "tools": ["*"]
+  },
+  "attributes": {
+    "apprenticeLegendary": true,
+    "apprenticeFeature": "shapesplitter",
+    "attackPower": 11.5,
+    "attackRange": 3,
+    "damageTier": 5,
+    "swingDuration": 0.72,
+    "heldItemPitchFollow": 1
+  },
+  "guiTransform": {
+    "translation": {"x": 0, "y": 0.12, "z": 0},
+    "rotation": {"x": -18, "y": 28, "z": 42},
+    "origin": {"x": 0.5, "y": 0.42, "z": 0.5},
+    "scale": 0.92
+  },
+  "tpHandTransform": {
+    "translation": {"x": -0.85, "y": -0.4, "z": -0.72},
+    "rotation": {"x": 5, "y": 1, "z": -92},
+    "origin": {"x": 0.5, "y": 0.2, "z": 0.5},
+    "scale": 0.84
+  },
+  "fpHandTransform": {
+    "translation": {"x": 0.08, "y": -0.13, "z": 0.02},
+    "rotation": {"x": -18, "y": 5, "z": -20},
+    "origin": {"x": 0.5, "y": 0.2, "z": 0.5},
+    "scale": 1.4
+  },
+  "groundTransform": {
+    "rotation": {"x": 90, "y": 0, "z": 24},
+    "origin": {"x": 0.5, "y": 0.5, "z": 0.5},
+    "scale": 1.08
+  }
+}

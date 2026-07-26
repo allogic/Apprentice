@@ -130,6 +130,14 @@ namespace Apprentice
 					);
 			}
 
+			damage = LegendaryWeaponRuntime.ModifyDirectDamage(
+				damagedEntity,
+				attacker,
+				weaponCode?.ToString(),
+				damageSource,
+				damage
+			);
+
 			EntityPlayer? damagedPlayer =
 				damagedEntity as EntityPlayer;
 
@@ -239,6 +247,13 @@ namespace Apprentice
 
 			if (actualHealthLost > 0)
 			{
+				LegendaryWeaponRuntime.OnConfirmedDamage(
+					__state.DamagedEntity,
+					__state.DamageSource,
+					__state.WeaponCode,
+					actualHealthLost
+				);
+
 				RememberCombatHit(
 					__state.DamagedEntity.EntityId,
 					__state.AttackerPlayerUid,

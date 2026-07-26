@@ -1,0 +1,56 @@
+{
+  "code": "bloodcleaver",
+  "class": "ApprenticeWarScythe",
+  "tool": "sword",
+  "attackRange": 3.15,
+  "attackpower": 13,
+  "heldTpIdleAnimation": "scytheIdle",
+  "tags": ["apprentice-content", "legendary"],
+  "maxstacksize": 1,
+  "storageFlags": 5,
+  "shape": {
+    "base": "apprentice:item/2.7/blood-cleaver"
+  },
+  "creativeinventory": {
+    "general": ["*"],
+    "items": ["*"],
+    "tools": ["*"]
+  },
+  "attributes": {
+    "apprenticeLegendary": true,
+    "apprenticeFeature": "blood-cleaver",
+    "aoeDamage": 13,
+    "aoeRadius": 3.15,
+    "aoeArcDegrees": 110,
+    "aoeSweepStartDegrees": 55,
+    "aoeSweepEndDegrees": -55,
+    "aoeSweepHalfWidthDegrees": 7,
+    "aoeMaxTargets": 4,
+    "damageTier": 5,
+    "heldItemPitchFollow": 1
+  },
+  "guiTransform": {
+    "translation": {"x": 0, "y": 0.2, "z": 0},
+    "rotation": {"x": -18, "y": 24, "z": 38},
+    "origin": {"x": 0.5, "y": 0.42, "z": 0.5},
+    "scale": 0.72
+  },
+  "tpHandTransform": {
+    "translation": {"x": -0.76, "y": -0.28, "z": -0.62},
+    "rotation": {"x": 54, "y": -4.5, "z": 280},
+    "origin": {"x": 0.5, "y": 0.18, "z": 0.5},
+    "scale": 0.82
+  },
+  "fpHandTransform": {
+    "translation": {"x": 0.15, "y": -0.14, "z": 0.08},
+    "rotation": {"x": -10, "y": 12, "z": -24},
+    "origin": {"x": 0.5, "y": 0.18, "z": 0.5},
+    "scale": 1.35
+  },
+  "groundTransform": {
+    "translation": {"x": 0, "y": 0.15, "z": 0},
+    "rotation": {"x": 90, "y": 0, "z": 18},
+    "origin": {"x": 0.5, "y": 0.5, "z": 0.5},
+    "scale": 0.82
+  }
+}

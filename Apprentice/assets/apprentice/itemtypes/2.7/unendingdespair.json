@@ -1,0 +1,54 @@
+{
+  "code": "unendingdespair",
+  "class": "ApprenticeUnendingDespair",
+  "tool": "spear",
+  "attackRange": 3.7,
+  "attackpower": 10,
+  "heldTpIdleAnimation": "spearidle",
+  "heldRightReadyAnimation": "spearidle",
+  "heldTpHitAnimation": "spearhit",
+  "behaviors": [{"name": "AnimationAuthoritative"}],
+  "tags": ["apprentice-content", "legendary"],
+  "maxstacksize": 1,
+  "storageFlags": 5,
+  "shape": {"base": "apprentice:item/2.7/unending-despair"},
+  "creativeinventory": {
+    "general": ["*"],
+    "items": ["*"],
+    "tools": ["*"]
+  },
+  "attributes": {
+    "apprenticeLegendary": true,
+    "apprenticeFeature": "unending-despair",
+    "attackPower": 10,
+    "attackRange": 3.7,
+    "damage": 10,
+    "damageTier": 5,
+    "collectible": false,
+    "dropOnImpactChance": 0,
+    "spearEntityCode": "apprentice:unending-despair-projectile",
+    "heldItemPitchFollow": 1
+  },
+  "guiTransform": {
+    "rotation": {"x": -60, "y": 124, "z": 6},
+    "origin": {"x": 1.125, "y": 0.5, "z": 0.5},
+    "scale": 0.66
+  },
+  "tpHandTransform": {
+    "translation": {"x": -0.53, "y": -0.613, "z": -0.66},
+    "rotation": {"x": 0, "y": 0, "z": 0},
+    "origin": {"x": 0.375, "y": 0.5, "z": 0.5},
+    "scale": 0.8
+  },
+  "fpHandTransform": {
+    "translation": {"x": 0.1, "y": 0.4, "z": 0.16},
+    "rotation": {"x": -82, "y": 180, "z": 96},
+    "origin": {"x": 0.375, "y": 0.5, "z": 0.5},
+    "scale": 2.35
+  },
+  "groundTransform": {
+    "rotation": {"x": 90, "y": 0, "z": 0},
+    "origin": {"x": 0.5, "y": 0.5, "z": 0.5},
+    "scale": 3.1
+  }
+}

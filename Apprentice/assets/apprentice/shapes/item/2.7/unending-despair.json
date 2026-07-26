@@ -1,0 +1,824 @@
+{
+  "editor": {
+    "allAngles": true,
+    "entityTextureMode": false
+  },
+  "textureWidth": 16,
+  "textureHeight": 16,
+  "textures": {
+    "dark": "apprentice:item/2.7/manaburn-darkmetal",
+    "steel": "apprentice:item/2.7/manaburn-blade",
+    "edge": "apprentice:item/2.7/manaburn-edge",
+    "gold": "game:block/metal/ingot/gold",
+    "copper": "game:block/metal/ingot/copper",
+    "red": "apprentice:item/2.7/war-scythe-redmetal",
+    "blackwrap": "apprentice:item/2.7/manaburn-grip",
+    "poison": "apprentice:item/2.7/poison-fluid-grandmaster",
+    "aether": "apprentice:item/2.7/ingot-aethersteel",
+    "star": "apprentice:item/2.7/ingot-starsteel",
+    "wood": "game:block/wood/planks/walnut1",
+    "leather": "game:block/leather/plain"
+  },
+  "elements": [
+    {
+      "name": "butt-spike",
+      "from": [
+        -13,
+        6.8,
+        6.8
+      ],
+      "to": [
+        -8,
+        9.2,
+        9.2
+      ],
+      "faces": {
+        "north": {
+          "texture": "#edge",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#edge",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#edge",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "west": {
+          "texture": "#edge",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "up": {
+          "texture": "#edge",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "down": {
+          "texture": "#edge",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        }
+      }
+    },
+    {
+      "name": "shaft",
+      "from": [
+        -9,
+        6.9,
+        6.9
+      ],
+      "to": [
+        36,
+        9.1,
+        9.1
+      ],
+      "faces": {
+        "north": {
+          "texture": "#dark",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#dark",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#dark",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "west": {
+          "texture": "#dark",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "up": {
+          "texture": "#dark",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "down": {
+          "texture": "#dark",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        }
+      }
+    },
+    {
+      "name": "grip",
+      "from": [
+        2,
+        6.3,
+        6.3
+      ],
+      "to": [
+        14,
+        9.7,
+        9.7
+      ],
+      "faces": {
+        "north": {
+          "texture": "#blackwrap",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#blackwrap",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#blackwrap",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "west": {
+          "texture": "#blackwrap",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "up": {
+          "texture": "#blackwrap",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "down": {
+          "texture": "#blackwrap",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        }
+      }
+    },
+    {
+      "name": "ring-1",
+      "from": [
+        17,
+        5.8,
+        5.8
+      ],
+      "to": [
+        20,
+        10.2,
+        10.2
+      ],
+      "faces": {
+        "north": {
+          "texture": "#aether",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "glow": 80
+        },
+        "east": {
+          "texture": "#aether",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "glow": 80
+        },
+        "south": {
+          "texture": "#aether",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "glow": 80
+        },
+        "west": {
+          "texture": "#aether",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "glow": 80
+        },
+        "up": {
+          "texture": "#aether",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "glow": 80
+        },
+        "down": {
+          "texture": "#aether",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "glow": 80
+        }
+      }
+    },
+    {
+      "name": "ring-2",
+      "from": [
+        27,
+        5.8,
+        5.8
+      ],
+      "to": [
+        30,
+        10.2,
+        10.2
+      ],
+      "faces": {
+        "north": {
+          "texture": "#aether",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "glow": 80
+        },
+        "east": {
+          "texture": "#aether",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "glow": 80
+        },
+        "south": {
+          "texture": "#aether",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "glow": 80
+        },
+        "west": {
+          "texture": "#aether",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "glow": 80
+        },
+        "up": {
+          "texture": "#aether",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "glow": 80
+        },
+        "down": {
+          "texture": "#aether",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "glow": 80
+        }
+      }
+    },
+    {
+      "name": "head-collar",
+      "from": [
+        34,
+        5.5,
+        5.5
+      ],
+      "to": [
+        39,
+        10.5,
+        10.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#gold",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#gold",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#gold",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "west": {
+          "texture": "#gold",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "up": {
+          "texture": "#gold",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "down": {
+          "texture": "#gold",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        }
+      }
+    },
+    {
+      "name": "spear-core",
+      "from": [
+        38,
+        6.2,
+        6.2
+      ],
+      "to": [
+        52,
+        9.8,
+        9.8
+      ],
+      "faces": {
+        "north": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "west": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "up": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "down": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        }
+      }
+    },
+    {
+      "name": "spear-tip",
+      "from": [
+        51,
+        7,
+        7
+      ],
+      "to": [
+        59,
+        9,
+        9
+      ],
+      "faces": {
+        "north": {
+          "texture": "#aether",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "glow": 100
+        },
+        "east": {
+          "texture": "#aether",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "glow": 100
+        },
+        "south": {
+          "texture": "#aether",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "glow": 100
+        },
+        "west": {
+          "texture": "#aether",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "glow": 100
+        },
+        "up": {
+          "texture": "#aether",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "glow": 100
+        },
+        "down": {
+          "texture": "#aether",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "glow": 100
+        }
+      }
+    },
+    {
+      "name": "barb-up",
+      "from": [
+        43,
+        8.4,
+        7
+      ],
+      "to": [
+        51,
+        13.5,
+        9
+      ],
+      "faces": {
+        "north": {
+          "texture": "#edge",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#edge",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#edge",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "west": {
+          "texture": "#edge",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "up": {
+          "texture": "#edge",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "down": {
+          "texture": "#edge",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        }
+      },
+      "rotationOrigin": [
+        47,
+        9,
+        8
+      ],
+      "rotationZ": 24
+    },
+    {
+      "name": "barb-down",
+      "from": [
+        43,
+        2.5,
+        7
+      ],
+      "to": [
+        51,
+        7.6,
+        9
+      ],
+      "faces": {
+        "north": {
+          "texture": "#edge",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#edge",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#edge",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "west": {
+          "texture": "#edge",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "up": {
+          "texture": "#edge",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "down": {
+          "texture": "#edge",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        }
+      },
+      "rotationOrigin": [
+        47,
+        7,
+        8
+      ],
+      "rotationZ": -24
+    },
+    {
+      "name": "despair-rune",
+      "from": [
+        20,
+        5.4,
+        7.2
+      ],
+      "to": [
+        33,
+        5.9,
+        8.8
+      ],
+      "faces": {
+        "north": {
+          "texture": "#aether",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "glow": 110
+        },
+        "east": {
+          "texture": "#aether",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "glow": 110
+        },
+        "south": {
+          "texture": "#aether",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "glow": 110
+        },
+        "west": {
+          "texture": "#aether",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "glow": 110
+        },
+        "up": {
+          "texture": "#aether",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "glow": 110
+        },
+        "down": {
+          "texture": "#aether",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "glow": 110
+        }
+      },
+      "rotationOrigin": [
+        26,
+        5.7,
+        8
+      ]
+    }
+  ]
+}
