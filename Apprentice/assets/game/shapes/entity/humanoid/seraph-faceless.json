@@ -2727,7 +2727,7 @@
 						},
 						"UpperTorso": {
 							"rotationX": 0.0,
-							"rotationY": 45.0,
+							"rotationY": 90.0,
 							"rotationZ": 0.0
 						},
 						"UpperArmR": {
@@ -2801,7 +2801,7 @@
 						},
 						"root": {
 							"rotationX": 0.0,
-							"rotationY": -45.0,
+							"rotationY": -90.0,
 							"rotationZ": 0.0
 						}
 					}

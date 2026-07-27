@@ -6,13 +6,11 @@ using System.Numerics;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
-using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
 using Vintagestory.Client.NoObf;
 using VSImGui;
 using VSImGui.API;
 
-// TODO: apply camera bobbing based on torso in bone-space
 // TODO: refactor Directional8 on dash quadrant angle
 // TODO: add attack pose on top of run animation based on mouse right down/up
 
@@ -391,6 +389,7 @@ namespace Apprentice.Weapon
 		public static bool enableLineGizmo = false;
 		public static bool enableMotionBlur = true;
 		public static bool enableRunAnimations = true;
+		public static bool enableBlendAttackPose = false;
 
 		internal enum Directional8
 		{
@@ -733,10 +732,18 @@ namespace Apprentice.Weapon
 			AnimationSpeed = 0.8F,
 			BlendMode = EnumAnimationBlendMode.Add,
 			ElementWeight = {
-				{ "UpperTorso", 1.0F },
+				{ "UpperTorso", 0.2F },
+				{ "UpperArmR", 1.0F },
+				{ "UpperArmL", 1.0F },
+				{ "Neck", 1.0F },
+				{ "UpperBackAttachment", 1.0F },
 			},
 			ElementBlendMode = {
-				{ "UpperTorso", EnumAnimationBlendMode.Add },
+				{ "UpperTorso", EnumAnimationBlendMode.AddAverage },
+				{ "UpperArmR", EnumAnimationBlendMode.Add },
+				{ "UpperArmL", EnumAnimationBlendMode.Add },
+				{ "Neck", EnumAnimationBlendMode.Add },
+				{ "UpperBackAttachment", EnumAnimationBlendMode.Add },
 			},
 		};
 		#endregion
@@ -1706,6 +1713,27 @@ namespace Apprentice.Weapon
 				}, jumpCooldownMs);
 			}
 		}
+		private void OnToggleBlendAttackPose()
+		{
+			enableBlendAttackPose = !enableBlendAttackPose;
+
+			if (enableBlendAttackPose)
+			{
+				// Set runtime animation data
+				holdWeaponCombatPassiveData.AnimationSpeed = 1.0F; // TODO
+
+				// Start random attack animation
+				entity.AnimManager.StartAnimation(holdWeaponCombatPassiveData);
+				RunningAnimation animation = entity.AnimManager.GetAnimationState(holdWeaponCombatPassiveData.Code);
+				animation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
+				animation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
+			}
+			else
+			{
+				// Stop attack animation only
+				if (entity.AnimManager.IsAnimationActive([holdWeaponCombatPassiveData.Code])) entity.AnimManager.StopAnimation(holdWeaponCombatPassiveData.Code);
+			}
+		}
 
 		private void OnMouseDown(MouseEvent e)
 		{
@@ -1717,7 +1745,8 @@ namespace Apprentice.Weapon
 			}
 			else if (e.Button == EnumMouseButton.Right)
 			{
-				OnJumpReset();
+				// OnJumpReset();
+				OnToggleBlendAttackPose();
 			}
 
 			e.Handled = true;
