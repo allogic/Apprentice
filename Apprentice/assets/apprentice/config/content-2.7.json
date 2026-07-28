@@ -270,8 +270,8 @@
     "RealmNames": ["Homeland", "Barren Desert", "Deep Sea", "Endless Forest", "Shadow Forest", "Frozen Expanse", "Poison Mire", "Shattered Highlands", "Crystal Labyrinth", "Ashen March", "Hell"]
   },
   "Ecology": [
-    { "SchemaVersion": 1, "Id": "venomberry", "DropCode": "apprentice:venomberry", "MinimumTier": 3, "ChancePerTier": 0.012, "MaximumQuantity": 2, "WorldgenBlockCode": "apprentice:venomberryplant", "WorldgenChancePerTier": 0.018, "WorldgenAttemptsPerChunk": 2 },
-    { "SchemaVersion": 1, "Id": "gloamcap", "DropCode": "apprentice:gloamcap", "MinimumTier": 5, "ChancePerTier": 0.010, "MaximumQuantity": 2, "WorldgenBlockCode": "apprentice:gloamcapplant", "WorldgenChancePerTier": 0.012, "WorldgenAttemptsPerChunk": 2 },
-    { "SchemaVersion": 1, "Id": "dangerous-tissue", "DropCode": "apprentice:dangerous-tissue", "MinimumTier": 4, "ChancePerTier": 0.015, "MaximumQuantity": 3 }
+    { "SchemaVersion": 1, "Id": "venomberry", "DropCode": "apprentice:venomberry", "MinimumTier": 3, "AllowedLevels": [3, 6], "ChancePerTier": 0.012, "MaximumQuantity": 2, "WorldgenBlockCode": "apprentice:venomberryplant", "WorldgenChancePerTier": 0.018, "WorldgenAttemptsPerChunk": 2 },
+    { "SchemaVersion": 1, "Id": "gloamcap", "DropCode": "apprentice:gloamcap", "MinimumTier": 4, "AllowedLevels": [4, 6], "ChancePerTier": 0.010, "MaximumQuantity": 2, "WorldgenBlockCode": "apprentice:gloamcapplant", "WorldgenChancePerTier": 0.012, "WorldgenAttemptsPerChunk": 2 },
+    { "SchemaVersion": 1, "Id": "dangerous-tissue", "DropCode": "apprentice:dangerous-tissue", "MinimumTier": 4, "AllowedLevels": [4, 5, 6, 7, 8, 9, 10], "ChancePerTier": 0.015, "MaximumQuantity": 3 }
   ]
 }
