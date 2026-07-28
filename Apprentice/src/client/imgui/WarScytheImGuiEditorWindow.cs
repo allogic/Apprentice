@@ -14,7 +14,7 @@ namespace Apprentice.ClientTools
         ImGuiDialogBase
     {
         private const string WindowTitle =
-            "War Scythe live calibration##apprentice-scythe-editor";
+            "Apprentice item animation editor##apprentice-item-editor";
 
         private static readonly string[] ComponentLabels =
         {
@@ -145,7 +145,7 @@ namespace Apprentice.ClientTools
         private void DrawHeader()
         {
             ImGui.TextUnformatted(
-                "Reference animation editor"
+                editor.SelectedItemCode
             );
             ImGui.SameLine();
             ImGui.TextDisabled(
@@ -215,6 +215,22 @@ namespace Apprentice.ClientTools
 
         private void DrawSelection()
         {
+            string[] animations = editor.AnimationLabels();
+            int animation = editor.SelectedAnimationIndex;
+            ImGui.SetNextItemWidth(420);
+            if (ImGui.Combo(
+                    "Animation##item-animation",
+                    ref animation,
+                    animations,
+                    animations.Length))
+            {
+                int selected = animation;
+                SafeAction(
+                    "Select animation",
+                    () => editor.SelectAnimation(selected)
+                );
+            }
+
             string[] frames = editor.FrameCodes();
             int frame = editor.SelectedFrameIndex;
             ImGui.SetNextItemWidth(280);
@@ -299,7 +315,7 @@ namespace Apprentice.ClientTools
                     "Time##war-scythe-timeline",
                     ref previewTime,
                     0,
-                    editor.WorkingDefinition.DurationSeconds,
+                    editor.DurationSeconds,
                     "%.3f s"))
             {
                 float selectedTime = previewTime;
@@ -437,11 +453,10 @@ namespace Apprentice.ClientTools
                 CultureInfo.InvariantCulture,
                 "Frame {0}/{1} | Element {2} | Time {3:0.000}/{4:0.000}s | Speed {5:0.0}x",
                 editor.SelectedFrameIndex + 1,
-                editor.WorkingDefinition.Animation
-                    .PlayerKeyFrames.Count,
+                editor.FrameCount,
                 editor.SelectedElement,
                 editor.PreviewTime,
-                editor.WorkingDefinition.DurationSeconds,
+                editor.DurationSeconds,
                 editor.PlaybackSpeed
             );
             ImGui.Separator();

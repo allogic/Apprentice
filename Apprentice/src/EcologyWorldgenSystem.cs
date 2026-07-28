@@ -64,7 +64,7 @@ namespace Apprentice
 
             int worldX = request.ChunkX * ChunkSize + ChunkSize / 2;
             int worldZ = request.ChunkZ * ChunkSize + ChunkSize / 2;
-            int tier = GetTierAt(state, worldX, worldZ);
+            int tier = WorldZoneLayout.GetLevelAt(state, worldX, worldZ);
             if (tier <= 0) return;
 
             IMapChunk mapChunk = request.Chunks[0].MapChunk;
@@ -106,20 +106,6 @@ namespace Apprentice
                     data.SetBlockUnsafe(index, blockId);
                 }
             }
-        }
-
-        private static int GetTierAt(DangerWorldState state, double x, double z)
-        {
-            double dx = x - state.AnchorX;
-            double dz = z - state.AnchorZ;
-            double distance = Math.Sqrt(dx * dx + dz * dz);
-            return Math.Clamp(
-                (int)Math.Ceiling(
-                    (distance - state.BaseRadius) / state.RingWidth
-                ),
-                0,
-                state.MaximumTier
-            );
         }
 
         private static long StableHash(string value)

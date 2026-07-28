@@ -39,6 +39,7 @@ namespace Apprentice
 		};
 
 		private readonly ICoreClientAPI api;
+		private readonly System.Func<Item, bool>? openEditor;
 		private readonly Dictionary<string, ModelTransform> baselines =
 			new(StringComparer.OrdinalIgnoreCase);
 		private readonly Dictionary<string, ModelTransform> previews =
@@ -48,9 +49,11 @@ namespace Apprentice
 
 		public ItemCalibrationSystem(
 			ICoreClientAPI api,
-			IClientNetworkChannel channel)
+			IClientNetworkChannel channel,
+			System.Func<Item, bool>? openEditor)
 		{
 			this.api = api;
+			this.openEditor = openEditor;
 			active = this;
 			channel.SetMessageHandler<ItemCalibrationCommandPacket>(
 				OnCommandPacket
@@ -61,7 +64,7 @@ namespace Apprentice
 
 			api.Logger.Notification(
 				"[Apprentice] Generic item calibration enabled. " +
-				"Use /apprentice calibrate <itemname> <show|set|add|reset|export>."
+				"Use /apprentice calibrate <itemname> <show|set|add|reset|export|edit>."
 			);
 		}
 
@@ -86,11 +89,80 @@ namespace Apprentice
 						"/apprentice calibrate apprentice:warscythe show",
 						"/apprentice calibrate game:axe-copper add rx 5",
 						"/apprentice calibrate game:axe-copper set scale 0.8",
-						"/apprentice calibrate apprentice:warscythe export"
+						"/apprentice calibrate apprentice:warscythe export",
+						"/apprentice calibrate apprentice:warscythe edit"
 					})
 					.WithArgs(parsers.All("item and calibration operation"))
 					.HandleWith(args => RelayToIssuingClient(args, channel))
+				.EndSubCommand()
+				.BeginSubCommand("realm")
+					.WithDescription(
+						"Inspect the active concentric-realm save profile"
+					)
+					.BeginSubCommand("status")
+						.WithDescription(
+							"Show the current realm and whether biome generation is active"
+						)
+						.HandleWith(BuildRealmStatus)
+					.EndSubCommand()
 				.EndSubCommand();
+		}
+
+		private static TextCommandResult BuildRealmStatus(
+			TextCommandCallingArgs args)
+		{
+			if (args.Caller.Player is not IServerPlayer player)
+			{
+				return TextCommandResult.Error(
+					"This command must be used by a player.",
+					"apprentice-realm-player-required"
+				);
+			}
+
+			DangerWorldState? state = DangerTierRuntime.WorldState;
+			if (state == null)
+			{
+				return TextCommandResult.Error(
+					"The realm save state is unavailable.",
+					"apprentice-realm-state-unavailable"
+				);
+			}
+
+			double x = player.Entity.Pos.X;
+			double z = player.Entity.Pos.Z;
+			double dx = x - state.AnchorX;
+			double dz = z - state.AnchorZ;
+			double distance = Math.Sqrt(dx * dx + dz * dz);
+			int level = WorldZoneLayout.GetLevelAt(state, x, z);
+			string realmName =
+				state.RealmNames != null &&
+				level >= 0 &&
+				level < state.RealmNames.Length
+					? state.RealmNames[level]
+					: $"Level {level}";
+			bool worldgenActive =
+				state.RealmWorldgenEnabled &&
+				state.WorldgenProfile ==
+					WorldZoneLayout.ConcentricRealmsProfile;
+			string generation = worldgenActive
+				? "ACTIVE"
+				: "DISABLED for this save";
+			string guidance = worldgenActive
+				? "Only newly generated chunks use the realm biome rules."
+				: "The colored map still shows danger levels, but terrain stays vanilla. Create a completely new world to activate realm biomes.";
+			int rewrittenRegions =
+				ConcentricRealmWorldgenSystem.RewrittenDesertMapRegions;
+
+			return TextCommandResult.Success(
+				$"Realm {level}: {realmName}. " +
+				$"Position: {x:0}, {z:0}; anchor: " +
+				$"{state.AnchorX:0}, {state.AnchorZ:0}. " +
+				$"Distance from anchor: {distance:0} blocks. " +
+				$"Biome generation: {generation} " +
+				$"(profile {state.WorldgenProfile}; " +
+				$"Level 1 map rewrite passes this session: " +
+				$"{rewrittenRegions}). {guidance}"
+			);
 		}
 
 		private static TextCommandResult RelayToIssuingClient(
@@ -172,6 +244,10 @@ namespace Apprentice
 				case "export":
 					if (tokens.Length != 2) return Usage;
 					return Export(item!);
+
+				case "edit":
+					if (tokens.Length != 2) return Usage;
+					return OpenEditor(item!);
 
 				case "add":
 				case "set":
@@ -326,6 +402,34 @@ namespace Apprentice
 				" written to client-main.log. " + FormatPose(item, pose);
 		}
 
+		private string OpenEditor(Item item)
+		{
+			if (openEditor == null)
+			{
+				return "The animation editor is unavailable on this client.";
+			}
+
+			try
+			{
+				return openEditor(item)
+					? "Opened the calibration editor for " +
+						CodeOf(item) + "."
+					: "Could not open the calibration editor for " +
+						CodeOf(item) +
+						". Put that item in your right hand and try again.";
+			}
+			catch (Exception exception)
+			{
+				api.Logger.Error(
+					"[Apprentice] Could not open the item editor for {0}: {1}",
+					CodeOf(item),
+					exception.Message
+				);
+				return "Could not open the calibration editor: " +
+					exception.Message;
+			}
+		}
+
 		private ModelTransform GetCurrent(Item item)
 		{
 			string code = CodeOf(item);
@@ -381,18 +485,36 @@ namespace Apprentice
 						nameof(ItemCalibrationRenderPatch.Postfix)
 					);
 
-				MethodInfo[] renderMethods = api.World.Items
-					.Where(item => item != null)
-					.Select(item => item.GetType().GetMethod(
-						nameof(CollectibleObject.OnBeforeRender),
-						BindingFlags.Instance | BindingFlags.Public,
-						binder: null,
-						types: signature,
-						modifiers: null
-					))
-					.Where(method => method != null)
-					.Cast<MethodInfo>()
-					.Distinct()
+				HashSet<MethodInfo> discoveredMethods = new();
+				foreach (Item item in api.World.Items.Where(item => item != null))
+				{
+					for (Type? type = item.GetType();
+						type != null &&
+						typeof(CollectibleObject).IsAssignableFrom(type);
+						type = type.BaseType)
+					{
+						MethodInfo? method = type.GetMethod(
+							nameof(CollectibleObject.OnBeforeRender),
+							BindingFlags.Instance |
+								BindingFlags.Public |
+								BindingFlags.DeclaredOnly,
+							binder: null,
+							types: signature,
+							modifiers: null
+						);
+						if (method != null && !method.IsAbstract)
+						{
+							discoveredMethods.Add(method);
+						}
+
+						if (type == typeof(CollectibleObject))
+						{
+							break;
+						}
+					}
+				}
+				MethodInfo[] renderMethods = discoveredMethods
+					.OrderBy(method => method.DeclaringType?.FullName)
 					.ToArray();
 
 				int patched = 0;
@@ -584,7 +706,7 @@ namespace Apprentice
 
 		private const string Usage =
 			"Usage: /apprentice calibrate <itemname> " +
-			"<show|reset|export|add component amount|set component value>.";
+			"<show|reset|export|edit|add component amount|set component value>.";
 	}
 
 	internal static class ItemCalibrationRenderPatch

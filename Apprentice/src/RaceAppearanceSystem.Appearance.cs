@@ -64,6 +64,39 @@ namespace Apprentice
             RefreshHiddenRaceParts(player, profile);
         }
 
+        private static void QueueLocalRaceAppearanceRefresh(
+            EntityPlayer player,
+            string classCode)
+        {
+            ApplyRaceAppearance(player, classCode);
+
+            ICoreClientAPI? capi = clientApi;
+            if (capi == null || player.Api.Side != EnumAppSide.Client) return;
+
+            long refreshId = ++raceAppearanceRefreshId;
+            foreach (int delay in new[] { 50, 200 })
+            {
+                capi.Event.RegisterCallback(
+                    _ =>
+                    {
+                        if (refreshId != raceAppearanceRefreshId ||
+                            !ReferenceEquals(capi.World.Player?.Entity, player) ||
+                            GetClassCode(player) != classCode)
+                        {
+                            return;
+                        }
+
+                        ApplyRaceAppearance(player, classCode);
+                        if (activeCharacterDialog != null)
+                        {
+                            UpdateBodyTrait(activeCharacterDialog);
+                        }
+                    },
+                    delay
+                );
+            }
+        }
+
         private static void RefreshHiddenRaceParts(
             EntityPlayer player,
             RaceProfile profile)
@@ -520,6 +553,7 @@ namespace Apprentice
             RestoreNaturalPalette();
             DestroyOptionsDialog();
             RestoreAllCharacterDialogLayouts();
+            StopInitialRacePreviewProtection();
             harmony?.UnpatchAll(HarmonyId);
             harmony = null;
             clientApi = null;
@@ -529,8 +563,11 @@ namespace Apprentice
             activeCharacterDialog = null;
             pendingSkinConfirmDialog = null;
             pendingSkinConfirmRequestId = 0;
+            raceAppearanceRefreshId++;
             skinCloseRequested = false;
+            loggedTraitRefreshFailure = false;
             ConfirmedRaceDialogs.Clear();
+            ConfirmedRaceClasses.Clear();
             ApprovedCharacterDialogClosures.Clear();
             NativeFinalCharacterConfirmCallbacks.Clear();
             RestoreInProgress.Clear();

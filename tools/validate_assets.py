@@ -2766,6 +2766,16 @@ def validate_repository_layout(validation: Validation) -> None:
             "state, never from a forge-plan inventory token."
         ),
     )
+    native_confirm_index = race_dialog_source.find("nativeConfirm();")
+    native_fallback_index = race_dialog_source.find(
+        "onConfirm.Invoke(dialog, null)"
+    )
+    authoritative_apply_index = race_dialog_source.find(
+        "ApplyCustomizationSnapshot(player, snapshot);"
+    )
+    authoritative_send_index = race_dialog_source.find(
+        "clientChannel?.SendPacket(snapshot);"
+    )
     validation.check(
         "ApprovedCharacterDialogClosures" in race_system_source
         and "NativeFinalCharacterConfirmCallbacks" in race_system_source
@@ -2775,19 +2785,23 @@ def validate_repository_layout(validation: Validation) -> None:
         and "__2 = () => OnCharacterSkinConfirmClicked(dialog)" in race_dialog_source
         and "NativeFinalCharacterConfirmCallbacks[dialog] = __2" in race_dialog_source
         and "SetDialogTab(dialog, 1);" in race_dialog_source
-        and "nativeConfirm();" in race_dialog_source
-        and "CompletePendingSkinConfirmation(dialog, requestId);" in race_dialog_source
+        and "CompletePendingSkinConfirmation(" in race_dialog_source
+        and "dialog,\n                    player,\n                    snapshot"
+            in race_dialog_source
+        and native_confirm_index >= 0
+        and native_fallback_index >= 0
+        and authoritative_apply_index > native_confirm_index
+        and authoritative_apply_index > native_fallback_index
+        and authoritative_send_index > authoritative_apply_index
         and "RegisterCallback(" not in race_dialog_source[
             race_dialog_source.find("private static void BeginSkinConfirmation"):
             race_dialog_source.find("private static void OnRaceSaveResult")
         ]
-        and "onConfirm.Invoke(dialog, null)" in race_dialog_source
         and "Removed {0} stale character dialog" not in race_dialog_source,
         (
             "Character creation must replace the native next-tab Skin callback, "
-            "retain the actual final character-confirm callback, queue persistence "
-            "before native completion without "
-            "deadlocking on the paused single-player server, "
+            "retain the actual final character-confirm callback, apply and send "
+            "the captured Apprentice race snapshot after native completion, "
             "and patch the implemented GuiDialog.TryClose declaration so "
             "every close route remains blocked until Race and Skin are confirmed."
         ),

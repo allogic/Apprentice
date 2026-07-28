@@ -124,6 +124,10 @@
     <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\shapes\block\2.7\advancedtrap-opening3.json" />
     <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\shapes\block\2.7\advancedtrap-opening4.json" />
     <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\entities\2.7\atlatl.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\entities\2.7\unending-despair-projectile.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\entities\2.7\fire-lance-projectile.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\entities\2.7\nuibari-projectile.json" />
+    <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\entities\2.7\shapesplitter-echo.json" />
     <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\shapes\item\2.7\grandmaster-spear.json" />
     <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\shapes\item\2.7\tower-shield.json" />
     <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\shapes\item\2.7\master-fishing-rod.json" />

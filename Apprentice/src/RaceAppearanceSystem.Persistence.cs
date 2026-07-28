@@ -23,7 +23,7 @@ namespace Apprentice
         {
             if (RestoreInProgress.Contains(eplayer)) return;
 
-            ApplyRaceAppearance(eplayer, classCode);
+            QueueLocalRaceAppearanceRefresh(eplayer, classCode);
             ApplyBodyStats(eplayer, GetProfile(classCode));
 
             if (eplayer.Api.Side == EnumAppSide.Client)
@@ -31,18 +31,8 @@ namespace Apprentice
                 if (activeCharacterDialog != null)
                 {
                     ConfirmedRaceDialogs.Remove(activeCharacterDialog);
+                    ConfirmedRaceClasses.Remove(activeCharacterDialog);
                 }
-                eplayer.Api.Event.RegisterCallback(
-                    _ =>
-                    {
-                        string currentClass = GetClassCode(eplayer);
-                        if (currentClass == classCode)
-                        {
-                            ApplyRaceAppearance(eplayer, classCode);
-                        }
-                    },
-                    100
-                );
             }
         }
 
@@ -82,6 +72,29 @@ namespace Apprentice
                         SerializerUtil.Serialize(snapshot)
                     );
                     ApplyCustomizationSnapshot(fromPlayer.Entity, snapshot);
+                    serverChannel?.SendPacket(snapshot, fromPlayer);
+                    ITreeAttribute? appliedParts = fromPlayer.Entity
+                        .WatchedAttributes
+                        .GetTreeAttribute("skinConfig")
+                        ?.GetTreeAttribute("appliedParts");
+                    serverApi?.Logger.Notification(
+                        "[Apprentice] Saved authoritative character snapshot for {0}: race={1}, subclass={2}, shape={3}, horns={4}, teeth={5}.",
+                        fromPlayer.PlayerName,
+                        snapshot.RaceClass,
+                        snapshot.Subclass,
+                        appliedParts?.GetString(
+                            SkinPartCode,
+                            "<missing>"
+                        ),
+                        appliedParts?.GetString(
+                            HornPartCode,
+                            "<missing>"
+                        ),
+                        appliedParts?.GetString(
+                            TeethPartCode,
+                            "<missing>"
+                        )
+                    );
                     result.Success = true;
                 }
             }
@@ -329,22 +342,36 @@ namespace Apprentice
             player.WatchedAttributes.MarkAllDirty();
         }
 
-        private static long SendBodyPacket(EntityPlayer player)
+        private static long SendBodyPacket(
+            EntityPlayer player,
+            string? confirmedRaceClass = null)
         {
             if (clientChannel == null) return 0;
 
             long requestId = System.Threading.Interlocked.Increment(
                 ref nextRaceSaveRequestId
             );
-            clientChannel.SendPacket(BuildRaceBodyPacket(player, requestId));
+            clientChannel.SendPacket(
+                BuildRaceBodyPacket(
+                    player,
+                    requestId,
+                    confirmedRaceClass
+                )
+            );
             return requestId;
         }
 
         private static RaceBodyPacket BuildRaceBodyPacket(
             EntityPlayer player,
-            long requestId)
+            long requestId,
+            string? confirmedRaceClass = null)
         {
-            RaceProfile profile = GetProfile(player);
+            string raceClass =
+                !string.IsNullOrEmpty(confirmedRaceClass) &&
+                RaceByClass.ContainsKey(confirmedRaceClass)
+                    ? confirmedRaceClass
+                    : GetClassCode(player);
+            RaceProfile profile = GetProfile(raceClass);
             RaceBodyPacket packet = new()
             {
                 Height = GetHeightChoice(player),
@@ -354,7 +381,7 @@ namespace Apprentice
                 Subclass = GetSubclassChoice(player, profile),
                 Profession = GetProfessionChoice(player),
                 HornColor = GetHornColorChoice(player),
-                RaceClass = GetClassCode(player),
+                RaceClass = raceClass,
                 SchemaVersion = RaceSnapshotSchemaVersion,
                 RequestId = requestId
             };

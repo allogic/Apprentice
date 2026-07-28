@@ -1905,7 +1905,6 @@ namespace Apprentice
         private static readonly string[] RenderMethods =
         {
             "DoRender3DOpaque",
-            "DoRender3DAfterOIT",
             "DoRender3DOpaqueBatched"
         };
 
@@ -1925,15 +1924,25 @@ namespace Apprentice
                 return;
             }
 
+            int patched = 0;
             foreach (string methodName in RenderMethods)
             {
-                MethodInfo? method =
-                    AccessTools.Method(
-                        rendererType,
-                        methodName
-                    );
+                MethodInfo? method = rendererType.GetMethod(
+                    methodName,
+                    BindingFlags.Instance |
+                        BindingFlags.Public |
+                    BindingFlags.NonPublic |
+                        BindingFlags.DeclaredOnly,
+                    binder: null,
+                    types: new[] { typeof(float), typeof(bool) },
+                    modifiers: null
+                );
                 if (method == null)
                 {
+                    api.Logger.Warning(
+                        "[Apprentice] Legendary invisibility did not find the implemented renderer method {0}.",
+                        methodName
+                    );
                     continue;
                 }
 
@@ -1944,7 +1953,13 @@ namespace Apprentice
                         nameof(EntityRenderPrefix)
                     )
                 );
+                patched++;
             }
+
+            api.Logger.Notification(
+                "[Apprentice] Legendary invisibility attached to {0} implemented entity-render methods.",
+                patched
+            );
         }
 
         public static bool EntityRenderPrefix(

@@ -56,6 +56,22 @@ namespace Apprentice
         [ProtoMember(10)]
         public string[] Palette { get; set; } = Array.Empty<string>();
 
+        [ProtoMember(11)]
+        public string[] RealmNames { get; set; } = Array.Empty<string>();
+
+        [ProtoMember(12)]
+        public string WorldgenProfile { get; set; } =
+            WorldZoneLayout.LegacyProfile;
+
+        [ProtoMember(13)]
+        public bool RealmWorldgenEnabled { get; set; }
+
+        [ProtoMember(14)]
+        public int DesertTemperatureCelsius { get; set; }
+
+        [ProtoMember(15)]
+        public int DesertRainfall { get; set; }
+
         internal static DangerHeatmapStatePacket FromState(
             DangerWorldState state)
         {
@@ -70,7 +86,14 @@ namespace Apprentice
                 MaximumTier = state.MaximumTier,
                 HealthPerTier = state.HealthPerTier,
                 DamagePerTier = state.DamagePerTier,
-                Palette = state.Palette ?? Array.Empty<string>()
+                Palette = state.Palette ?? Array.Empty<string>(),
+                RealmNames = state.RealmNames ?? Array.Empty<string>(),
+                WorldgenProfile = state.WorldgenProfile ??
+                    WorldZoneLayout.LegacyProfile,
+                RealmWorldgenEnabled = state.RealmWorldgenEnabled,
+                DesertTemperatureCelsius =
+                    state.DesertTemperatureCelsius,
+                DesertRainfall = state.DesertRainfall
             };
         }
 
@@ -87,7 +110,14 @@ namespace Apprentice
                 MaximumTier = MaximumTier,
                 HealthPerTier = HealthPerTier,
                 DamagePerTier = DamagePerTier,
-                Palette = Palette ?? Array.Empty<string>()
+                Palette = Palette ?? Array.Empty<string>(),
+                RealmNames = RealmNames ?? Array.Empty<string>(),
+                WorldgenProfile = WorldgenProfile ??
+                    WorldZoneLayout.LegacyProfile,
+                RealmWorldgenEnabled = RealmWorldgenEnabled,
+                DesertTemperatureCelsius =
+                    DesertTemperatureCelsius,
+                DesertRainfall = DesertRainfall
             };
         }
     }

@@ -31,11 +31,7 @@ internal static class ReferenceAnimationEditing
             element,
             out bool exists
         );
-        return exists
-            ? result
-            : throw new InvalidOperationException(
-                $"Frame {frameIndex} does not own '{elementName}'."
-            );
+        return exists ? result : AnimationElement.Zero;
     }
 
     public static float[] GetValues(
@@ -162,6 +158,11 @@ internal static class ReferenceAnimationEditing
     {
         RightHandFrame? right = frame.RightHand;
         LeftHandFrame? left = frame.LeftHand;
+        OtherPartsFrame? other = frame.OtherParts;
+        AnimationElement? upperTorso = frame.UpperTorso;
+        AnimationElement? lowerTorso = frame.LowerTorso;
+        AnimationElement? detachedAnchor =
+            frame.DetachedAnchorFrame;
 
         switch (selectedPart)
         {
@@ -193,25 +194,104 @@ internal static class ReferenceAnimationEditing
                 };
                 break;
 
+            case EnumAnimatedElement.Neck:
+            case EnumAnimatedElement.Head:
+            case EnumAnimatedElement.UpperFootR:
+            case EnumAnimatedElement.UpperFootL:
+            case EnumAnimatedElement.LowerFootR:
+            case EnumAnimatedElement.LowerFootL:
+                OtherPartsFrame parts =
+                    other ?? OtherPartsFrame.Zero;
+                other = selectedPart switch
+                {
+                    EnumAnimatedElement.Neck =>
+                        new(
+                            element,
+                            parts.Head,
+                            parts.UpperFootR,
+                            parts.UpperFootL,
+                            parts.LowerFootR,
+                            parts.LowerFootL
+                        ),
+                    EnumAnimatedElement.Head =>
+                        new(
+                            parts.Neck,
+                            element,
+                            parts.UpperFootR,
+                            parts.UpperFootL,
+                            parts.LowerFootR,
+                            parts.LowerFootL
+                        ),
+                    EnumAnimatedElement.UpperFootR =>
+                        new(
+                            parts.Neck,
+                            parts.Head,
+                            element,
+                            parts.UpperFootL,
+                            parts.LowerFootR,
+                            parts.LowerFootL
+                        ),
+                    EnumAnimatedElement.UpperFootL =>
+                        new(
+                            parts.Neck,
+                            parts.Head,
+                            parts.UpperFootR,
+                            element,
+                            parts.LowerFootR,
+                            parts.LowerFootL
+                        ),
+                    EnumAnimatedElement.LowerFootR =>
+                        new(
+                            parts.Neck,
+                            parts.Head,
+                            parts.UpperFootR,
+                            parts.UpperFootL,
+                            element,
+                            parts.LowerFootL
+                        ),
+                    _ =>
+                        new(
+                            parts.Neck,
+                            parts.Head,
+                            parts.UpperFootR,
+                            parts.UpperFootL,
+                            parts.LowerFootR,
+                            element
+                        )
+                };
+                break;
+
+            case EnumAnimatedElement.UpperTorso:
+                upperTorso = element;
+                break;
+
+            case EnumAnimatedElement.LowerTorso:
+                lowerTorso = element;
+                break;
+
+            case EnumAnimatedElement.DetachedAnchor:
+                detachedAnchor = element;
+                break;
+
             default:
                 throw new InvalidOperationException(
-                    $"'{selectedPart}' is outside the War Scythe six-part reference frame."
+                    $"'{selectedPart}' is not an editable player-rig element."
                 );
         }
 
         return new PlayerFrame(
             right,
             left,
-            frame.OtherParts,
-            frame.UpperTorso,
-            frame.DetachedAnchorFrame,
+            other,
+            upperTorso,
+            detachedAnchor,
             frame.DetachedAnchor,
             frame.SwitchArms,
             frame.PitchFollow,
             frame.FovMultiplier,
             frame.BobbingAmplitude,
             frame.DetachedAnchorFollow,
-            frame.LowerTorso
+            lowerTorso
         );
     }
 
@@ -241,6 +321,33 @@ internal static class ReferenceAnimationEditing
             case EnumAnimatedElement.UpperArmL
                 when frame.LeftHand != null:
                 return frame.LeftHand.Value.UpperArmL;
+            case EnumAnimatedElement.Neck
+                when frame.OtherParts != null:
+                return frame.OtherParts.Value.Neck;
+            case EnumAnimatedElement.Head
+                when frame.OtherParts != null:
+                return frame.OtherParts.Value.Head;
+            case EnumAnimatedElement.UpperFootR
+                when frame.OtherParts != null:
+                return frame.OtherParts.Value.UpperFootR;
+            case EnumAnimatedElement.UpperFootL
+                when frame.OtherParts != null:
+                return frame.OtherParts.Value.UpperFootL;
+            case EnumAnimatedElement.LowerFootR
+                when frame.OtherParts != null:
+                return frame.OtherParts.Value.LowerFootR;
+            case EnumAnimatedElement.LowerFootL
+                when frame.OtherParts != null:
+                return frame.OtherParts.Value.LowerFootL;
+            case EnumAnimatedElement.UpperTorso
+                when frame.UpperTorso != null:
+                return frame.UpperTorso.Value;
+            case EnumAnimatedElement.LowerTorso
+                when frame.LowerTorso != null:
+                return frame.LowerTorso.Value;
+            case EnumAnimatedElement.DetachedAnchor
+                when frame.DetachedAnchorFrame != null:
+                return frame.DetachedAnchorFrame.Value;
             default:
                 exists = false;
                 return AnimationElement.Zero;

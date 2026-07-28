@@ -19,6 +19,12 @@ namespace Apprentice
     public sealed class DangerHeatmapLayer : MarkerMapLayer
     {
         private const int TextureSize = 512;
+        private const int LegendWidth = 238;
+        private const int LegendRowHeight = 19;
+        private const int LegendPadding = 8;
+        private const double OverlayAlpha = 0.24;
+        private const double FullMapMinimumWidth = 500;
+        private const double FullMapMinimumHeight = 400;
         // Vanilla terrain chunks render at z=50 and waypoint icons at z=60.
         // Keep the heatmap between them so it tints the terrain without
         // hiding waypoints or falling behind the map canvas.
@@ -29,6 +35,7 @@ namespace Apprentice
         private ICoreClientAPI? capi;
         private DangerWorldState? state;
         private LoadedTexture? overlayTexture;
+        private LoadedTexture? legendTexture;
         private double cachedViewX1 = double.NaN;
         private double cachedViewZ1 = double.NaN;
         private double cachedViewX2 = double.NaN;
@@ -37,7 +44,8 @@ namespace Apprentice
         private bool loggedFirstRender;
 
         public override bool RequireChunkLoaded => false;
-        public override string Title => "Apprentice danger regions (tiers 0-10)";
+        public override string Title =>
+            "Apprentice concentric realms (levels 0-10)";
         public override EnumMapAppSide DataSide => EnumMapAppSide.Client;
         public override string LayerGroupCode => "apprentice-danger-heatmap";
 
@@ -129,7 +137,10 @@ namespace Apprentice
                 );
                 if (received == null || received.RingWidth <= 0 ||
                     received.Palette == null ||
-                    received.Palette.Length != received.MaximumTier + 1)
+                    received.Palette.Length != received.MaximumTier + 1 ||
+                    received.RealmNames == null ||
+                    received.RealmNames.Length !=
+                        received.MaximumTier + 1)
                 {
                     return;
                 }
@@ -154,7 +165,10 @@ namespace Apprentice
         {
             if (received.RingWidth <= 0 || received.MaximumTier < 0 ||
                 received.Palette == null ||
-                received.Palette.Length != received.MaximumTier + 1)
+                received.Palette.Length != received.MaximumTier + 1 ||
+                received.RealmNames == null ||
+                received.RealmNames.Length !=
+                    received.MaximumTier + 1)
             {
                 capi?.Logger.Warning(
                     "[Apprentice] Ignored an incomplete danger heatmap snapshot."
@@ -170,8 +184,9 @@ namespace Apprentice
                 Active = false;
             }
             InvalidateViewTexture();
+            RebuildLegendTexture();
             capi?.Logger.Notification(
-                "[Apprentice] Danger heatmap ready at X={0:0}, Z={1:0} with tiers 0-{2}.",
+                "[Apprentice] Realm heatmap ready at X={0:0}, Z={1:0} with levels 0-{2}.",
                 received.AnchorX,
                 received.AnchorZ,
                 received.MaximumTier
@@ -287,7 +302,7 @@ namespace Apprentice
                 backgroundRed,
                 backgroundGreen,
                 backgroundBlue,
-                0.58
+                OverlayAlpha
             );
             context.Paint();
 
@@ -304,7 +319,12 @@ namespace Apprentice
                 (double red, double green, double blue) = ParseColor(
                     state.Palette[tier]
                 );
-                context.SetSourceRGBA(red, green, blue, 0.58);
+                context.SetSourceRGBA(
+                    red,
+                    green,
+                    blue,
+                    OverlayAlpha
+                );
                 context.Save();
                 context.Translate(centerX, centerY);
                 context.Scale(radiusX, radiusY);
@@ -331,8 +351,98 @@ namespace Apprentice
             cachedViewZ2 = view.Z2;
         }
 
+        private void RebuildLegendTexture()
+        {
+            if (capi == null || state?.Palette == null ||
+                state.RealmNames == null ||
+                state.Palette.Length != state.RealmNames.Length)
+            {
+                return;
+            }
+
+            int statusRows = 1;
+            int height = LegendPadding * 2 +
+                (state.RealmNames.Length + statusRows) *
+                    LegendRowHeight;
+            using ImageSurface surface = new(
+                (Format)0,
+                LegendWidth,
+                height
+            );
+            using Context context = new(surface);
+            context.Operator = Operator.Source;
+            context.SetSourceRGBA(0.035, 0.035, 0.04, 0.86);
+            context.Paint();
+            context.Operator = Operator.Over;
+            context.SelectFontFace(
+                "Sans",
+                FontSlant.Normal,
+                FontWeight.Normal
+            );
+            context.SetFontSize(12);
+
+            bool worldgenActive =
+                state.RealmWorldgenEnabled &&
+                state.WorldgenProfile ==
+                    WorldZoneLayout.ConcentricRealmsProfile;
+            context.SetSourceRGB(
+                worldgenActive ? 0.55 : 1.0,
+                worldgenActive ? 0.92 : 0.45,
+                worldgenActive ? 0.62 : 0.35
+            );
+            context.MoveTo(8, LegendPadding + 14);
+            context.ShowText(
+                worldgenActive
+                    ? "Biome worldgen: active"
+                    : "Biome worldgen: disabled"
+            );
+
+            for (int level = 0;
+                level < state.RealmNames.Length;
+                level++)
+            {
+                double y = LegendPadding +
+                    (level + statusRows) * LegendRowHeight;
+                (double red, double green, double blue) = ParseColor(
+                    state.Palette[level]
+                );
+                context.SetSourceRGB(red, green, blue);
+                context.Rectangle(8, y + 3, 12, 12);
+                context.Fill();
+
+                context.SetSourceRGB(0.96, 0.96, 0.96);
+                context.MoveTo(27, y + 14);
+                context.ShowText(
+                    $"{level}. {state.RealmNames[level]}"
+                );
+            }
+
+            LoadedTexture texture = legendTexture ?? new LoadedTexture(
+                capi,
+                0,
+                LegendWidth,
+                height
+            );
+            capi.Gui.LoadOrUpdateCairoTexture(
+                surface,
+                linearMag: true,
+                ref texture
+            );
+            legendTexture = texture;
+        }
+
         public override void Render(GuiElementMap map, float dt)
         {
+            // GuiDialogWorldMap reuses every map layer for both its full map
+            // and its 250x250 HUD minimap. Realm tinting and its legend are
+            // useful only on the full map; on the HUD they obscure terrain
+            // and consume most of the available space.
+            if (map.Bounds.OuterWidth < FullMapMinimumWidth ||
+                map.Bounds.OuterHeight < FullMapMinimumHeight)
+            {
+                return;
+            }
+
             EnsureTerrainVisible();
             DangerHeatmapStatePacket? latest =
                 DangerHeatmapClientRuntime.LatestState;
@@ -374,6 +484,17 @@ namespace Apprentice
                 map.Bounds.OuterHeight,
                 HeatmapRingDepth
             );
+            if (legendTexture != null && !legendTexture.Disposed)
+            {
+                render.Render2DTexturePremultipliedAlpha(
+                    legendTexture.TextureId,
+                    map.Bounds.renderX + 12,
+                    map.Bounds.renderY + 12,
+                    LegendWidth,
+                    legendTexture.Height,
+                    HeatmapRingDepth + 1
+                );
+            }
         }
 
         private static (double Red, double Green, double Blue) ParseColor(
@@ -399,6 +520,8 @@ namespace Apprentice
             }
             overlayTexture?.Dispose();
             overlayTexture = null;
+            legendTexture?.Dispose();
+            legendTexture = null;
             base.Dispose();
         }
     }

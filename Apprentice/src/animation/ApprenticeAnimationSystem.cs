@@ -67,6 +67,9 @@ namespace Apprentice
 
         public bool EditorPreviewActive => editor.PreviewActive;
 
+        public bool OpenEditorForItem(Item item) =>
+            editor.OpenForItem(item);
+
         public static void RegisterServerHandler(
             ICoreServerAPI api,
             IServerNetworkChannel channel,

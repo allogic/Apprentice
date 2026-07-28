@@ -255,15 +255,19 @@
     { "SchemaVersion": 1, "Id": "grandmaster", "ArrowCode": "apprentice:arrow-poison-grandmaster", "DamagePerSecond": 0.5, "DurationSeconds": 20, "MaximumDurationSeconds": 30, "RequiredDiscovery": "hivealchemist" }
   ],
   "Danger": {
-    "SchemaVersion": 2, "Enabled": true, "BaseRadius": 4000, "RingWidth": 2000,
+    "SchemaVersion": 3, "Enabled": true, "BaseRadius": 10000, "RingWidth": 5000,
     "MaximumTier": 10, "HealthPerTier": 0.35, "DamagePerTier": 0.18,
+    "WorldgenProfile": "concentric-realms-v1", "RealmWorldgenEnabled": true,
+    "DesertTemperatureCelsius": 38, "DesertRainfall": 4,
+    "DeepSeaDepth": 48, "DeepSeaShoreWidth": 128,
     "IncludeCodePatterns": [
       "game:drifter-*", "game:locust-*", "game:bell-*", "game:shiver-*",
       "game:bowtorn-*", "game:nightmare-*", "game:wolf-*", "game:bear-*",
       "game:hyena-*", "game:fox-*", "game:boar-*", "game:seraphim-*"
     ],
     "ExcludeCodePatterns": ["game:player", "*trader*", "*villager*", "*livestock*", "*mount*", "*vehicle*", "*corpse*", "*drifter-normalized*"],
-    "Palette": ["#165A2A", "#62B44B", "#3F8F3B", "#2F6F2F", "#B7C83D", "#E5D744", "#F3B33D", "#ED7A2F", "#D94A2D", "#B3232E", "#650F24"]
+    "Palette": ["#2F7D44", "#D6A84B", "#165D8F", "#174F2A", "#241C35", "#9EDCEB", "#6E8F36", "#8A7358", "#7B59B3", "#4A4543", "#A11F16"],
+    "RealmNames": ["Homeland", "Barren Desert", "Deep Sea", "Endless Forest", "Shadow Forest", "Frozen Expanse", "Poison Mire", "Shattered Highlands", "Crystal Labyrinth", "Ashen March", "Hell"]
   },
   "Ecology": [
     { "SchemaVersion": 1, "Id": "venomberry", "DropCode": "apprentice:venomberry", "MinimumTier": 3, "ChancePerTier": 0.012, "MaximumQuantity": 2, "WorldgenBlockCode": "apprentice:venomberryplant", "WorldgenChancePerTier": 0.018, "WorldgenAttemptsPerChunk": 2 },

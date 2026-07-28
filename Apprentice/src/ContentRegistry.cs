@@ -65,16 +65,24 @@ namespace Apprentice
 
     internal sealed class DangerDefinition
     {
-        public int SchemaVersion { get; set; } = 1;
+        public int SchemaVersion { get; set; } = 3;
         public bool Enabled { get; set; } = true;
-        public double BaseRadius { get; set; } = 4000;
-        public double RingWidth { get; set; } = 2000;
+        public double BaseRadius { get; set; } = 10000;
+        public double RingWidth { get; set; } = 5000;
         public int MaximumTier { get; set; } = 10;
         public double HealthPerTier { get; set; } = 0.35;
         public double DamagePerTier { get; set; } = 0.18;
+        public string WorldgenProfile { get; set; } =
+            WorldZoneLayout.ConcentricRealmsProfile;
+        public bool RealmWorldgenEnabled { get; set; } = true;
+        public int DesertTemperatureCelsius { get; set; } = 38;
+        public int DesertRainfall { get; set; } = 4;
+        public int DeepSeaDepth { get; set; } = 48;
+        public int DeepSeaShoreWidth { get; set; } = 128;
         public List<string> IncludeCodePatterns { get; set; } = new();
         public List<string> ExcludeCodePatterns { get; set; } = new();
         public List<string> Palette { get; set; } = new();
+        public List<string> RealmNames { get; set; } = new();
     }
 
     internal sealed class EcologyDefinition
@@ -471,6 +479,10 @@ namespace Apprentice
         {
             value.IncludeCodePatterns = value.IncludeCodePatterns.Select(NormalizeCode).ToList();
             value.ExcludeCodePatterns = value.ExcludeCodePatterns.Select(NormalizeCode).ToList();
+            value.WorldgenProfile = NormalizeId(value.WorldgenProfile);
+            value.RealmNames = value.RealmNames
+                .Select(name => (name ?? string.Empty).Trim())
+                .ToList();
             if (!value.Enabled) return null;
             if (value.SchemaVersion < 1) return "SchemaVersion must be positive";
             if (value.BaseRadius < 0 || !double.IsFinite(value.BaseRadius)) return "BaseRadius must be finite and non-negative";
@@ -480,6 +492,24 @@ namespace Apprentice
                 !double.IsFinite(value.HealthPerTier) || !double.IsFinite(value.DamagePerTier))
                 return "tier multipliers must be finite and non-negative";
             if (value.Palette.Count != value.MaximumTier + 1) return "Palette needs exactly MaximumTier + 1 colors";
+            if (value.RealmNames.Count != value.MaximumTier + 1)
+                return "RealmNames needs exactly MaximumTier + 1 names";
+            if (value.RealmNames.Any(string.IsNullOrWhiteSpace))
+                return "RealmNames cannot contain empty names";
+            if (value.RealmWorldgenEnabled &&
+                value.WorldgenProfile !=
+                    WorldZoneLayout.ConcentricRealmsProfile)
+                return "WorldgenProfile must be concentric-realms-v1 when realm worldgen is enabled";
+            if (value.DesertTemperatureCelsius < -50 ||
+                value.DesertTemperatureCelsius > 60)
+                return "DesertTemperatureCelsius must be between -50 and 60";
+            if (value.DesertRainfall < 0 || value.DesertRainfall > 255)
+                return "DesertRainfall must be between 0 and 255";
+            if (value.DeepSeaDepth < 8 || value.DeepSeaDepth > 256)
+                return "DeepSeaDepth must be between 8 and 256 blocks";
+            if (value.DeepSeaShoreWidth < 0 ||
+                value.DeepSeaShoreWidth * 2 >= value.RingWidth)
+                return "DeepSeaShoreWidth must leave a positive Deep Sea core";
             if (value.Palette.Any(color =>
                 color.Length != 7 ||
                 color[0] != '#' ||

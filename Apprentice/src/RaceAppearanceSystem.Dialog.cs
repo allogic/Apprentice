@@ -285,6 +285,7 @@ namespace Apprentice
 
         private static void AfterDialogOpened(object __instance)
         {
+            StopInitialRacePreviewProtection();
             if (!ReferenceEquals(activeCharacterDialog, __instance))
             {
                 pendingSkinConfirmDialog = null;
@@ -294,18 +295,157 @@ namespace Apprentice
             activeCharacterDialog = __instance;
             HookCharacterBeforeCompose(__instance);
             ConfirmedRaceDialogs.Remove(__instance);
+            ConfirmedRaceClasses.Remove(__instance);
             ApprovedCharacterDialogClosures.Remove(__instance);
             NativeFinalCharacterConfirmCallbacks.Remove(__instance);
             SetDialogTab(__instance, 1);
             ResetDialogZoom(__instance);
             AccessTools.Method(__instance.GetType(), "ComposeGuis")?.Invoke(__instance, null);
+            SynchronizeInitialRacePreview(__instance);
             FixActiveTab(__instance);
+        }
+
+        private static void SynchronizeInitialRacePreview(object dialog)
+        {
+            if (!ReferenceEquals(activeCharacterDialog, dialog))
+            {
+                return;
+            }
+
+            EntityPlayer? player = clientApi?.World.Player?.Entity;
+            if (player == null)
+            {
+                return;
+            }
+
+            // OnGuiOpened selects the initial class before the character GUI
+            // performs its final composition. That composition can rebuild the
+            // preview from the base Seraph skin after AfterSetCharacterClass
+            // already applied the hidden Apprentice race parts. Reapply once
+            // after the final opening composition—the same ordering reached
+            // naturally when the player switches to another race and back.
+            string classCode = GetClassCode(player);
+            ApplyRaceAppearance(player, classCode);
+            StartInitialRacePreviewProtection(player, classCode);
+
+            ITreeAttribute? appliedParts = player.WatchedAttributes
+                .GetTreeAttribute("skinConfig")
+                ?.GetTreeAttribute("appliedParts");
+            clientApi?.Logger.Notification(
+                "[Apprentice] Initial race preview synchronized: class={0}, shape={1}, horns={2}, teeth={3}.",
+                classCode,
+                appliedParts?.GetString(SkinPartCode, "<missing>"),
+                appliedParts?.GetString(HornPartCode, "<missing>"),
+                appliedParts?.GetString(TeethPartCode, "<missing>")
+            );
+        }
+
+        private static void StartInitialRacePreviewProtection(
+            EntityPlayer player,
+            string classCode)
+        {
+            if (!RaceByClass.ContainsKey(classCode))
+            {
+                return;
+            }
+
+            initialPreviewRacePlayer = player;
+            initialPreviewRaceClass = classCode;
+            initialPreviewRaceListener = () =>
+            {
+                RestoreInitialRaceAfterNativePlaceholder(player);
+            };
+            player.WatchedAttributes.RegisterModifiedListener(
+                "characterClass",
+                initialPreviewRaceListener
+            );
+        }
+
+        private static void RestoreInitialRaceAfterNativePlaceholder(
+            EntityPlayer player)
+        {
+            if (restoringInitialPreviewRace ||
+                activeCharacterDialog == null ||
+                !ReferenceEquals(initialPreviewRacePlayer, player) ||
+                !ReferenceEquals(clientApi?.World.Player?.Entity, player))
+            {
+                return;
+            }
+
+            string? currentClass = player.WatchedAttributes.GetString(
+                "characterClass",
+                null
+            );
+            if (currentClass != null && RaceByClass.ContainsKey(currentClass))
+            {
+                initialPreviewRaceClass = currentClass;
+                return;
+            }
+
+            string? selectedRace = initialPreviewRaceClass;
+            if (selectedRace == null || !RaceByClass.ContainsKey(selectedRace))
+            {
+                return;
+            }
+
+            restoringInitialPreviewRace = true;
+            bool addedRestoreGuard = RestoreInProgress.Add(player);
+            try
+            {
+                // A new character temporarily exists as vanilla "commoner" on
+                // the server. Its first full watched-attribute sync can arrive
+                // after the race dialog has already selected Dragonborn and can
+                // replace the visible preview with the human mesh. Preserve the
+                // race owned by the open dialog; a real user race change updates
+                // initialPreviewRaceClass through this same listener.
+                SetCharacterClassForRestore(player, selectedRace);
+                ApplyRaceAppearance(player, selectedRace);
+                ApplyBodyStats(player, GetProfile(selectedRace));
+
+                ITreeAttribute? appliedParts = player.WatchedAttributes
+                    .GetTreeAttribute("skinConfig")
+                    ?.GetTreeAttribute("appliedParts");
+                clientApi?.Logger.Notification(
+                    "[Apprentice] Restored initial race preview after native placeholder '{0}': class={1}, shape={2}, horns={3}, teeth={4}.",
+                    currentClass ?? "<missing>",
+                    selectedRace,
+                    appliedParts?.GetString(SkinPartCode, "<missing>"),
+                    appliedParts?.GetString(HornPartCode, "<missing>"),
+                    appliedParts?.GetString(TeethPartCode, "<missing>")
+                );
+            }
+            finally
+            {
+                if (addedRestoreGuard)
+                {
+                    RestoreInProgress.Remove(player);
+                }
+                restoringInitialPreviewRace = false;
+            }
+        }
+
+        private static void StopInitialRacePreviewProtection()
+        {
+            if (initialPreviewRacePlayer != null &&
+                initialPreviewRaceListener != null)
+            {
+                initialPreviewRacePlayer.WatchedAttributes.UnregisterListener(
+                    initialPreviewRaceListener
+                );
+            }
+
+            initialPreviewRacePlayer = null;
+            initialPreviewRaceListener = null;
+            initialPreviewRaceClass = null;
+            restoringInitialPreviewRace = false;
         }
 
         private static void AfterDialogClosed(object __instance)
         {
+            StopInitialRacePreviewProtection();
             RestoreCharacterDialogLayout(__instance);
             ConfirmedRaceDialogs.Remove(__instance);
+            ConfirmedRaceClasses.Remove(__instance);
             ApprovedCharacterDialogClosures.Remove(__instance);
             NativeFinalCharacterConfirmCallbacks.Remove(__instance);
             if (ReferenceEquals(pendingSkinConfirmDialog, __instance))
@@ -326,6 +466,17 @@ namespace Apprentice
         {
             activeCharacterDialog = __instance;
             ConfirmedRaceDialogs.Remove(__instance);
+            ConfirmedRaceClasses.Remove(__instance);
+            EntityPlayer? player = clientApi?.World.Player?.Entity;
+            if (player != null)
+            {
+                string classCode = GetClassCode(player);
+                if (RaceByClass.ContainsKey(classCode))
+                {
+                    initialPreviewRaceClass = classCode;
+                }
+                QueueLocalRaceAppearanceRefresh(player, classCode);
+            }
             ResetDialogZoom(__instance);
             UpdateBodyTrait(__instance);
             RefreshOptionsDialog(__instance);
@@ -382,7 +533,7 @@ namespace Apprentice
                 pendingSkinConfirmRequestId = 0;
                 skinCloseRequested = true;
                 clientApi?.Logger.Notification(
-                    "[Apprentice] Confirm Skin clicked; queueing the character save before native completion."
+                    "[Apprentice] Confirm Skin clicked; completing the native character selection before the authoritative race save."
                 );
                 if (!ReferenceEquals(activeCharacterDialog, dialog) ||
                     GetDialogTab(dialog) != 0 ||
@@ -396,8 +547,16 @@ namespace Apprentice
                 }
 
                 EntityPlayer? player = clientApi?.World.Player?.Entity;
-                long requestId = player == null ? 0 : SendBodyPacket(player);
-                if (requestId <= 0)
+                string? confirmedRaceClass =
+                    ConfirmedRaceClasses.TryGetValue(
+                        dialog,
+                        out string? selectedRaceClass
+                    )
+                        ? selectedRaceClass
+                        : null;
+                if (player == null ||
+                    confirmedRaceClass == null ||
+                    clientChannel == null)
                 {
                     AbortPendingSkinConfirmation(
                         dialog,
@@ -406,12 +565,25 @@ namespace Apprentice
                     return;
                 }
 
-                pendingSkinConfirmRequestId = requestId;
-                clientApi?.Logger.Notification(
-                    "[Apprentice] Queued character save request {0}; completing the native character dialog.",
-                    requestId
+                long requestId =
+                    System.Threading.Interlocked.Increment(
+                        ref nextRaceSaveRequestId
+                    );
+                RaceBodyPacket snapshot = BuildRaceBodyPacket(
+                    player,
+                    requestId,
+                    confirmedRaceClass
                 );
-                CompletePendingSkinConfirmation(dialog, requestId);
+                pendingSkinConfirmRequestId = snapshot.RequestId;
+                clientApi?.Logger.Notification(
+                    "[Apprentice] Prepared authoritative character save request {0} for post-native application.",
+                    snapshot.RequestId
+                );
+                CompletePendingSkinConfirmation(
+                    dialog,
+                    player,
+                    snapshot
+                );
             }
         }
 
@@ -428,47 +600,31 @@ namespace Apprentice
             if (result.RequestId <= 0) return;
 
             clientApi?.Logger.Notification(
-                "[Apprentice] Character save request {0} was {1} by the resumed server.",
+                "[Apprentice] Character save request {0} was {1} by the server.",
                 result.RequestId,
                 result.Success ? "approved" : "rejected"
             );
 
-            object? dialog = pendingSkinConfirmDialog;
-            if (dialog == null ||
-                result.RequestId != pendingSkinConfirmRequestId)
-            {
-                if (!result.Success)
-                {
-                    clientApi?.TriggerIngameError(
-                        typeof(RaceAppearanceSystem),
-                        "race-save-failed",
-                        string.IsNullOrWhiteSpace(result.Error)
-                            ? Lang.Get("apprentice:race-save-rejected")
-                            : result.Error
-                    );
-                }
-                return;
-            }
-
             if (!result.Success)
             {
-                string message = string.IsNullOrWhiteSpace(result.Error)
-                    ? Lang.Get("apprentice:race-save-rejected")
-                    : result.Error;
-                AbortPendingSkinConfirmation(dialog, message);
-                return;
+                clientApi?.TriggerIngameError(
+                    typeof(RaceAppearanceSystem),
+                    "race-save-failed",
+                    string.IsNullOrWhiteSpace(result.Error)
+                        ? Lang.Get("apprentice:race-save-rejected")
+                        : result.Error
+                );
             }
-
-            CompletePendingSkinConfirmation(dialog, result.RequestId);
         }
 
         private static void CompletePendingSkinConfirmation(
             object dialog,
-            long requestId)
+            EntityPlayer player,
+            RaceBodyPacket snapshot)
         {
             if (!ReferenceEquals(activeCharacterDialog, dialog) ||
                 !ReferenceEquals(pendingSkinConfirmDialog, dialog) ||
-                pendingSkinConfirmRequestId != requestId ||
+                pendingSkinConfirmRequestId != snapshot.RequestId ||
                 !skinCloseRequested)
             {
                 return;
@@ -490,19 +646,44 @@ namespace Apprentice
                         "[Apprentice] Executing the native final character-confirm callback."
                     );
                     nativeConfirm();
-                    return;
                 }
-
-                MethodInfo? onConfirm = AccessTools.Method(dialog.GetType(), "OnConfirm");
-                if (onConfirm == null)
+                else
                 {
-                    throw new MissingMethodException(
-                        dialog.GetType().FullName,
+                    MethodInfo? onConfirm = AccessTools.Method(
+                        dialog.GetType(),
                         "OnConfirm"
                     );
+                    if (onConfirm == null)
+                    {
+                        throw new MissingMethodException(
+                            dialog.GetType().FullName,
+                            "OnConfirm"
+                        );
+                    }
+
+                    onConfirm.Invoke(dialog, null);
                 }
 
-                onConfirm.Invoke(dialog, null);
+                // GuiDialogCreateCharacter.OnGuiClosed sends Vintage Story's
+                // CharacterSelectionPacket. That packet can contain the
+                // temporary fallback class used while the two reordered tabs
+                // are composed. Apply and send Apprentice's captured snapshot
+                // only after the native callback returns, so it is the final
+                // owner of the live class and hidden race-shape selections.
+                ApplyCustomizationSnapshot(player, snapshot);
+                clientChannel?.SendPacket(snapshot);
+
+                ITreeAttribute? appliedParts = player.WatchedAttributes
+                    .GetTreeAttribute("skinConfig")
+                    ?.GetTreeAttribute("appliedParts");
+                clientApi?.Logger.Notification(
+                    "[Apprentice] Applied post-native race snapshot {0}: class={1}, shape={2}, horns={3}, teeth={4}.",
+                    snapshot.RequestId,
+                    GetClassCode(player),
+                    appliedParts?.GetString(SkinPartCode, "<missing>"),
+                    appliedParts?.GetString(HornPartCode, "<missing>"),
+                    appliedParts?.GetString(TeethPartCode, "<missing>")
+                );
             }
             catch (Exception exception)
             {
@@ -621,7 +802,9 @@ namespace Apprentice
             ConfirmedRaceDialogs.Add(__instance);
             if (player != null)
             {
-                SendBodyPacket(player);
+                string confirmedRaceClass = GetClassCode(player);
+                ConfirmedRaceClasses[__instance] = confirmedRaceClass;
+                SendBodyPacket(player, confirmedRaceClass);
             }
             SetDialogTab(__instance, 0);
             AccessTools.Method(__instance.GetType(), "ComposeGuis")?.Invoke(__instance, null);
@@ -1062,6 +1245,7 @@ namespace Apprentice
             if (player == null) return;
 
             RaceProfile profile = GetProfile(player);
+            string previousSubclass = GetSubclassChoice(player, profile);
             SaveBodyChoices(
                 player,
                 profile,
@@ -1074,11 +1258,20 @@ namespace Apprentice
                 GetHornColorChoice(player)
             );
             player.WatchedAttributes.MarkAllDirty();
-            ApplyRaceAppearance(player, GetClassCode(player));
+            string classCode = GetClassCode(player);
+            if (previousSubclass != GetSubclassChoice(player, profile))
+            {
+                QueueLocalRaceAppearanceRefresh(player, classCode);
+            }
+            else
+            {
+                ApplyRaceAppearance(player, classCode);
+            }
             ApplyBodyStats(player, profile);
             if (activeCharacterDialog != null)
             {
                 ConfirmedRaceDialogs.Remove(activeCharacterDialog);
+                ConfirmedRaceClasses.Remove(activeCharacterDialog);
                 ResetDialogZoom(activeCharacterDialog);
                 UpdateBodyTrait(activeCharacterDialog);
                 RefreshOptionsDialog(activeCharacterDialog);

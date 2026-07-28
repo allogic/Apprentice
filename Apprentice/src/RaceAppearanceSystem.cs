@@ -616,6 +616,8 @@ namespace Apprentice
             .ToArray();
 
         private static readonly HashSet<object> ConfirmedRaceDialogs = new();
+        private static readonly Dictionary<object, string> ConfirmedRaceClasses =
+            new();
         private static readonly HashSet<object> ApprovedCharacterDialogClosures = new();
         private static readonly Dictionary<object, ActionConsumable>
             NativeFinalCharacterConfirmCallbacks = new();
@@ -636,7 +638,13 @@ namespace Apprentice
         private static object? pendingSkinConfirmDialog;
         private static long pendingSkinConfirmRequestId;
         private static long nextRaceSaveRequestId = DateTime.UtcNow.Ticks;
+        private static long raceAppearanceRefreshId;
         private static bool skinCloseRequested;
+        private static bool restoringInitialPreviewRace;
+        private static bool loggedTraitRefreshFailure;
+        private static EntityPlayer? initialPreviewRacePlayer;
+        private static Action? initialPreviewRaceListener;
+        private static string? initialPreviewRaceClass;
         private static RaceOptionsDialog? optionsDialog;
 
         public override double ExecuteOrder() => 0.2;
@@ -722,10 +730,17 @@ namespace Apprentice
                 typeof(RaceAppearanceSystem),
                 nameof(AfterGetClassTraitText)
             );
-            if (traitTextTarget != null && traitTextPostfix != null)
+            MethodInfo? traitTextPrefix = AccessTools.Method(
+                typeof(RaceAppearanceSystem),
+                nameof(BeforeGetClassTraitText)
+            );
+            if (traitTextTarget != null &&
+                traitTextPrefix != null &&
+                traitTextPostfix != null)
             {
                 harmony.Patch(
                     traitTextTarget,
+                    prefix: new HarmonyMethod(traitTextPrefix),
                     postfix: new HarmonyMethod(traitTextPostfix)
                 );
             }

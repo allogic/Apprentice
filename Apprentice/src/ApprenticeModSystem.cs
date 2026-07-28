@@ -16,7 +16,7 @@ namespace Apprentice
 {
 	public sealed class ApprenticeModSystem : ModSystem
 	{
-		private const string PlaytestVersion = "2.7.0-dev.20260723.86";
+		private const string PlaytestVersion = "2.7.0-dev.20260728.95";
 		private const string BowAssetFingerprint = "BOW-DARKWOOD-OXBLOOD-C-AXIS2-EDIT1-UV1-DRAW5";
 		private const string ReviewedAssetFingerprint = "ITEMS-RUNEBOUND5-GILDED2-SUNLANCE2-KITS-HANDANCHOR-TRAP-CHAIN-SHIELD-SIDEWAYS-FISHING-NATIVE-METALS-APPRENTICE2-LEGENDARY9";
 		private static readonly string[] ExpectedBowShapeCodes =
@@ -57,10 +57,6 @@ namespace Apprentice
 			"shapes/item/2.7/shapesplitter.json",
 			"shapes/item/2.7/nuibari.json",
 			"shapes/item/2.7/nuibari-thrown.json",
-			"entities/2.7/unending-despair-projectile.json",
-			"entities/2.7/fire-lance-projectile.json",
-			"entities/2.7/nuibari-projectile.json",
-			"entities/2.7/shapesplitter-echo.json",
 			"shapes/item/2.7/tower-shield.json",
 			"shapes/item/2.7/master-fishing-rod.json",
 			"shapes/item/2.7/grandmaster-spear.json",
@@ -75,6 +71,13 @@ namespace Apprentice
 			"shapes/block/2.7/advancedtrap-opening3.json",
 			"shapes/block/2.7/advancedtrap-opening4.json",
 			"shapes/block/2.7/advancedtrap-armed.json"
+		};
+		private static readonly string[] ExpectedReviewedServerAssetPaths =
+		{
+			"entities/2.7/unending-despair-projectile.json",
+			"entities/2.7/fire-lance-projectile.json",
+			"entities/2.7/nuibari-projectile.json",
+			"entities/2.7/shapesplitter-echo.json"
 		};
 
 		private ICoreServerAPI? sapi = null;
@@ -92,9 +95,11 @@ namespace Apprentice
 		private ClassesManager? classesManager = null;
 		private ExperienceManager? experienceManager = null;
 		private SkillTreeManager? skillTreeManager = null;
-		private InteractionEventBridge? interactionEventBridge = null;
-		private DangerTierSystem? dangerTierSystem = null;
-		private PoisonEffectSystem? poisonEffectSystem = null;
+			private InteractionEventBridge? interactionEventBridge = null;
+			private DangerTierSystem? dangerTierSystem = null;
+			private ConcentricRealmWorldgenSystem?
+				concentricRealmWorldgenSystem = null;
+			private PoisonEffectSystem? poisonEffectSystem = null;
 		private LegendaryWeaponSystem? legendaryWeaponSystem = null;
 		private EcologyWorldgenSystem? ecologyWorldgenSystem = null;
 
@@ -102,10 +107,17 @@ namespace Apprentice
 		private OverlayManager? overlayManager = null;
 		private HealthBarRenderer? healthBarRenderer = null;
 		private ApprenticeAnimationSystem? animationSystem = null;
+		private ItemCalibrationSystem? itemCalibrationSystem = null;
 		private Harmony? poisonInfoHarmony = null;
 		private Harmony? durabilityUpgradeHarmony = null;
 
 		#region ModSystem Impl
+		// Vanilla GenMaps uses the default 0.1 order. Register Apprentice at
+		// 0.11 so its map-region callback deterministically runs after vanilla
+		// has populated climate/forest/ocean maps, while still staying ahead
+		// of the 0.2 block and item loaders required by our class registry.
+		public override double ExecuteOrder() => 0.11;
+
 		public override void Start(ICoreAPI api)
 		{
 			api.Logger.Notification(
@@ -308,6 +320,17 @@ namespace Apprentice
 							nameof(LegendaryInfoPatch.Postfix)
 						)
 					);
+				}
+				catch (Exception exception)
+				{
+					api.Logger.Warning(
+						"[Apprentice] Entity inspection text integration was disabled: {0}",
+						exception.Message
+					);
+				}
+
+				try
+				{
 					LegendaryClientPatches.Install(
 						poisonInfoHarmony,
 						(ICoreClientAPI)api
@@ -316,7 +339,7 @@ namespace Apprentice
 				catch (Exception exception)
 				{
 					api.Logger.Warning(
-						"[Apprentice] Poison inspection text integration was disabled: {0}",
+						"[Apprentice] Legendary invisibility rendering integration was disabled: {0}",
 						exception.Message
 					);
 				}
@@ -359,7 +382,8 @@ namespace Apprentice
 					.RegisterMessageType<DangerHeatmapRequestPacket>()
 					.RegisterMessageType<SkillPurchaseRequestPacket>()
 					.RegisterMessageType<SkillPurchaseResultPacket>()
-					.RegisterMessageType<WarScytheAnimationPacket>();
+					.RegisterMessageType<WarScytheAnimationPacket>()
+					.RegisterMessageType<ItemCalibrationCommandPacket>();
 			}
 			else
 			{
@@ -371,7 +395,8 @@ namespace Apprentice
 					.RegisterMessageType<DangerHeatmapRequestPacket>()
 					.RegisterMessageType<SkillPurchaseRequestPacket>()
 					.RegisterMessageType<SkillPurchaseResultPacket>()
-					.RegisterMessageType<WarScytheAnimationPacket>();
+					.RegisterMessageType<WarScytheAnimationPacket>()
+					.RegisterMessageType<ItemCalibrationCommandPacket>();
 			}
 		}
 		public override void AssetsLoaded(ICoreAPI api)
@@ -406,8 +431,8 @@ namespace Apprentice
 			if (api.Side == EnumAppSide.Client)
 			{
 				LogBowAssetFingerprint(api);
-				LogReviewedAssetFingerprint(api);
 			}
+			LogReviewedAssetFingerprint(api);
 		}
 
 		private static void ApplyVanillaMetalPresentation(ICoreAPI api)
@@ -559,7 +584,13 @@ namespace Apprentice
 
 		private static void LogReviewedAssetFingerprint(ICoreAPI api)
 		{
-			string[] missingAssets = ExpectedReviewedAssetPaths
+			string side = api.Side == EnumAppSide.Server
+				? "server"
+				: "client";
+			string[] expectedPaths = api.Side == EnumAppSide.Server
+				? ExpectedReviewedServerAssetPaths
+				: ExpectedReviewedAssetPaths;
+			string[] missingAssets = expectedPaths
 				.Where(
 					path => api.Assets.TryGet(
 						new AssetLocation("apprentice", path)
@@ -568,8 +599,9 @@ namespace Apprentice
 				.ToArray();
 
 			api.Logger.Notification(
-				"[Apprentice] Reviewed item asset fingerprint {0}: missing-files=[{1}].",
+				"[Apprentice] Reviewed item asset fingerprint {0} ({1} assets): missing-files=[{2}].",
 				ReviewedAssetFingerprint,
+				side,
 				string.Join(", ", missingAssets)
 			);
 			if (missingAssets.Length != 0)
@@ -638,11 +670,16 @@ namespace Apprentice
 			skillTreeManager = new SkillTreeManager(api, loadedClassConfig, loadedSkillTreeConfig, networkChannel);
 			experienceManager = new ExperienceManager(api, networkChannel, loadedClassConfig, baseConfig, skillTreeManager);
 			interactionEventBridge = new InteractionEventBridge(api, experienceManager);
-			dangerTierSystem = new DangerTierSystem(
-				api,
-				contentRegistry,
-				networkChannel
-			);
+				dangerTierSystem = new DangerTierSystem(
+					api,
+					contentRegistry,
+					networkChannel
+				);
+				concentricRealmWorldgenSystem =
+					new ConcentricRealmWorldgenSystem(
+						api,
+						contentRegistry
+					);
 			networkChannel.SetMessageHandler<DangerHeatmapRequestPacket>(
 				OnDangerHeatmapRequest
 			);
@@ -655,6 +692,10 @@ namespace Apprentice
 				networkChannel,
 				WarScytheAnimation
 			);
+			ItemCalibrationSystem.RegisterServerCommand(
+				api,
+				networkChannel
+			);
 		}
 		public override void StartClientSide(ICoreClientAPI api)
 		{
@@ -664,6 +705,13 @@ namespace Apprentice
 					api,
 					clientNetworkChannel,
 					WarScytheAnimation
+				);
+				itemCalibrationSystem = new ItemCalibrationSystem(
+					api,
+					clientNetworkChannel,
+					item =>
+						animationSystem?.OpenEditorForItem(item) ==
+							true
 				);
 			}
 			else
@@ -766,7 +814,8 @@ namespace Apprentice
 			poisonInfoHarmony?.UnpatchAll("apprentice.client.runtime");
 			poisonInfoHarmony = null;
 			interactionEventBridge?.Dispose();
-			dangerTierSystem?.Dispose();
+				concentricRealmWorldgenSystem?.Dispose();
+				dangerTierSystem?.Dispose();
 			poisonEffectSystem?.Dispose();
 			legendaryWeaponSystem?.Dispose();
 			ecologyWorldgenSystem?.Dispose();
@@ -776,11 +825,14 @@ namespace Apprentice
 			overlayManager?.Dispose();
 			interfaceManager?.Dispose();
 			healthBarRenderer?.Dispose();
+			itemCalibrationSystem?.Dispose();
+			itemCalibrationSystem = null;
 			animationSystem?.Dispose();
 			animationSystem = null;
 
-			interactionEventBridge = null;
-			dangerTierSystem = null;
+				interactionEventBridge = null;
+				concentricRealmWorldgenSystem = null;
+				dangerTierSystem = null;
 			poisonEffectSystem = null;
 			legendaryWeaponSystem = null;
 			ecologyWorldgenSystem = null;

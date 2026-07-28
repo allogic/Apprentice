@@ -7,9 +7,9 @@
 		"Kanista",
 		"allogic"
 	],
-	"description": "Character progression, race-first creation, Grandmaster discoveries, advanced metals, arrow poison, and danger regions.",
+	"description": "Character progression, race-first creation, Grandmaster discoveries, advanced metals, arrow poison, and concentric realms.",
 	"website": "https://github.com/allogic/Apprentice",
-	"version": "3.0.0",
+	"version": "2.7.0-dev.20260728.95",
 	"dependencies": {
 		"game": "1.22.3",
 		"vsimgui": "1.2.7"

@@ -5,31 +5,19 @@ using Newtonsoft.Json;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
 using Vintagestory.API.Datastructures;
-using Vintagestory.API.MathTools;
 using Vintagestory.API.Server;
 using Vintagestory.GameContent;
 
 namespace Apprentice
 {
-    internal sealed class DangerWorldState
-    {
-        public int SchemaVersion { get; set; } = 2;
-        public bool Enabled { get; set; } = true;
-        public double AnchorX { get; set; }
-        public double AnchorZ { get; set; }
-        public double BaseRadius { get; set; }
-        public double RingWidth { get; set; }
-        public int MaximumTier { get; set; }
-        public double HealthPerTier { get; set; }
-        public double DamagePerTier { get; set; }
-        public string[] Palette { get; set; } = Array.Empty<string>();
-    }
-
     internal static class DangerTierRuntime
     {
         private const string RootKey = "apprentice:danger";
 
         public static DangerWorldState? WorldState { get; set; }
+
+        public static int GetTierAt(double x, double z) =>
+            WorldZoneLayout.GetLevelAt(WorldState, x, z);
 
         public static int GetTier(Entity entity) =>
             entity.WatchedAttributes.GetTreeAttribute(RootKey)?.GetInt("tier", 0) ?? 0;
@@ -66,7 +54,6 @@ namespace Apprentice
         private readonly DangerDefinition definition;
         private readonly ApprenticeContentRegistry registry;
         private DangerWorldState? state;
-        private bool awaitingAnchor;
         private bool disposed;
 
         public DangerTierSystem(
@@ -86,6 +73,7 @@ namespace Apprentice
 
             api.Event.SaveGameLoaded += OnSaveGameLoaded;
             api.Event.GameWorldSave += OnGameWorldSave;
+            api.Event.InitWorldGenerator(OnInitWorldGenerator, "standard");
             api.Event.PlayerReady += OnPlayerReady;
             api.Event.OnEntitySpawn += OnEntitySpawn;
             api.Event.OnEntityLoaded += OnEntityLoaded;
@@ -94,64 +82,58 @@ namespace Apprentice
 
         public DangerWorldState? State => state;
 
-        public int GetTierAt(double x, double z)
-        {
-            DangerWorldState? current = state;
-            if (current == null || current.RingWidth <= 0)
-            {
-                return 0;
-            }
-
-            double dx = x - current.AnchorX;
-            double dz = z - current.AnchorZ;
-            double distance = Math.Sqrt(dx * dx + dz * dz);
-            double rings = Math.Ceiling((distance - current.BaseRadius) / current.RingWidth);
-            return Math.Clamp((int)rings, 0, current.MaximumTier);
-        }
+        public int GetTierAt(double x, double z) =>
+            WorldZoneLayout.GetLevelAt(state, x, z);
 
         private void OnSaveGameLoaded()
         {
             state = null;
-            awaitingAnchor = false;
             DangerTierRuntime.WorldState = null;
 
-            byte[]? bytes = api.WorldManager.SaveGame.GetData(SaveKey);
-            if (bytes != null && bytes.Length > 0)
+            if (!TryLoadPersistedState())
             {
-                try
-                {
-                    state = JsonConvert.DeserializeObject<DangerWorldState>(
-                        Encoding.UTF8.GetString(bytes)
-                    );
-                }
-                catch (Exception exception)
-                {
-                    api.Logger.Error(
-                        "[Apprentice] Danger world data is unreadable; danger scaling is disabled for this session to protect the save: {0}",
-                        exception.Message
-                    );
-                    state = null;
-                    return;
-                }
+                InitializeMissingState();
+                OnGameWorldSave();
             }
 
-            if (state == null)
+            NormalizeLoadedState();
+        }
+
+        private bool TryLoadPersistedState()
+        {
+            byte[]? bytes = api.WorldManager.SaveGame.GetData(SaveKey);
+            if (bytes == null || bytes.Length == 0)
             {
-                // On a brand-new world Vintage Story has not necessarily
-                // created PlayerSpawnPos yet. Reading DefaultSpawnPosition in
-                // SaveGameLoaded then throws inside ServerMain. PlayerReady is
-                // the first point at which both the spawn and player position
-                // are guaranteed to be usable.
-                awaitingAnchor = true;
-                api.Logger.Notification(
-                    "[Apprentice] New world detected; danger anchor initialization is waiting for the first player to be ready."
-                );
-                return;
+                return false;
             }
+
+            try
+            {
+                state = JsonConvert.DeserializeObject<DangerWorldState>(
+                    Encoding.UTF8.GetString(bytes)
+                );
+                return state != null;
+            }
+            catch (Exception exception)
+            {
+                api.Logger.Error(
+                    "[Apprentice] Realm layout data is unreadable; danger scaling and realm world generation are disabled for this session to protect the save: {0}",
+                    exception.Message
+                );
+                state = null;
+                return true;
+            }
+        }
+
+        private void NormalizeLoadedState()
+        {
+            if (state == null) return;
+            bool migrated = false;
 
             if (state.SchemaVersion < 1)
             {
                 state.SchemaVersion = 1;
+                migrated = true;
                 api.Logger.Notification("[Apprentice] Migrated danger world data to schema 1.");
             }
 
@@ -160,8 +142,24 @@ namespace Apprentice
                 state.Enabled = true;
                 state.Palette = definition.Palette.ToArray();
                 state.SchemaVersion = 2;
+                migrated = true;
                 api.Logger.Notification(
                     "[Apprentice] Migrated danger world data to schema 2 (heatmap palette)."
+                );
+            }
+
+            if (state.SchemaVersion < WorldZoneLayout.CurrentSchema)
+            {
+                state.RealmNames = BuildRealmNames(state.MaximumTier);
+                state.WorldgenProfile = WorldZoneLayout.LegacyProfile;
+                state.RealmWorldgenEnabled = false;
+                state.DesertTemperatureCelsius =
+                    definition.DesertTemperatureCelsius;
+                state.DesertRainfall = definition.DesertRainfall;
+                state.SchemaVersion = WorldZoneLayout.CurrentSchema;
+                migrated = true;
+                api.Logger.Notification(
+                    "[Apprentice] Migrated realm layout data to schema 3. Concentric biome generation remains disabled for this existing world."
                 );
             }
 
@@ -169,6 +167,13 @@ namespace Apprentice
                 state.Palette.Length != state.MaximumTier + 1)
             {
                 state.Palette = definition.Palette.ToArray();
+                migrated = true;
+            }
+            if (state.RealmNames == null ||
+                state.RealmNames.Length != state.MaximumTier + 1)
+            {
+                state.RealmNames = BuildRealmNames(state.MaximumTier);
+                migrated = true;
             }
             DangerTierRuntime.WorldState = state;
 
@@ -180,48 +185,89 @@ namespace Apprentice
                     "[Apprentice] Danger config differs from this world's persisted ring layout. The persisted layout remains authoritative; use a future explicit admin migration instead of silently moving tiers."
                 );
             }
+
+            if (migrated)
+            {
+                OnGameWorldSave();
+            }
+        }
+
+        private string[] BuildRealmNames(int maximumTier)
+        {
+            if (definition.RealmNames.Count == maximumTier + 1)
+            {
+                return definition.RealmNames.ToArray();
+            }
+
+            return Enumerable.Range(0, maximumTier + 1)
+                .Select(level => $"Level {level}")
+                .ToArray();
+        }
+
+        private void InitializeMissingState()
+        {
+            var savedSpawn = api.WorldManager.SaveGame.DefaultSpawn;
+            bool existingWorld = !api.WorldManager.SaveGame.IsNew;
+            double anchorX;
+            double anchorZ;
+
+            if (savedSpawn != null)
+            {
+                anchorX = savedSpawn.x;
+                anchorZ = savedSpawn.z;
+            }
+            else
+            {
+                // ServerSystemSupplyChunks generates the 1.22 spawn area at
+                // the exact world-map center before DefaultSpawn exists.
+                anchorX = api.WorldManager.MapSizeX / 2d;
+                anchorZ = api.WorldManager.MapSizeZ / 2d;
+            }
+
+            InitializeNewState(
+                anchorX,
+                anchorZ,
+                enableRealmWorldgen: !existingWorld
+            );
+            if (existingWorld)
+            {
+                api.Logger.Warning(
+                    "[Apprentice] No realm layout was found in an existing world. Danger rings were initialized at the saved spawn, but concentric biome generation is disabled to protect existing chunks."
+                );
+            }
+        }
+
+        private void OnInitWorldGenerator()
+        {
+            if (state == null)
+            {
+                if (!TryLoadPersistedState())
+                {
+                    InitializeMissingState();
+                    OnGameWorldSave();
+                }
+                NormalizeLoadedState();
+            }
+
+            DangerTierRuntime.WorldState = state;
         }
 
         private void OnPlayerReady(IServerPlayer player)
         {
-            if (!awaitingAnchor || state != null)
+            if (state == null)
             {
-                SendHeatmapState(player);
-                return;
-            }
+                if (!TryLoadPersistedState())
+                {
+                    InitializeMissingState();
+                }
+                NormalizeLoadedState();
+                OnGameWorldSave();
 
-            EntityPos anchor;
-            try
-            {
-                anchor = api.World.DefaultSpawnPosition;
-            }
-            catch (Exception exception)
-            {
-                // Some engine/worldgen combinations can still expose the
-                // PlayerReady event one tick before the shared spawn object.
-                // The ready player's position is a safe one-time fallback and
-                // is persisted immediately, so the rings never move later.
-                anchor = player.Entity.Pos;
-                api.Logger.Warning(
-                    "[Apprentice] World spawn was not available when the first player became ready ({0}); using the player's initial position as the permanent danger anchor.",
-                    exception.Message
-                );
-            }
-
-            if (!double.IsFinite(anchor.X) || !double.IsFinite(anchor.Z))
-            {
-                anchor = player.Entity.Pos;
-            }
-
-            InitializeNewState(anchor);
-            OnGameWorldSave();
-
-            // Entities can load between SaveGameLoaded and PlayerReady. Apply
-            // the same idempotent spawn path so this short initialization gap
-            // cannot leave nearby creatures permanently unscaled.
-            foreach (Entity entity in api.World.LoadedEntities.Values.ToArray())
-            {
-                OnEntitySpawn(entity);
+                foreach (Entity entity in
+                    api.World.LoadedEntities.Values.ToArray())
+                {
+                    OnEntitySpawn(entity);
+                }
             }
 
             SendHeatmapState(player);
@@ -229,35 +275,6 @@ namespace Apprentice
 
         internal void SendHeatmapState(IServerPlayer player)
         {
-            // PlayerReady is not a reliable initialization boundary for every
-            // server implementation/mod stack.  A map request is, however,
-            // always made by a fully constructed player.  Initialize the
-            // permanent anchor here as a final, deterministic fallback so a
-            // late subscriber can never leave the client waiting forever.
-            if (state == null && awaitingAnchor)
-            {
-                EntityPos anchor = player.Entity.Pos;
-                try
-                {
-                    EntityPos worldSpawn = api.World.DefaultSpawnPosition;
-                    if (double.IsFinite(worldSpawn.X) &&
-                        double.IsFinite(worldSpawn.Z))
-                    {
-                        anchor = worldSpawn;
-                    }
-                }
-                catch (Exception exception)
-                {
-                    api.Logger.Warning(
-                        "[Apprentice] Danger heatmap request arrived before the world spawn was available ({0}); using the requesting player's position as the permanent anchor.",
-                        exception.Message
-                    );
-                }
-
-                InitializeNewState(anchor);
-                OnGameWorldSave();
-            }
-
             if (state == null)
             {
                 api.Logger.Error(
@@ -275,28 +292,50 @@ namespace Apprentice
             );
         }
 
-        private void InitializeNewState(EntityPos anchor)
+        private void InitializeNewState(
+            double anchorX,
+            double anchorZ,
+            bool enableRealmWorldgen)
         {
             state = new DangerWorldState
             {
-                SchemaVersion = Math.Max(2, definition.SchemaVersion),
-                AnchorX = anchor.X,
-                AnchorZ = anchor.Z,
+                SchemaVersion = Math.Max(
+                    WorldZoneLayout.CurrentSchema,
+                    definition.SchemaVersion
+                ),
+                Enabled = definition.Enabled,
+                AnchorX = anchorX,
+                AnchorZ = anchorZ,
                 BaseRadius = definition.BaseRadius,
                 RingWidth = definition.RingWidth,
                 MaximumTier = definition.MaximumTier,
                 HealthPerTier = definition.HealthPerTier,
                 DamagePerTier = definition.DamagePerTier,
-                Palette = definition.Palette.ToArray()
+                Palette = definition.Palette.ToArray(),
+                RealmNames = BuildRealmNames(
+                    definition.MaximumTier
+                ),
+                WorldgenProfile = enableRealmWorldgen
+                    ? definition.WorldgenProfile
+                    : WorldZoneLayout.LegacyProfile,
+                RealmWorldgenEnabled =
+                    enableRealmWorldgen &&
+                    definition.RealmWorldgenEnabled,
+                DesertTemperatureCelsius =
+                    definition.DesertTemperatureCelsius,
+                DesertRainfall = definition.DesertRainfall,
+                DeepSeaDepth = definition.DeepSeaDepth,
+                DeepSeaShoreWidth = definition.DeepSeaShoreWidth
             };
-            awaitingAnchor = false;
             DangerTierRuntime.WorldState = state;
             api.Logger.Notification(
-                "[Apprentice] Initialized permanent danger anchor at X={0:0}, Z={1:0} (base radius {2:0}, ring width {3:0}).",
+                "[Apprentice] Initialized permanent realm anchor at X={0:0}, Z={1:0} (base radius {2:0}, ring width {3:0}, profile {4}, biome generation {5}).",
                 state.AnchorX,
                 state.AnchorZ,
                 state.BaseRadius,
-                state.RingWidth
+                state.RingWidth,
+                state.WorldgenProfile,
+                state.RealmWorldgenEnabled ? "enabled" : "disabled"
             );
         }
 

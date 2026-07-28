@@ -142,11 +142,43 @@ namespace Apprentice
 
         private static void AfterGetClassTraitText(ref string __result)
         {
+            // During the character dialog's class/subclass transition the
+            // engine can briefly have no selected class and return null.
+            // A Harmony postfix must not turn that transient state into a
+            // fatal input-callback exception.
+            if (__result == null) return;
+
             EntityPlayer? player = clientApi?.World.Player?.Entity;
             if (player != null)
             {
                 __result = CompactTraitText(ReplaceBodyTrait(__result, player));
             }
+        }
+
+        private static bool BeforeGetClassTraitText(
+            CharacterSystem __instance,
+            ref string __result)
+        {
+            EntityPlayer? player = clientApi?.World.Player?.Entity;
+            string? classCode = player?.WatchedAttributes.GetString(
+                "characterClass",
+                null
+            );
+            if (classCode != null &&
+                __instance.characterClasses.Any(
+                    characterClass => characterClass.Code == classCode
+                ))
+            {
+                return true;
+            }
+
+            // Vintage Story's private implementation dereferences the result
+            // of FirstOrDefault without checking it. The reordered two-step
+            // dialog can briefly expose no current class while ComposeGuis is
+            // rebuilding. Return an empty transient value instead of allowing
+            // that native gap to crash an input callback.
+            __result = "";
+            return false;
         }
 
         private static void UpdateBodyTrait(object dialog)
@@ -160,12 +192,56 @@ namespace Apprentice
             }
 
             if (AccessTools.Field(dialog.GetType(), "modSys")?.GetValue(dialog)
-                    is not CharacterSystem characterSystem ||
-                AccessTools.Method(characterSystem.GetType(), "getClassTraitText")
-                    ?.Invoke(characterSystem, null) is not string traitText)
+                    is not CharacterSystem characterSystem)
             {
                 return;
             }
+
+            MethodInfo? traitTextMethod = AccessTools.Method(
+                characterSystem.GetType(),
+                "getClassTraitText"
+            );
+            string classCode = GetClassCode(player);
+            if (traitTextMethod == null ||
+                !characterSystem.characterClasses.Any(
+                    characterClass => characterClass.Code == classCode
+                ))
+            {
+                return;
+            }
+
+            string? traitText;
+            try
+            {
+                traitText = traitTextMethod.Invoke(characterSystem, null) as string;
+            }
+            catch (TargetInvocationException exception)
+            {
+                if (!loggedTraitRefreshFailure)
+                {
+                    loggedTraitRefreshFailure = true;
+                    clientApi?.Logger.Warning(
+                        "[Apprentice] Deferred character trait refresh while the native race selection was incomplete: {0}",
+                        exception.GetBaseException().Message
+                    );
+                }
+                return;
+            }
+            catch (Exception exception)
+            {
+                if (!loggedTraitRefreshFailure)
+                {
+                    loggedTraitRefreshFailure = true;
+                    clientApi?.Logger.Warning(
+                        "[Apprentice] Deferred character trait refresh: {0}",
+                        exception.Message
+                    );
+                }
+                return;
+            }
+
+            if (string.IsNullOrEmpty(traitText)) return;
+            loggedTraitRefreshFailure = false;
 
             string updated =
                 Lang.Get("characterdesc-" + GetClassCode(player)) +
