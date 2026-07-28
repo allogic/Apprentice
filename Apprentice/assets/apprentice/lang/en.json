@@ -1,6 +1,7 @@
 {
   "game:tabname-apprentice": "Apprentice",
   "game:maplayer-apprentice-danger-heatmap": "Concentric realms",
+  "endless-forest-map-disabled": "The Endless Forest blocks both the world map and minimap.",
   "apprentice": "Apprentice",
   "item-warscythe": "War Scythe",
   "itemdesc-warscythe": "Sweeps a 180-degree arc up to 3.5 blocks, striking every enemy crossed by the attack, and never loses durability. The last harvest-guard forged it to reap monsters instead of grain.",

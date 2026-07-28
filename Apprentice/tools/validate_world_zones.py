@@ -6,6 +6,7 @@ from __future__ import annotations
 import json
 import math
 import random
+import re
 from pathlib import Path
 
 
@@ -16,6 +17,16 @@ CONFIG_PATH = (
     / "apprentice"
     / "config"
     / "content-2.7.json"
+)
+WORLDGEN_SOURCE_PATH = (
+    REPOSITORY_ROOT
+    / "src"
+    / "ConcentricRealmWorldgenSystem.cs"
+)
+MAP_RESTRICTION_SOURCE_PATH = (
+    REPOSITORY_ROOT
+    / "src"
+    / "EndlessForestMapRestrictionSystem.cs"
 )
 
 EXPECTED_REALMS = [
@@ -80,6 +91,30 @@ def require(condition: bool, message: str) -> None:
         raise AssertionError(message)
 
 
+def adjusted_temperature(
+    temperature_celsius: int,
+    y: int,
+    sea_level: int = 110,
+) -> int:
+    unscaled = int((temperature_celsius + 20) * 4.25)
+    return max(
+        -20,
+        min(40, int((unscaled - (y - sea_level) / 1.5) / 4.25) - 20),
+    )
+
+
+def adjusted_rainfall(
+    rainfall: int,
+    y: int,
+    sea_level: int = 110,
+) -> int:
+    lowland_bonus = 5 * max(0, min(8, 8 + sea_level - y))
+    return max(
+        0,
+        min(255, rainfall + (y - sea_level) // 2 + lowland_bonus),
+    )
+
+
 def main() -> None:
     config = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
     danger = config["Danger"]
@@ -121,6 +156,153 @@ def main() -> None:
         "Every realm needs exactly one heatmap color",
     )
 
+    worldgen_source = WORLDGEN_SOURCE_PATH.read_text(encoding="utf-8")
+    map_restriction_source = MAP_RESTRICTION_SOURCE_PATH.read_text(
+        encoding="utf-8"
+    )
+    require(
+        re.search(
+            r"ChunkColumnGeneration\s*\(\s*"
+            r"SculptDeepSeaBeforeVegetation\s*,\s*"
+            r"EnumWorldGenPass\.Vegetation",
+            worldgen_source,
+        )
+        is not None,
+        (
+            "Deep Sea must be sculpted in the Vegetation pass before "
+            "vanilla vegetation and sunlight generation"
+        ),
+    )
+    require(
+        "originalColumnTop + 1" in worldgen_source,
+        (
+            "Deep Sea cleanup must remove the one-block surface vegetation "
+            "created during the Terrain pass"
+        ),
+    )
+    require(
+        ".SetBlockUnsafe(" not in worldgen_source,
+        (
+            "Deep Sea must use allocation-safe solid block writes because "
+            "Vegetation-pass chunk layers may not have a writable palette"
+        ),
+    )
+    require(
+        "floorChunkData[floorIndex] = rockId;" in worldgen_source
+        and "chunkData[index] = 0;" in worldgen_source,
+        (
+            "Deep Sea floor and air writes must use the allocation-safe "
+            "IChunkBlocks indexer"
+        ),
+    )
+    require(
+        "private const int EndlessForestLevel = 3;" in worldgen_source,
+        "Endless Forest must remain Level 3",
+    )
+    require(
+        "private const int EndlessForestDensity = 255;"
+        in worldgen_source
+        and "private const int EndlessForestShrubDensity = 224;"
+        in worldgen_source,
+        "Endless Forest must retain maximum tree density and dense shrubs",
+    )
+    require(
+        "private const int EndlessForestTemperatureCelsius = 14;"
+        in worldgen_source
+        and "private const int EndlessForestRainfall = 100;"
+        in worldgen_source,
+        (
+            "Endless Forest must compensate for Vintage Story's altitude "
+            "temperature/rainfall adjustment"
+        ),
+    )
+    valley_temperature = adjusted_temperature(14, 110)
+    valley_rainfall = adjusted_rainfall(100, 110)
+    mid_temperature = adjusted_temperature(14, 190)
+    mid_rainfall = adjusted_rainfall(100, 190)
+    high_temperature = adjusted_temperature(14, 304)
+    high_rainfall = adjusted_rainfall(100, 304)
+    require(
+        2 <= valley_temperature <= 22
+        and 95 <= valley_rainfall <= 170,
+        "Level 3 valleys must remain compatible with broadleaf trees",
+    )
+    require(
+        -14 <= mid_temperature <= 12
+        and 50 <= mid_rainfall <= 150,
+        "Level 3 middle slopes must remain compatible with pine/fir",
+    )
+    require(
+        -17 <= high_temperature <= -3
+        and 100 <= high_rainfall <= 255,
+        "Level 3 high plateaus must remain compatible with larch",
+    )
+    require(
+        "private const int EndlessForestUpheaval = 255;"
+        in worldgen_source
+        and '"cliffy rolling hills"' in worldgen_source,
+        "Endless Forest must retain its difficult terrain contract",
+    )
+    require(
+        re.search(
+            r"RewriteEndlessForestMaps\s*\(.*?"
+            r"mapRegion\.ForestMap.*?"
+            r"mapRegion\.ShrubMap.*?"
+            r"mapRegion\.OceanMap.*?"
+            r"mapRegion\.UpheavelMap.*?"
+            r"mapRegion\.LandformMap",
+            worldgen_source,
+            re.DOTALL,
+        )
+        is not None,
+        (
+            "Endless Forest must rewrite forest, shrub, ocean, upheaval, "
+            "and landform maps together"
+        ),
+    )
+    require(
+        "insideEndlessForest" in worldgen_source
+        and "handling = EnumHandling.PreventSubsequent;"
+        in worldgen_source,
+        (
+            "Endless Forest must suppress non-tree block patches without "
+            "disabling vanilla tree generation"
+        ),
+    )
+    prevent_placement_body = re.search(
+        r"public bool PreventPlacementAt\(.*?;"
+        r"\s*public bool PreventPlacementBroadlyAt",
+        worldgen_source,
+        re.DOTALL,
+    )
+    require(
+        prevent_placement_body is not None
+        and "EndlessForestLevel" not in prevent_placement_body.group(0),
+        (
+            "Endless Forest must not be included in broad placement "
+            "suppression because that would also suppress its trees"
+        ),
+    )
+    require(
+        "WorldMapManager.ToggleMap" in map_restriction_source
+        and "ToggleMapPrefix" in map_restriction_source,
+        "Level 3 must block both map hotkeys at WorldMapManager.ToggleMap",
+    )
+    require(
+        "TickIntervalMilliseconds = 100" in map_restriction_source
+        and "ForceMapClosed();" in map_restriction_source,
+        "Level 3 map restriction must react within 100 ms of entry",
+    )
+    require(
+        'private const string MinimapSetting = "showMinimapHud";'
+        in map_restriction_source
+        and "savedMinimapPreference" in map_restriction_source,
+        (
+            "Level 3 must disable the minimap temporarily and restore the "
+            "player's preference after exit"
+        ),
+    )
+
     anchor_x = 500_000.0
     anchor_z = 500_000.0
     epsilon = 0.125
@@ -153,6 +335,31 @@ def main() -> None:
 
     deep_sea_inner = base_radius + ring_width
     deep_sea_outer = base_radius + ring_width * 2
+    endless_forest_inner = deep_sea_outer
+    endless_forest_outer = base_radius + ring_width * 3
+    for radius, expected in (
+        (endless_forest_inner + epsilon, 3),
+        ((endless_forest_inner + endless_forest_outer) / 2, 3),
+        (endless_forest_outer, 3),
+        (endless_forest_outer + epsilon, 4),
+    ):
+        actual = level_at(
+            anchor_x + radius,
+            anchor_z,
+            anchor_x,
+            anchor_z,
+            base_radius,
+            ring_width,
+            maximum_level,
+        )
+        require(
+            actual == expected,
+            (
+                f"Endless Forest radius {radius} resolved to level "
+                f"{actual}, expected {expected}"
+            ),
+        )
+
     deep_sea_core_radii = [
         deep_sea_inner + deep_sea_shore_width + 1,
         (deep_sea_inner + deep_sea_outer) / 2,
@@ -218,7 +425,9 @@ def main() -> None:
     print(
         "World-zone validation passed: 10,000-block Homeland, "
         "5,000-block rings, exact boundaries, continuous Level 2 core at "
-        "2,160 angular samples, 20,000 deterministic samples."
+        "2,160 angular samples, Level 3 valley/slope/plateau forest climate, "
+        "difficult-terrain/map restriction contract, 20,000 deterministic "
+        "samples."
     )
 
 

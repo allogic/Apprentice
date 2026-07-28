@@ -150,8 +150,13 @@ namespace Apprentice
 			string guidance = worldgenActive
 				? "Only newly generated chunks use the realm biome rules."
 				: "The colored map still shows danger levels, but terrain stays vanilla. Create a completely new world to activate realm biomes.";
-			int rewrittenRegions =
+			int rewrittenDesertRegions =
 				ConcentricRealmWorldgenSystem.RewrittenDesertMapRegions;
+			int rewrittenDeepSeaRegions =
+				ConcentricRealmWorldgenSystem.RewrittenDeepSeaMapRegions;
+			int rewrittenForestRegions =
+				ConcentricRealmWorldgenSystem
+					.RewrittenEndlessForestMapRegions;
 
 			return TextCommandResult.Success(
 				$"Realm {level}: {realmName}. " +
@@ -160,9 +165,12 @@ namespace Apprentice
 				$"Distance from anchor: {distance:0} blocks. " +
 				$"Biome generation: {generation} " +
 				$"(profile {state.WorldgenProfile}; " +
-				$"Level 1 map rewrite passes this session: " +
-				$"{rewrittenRegions}). {guidance}"
-			);
+					$"map rewrite passes this session: " +
+					$"Level 1={rewrittenDesertRegions}, " +
+					$"Level 2={rewrittenDeepSeaRegions}, " +
+					$"Level 3={rewrittenForestRegions}). " +
+					guidance
+				);
 		}
 
 		private static TextCommandResult RelayToIssuingClient(

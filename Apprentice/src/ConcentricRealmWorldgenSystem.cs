@@ -15,7 +15,9 @@ namespace Apprentice
     /// Concentric-realms world generation. Level 0 is left untouched. Level 1
     /// is a hot, dry, land-only desert. Level 2 is a continuous salt-water
     /// crossing with deterministic deep-sea floor geometry and natural shore
-    /// transitions. Later milestones extend this class one realm at a time.
+    /// transitions. Level 3 is a land-only, maximum-density forest over
+    /// difficult cliff-and-hill terrain. Later milestones extend this class
+    /// one realm at a time.
     /// </summary>
     internal sealed class ConcentricRealmWorldgenSystem :
         IBlockPatchModifier,
@@ -23,12 +25,26 @@ namespace Apprentice
     {
         private const int DesertLevel = 1;
         private const int DeepSeaLevel = 2;
+        private const int EndlessForestLevel = 3;
         private const int ChunkSize = GlobalConstants.ChunkSize;
         private const int DeepSeaFloorVariation = 6;
+        // These are sea-level inputs. Vintage Story lowers temperature and
+        // raises rainfall with altitude before choosing a tree variant. This
+        // profile keeps broadleaf trees viable in valleys, conifers viable
+        // on the middle slopes, and larch viable on the highest plateaus.
+        private const int EndlessForestTemperatureCelsius = 14;
+        private const int EndlessForestRainfall = 100;
+        private const int EndlessForestDensity = 255;
+        private const int EndlessForestShrubDensity = 224;
+        private const int EndlessForestUpheaval = 255;
+        private const string EndlessForestLandformCode =
+            "cliffy rolling hills";
         private const string DesertMapMarker =
             "apprentice:concentricRealmsLevel1MapsV1";
         private const string DeepSeaMapMarker =
             "apprentice:concentricRealmsLevel2MapsV1";
+        private const string EndlessForestMapMarker =
+            "apprentice:concentricRealmsLevel3MapsV1";
 
         private static readonly BlockPatchConfig EmptyPatches = new()
         {
@@ -46,10 +62,13 @@ namespace Apprentice
         private NormalizedSimplexNoise? deepSeaFloorNoise;
         private static int rewrittenDesertMapRegions;
         private static int rewrittenDeepSeaMapRegions;
+        private static int rewrittenEndlessForestMapRegions;
         private static int sculptedDeepSeaChunks;
         private static int sculptedDeepSeaColumns;
+        private int endlessForestLandformIndex = -1;
         private int loggedDesertRegions;
         private int loggedDeepSeaRegions;
+        private int loggedEndlessForestRegions;
         private int loggedDeepSeaChunks;
         private bool disposed;
         private bool conflictLogged;
@@ -62,6 +81,11 @@ namespace Apprentice
         internal static int RewrittenDeepSeaMapRegions =>
             System.Threading.Volatile.Read(
                 ref rewrittenDeepSeaMapRegions
+            );
+
+        internal static int RewrittenEndlessForestMapRegions =>
+            System.Threading.Volatile.Read(
+                ref rewrittenEndlessForestMapRegions
             );
 
         internal static int SculptedDeepSeaChunks =>
@@ -97,8 +121,8 @@ namespace Apprentice
                 "standard"
             );
             api.Event.ChunkColumnGeneration(
-                SculptDeepSeaCore,
-                EnumWorldGenPass.PreDone,
+                SculptDeepSeaBeforeVegetation,
+                EnumWorldGenPass.Vegetation,
                 "standard"
             );
             api.Event.OnTrySpawnEntity += OnTrySpawnEntity;
@@ -191,6 +215,103 @@ namespace Apprentice
             }
         }
 
+        private void RewriteEndlessForestMaps(
+            IMapRegion mapRegion,
+            DangerWorldState state,
+            int regionX,
+            int regionZ)
+        {
+            int regionSize = api.WorldManager.RegionSize;
+            int climate = ApplyClimateMap(
+                mapRegion.ClimateMap,
+                state,
+                EndlessForestLevel,
+                regionX,
+                regionZ,
+                regionSize,
+                EndlessForestTemperatureCelsius,
+                EndlessForestRainfall
+            );
+            int forest = SetLevelMap(
+                mapRegion.ForestMap,
+                state,
+                EndlessForestLevel,
+                regionX,
+                regionZ,
+                regionSize,
+                EndlessForestDensity
+            );
+            int shrubs = SetLevelMap(
+                mapRegion.ShrubMap,
+                state,
+                EndlessForestLevel,
+                regionX,
+                regionZ,
+                regionSize,
+                EndlessForestShrubDensity
+            );
+            int ocean = ClearLevelMap(
+                mapRegion.OceanMap,
+                state,
+                EndlessForestLevel,
+                regionX,
+                regionZ,
+                regionSize
+            );
+            int upheaval = SetLevelMap(
+                mapRegion.UpheavelMap,
+                state,
+                EndlessForestLevel,
+                regionX,
+                regionZ,
+                regionSize,
+                EndlessForestUpheaval
+            );
+            int landform = endlessForestLandformIndex >= 0
+                ? SetLevelMap(
+                    mapRegion.LandformMap,
+                    state,
+                    EndlessForestLevel,
+                    regionX,
+                    regionZ,
+                    regionSize,
+                    endlessForestLandformIndex
+                )
+                : 0;
+
+            mapRegion.SetModdata(
+                EndlessForestMapMarker,
+                new byte[] { 1 }
+            );
+            mapRegion.DirtyForSaving = true;
+
+            if (climate + forest + shrubs + ocean + upheaval + landform <= 0)
+            {
+                return;
+            }
+
+            System.Threading.Interlocked.Increment(
+                ref rewrittenEndlessForestMapRegions
+            );
+            if (System.Threading.Interlocked.Increment(
+                    ref loggedEndlessForestRegions
+                ) <= 12)
+            {
+                api.Logger.Notification(
+                    "[Apprentice] Rewrote Level 3 map region {0},{1}: climate={2}, forest={3}, shrubs={4}, ocean={5}, upheaval={6}, landform={7} ({8}).",
+                    regionX,
+                    regionZ,
+                    climate,
+                    forest,
+                    shrubs,
+                    ocean,
+                    upheaval,
+                    landform,
+                    EndlessForestLandformCode
+                );
+            }
+        }
+
         private void OnInitWorldGenerator()
         {
             activeState = null;
@@ -204,6 +325,10 @@ namespace Apprentice
                 0
             );
             System.Threading.Interlocked.Exchange(
+                ref rewrittenEndlessForestMapRegions,
+                0
+            );
+            System.Threading.Interlocked.Exchange(
                 ref sculptedDeepSeaChunks,
                 0
             );
@@ -213,9 +338,11 @@ namespace Apprentice
             );
             loggedDesertRegions = 0;
             loggedDeepSeaRegions = 0;
+            loggedEndlessForestRegions = 0;
             loggedDeepSeaChunks = 0;
             globalConfig = null;
             deepSeaFloorNoise = null;
+            endlessForestLandformIndex = -1;
             if (HasIncompatibleTerrainGenerator())
             {
                 if (!conflictLogged)
@@ -258,14 +385,52 @@ namespace Apprentice
                     0.65,
                     api.WorldManager.Seed + 0x2D33EAL
                 );
+            endlessForestLandformIndex =
+                ResolveLandformIndex(EndlessForestLandformCode);
+            if (endlessForestLandformIndex < 0)
+            {
+                activeState = null;
+                api.Logger.Error(
+                    "[Apprentice] Concentric realm world generation is disabled: required Level 3 landform '{0}' was not loaded.",
+                    EndlessForestLandformCode
+                );
+                return;
+            }
             api.Logger.Notification(
-                "[Apprentice] Concentric realms profile active: Homeland 0-{0:0}, Barren Desert {0:0}-{1:0}, Deep Sea {1:0}-{2:0} (depth {3}, shore width {4}).",
+                "[Apprentice] Concentric realms profile active: Homeland 0-{0:0}, Barren Desert {0:0}-{1:0}, Deep Sea {1:0}-{2:0} (depth {3}, shore width {4}), Endless Forest {2:0}-{5:0} (landform {6}, sea-level climate {7} C/{8} rainfall).",
                 state.BaseRadius,
                 state.BaseRadius + state.RingWidth,
                 state.BaseRadius + state.RingWidth * 2,
                 state.DeepSeaDepth,
-                state.DeepSeaShoreWidth
+                state.DeepSeaShoreWidth,
+                state.BaseRadius + state.RingWidth * 3,
+                EndlessForestLandformCode,
+                EndlessForestTemperatureCelsius,
+                EndlessForestRainfall
             );
+        }
+
+        private static int ResolveLandformIndex(string code)
+        {
+            LandformVariant[]? landforms =
+                NoiseLandforms.landforms?.LandFormsByIndex;
+            if (landforms == null)
+            {
+                return -1;
+            }
+
+            for (int index = 0; index < landforms.Length; index++)
+            {
+                if (string.Equals(
+                    landforms[index]?.Code?.Path,
+                    code,
+                    StringComparison.OrdinalIgnoreCase))
+                {
+                    return index;
+                }
+            }
+
+            return -1;
         }
 
         private bool HasIncompatibleTerrainGenerator() =>
@@ -330,6 +495,12 @@ namespace Apprentice
         {
             RewriteDesertMaps(mapRegion, state, regionX, regionZ);
             RewriteDeepSeaMaps(mapRegion, state, regionX, regionZ);
+            RewriteEndlessForestMaps(
+                mapRegion,
+                state,
+                regionX,
+                regionZ
+            );
         }
 
         private void RewriteDesertMaps(
@@ -345,7 +516,9 @@ namespace Apprentice
                 DesertLevel,
                 regionX,
                 regionZ,
-                regionSize
+                regionSize,
+                state.DesertTemperatureCelsius,
+                state.DesertRainfall
             );
             int forest = ClearLevelMap(
                 mapRegion.ForestMap,
@@ -413,11 +586,13 @@ namespace Apprentice
             int level,
             int regionX,
             int regionZ,
-            int regionSize)
+            int regionSize,
+            int temperatureCelsius,
+            int rainfall)
         {
             int temperature = Math.Clamp(
                 Climate.DescaleTemperature(
-                    state.DesertTemperatureCelsius
+                    temperatureCelsius
                 ),
                 0,
                 255
@@ -431,7 +606,7 @@ namespace Apprentice
                 regionSize,
                 existing =>
                     (temperature << 16) |
-                    (state.DesertRainfall << 8) |
+                    (Math.Clamp(rainfall, 0, 255) << 8) |
                     (existing & 0xff)
             );
         }
@@ -516,7 +691,7 @@ namespace Apprentice
             return transformed;
         }
 
-        private void SculptDeepSeaCore(
+        private void SculptDeepSeaBeforeVegetation(
             IChunkColumnGenerateRequest request)
         {
             DangerWorldState? state = activeState;
@@ -591,13 +766,14 @@ namespace Apprentice
                         originalTerrain,
                         desiredFloor
                     );
+                    int originalColumnTop = Math.Max(
+                        terrainHeights[mapIndex],
+                        rainHeights[mapIndex]
+                    );
                     int columnTop = Math.Clamp(
                         Math.Max(
-                            seaLevel - 1,
-                            Math.Max(
-                                terrainHeights[mapIndex],
-                                rainHeights[mapIndex]
-                            )
+                            seaLevel,
+                            originalColumnTop + 1
                         ),
                         floor + 1,
                         mapSizeY - 1
@@ -615,10 +791,10 @@ namespace Apprentice
                         topRockIds[mapIndex] > 0
                             ? topRockIds[mapIndex]
                             : config.defaultRockId;
-                    request.Chunks[floorChunkY].Data
-                        .SetBlockUnsafe(floorIndex, rockId);
-                    request.Chunks[floorChunkY].Data
-                        .SetFluid(floorIndex, 0);
+                    IChunkBlocks floorChunkData =
+                        request.Chunks[floorChunkY].Data;
+                    floorChunkData[floorIndex] = rockId;
+                    floorChunkData.SetFluid(floorIndex, 0);
 
                     for (int y = floor + 1;
                          y <= columnTop;
@@ -631,7 +807,12 @@ namespace Apprentice
                             y % ChunkSize,
                             localZ
                         );
-                        chunkData.SetBlockUnsafe(index, 0);
+                        // Vegetation-pass chunks can legitimately contain an
+                        // empty solid layer with no writable palette. The
+                        // indexer initializes or safely skips that layer;
+                        // SetBlockUnsafe assumes an existing writable palette
+                        // and crashes while clearing such columns.
+                        chunkData[index] = 0;
                         chunkData.SetFluid(
                             index,
                             y < seaLevel
@@ -746,7 +927,17 @@ namespace Apprentice
                     chunkZ,
                     ChunkSize
                 );
-            if (!insideDesert && !insideDeepSea)
+            bool insideEndlessForest =
+                WorldZoneLayout.ChunkFullyInsideLevel(
+                    activeState,
+                    EndlessForestLevel,
+                    chunkX,
+                    chunkZ,
+                    ChunkSize
+                );
+            if (!insideDesert &&
+                !insideDeepSea &&
+                !insideEndlessForest)
             {
                 return null;
             }
@@ -775,6 +966,14 @@ namespace Apprentice
             WorldZoneLayout.RectangleIntersectsLevel(
                 state,
                 DeepSeaLevel,
+                schematicLocation.X1,
+                schematicLocation.Z1,
+                schematicLocation.X2,
+                schematicLocation.Z2
+            ) ||
+            WorldZoneLayout.RectangleIntersectsLevel(
+                state,
+                EndlessForestLevel,
                 schematicLocation.X1,
                 schematicLocation.Z1,
                 schematicLocation.X2,
@@ -826,6 +1025,7 @@ namespace Apprentice
             activeState = null;
             globalConfig = null;
             deepSeaFloorNoise = null;
+            endlessForestLandformIndex = -1;
             api.Event.OnTrySpawnEntity -= OnTrySpawnEntity;
             if (structures != null)
             {
