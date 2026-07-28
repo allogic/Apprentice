@@ -15,6 +15,7 @@ using ImGuiNET;
 using VSImGui;
 using VSImGui.API;
 
+// TODO: delete all UpperTorso animation keyframes for all strafing animations + sprint-forward and sprint-back
 // TODO: refactor Directional8 on dash quadrant angle
 // TODO: add attack pose on top of run animation based on mouse right down/up
 // TODO: update frame buffer sizes at runtime
@@ -499,7 +500,7 @@ namespace Apprentice.src._burgi
 				clientApi.Event.MouseDown += OnMouseDown;
 
 				// TODO: move me..
-				darkAges.darkEnable = true;
+				darkAges.darkEnable = false;
 			}
 
 			public override string PropertyName()
