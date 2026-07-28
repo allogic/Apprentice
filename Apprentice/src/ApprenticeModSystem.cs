@@ -1,4 +1,3 @@
-using Apprentice.Weapon;
 using HarmonyLib;
 using Newtonsoft.Json.Linq;
 using System;
@@ -7,13 +6,14 @@ using System.Linq;
 using System.Reflection;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
-using Vintagestory.API.Common.Entities;
 using Vintagestory.API.Datastructures;
 using Vintagestory.API.Server;
 using Vintagestory.GameContent;
 
 namespace Apprentice
 {
+	using static Apprentice.src._burgi.Behaviour;
+
 	public sealed class ApprenticeModSystem : ModSystem
 	{
 		private const string PlaytestVersion = "2.7.0-dev.20260728.99";
@@ -105,7 +105,6 @@ namespace Apprentice
 
 		private InterfaceManager? interfaceManager = null;
 		private OverlayManager? overlayManager = null;
-		private HealthBarRenderer? healthBarRenderer = null;
 		private ApprenticeAnimationSystem? animationSystem = null;
 		private ItemCalibrationSystem? itemCalibrationSystem = null;
 		private Harmony? poisonInfoHarmony = null;
@@ -772,21 +771,6 @@ namespace Apprentice
 
 				interfaceManager = new InterfaceManager(api, loadedClassConfig, loadedSkillTreeConfig, networkChannel);
 				overlayManager = new OverlayManager(api, baseConfig, loadedClassConfig);
-				try
-				{
-					healthBarRenderer = new HealthBarRenderer(api);
-				}
-				catch (Exception exception)
-				{
-					// The enemy health bars are optional presentation. A GPU or
-					// shader problem must not abort the skill-tree UI or packet
-					// handlers that are initialized immediately below.
-					api.Logger.Warning(
-						"[Apprentice] Enemy health bars were disabled because their shader could not be initialized: {0}",
-						exception.Message
-					);
-					healthBarRenderer = null;
-				}
 
 				networkChannel.SetMessageHandler<ExperienceNotificationPacket>(OnExperienceNotification);
 				networkChannel.SetMessageHandler<SkillPurchaseResultPacket>(OnSkillPurchaseResult);
@@ -799,10 +783,8 @@ namespace Apprentice
 				api.Logger.Error(exception);
 			}
 
-			UchigatanaDashBehaviour.clientApi = api;
-			TrueThirdPersonBehaviour.clientApi = api;
-
-			capi?.Event.PlayerJoin += OnPlayerJoin; // Pls let me life..!
+			DashBehaviour.Register(api);
+			TrueThirdPerson.Register(api);
 		}
 
 		public override void Dispose()
@@ -824,7 +806,6 @@ namespace Apprentice
 
 			overlayManager?.Dispose();
 			interfaceManager?.Dispose();
-			healthBarRenderer?.Dispose();
 			itemCalibrationSystem?.Dispose();
 			itemCalibrationSystem = null;
 			animationSystem?.Dispose();
@@ -841,7 +822,6 @@ namespace Apprentice
 			classesManager = null;
 			interfaceManager = null;
 			overlayManager = null;
-			healthBarRenderer = null;
 			DangerHeatmapClientRuntime.RequestState = null;
 			DangerHeatmapClientRuntime.LatestState = null;
 			warScytheAnimation = null;
@@ -881,14 +861,6 @@ namespace Apprentice
 		#endregion
 
 		#region Event Handler
-		private void OnPlayerJoin(IClientPlayer byPlayer)
-		{
-			if (capi != null)
-			{
-				byPlayer.Entity.AddBehavior(new UchigatanaDashBehaviour(byPlayer.Entity));
-				byPlayer.Entity.AddBehavior(new TrueThirdPersonBehaviour(byPlayer.Entity));
-			}
-		}
 		private void OnExperienceNotification(ExperienceNotificationPacket packet)
 		{
 			// Network packet callbacks are not a safe place to create
