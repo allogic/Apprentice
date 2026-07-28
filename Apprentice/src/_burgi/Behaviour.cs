@@ -31,8 +31,6 @@ namespace Apprentice.src._burgi
 			private static ICoreClientAPI? clientApi = null;
 
 			private static bool enable = false;
-			private static bool enableLineGizmo = false;
-			private static bool enableMotionBlur = true;
 			private static bool enableRunAnimations = true;
 			private static bool enableBlendAttackPose = false;
 
@@ -179,8 +177,6 @@ namespace Apprentice.src._burgi
 			private float animationSpeedStrafeForwardRight90 = 0.6F;
 			private float animationSpeedStrafeForwardLeft45 = 0.6F;
 			private float animationSpeedStrafeForwardRight45 = 0.6F;
-
-			private float motionBlurIntensity = 2.7F;
 
 			private int dashCooldownMs = 1500;
 			private int jumpCooldownMs = 150;
@@ -498,9 +494,6 @@ namespace Apprentice.src._burgi
 
 				// Register event's
 				clientApi.Event.MouseDown += OnMouseDown;
-
-				// TODO: move me..
-				darkAges.darkEnable = false;
 			}
 
 			public override string PropertyName()
@@ -679,32 +672,35 @@ namespace Apprentice.src._burgi
 				}
 
 				// Apply motion blur
-				if ((sequenceType == SequenceType.SEQUENCE_TYPE_NONE) || (enableMotionBlur == false))
+				if (sequenceType == SequenceType.SEQUENCE_TYPE_NONE)
 				{
 					motionBlur.blurEnable = false;
 				}
 				else
 				{
 					motionBlur.blurEnable = true;
-					motionBlur.blurIntensity = (float)transform.Motion.Length() * motionBlurIntensity;
+					motionBlur.blurLength = (float)transform.Motion.Length();
 				}
 
 #if DEBUG
-				if ((sequenceType != SequenceType.SEQUENCE_TYPE_NONE) && (enableLineGizmo == true))
+				if (lineGizmo != null)
 				{
-					// Track motion trajectory
-					lineGizmo?.AddLine(
-						(float)transform.X,
-						(float)transform.Y,
-						(float)transform.Z,
-						(float)transform.X + (float)transform.Motion.X * 10.0F,
-						(float)transform.Y + (float)transform.Motion.Y * 10.0F,
-						(float)transform.Z + (float)transform.Motion.Z * 10.0F,
-						ColorUtil.ToRgba(0xFF, 0xFF, 0xFF, 0xFF)
-					);
+					if ((sequenceType != SequenceType.SEQUENCE_TYPE_NONE) && (lineGizmo.gizmoEnable == true))
+					{
+						// Track motion trajectory
+						lineGizmo.AddLine(
+							(float)transform.X,
+							(float)transform.Y,
+							(float)transform.Z,
+							(float)transform.X + (float)transform.Motion.X * 10.0F,
+							(float)transform.Y + (float)transform.Motion.Y * 10.0F,
+							(float)transform.Z + (float)transform.Motion.Z * 10.0F,
+							ColorUtil.ToRgba(0xFF, 0xFF, 0xFF, 0xFF)
+						);
 
-					// Upload memory
-					lineGizmo?.Commit();
+						// Upload memory
+						lineGizmo.Commit();
+					}
 				}
 #endif
 
@@ -772,13 +768,16 @@ namespace Apprentice.src._burgi
 
 #if DEBUG
 							// Add start point position
-							if (enableLineGizmo)
+							if (lineGizmo != null)
 							{
-								lineGizmo?.AddBox(
-									(float)transform.X, (float)transform.Y, (float)transform.Z,
-									0.5F, 0.5F, 0.5F,
-									ColorUtil.ToRgba(0xFF, 0xFF, 0xFF, 0xFF)
-								);
+								if (lineGizmo.gizmoEnable)
+								{
+									lineGizmo.AddBox(
+										(float)transform.X, (float)transform.Y, (float)transform.Z,
+										0.5F, 0.5F, 0.5F,
+										ColorUtil.ToRgba(0xFF, 0xFF, 0xFF, 0xFF)
+									);
+								}
 							}
 #endif
 
@@ -894,13 +893,16 @@ namespace Apprentice.src._burgi
 						{
 #if DEBUG
 							// Add end point position
-							if (enableLineGizmo)
+							if (lineGizmo != null)
 							{
-								lineGizmo?.AddBox(
-									(float)transform.X, (float)transform.Y, (float)transform.Z,
-									0.5F, 0.5F, 0.5F,
-									ColorUtil.ToRgba(0xFF, 0xFF, 0xFF, 0xFF)
-								);
+								if (lineGizmo.gizmoEnable)
+								{
+									lineGizmo.AddBox(
+										(float)transform.X, (float)transform.Y, (float)transform.Z,
+										0.5F, 0.5F, 0.5F,
+										ColorUtil.ToRgba(0xFF, 0xFF, 0xFF, 0xFF)
+									);
+								}
 							}
 #endif
 
@@ -1382,6 +1384,10 @@ namespace Apprentice.src._burgi
 
 			private CallbackGUIStatus OnImGuiDraw(float deltaSeconds)
 			{
+				if (lineGizmo == null) return CallbackGUIStatus.DontGrabMouse;
+				if (motionBlur == null) return CallbackGUIStatus.DontGrabMouse;
+				if (darkAges == null) return CallbackGUIStatus.DontGrabMouse;
+
 				ImGui.Begin("Ushigatana");
 
 				if (ImGui.BeginTabBar("Settings", ImGuiTabBarFlags.None))
@@ -1389,7 +1395,7 @@ namespace Apprentice.src._burgi
 					if (ImGui.BeginTabItem("General"))
 					{
 						ImGui.Checkbox("enable", ref enable);
-						ImGui.Checkbox("enableLineGizmo", ref enableLineGizmo);
+						ImGui.Checkbox("enableLineGizmo", ref lineGizmo.gizmoEnable);
 						ImGui.DragInt("dashCooldownMs", ref dashCooldownMs);
 						ImGui.DragInt("jumpCooldownMs", ref jumpCooldownMs);
 						ImGui.DragInt("attackCooldownMs", ref attackCooldownMs);
@@ -1398,14 +1404,14 @@ namespace Apprentice.src._burgi
 
 					if (ImGui.BeginTabItem("Shader"))
 					{
-						if (motionBlur != null) ImGui.Checkbox("enableMotionBlur", ref motionBlur.blurEnable);
-						if (darkAges != null) ImGui.Checkbox("enableDarkAges", ref darkAges.darkEnable);
 						ImGui.SeparatorText("Motion Blur");
-						ImGui.DragFloat("motionBlurIntensity", ref motionBlurIntensity, 0.1F, 0.0F, 10.0F); // TODO
+						ImGui.Checkbox("enableMotionBlur (Don't touch)", ref motionBlur.blurEnable);
+						ImGui.DragFloat("motionBlurIntensity", ref motionBlur.blurIntensity, 0.1F, 0.0F, 10.0F); // TODO
 						ImGui.SeparatorText("Dark Ages");
-						if (darkAges != null) ImGui.DragFloat("darkIntensity", ref darkAges.darkIntensity, 0.1F, 0.0F, 10.0F);
-						if (darkAges != null) ImGui.DragFloat("darkRadius", ref darkAges.darkRadius, 0.001F, -10000.0F, 10000.0F); // TODO
-						if (darkAges != null) ImGui.DragFloat("depthFactor", ref darkAges.depthFactor, 0.001F, -10000.0F, 10000.0F); // TODO
+						ImGui.Checkbox("enableDarkAges", ref darkAges.darkEnable);
+						ImGui.DragFloat("darkIntensity", ref darkAges.darkIntensity, 0.1F, 0.0F, 10.0F);
+						ImGui.DragFloat("darkRadius", ref darkAges.darkRadius, 0.001F, -10000.0F, 10000.0F); // TODO
+						ImGui.DragFloat("depthFactor", ref darkAges.depthFactor, 0.001F, -10000.0F, 10000.0F); // TODO
 						ImGui.EndTabItem();
 					}
 
@@ -1461,7 +1467,6 @@ namespace Apprentice.src._burgi
 			private static ICoreClientAPI? clientApi = null;
 
 			private static bool enable = false;
-			private static bool enableLineGizmo = false;
 			private static bool enableLinearVelocity = true;
 			private static bool enableAngularVelocity = true;
 			private static bool enableBoneBobbing = true;
@@ -1682,6 +1687,8 @@ namespace Apprentice.src._burgi
 
 			private CallbackGUIStatus OnImGuiDraw(float deltaSeconds)
 			{
+				if (lineGizmo == null) return CallbackGUIStatus.DontGrabMouse;
+
 				ImGui.Begin("TrueThirdPerson");
 
 				if (ImGui.BeginTabBar("Settings", ImGuiTabBarFlags.None))
@@ -1689,7 +1696,7 @@ namespace Apprentice.src._burgi
 					if (ImGui.BeginTabItem("General"))
 					{
 						ImGui.Checkbox("enable", ref enable);
-						ImGui.Checkbox("enableLineGizmo", ref enableLineGizmo);
+						ImGui.Checkbox("enableLineGizmo", ref lineGizmo.gizmoEnable);
 						ImGui.SeparatorText("Camera");
 						Vector3 p = new(cameraRootOffset.X, cameraRootOffset.Y, cameraRootOffset.Z);
 						if (ImGui.DragFloat3("cameraRootOffset", ref p, 0.01F)) cameraRootOffset.Set(p.X, p.Y, p.Z);

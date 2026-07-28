@@ -3,6 +3,7 @@
 uniform sampler2D blitTex;
 uniform sampler2D accTex;
 
+uniform float blurLength;
 uniform float blurIntensity;
 
 in vec2 texCoord;
@@ -14,7 +15,7 @@ void main()
 	vec4 prevColor = texture(accTex, texCoord);
 	vec4 currColor = texture(blitTex, texCoord);
 
-	float t = clamp(blurIntensity, 0.0, 1.0);
+	float t = clamp(blurLength * blurIntensity, 0.0, 1.0);
 
 	float historyWeight = mix(0.0, 0.95, t);
 	float currentWeight = 1.0 - historyWeight;

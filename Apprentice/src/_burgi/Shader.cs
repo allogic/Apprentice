@@ -21,6 +21,8 @@ namespace Apprentice.src._burgi
 			private MeshData? mesh = null;
 			private MeshRef? meshRef = null;
 
+			public bool gizmoEnable = false;
+
 			public double RenderOrder => 1.0;
 			public int RenderRange => 10;
 
@@ -52,20 +54,23 @@ namespace Apprentice.src._burgi
 
 				if (meshRef == null) return;
 
-				renderApi.GlDisableCullFace();
-				renderApi.GlToggleBlend(false);
+				if (gizmoEnable)
+				{
+					renderApi.GlDisableCullFace();
+					renderApi.GlToggleBlend(false);
 
-				renderApi.LineWidth = 10;
+					renderApi.LineWidth = 10;
 
-				// Draw the gizmo
-				lineProgram.Use();
-				lineProgram.UniformMatrix("projectionMatrix", renderApi.CurrentProjectionMatrix);
-				lineProgram.UniformMatrix("viewMatrix", renderApi.CurrentModelviewMatrix);
-				renderApi.RenderMesh(meshRef);
-				lineProgram.Stop();
+					// Draw the gizmo
+					lineProgram.Use();
+					lineProgram.UniformMatrix("projectionMatrix", renderApi.CurrentProjectionMatrix);
+					lineProgram.UniformMatrix("viewMatrix", renderApi.CurrentModelviewMatrix);
+					renderApi.RenderMesh(meshRef);
+					lineProgram.Stop();
 
-				renderApi.GlToggleBlend(true);
-				renderApi.GlEnableCullFace();
+					renderApi.GlToggleBlend(true);
+					renderApi.GlEnableCullFace();
+				}
 			}
 
 			public void AddLine(
@@ -187,7 +192,8 @@ namespace Apprentice.src._burgi
 			private FrameBufferRef? frameBufferBRef = null;
 
 			public bool blurEnable = false;
-			public float blurIntensity = 0.0F;
+			public float blurLength = 0.0F;
+			public float blurIntensity = 2.7F;
 
 			public double RenderOrder => 1.0;
 			public int RenderRange => 9999;
@@ -288,24 +294,25 @@ namespace Apprentice.src._burgi
 				if (frameBufferARef == null) return;
 				if (frameBufferBRef == null) return;
 
-				// Blit render target
-				renderApi.CurrentFrameBuffer = frameBufferBlitRef;
-				blitProgram.Use();
-				blitProgram.BindTexture2D("tex", renderApi.FrameBuffers[(int)EnumFrameBuffer.Primary].ColorTextureIds[0], 0);
-				renderApi.RenderMesh(meshRef);
-				blitProgram.Stop();
-
-				// Accumulate motion blur
-				renderApi.CurrentFrameBuffer = frameBufferARef;
-				blurProgram.Use();
-				blurProgram.BindTexture2D("blitTex", frameBufferBlitRef.ColorTextureIds[0], 0);
-				blurProgram.BindTexture2D("accTex", frameBufferBRef.ColorTextureIds[0], 1);
-				blurProgram.Uniform("blurIntensity", blurIntensity);
-				renderApi.RenderMesh(meshRef);
-				blurProgram.Stop();
-
 				if (blurEnable)
 				{
+					// Blit render target
+					renderApi.CurrentFrameBuffer = frameBufferBlitRef;
+					blitProgram.Use();
+					blitProgram.BindTexture2D("tex", renderApi.FrameBuffers[(int)EnumFrameBuffer.Primary].ColorTextureIds[0], 0);
+					renderApi.RenderMesh(meshRef);
+					blitProgram.Stop();
+
+					// Accumulate motion blur
+					renderApi.CurrentFrameBuffer = frameBufferARef;
+					blurProgram.Use();
+					blurProgram.BindTexture2D("blitTex", frameBufferBlitRef.ColorTextureIds[0], 0);
+					blurProgram.BindTexture2D("accTex", frameBufferBRef.ColorTextureIds[0], 1);
+					blurProgram.Uniform("blurLength", blurLength);
+					blurProgram.Uniform("blurIntensity", blurIntensity);
+					renderApi.RenderMesh(meshRef);
+					blurProgram.Stop();
+
 					// Blit render target
 					renderApi.CurrentFrameBuffer = null;
 					blitProgram.Use();
@@ -381,12 +388,12 @@ namespace Apprentice.src._burgi
 
 				if (meshRef == null) return;
 
-				renderApi.GLDisableDepthTest();
-				renderApi.GlDisableStencilTest();
-				renderApi.GlToggleBlend(false);
-
 				if (darkEnable)
 				{
+					renderApi.GLDisableDepthTest();
+					renderApi.GlDisableStencilTest();
+					renderApi.GlToggleBlend(false);
+
 					// Extract near and far plane
 					float m22 = renderApi.CurrentProjectionMatrix[10];
 					float m32 = renderApi.CurrentProjectionMatrix[14];
@@ -413,11 +420,11 @@ namespace Apprentice.src._burgi
 					darkProgram.Uniform("farZ", farZ);
 					renderApi.RenderMesh(meshRef);
 					darkProgram.Stop();
-				}
 
-				renderApi.GlToggleBlend(true);
-				renderApi.GLEnableDepthTest();
-				renderApi.GLEnableDepthTest();
+					renderApi.GlToggleBlend(true);
+					renderApi.GLEnableDepthTest();
+					renderApi.GLEnableDepthTest();
+				}
 			}
 
 			public void Dispose()
