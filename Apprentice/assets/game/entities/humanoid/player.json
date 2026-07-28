@@ -628,6 +628,48 @@
 				"animationSpeed": 1.0
 			},
 			{
+				"code": "strafe-forward-left-90",
+				"animation": "strafe-forward-left-90",
+				"blendMode": "Add",
+				"mulWithWalkSpeed": false,
+				"animationSpeed": 1.0
+			},
+			{
+				"code": "strafe-forward-left-45",
+				"animation": "strafe-forward-left-45",
+				"blendMode": "Add",
+				"mulWithWalkSpeed": false,
+				"animationSpeed": 1.0
+			},
+			{
+				"code": "strafe-forward-right-90",
+				"animation": "strafe-forward-right-90",
+				"blendMode": "Add",
+				"mulWithWalkSpeed": false,
+				"animationSpeed": 1.0
+			},
+			{
+				"code": "strafe-forward-right-45",
+				"animation": "strafe-forward-right-45",
+				"blendMode": "Add",
+				"mulWithWalkSpeed": false,
+				"animationSpeed": 1.0
+			},
+			{
+				"code": "sprint-forward",
+				"animation": "sprint-forward",
+				"blendMode": "Add",
+				"mulWithWalkSpeed": false,
+				"animationSpeed": 1.0
+			},
+			{
+				"code": "sprint-back",
+				"animation": "sprint-back",
+				"blendMode": "Add",
+				"mulWithWalkSpeed": false,
+				"animationSpeed": 1.0
+			},
+			{
 				"code": "walk",
 				"animation": "walk",
 				"blendMode": "Average",

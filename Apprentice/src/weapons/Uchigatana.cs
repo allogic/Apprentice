@@ -3,17 +3,16 @@ using ImGuiNET;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using System.Threading.Tasks.Dataflow;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
 using Vintagestory.API.MathTools;
 using Vintagestory.Client.NoObf;
-using Vintagestory.GameContent;
 using VSImGui;
 using VSImGui.API;
-using VSImGui.Debug;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+
+// TODO: refactor Directional8 on dash quadrant angle
+// TODO: add attack pose on top of run animation based on mouse right down/up
 
 namespace Apprentice.Weapon
 {
@@ -41,6 +40,19 @@ namespace Apprentice.Weapon
 			Vec3d term3 = axis * (axis.Dot(v) * (1.0 - cos));
 
 			return term1 + term2 + term3;
+		}
+
+		public static double AngleDifference(double target, double current)
+		{
+			double diff = target - current;
+
+			while (diff > Math.PI)
+				diff -= Math.Tau;
+
+			while (diff < -Math.PI)
+				diff += Math.Tau;
+
+			return diff;
 		}
 	}
 
@@ -372,20 +384,34 @@ namespace Apprentice.Weapon
 	internal class UchigatanaDashBehaviour : EntityBehavior
 	{
 		public static ICoreClientAPI? clientApi = null;
+
 		public static bool enable = true;
 		public static bool enableLineGizmo = false;
 		public static bool enableMotionBlur = true;
+		public static bool enableRunAnimations = true;
+		public static bool enableBlendAttackPose = false;
 
+		internal enum Directional8
+		{
+			DIR8_FORWARD = 0,
+			DIR8_FORWARD_LEFT,
+			DIR8_LEFT,
+			DIR8_BACK_LEFT,
+			DIR8_BACK,
+			DIR8_BACK_RIGHT,
+			DIR8_RIGHT,
+			DIR8_FORWARD_RIGHT,
+		}
 		internal enum SequenceType
 		{
-			SEQUENCE_TYPE_NONE,
+			SEQUENCE_TYPE_NONE = 0,
 			SEQUENCE_TYPE_DASH,
 			SEQUENCE_TYPE_ATTACK,
 			SEQUENCE_TYPE_JUMP,
 		}
 		internal enum DashSequenceState
 		{
-			DASH_SEQUENCE_STATE_IDLE,
+			DASH_SEQUENCE_STATE_IDLE = 0,
 			DASH_SEQUENCE_STATE_START,
 			DASH_SEQUENCE_STATE_DASH,
 			DASH_SEQUENCE_STATE_RETRACT,
@@ -393,14 +419,14 @@ namespace Apprentice.Weapon
 		}
 		internal enum AttackSequenceState
 		{
-			ATTACK_SEQUENCE_STATE_IDLE,
+			ATTACK_SEQUENCE_STATE_IDLE = 0,
 			ATTACK_SEQUENCE_STATE_START,
 			ATTACK_SEQUENCE_STATE_ATTACK,
 			ATTACK_SEQUENCE_STATE_STOP,
 		}
 		internal enum JumpSequenceState
 		{
-			JUMP_SEQUENCE_STATE_IDLE,
+			JUMP_SEQUENCE_STATE_IDLE = 0,
 			JUMP_SEQUENCE_STATE_START,
 			JUMP_SEQUENCE_STATE_JUMP,
 			JUMP_SEQUENCE_STATE_STOP,
@@ -417,6 +443,19 @@ namespace Apprentice.Weapon
 			"dash-back",
 			"dash-left",
 			"dash-right",
+
+			"sprint-forward",
+			"sprint-back",
+
+			"strafe-forward-right-45",
+			"strafe-forward-left-45",
+			"strafe-forward-right-90",
+			"strafe-forward-left-90",
+
+			"strafe-back-right-45",
+			"strafe-back-left-45",
+			"strafe-back-right-90",
+			"strafe-back-left-90",
 
 			// Combat
 			"hold-weapon-combat-passive",
@@ -457,6 +496,7 @@ namespace Apprentice.Weapon
 		private readonly AssetLocation wooshSound1 = new("apprentice", "sounds/woosh-1");
 		private readonly AssetLocation wooshSound2 = new("apprentice", "sounds/woosh-2");
 		private readonly AssetLocation wooshSound3 = new("apprentice", "sounds/woosh-3");
+		// TODO: add missing footstep sfx..
 
 		private LineGizmo? lineGizmo = null;
 		private MotionBlur? motionBlur = null;
@@ -480,11 +520,19 @@ namespace Apprentice.Weapon
 		private float attackHorizontalImpulse = 0.15F;
 		private float jumpHorizontalImpulse = 0.15F;
 
+		private float runAnimationDeadzone = 0.001F;
+
 		private float animationSpeedDash = 2.5F;
 		private float animationSpeedJump = 2.5F;
 		private float animationSpeedSwordHit = 2.5F;
 		private float animationSpeedSwordHit2 = 2.5F;
 		private float animationSpeedCleaverHit = 2.5F;
+		private float animationSpeedSprintForward = 0.7F;
+		private float animationSpeedSprintBack = 0.7F;
+		private float animationSpeedStrafeForwardLeft90 = 0.6F;
+		private float animationSpeedStrafeForwardRight90 = 0.6F;
+		private float animationSpeedStrafeForwardLeft45 = 0.6F;
+		private float animationSpeedStrafeForwardRight45 = 0.6F;
 
 		private float motionBlurIntensity = 2.7F;
 
@@ -504,7 +552,7 @@ namespace Apprentice.Weapon
 		private Vec3d attackDirection = new(0, 0, 0);
 		private Vec3d jumpDirection = new(0, 0, 0);
 
-		// Movement Animations
+		#region Dash Animations
 		private AnimationMetaData dashForwardData = new()
 		{
 			Animation = "dash-forward",
@@ -569,8 +617,111 @@ namespace Apprentice.Weapon
 				{ "root", EnumAnimationBlendMode.Add },
 			},
 		};
+		#endregion
 
-		// Combat Animations
+		#region Run Animations
+		private AnimationMetaData sprintForwardData = new()
+		{
+			Animation = "sprint-forward",
+			Code = "sprint-forward",
+			Weight = 1.0F,
+			SupressDefaultAnimation = true,
+			ClientSide = true,
+			AnimationSpeed = 1.0F,
+			BlendMode = EnumAnimationBlendMode.Add,
+			ElementWeight = {
+				{ "root", 1.0F },
+			},
+			ElementBlendMode = {
+				{ "root", EnumAnimationBlendMode.Add },
+			},
+		};
+		private AnimationMetaData sprintBackData = new()
+		{
+			Animation = "sprint-back",
+			Code = "sprint-back",
+			Weight = 1.0F,
+			SupressDefaultAnimation = true,
+			ClientSide = true,
+			AnimationSpeed = 1.0F,
+			BlendMode = EnumAnimationBlendMode.Add,
+			ElementWeight = {
+				{ "root", 1.0F },
+			},
+			ElementBlendMode = {
+				{ "root", EnumAnimationBlendMode.Add },
+			},
+		};
+		#endregion
+
+		#region Strafe Animations
+		private AnimationMetaData strafeForwardLeft90Data = new()
+		{
+			Animation = "strafe-forward-left-90",
+			Code = "strafe-forward-left-90",
+			Weight = 1.0F,
+			SupressDefaultAnimation = true,
+			ClientSide = true,
+			AnimationSpeed = 1.0F,
+			BlendMode = EnumAnimationBlendMode.Add,
+			ElementWeight = {
+				{ "root", 1.0F },
+			},
+			ElementBlendMode = {
+				{ "root", EnumAnimationBlendMode.Add },
+			},
+		};
+		private AnimationMetaData strafeForwardLeft45Data = new()
+		{
+			Animation = "strafe-forward-left-45",
+			Code = "strafe-forward-left-45",
+			Weight = 1.0F,
+			SupressDefaultAnimation = true,
+			ClientSide = true,
+			AnimationSpeed = 1.0F,
+			BlendMode = EnumAnimationBlendMode.Add,
+			ElementWeight = {
+				{ "root", 1.0F },
+			},
+			ElementBlendMode = {
+				{ "root", EnumAnimationBlendMode.Add },
+			},
+		};
+		private AnimationMetaData strafeForwardRight90Data = new()
+		{
+			Animation = "strafe-forward-right-90",
+			Code = "strafe-forward-right-90",
+			Weight = 1.0F,
+			SupressDefaultAnimation = true,
+			ClientSide = true,
+			AnimationSpeed = 1.0F,
+			BlendMode = EnumAnimationBlendMode.Add,
+			ElementWeight = {
+				{ "root", 1.0F },
+			},
+			ElementBlendMode = {
+				{ "root", EnumAnimationBlendMode.Add },
+			},
+		};
+		private AnimationMetaData strafeForwardRight45Data = new()
+		{
+			Animation = "strafe-forward-right-45",
+			Code = "strafe-forward-right-45",
+			Weight = 1.0F,
+			SupressDefaultAnimation = true,
+			ClientSide = true,
+			AnimationSpeed = 1.0F,
+			BlendMode = EnumAnimationBlendMode.Add,
+			ElementWeight = {
+				{ "root", 1.0F },
+			},
+			ElementBlendMode = {
+				{ "root", EnumAnimationBlendMode.Add },
+			},
+		};
+		#endregion
+
+		#region Combat Animations
 		private AnimationMetaData holdWeaponCombatPassiveData = new()
 		{
 			Animation = "hold-weapon-combat-passive",
@@ -581,14 +732,23 @@ namespace Apprentice.Weapon
 			AnimationSpeed = 0.8F,
 			BlendMode = EnumAnimationBlendMode.Add,
 			ElementWeight = {
-				{ "UpperTorso", 1.0F },
+				{ "UpperTorso", 0.2F },
+				{ "UpperArmR", 1.0F },
+				{ "UpperArmL", 1.0F },
+				{ "Neck", 1.0F },
+				{ "UpperBackAttachment", 1.0F },
 			},
 			ElementBlendMode = {
-				{ "UpperTorso", EnumAnimationBlendMode.Add },
+				{ "UpperTorso", EnumAnimationBlendMode.AddAverage },
+				{ "UpperArmR", EnumAnimationBlendMode.Add },
+				{ "UpperArmL", EnumAnimationBlendMode.Add },
+				{ "Neck", EnumAnimationBlendMode.Add },
+				{ "UpperBackAttachment", EnumAnimationBlendMode.Add },
 			},
 		};
+		#endregion
 
-		// Game Animations
+		#region Internal Animations
 		private AnimationMetaData swordHitData = new()
 		{
 			Animation = "SwordHit",
@@ -653,6 +813,7 @@ namespace Apprentice.Weapon
 				{ "UpperTorso", EnumAnimationBlendMode.Add },
 			},
 		};
+		#endregion
 
 		public UchigatanaDashBehaviour(Entity entity) : base(entity)
 		{
@@ -673,10 +834,12 @@ namespace Apprentice.Weapon
 			harmonyInstance.CreateClassProcessor(typeof(AnimationManager_StartAnimation1_Patch)).Patch();
 
 			// Register hotkey's
-			clientApi.Input.RegisterHotKey("dash", "", GlKeys.ShiftLeft, HotkeyType.MovementControls);
+			clientApi.Input.RegisterHotKey("dash_reset", "", GlKeys.ShiftLeft, HotkeyType.MovementControls);
+			clientApi.Input.RegisterHotKey("reset", "", GlKeys.B, HotkeyType.GUIOrOtherControls);
 
 			// Register hotkey handler's
-			clientApi.Input.SetHotKeyHandler("dash", OnDashReset);
+			clientApi.Input.SetHotKeyHandler("dash_reset", OnDashReset);
+			clientApi.Input.SetHotKeyHandler("reset", OnReset);
 
 			// Register event's
 			clientApi.Event.MouseDown += OnMouseDown;
@@ -715,6 +878,146 @@ namespace Apprentice.Weapon
 				controls.Backward = false;
 				controls.Left = false;
 				controls.Right = false;
+			}
+
+			// TODO: Adjust animation speed with player motion vector..
+			// Play animation when player is running
+			if (enableRunAnimations)
+			{
+				if (transform.Motion.Length() > runAnimationDeadzone)
+				{
+					// Compute local direction
+					Vec3d localForward = transform.GetViewVector().ToVec3d();
+					Vec3d localRight = MathUtil.WORLD_UP.Cross(localForward).Normalize();
+
+					// Stop animations
+					if (entity.AnimManager.IsAnimationActive([sprintForwardData.Code])) entity.AnimManager.StopAnimation(sprintForwardData.Code);
+					if (entity.AnimManager.IsAnimationActive([sprintBackData.Code])) entity.AnimManager.StopAnimation(sprintBackData.Code);
+					if (entity.AnimManager.IsAnimationActive([strafeForwardLeft90Data.Code])) entity.AnimManager.StopAnimation(strafeForwardLeft90Data.Code);
+					if (entity.AnimManager.IsAnimationActive([strafeForwardLeft45Data.Code])) entity.AnimManager.StopAnimation(strafeForwardLeft45Data.Code);
+					if (entity.AnimManager.IsAnimationActive([strafeForwardRight90Data.Code])) entity.AnimManager.StopAnimation(strafeForwardRight90Data.Code);
+					if (entity.AnimManager.IsAnimationActive([strafeForwardRight45Data.Code])) entity.AnimManager.StopAnimation(strafeForwardRight45Data.Code);
+
+					// Compute quadrant angle of motion vector
+					double x = transform.Motion.Dot(localRight);
+					double y = transform.Motion.Dot(localForward);
+					double angle = Math.Atan2(x, y) * MathUtil.RAD_TO_DEG;
+
+					// Normalize to 0-360
+					double degrees = angle;
+					if (degrees < 0) degrees += 360.0;
+
+					// Round to nearest 45 degrees
+					Directional8 direction = (Directional8)((int)Math.Round(degrees / 45.0) % 8);
+
+					// Start strafe animation based on quadrant angle
+					if (entityPlayer.AnimManager != null)
+					{
+						if (entityPlayer.AnimManager.Animator != null)
+						{
+							switch (direction)
+							{
+								case Directional8.DIR8_FORWARD:
+									{
+										// Set runtime animation data
+										sprintForwardData.AnimationSpeed = animationSpeedSprintForward;
+
+										// Sprint forward
+										if (entity.AnimManager.StartAnimation(sprintForwardData))
+										{
+											RunningAnimation animation = entity.AnimManager.GetAnimationState(sprintForwardData.Code);
+											animation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Repeat;
+											animation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.Rewind;
+										}
+
+										break;
+									}
+								case Directional8.DIR8_FORWARD_LEFT:
+									{
+										// Set runtime animation data
+										strafeForwardLeft45Data.AnimationSpeed = animationSpeedStrafeForwardLeft45;
+
+										// Strafe forward left 45
+										if (entity.AnimManager.StartAnimation(strafeForwardLeft45Data))
+										{
+											RunningAnimation animation = entity.AnimManager.GetAnimationState(strafeForwardLeft45Data.Code);
+											animation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Repeat;
+											animation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.Rewind;
+										}
+
+										break;
+									}
+								case Directional8.DIR8_LEFT:
+									{
+										// Set runtime animation data
+										strafeForwardLeft90Data.AnimationSpeed = animationSpeedStrafeForwardLeft90;
+
+										// Strafe forward left 90
+										if (entity.AnimManager.StartAnimation(strafeForwardLeft90Data))
+										{
+											RunningAnimation animation = entity.AnimManager.GetAnimationState(strafeForwardLeft90Data.Code);
+											animation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Repeat;
+											animation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.Rewind;
+										}
+
+										break;
+									}
+								case Directional8.DIR8_BACK_LEFT:
+									{
+										break;
+									}
+								case Directional8.DIR8_BACK:
+									{
+										break;
+									}
+								case Directional8.DIR8_BACK_RIGHT:
+									{
+										break;
+									}
+								case Directional8.DIR8_RIGHT:
+									{
+										// Set runtime animation data
+										strafeForwardRight90Data.AnimationSpeed = animationSpeedStrafeForwardRight90;
+
+										// Strafe forward right 90
+										if (entity.AnimManager.StartAnimation(strafeForwardRight90Data))
+										{
+											RunningAnimation animation = entity.AnimManager.GetAnimationState(strafeForwardRight90Data.Code);
+											animation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Repeat;
+											animation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.Rewind;
+										}
+
+										break;
+									}
+								case Directional8.DIR8_FORWARD_RIGHT:
+									{
+										// Set runtime animation data
+										strafeForwardRight45Data.AnimationSpeed = animationSpeedStrafeForwardRight45;
+
+										// Strafe forward right 45
+										if (entity.AnimManager.StartAnimation(strafeForwardRight45Data))
+										{
+											RunningAnimation animation = entity.AnimManager.GetAnimationState(strafeForwardRight45Data.Code);
+											animation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Repeat;
+											animation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.Rewind;
+										}
+
+										break;
+									}
+							}
+						}
+					}
+				}
+				else
+				{
+					// Stop animations
+					if (entity.AnimManager.IsAnimationActive([sprintForwardData.Code])) entity.AnimManager.StopAnimation(sprintForwardData.Code);
+					if (entity.AnimManager.IsAnimationActive([sprintBackData.Code])) entity.AnimManager.StopAnimation(sprintBackData.Code);
+					if (entity.AnimManager.IsAnimationActive([strafeForwardLeft90Data.Code])) entity.AnimManager.StopAnimation(strafeForwardLeft90Data.Code);
+					if (entity.AnimManager.IsAnimationActive([strafeForwardLeft45Data.Code])) entity.AnimManager.StopAnimation(strafeForwardLeft45Data.Code);
+					if (entity.AnimManager.IsAnimationActive([strafeForwardRight90Data.Code])) entity.AnimManager.StopAnimation(strafeForwardRight90Data.Code);
+					if (entity.AnimManager.IsAnimationActive([strafeForwardRight45Data.Code])) entity.AnimManager.StopAnimation(strafeForwardRight45Data.Code);
+				}
 			}
 
 			// Apply motion blur
@@ -1341,6 +1644,13 @@ namespace Apprentice.Weapon
 
 			return true;
 		}
+		private bool OnReset(KeyCombination keyComb)
+		{
+			// Stop all animations
+			entity.AnimManager.StopAllAnimations();
+
+			return true;
+		}
 		private void OnAttackReset()
 		{
 			if (enable == false) return;
@@ -1403,6 +1713,27 @@ namespace Apprentice.Weapon
 				}, jumpCooldownMs);
 			}
 		}
+		private void OnToggleBlendAttackPose()
+		{
+			enableBlendAttackPose = !enableBlendAttackPose;
+
+			if (enableBlendAttackPose)
+			{
+				// Set runtime animation data
+				holdWeaponCombatPassiveData.AnimationSpeed = 1.0F; // TODO
+
+				// Start random attack animation
+				entity.AnimManager.StartAnimation(holdWeaponCombatPassiveData);
+				RunningAnimation animation = entity.AnimManager.GetAnimationState(holdWeaponCombatPassiveData.Code);
+				animation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
+				animation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
+			}
+			else
+			{
+				// Stop attack animation only
+				if (entity.AnimManager.IsAnimationActive([holdWeaponCombatPassiveData.Code])) entity.AnimManager.StopAnimation(holdWeaponCombatPassiveData.Code);
+			}
+		}
 
 		private void OnMouseDown(MouseEvent e)
 		{
@@ -1414,7 +1745,8 @@ namespace Apprentice.Weapon
 			}
 			else if (e.Button == EnumMouseButton.Right)
 			{
-				OnJumpReset();
+				// OnJumpReset();
+				OnToggleBlendAttackPose();
 			}
 
 			e.Handled = true;
@@ -1461,12 +1793,19 @@ namespace Apprentice.Weapon
 
 				if (ImGui.BeginTabItem("Animation"))
 				{
+					ImGui.Checkbox("enableRunAnimations", ref enableRunAnimations);
 					ImGui.SeparatorText("Animation Speed");
 					ImGui.DragFloat("animationSpeedDash", ref animationSpeedDash, 0.1F, 0.0F, 20.0F);
 					ImGui.DragFloat("animationSpeedJump", ref animationSpeedJump, 0.1F, 0.0F, 20.0F);
 					ImGui.DragFloat("animationSpeedSwordHit", ref animationSpeedSwordHit, 0.1F, 0.0F, 20.0F);
 					ImGui.DragFloat("animationSpeedSwordHit2", ref animationSpeedSwordHit2, 0.1F, 0.0F, 20.0F);
 					ImGui.DragFloat("animationSpeedCleaverHit", ref animationSpeedCleaverHit, 0.1F, 0.0F, 20.0F);
+					ImGui.DragFloat("animationSpeedSprintForward", ref animationSpeedSprintForward, 0.1F, 0.0F, 20.0F);
+					ImGui.DragFloat("animationSpeedSprintBack", ref animationSpeedSprintBack, 0.1F, 0.0F, 20.0F);
+					ImGui.DragFloat("animationSpeedStrafeForwardLeft90", ref animationSpeedStrafeForwardLeft90, 0.1F, 0.0F, 20.0F);
+					ImGui.DragFloat("animationSpeedStrafeForwardRight90", ref animationSpeedStrafeForwardRight90, 0.1F, 0.0F, 20.0F);
+					ImGui.DragFloat("animationSpeedStrafeForwardLeft45", ref animationSpeedStrafeForwardLeft45, 0.1F, 0.0F, 20.0F);
+					ImGui.DragFloat("animationSpeedStrafeForwardRight45", ref animationSpeedStrafeForwardRight45, 0.1F, 0.0F, 20.0F);
 					ImGui.SeparatorText("Frame Counts");
 					ImGui.DragInt("dashFrameCount", ref dashFrameCount);
 					ImGui.DragInt("dashRetractFrameCount", ref dashRetractFrameCount);
@@ -1486,8 +1825,13 @@ namespace Apprentice.Weapon
 	internal class TrueThirdPersonBehaviour : EntityBehavior
 	{
 		public static ICoreClientAPI? clientApi = null;
+
 		public static bool enable = true;
 		public static bool enableLineGizmo = false;
+		public static bool enableLinearVelocity = true;
+		public static bool enableAngularVelocity = true;
+		public static bool enableBoneBobbing = true;
+		public static bool enableRandomRotation = true;
 
 		private static readonly AccessTools.FieldRef<Camera, Vec3d> camEyePosInRef = AccessTools.FieldRefAccess<Camera, Vec3d>("camEyePosIn");
 		private static readonly AccessTools.FieldRef<Camera, Vec3d> originPosRef = AccessTools.FieldRefAccess<Camera, Vec3d>("originPos");
@@ -1497,14 +1841,23 @@ namespace Apprentice.Weapon
 
 		private static LineGizmo? lineGizmo = null;
 
-		private static Vec3f cameraRootOffset = new(-0.5F, 0.0F, -1.5F);
-		private static Vec3f cameraRootRotation = new(0, 0, 0);
+		private static Vec3f cameraRootOffset = new(-0.17F, 0.03F, -0.33F);
+		private static float bobbingAmount = 4.0F;
+		private static float yawRotationAmount = 0.012F;
+		private static float pitchRotationAmount = 0.02F;
 
 		private static Vec3d linearVelocity = new(0, 0, 0);
-		private static Vec3d angularVelocity = new(0, 0, 0);
+		private static double yawVelocity = 0.0;
+		private static double pitchVelocity = 0.0;
 
-		private static float motionStiffness = 10.0F;
-		private static float motionDamping = 10.0F;
+		private static float linearStiffness = 22.0F;
+		private static float angularStiffness = 22.0F;
+		private static float linearDamping = 8.0F;
+		private static float angularDamping = 8.0F;
+
+		private static double lastBoneY = 0.0;
+		private static double yawRotationTime = 0.0;
+		private static double pitchRotationTime = 0.0;
 
 		[HarmonyPatch(typeof(Camera), nameof(Camera.Update), [typeof(float), typeof(AABBIntersectionTest)])]
 		internal class Camera_Update_Patch
@@ -1532,26 +1885,71 @@ namespace Apprentice.Weapon
 
 				// Linear interpolation
 				Vec3d linearDisplacement = targetPosition - __instance.OriginPosition;
-				Vec3d linearAcceleration = linearDisplacement * motionStiffness - linearVelocity * motionDamping;
+				Vec3d linearAcceleration = linearDisplacement * linearStiffness - linearVelocity * linearDamping;
 				linearVelocity += linearAcceleration * deltaTime;
-				Vec3d cameraPosition = targetPosition + linearVelocity;
+				Vec3d physicCameraPosition = targetPosition + linearVelocity;
 
 				// Angular interpolation
-				// Vec3d angularDisplacement = localForward - __instance.forwardVec;
-				// FastVec3f angularRotation = __instance.forwardVec; // In degrees..
-				// angularVelocity += 
+				double targetYaw = transform.Yaw;
+				double targetPitch = transform.Pitch;
+				double yawDisplacement = MathUtil.AngleDifference(targetYaw, __instance.Yaw);
+				double pitchDisplacement = targetPitch - __instance.Pitch;
+				double yawAcceleration = yawDisplacement * angularStiffness - yawVelocity * angularDamping;
+				double pitchAcceleration = pitchDisplacement * angularStiffness - pitchVelocity * angularDamping;
+				yawVelocity += yawAcceleration * deltaTime;
+				pitchVelocity += pitchAcceleration * deltaTime;
+				double physicCameraYaw = targetYaw + yawVelocity;
+				double physicCameraPitch = targetPitch + pitchVelocity;
+
+				// Apply bone bobbing
+				double deltaY = 0.0;
+				if (enableBoneBobbing)
+				{
+					if (entityPlayer.AnimManager != null)
+					{
+						if (entityPlayer.AnimManager.Animator != null)
+						{
+							ElementPose pose = entityPlayer.AnimManager.Animator.GetPosebyName("UpperTorso");
+					
+							double boneX = pose.AnimModelMatrix[12];
+							double boneY = pose.AnimModelMatrix[13];
+							double boneZ = pose.AnimModelMatrix[14];
+					
+							deltaY = (boneY - lastBoneY);
+							lastBoneY = boneY;
+						}
+					}
+				}
+
+				// Apply random camera rotation
+				double deltaYaw = 0.0;
+				double deltaPitch = 0.0;
+				if (enableRandomRotation)
+				{
+					deltaYaw = Math.Sin(yawRotationTime) * yawRotationAmount;
+					deltaPitch = Math.Cos(pitchRotationTime) * pitchRotationAmount;
+					yawRotationTime += deltaTime;
+					pitchRotationTime += deltaTime;
+				}
 
 				// Apply our camera position
-				__instance.OriginPosition = targetPosition;
-				// __instance.CameraOffset.Rotation = rotation;
+				__instance.OriginPosition = enableLinearVelocity
+					? physicCameraPosition
+					: targetPosition; // TODO: * deltaTime
+				__instance.OriginPosition.Y += deltaY * bobbingAmount;
+				__instance.Yaw = enableAngularVelocity
+					? physicCameraYaw + deltaYaw
+					: targetYaw; // TODO: * deltaTime
+				__instance.Pitch = enableAngularVelocity
+					? physicCameraPitch + deltaPitch
+					: targetPitch; // TODO: * deltaTime
 				__instance.CameraMatrix = __instance.GetCameraMatrix(camEyePosInRef(__instance), camEyePosInRef(__instance), __instance.Yaw, __instance.Pitch, intersectionTester);
 				__instance.CameraEyePos.Set(camEyePosOutTmpRef(__instance));
 				__instance.CameraMatrixOrigin = __instance.GetCameraMatrix(originPosRef(__instance), camEyePosInRef(__instance), __instance.Yaw, __instance.Pitch, intersectionTester);
 
+				// Compute rolled matrix
 				double[] cameraMatrixOrigin = __instance.CameraMatrixOrigin;
 				double[] cameraMatrixOrigin2 = __instance.CameraMatrixOrigin;
-
-				// Compute rolled matrix
 				double[] array = new double[3];
 				array[0] = 1.0;
 				Mat4d.Rotate(cameraMatrixOrigin, cameraMatrixOrigin2, __instance.Roll, array);
@@ -1653,16 +2051,22 @@ namespace Apprentice.Weapon
 					ImGui.SeparatorText("Camera");
 					Vector3 p = new(cameraRootOffset.X, cameraRootOffset.Y, cameraRootOffset.Z);
 					if (ImGui.DragFloat3("cameraRootOffset", ref p, 0.01F)) cameraRootOffset.Set(p.X, p.Y, p.Z);
-					Vector3 r = new(cameraRootRotation.X, cameraRootRotation.Y, cameraRootRotation.Z);
-					if (ImGui.DragFloat3("cameraRootRotation", ref r, 0.01F)) cameraRootRotation.Set(r.X, r.Y, r.Z);
 					ImGui.EndTabItem();
 				}
 
 				if (ImGui.BeginTabItem("Physic"))
 				{
-					// ImGui.Checkbox("enablePhysics", ref enablePhysics); // TODO
-					ImGui.DragFloat("motionStiffness", ref motionStiffness, 0.1F);
-					ImGui.DragFloat("motionDamping", ref motionDamping, 0.1F);
+					ImGui.Checkbox("enableLinearVelocity", ref enableLinearVelocity);
+					ImGui.Checkbox("enableAngularVelocity", ref enableAngularVelocity);
+					ImGui.Checkbox("enableBoneBobbing", ref enableBoneBobbing);
+					ImGui.Checkbox("enableRandomRotation", ref enableRandomRotation);
+					ImGui.DragFloat("bobbingAmount", ref bobbingAmount, 0.1F);
+					ImGui.DragFloat("bobbingAmountYaw", ref yawRotationAmount, 0.1F);
+					ImGui.DragFloat("bobbingAmountPitch", ref pitchRotationAmount, 0.1F);
+					ImGui.DragFloat("motionStiffness", ref linearStiffness, 0.1F);
+					ImGui.DragFloat("angularStiffness", ref angularStiffness, 0.1F);
+					ImGui.DragFloat("motionDamping", ref linearDamping, 0.1F);
+					ImGui.DragFloat("angularDamping", ref angularDamping, 0.1F);
 					ImGui.EndTabItem();
 				}
 
