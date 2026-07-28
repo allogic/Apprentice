@@ -16,8 +16,9 @@ namespace Apprentice
     /// is a hot, dry, land-only desert. Level 2 is a continuous salt-water
     /// crossing with deterministic deep-sea floor geometry and natural shore
     /// transitions. Level 3 is a land-only, maximum-density forest over
-    /// difficult cliff-and-hill terrain. Later milestones extend this class
-    /// one realm at a time.
+    /// difficult cliff-and-hill terrain. Level 4 is a dense, older forest with
+    /// lower overall relief, deterministic canopy clearings and valley terrain.
+    /// Later milestones extend this class one realm at a time.
     /// </summary>
     internal sealed class ConcentricRealmWorldgenSystem :
         IBlockPatchModifier,
@@ -26,6 +27,7 @@ namespace Apprentice
         private const int DesertLevel = 1;
         private const int DeepSeaLevel = 2;
         private const int EndlessForestLevel = 3;
+        private const int ShadowForestLevel = 4;
         private const int ChunkSize = GlobalConstants.ChunkSize;
         private const int DeepSeaFloorVariation = 6;
         // These are sea-level inputs. Vintage Story lowers temperature and
@@ -39,12 +41,28 @@ namespace Apprentice
         private const int EndlessForestUpheaval = 255;
         private const string EndlessForestLandformCode =
             "cliffy rolling hills";
+        // Shadow Forest keeps a continuous canopy outside deterministic dead
+        // clearings. Its lower upheaval and valley landform make darkness and
+        // navigation the main pressure instead of repeating Level 3 climbing.
+        private const int ShadowForestTemperatureCelsius = 15;
+        private const int ShadowForestRainfall = 130;
+        private const int ShadowForestDensity = 255;
+        private const int ShadowForestShrubDensity = 196;
+        private const int ShadowForestUpheaval = 176;
+        private const int ShadowForestOuterTransitionWidth = 128;
+        private const int ShadowForestClearingCellSize = 384;
+        private const int ShadowForestClearingMinimumRadius = 48;
+        private const int ShadowForestClearingRadiusVariation = 32;
+        private const string ShadowForestLandformCode =
+            "flathillvalley";
         private const string DesertMapMarker =
             "apprentice:concentricRealmsLevel1MapsV1";
         private const string DeepSeaMapMarker =
             "apprentice:concentricRealmsLevel2MapsV1";
         private const string EndlessForestMapMarker =
             "apprentice:concentricRealmsLevel3MapsV1";
+        private const string ShadowForestMapMarker =
+            "apprentice:concentricRealmsLevel4MapsV1";
 
         private static readonly BlockPatchConfig EmptyPatches = new()
         {
@@ -63,12 +81,15 @@ namespace Apprentice
         private static int rewrittenDesertMapRegions;
         private static int rewrittenDeepSeaMapRegions;
         private static int rewrittenEndlessForestMapRegions;
+        private static int rewrittenShadowForestMapRegions;
         private static int sculptedDeepSeaChunks;
         private static int sculptedDeepSeaColumns;
         private int endlessForestLandformIndex = -1;
+        private int shadowForestLandformIndex = -1;
         private int loggedDesertRegions;
         private int loggedDeepSeaRegions;
         private int loggedEndlessForestRegions;
+        private int loggedShadowForestRegions;
         private int loggedDeepSeaChunks;
         private bool disposed;
         private bool conflictLogged;
@@ -86,6 +107,11 @@ namespace Apprentice
         internal static int RewrittenEndlessForestMapRegions =>
             System.Threading.Volatile.Read(
                 ref rewrittenEndlessForestMapRegions
+            );
+
+        internal static int RewrittenShadowForestMapRegions =>
+            System.Threading.Volatile.Read(
+                ref rewrittenShadowForestMapRegions
             );
 
         internal static int SculptedDeepSeaChunks =>
@@ -312,6 +338,99 @@ namespace Apprentice
             }
         }
 
+        private void RewriteShadowForestMaps(
+            IMapRegion mapRegion,
+            DangerWorldState state,
+            int regionX,
+            int regionZ)
+        {
+            int regionSize = api.WorldManager.RegionSize;
+            int climate = ApplyClimateMap(
+                mapRegion.ClimateMap,
+                state,
+                ShadowForestLevel,
+                regionX,
+                regionZ,
+                regionSize,
+                ShadowForestTemperatureCelsius,
+                ShadowForestRainfall
+            );
+            int forest = ApplyShadowForestDensityMap(
+                mapRegion.ForestMap,
+                state,
+                regionX,
+                regionZ,
+                regionSize,
+                ShadowForestDensity
+            );
+            int shrubs = ApplyShadowForestDensityMap(
+                mapRegion.ShrubMap,
+                state,
+                regionX,
+                regionZ,
+                regionSize,
+                ShadowForestShrubDensity
+            );
+            int ocean = ClearLevelMap(
+                mapRegion.OceanMap,
+                state,
+                ShadowForestLevel,
+                regionX,
+                regionZ,
+                regionSize
+            );
+            int upheaval = ApplyShadowForestUpheavalMap(
+                mapRegion.UpheavelMap,
+                state,
+                regionX,
+                regionZ,
+                regionSize
+            );
+            int landform = shadowForestLandformIndex >= 0
+                ? ApplyShadowForestLandformMap(
+                    mapRegion.LandformMap,
+                    state,
+                    regionX,
+                    regionZ,
+                    regionSize,
+                    shadowForestLandformIndex
+                )
+                : 0;
+
+            mapRegion.SetModdata(
+                ShadowForestMapMarker,
+                new byte[] { 1 }
+            );
+            mapRegion.DirtyForSaving = true;
+
+            if (climate + forest + shrubs + ocean + upheaval + landform <= 0)
+            {
+                return;
+            }
+
+            System.Threading.Interlocked.Increment(
+                ref rewrittenShadowForestMapRegions
+            );
+            if (System.Threading.Interlocked.Increment(
+                    ref loggedShadowForestRegions
+                ) <= 12)
+            {
+                api.Logger.Notification(
+                    "[Apprentice] Rewrote Level 4 map region {0},{1}: climate={2}, forest={3}, shrubs={4}, ocean={5}, upheaval={6}, landform={7} ({8}), clearings={9}-block cells.",
+                    regionX,
+                    regionZ,
+                    climate,
+                    forest,
+                    shrubs,
+                    ocean,
+                    upheaval,
+                    landform,
+                    ShadowForestLandformCode,
+                    ShadowForestClearingCellSize
+                );
+            }
+        }
+
         private void OnInitWorldGenerator()
         {
             activeState = null;
@@ -329,6 +448,10 @@ namespace Apprentice
                 0
             );
             System.Threading.Interlocked.Exchange(
+                ref rewrittenShadowForestMapRegions,
+                0
+            );
+            System.Threading.Interlocked.Exchange(
                 ref sculptedDeepSeaChunks,
                 0
             );
@@ -339,10 +462,12 @@ namespace Apprentice
             loggedDesertRegions = 0;
             loggedDeepSeaRegions = 0;
             loggedEndlessForestRegions = 0;
+            loggedShadowForestRegions = 0;
             loggedDeepSeaChunks = 0;
             globalConfig = null;
             deepSeaFloorNoise = null;
             endlessForestLandformIndex = -1;
+            shadowForestLandformIndex = -1;
             if (HasIncompatibleTerrainGenerator())
             {
                 if (!conflictLogged)
@@ -396,8 +521,19 @@ namespace Apprentice
                 );
                 return;
             }
+            shadowForestLandformIndex =
+                ResolveLandformIndex(ShadowForestLandformCode);
+            if (shadowForestLandformIndex < 0)
+            {
+                activeState = null;
+                api.Logger.Error(
+                    "[Apprentice] Concentric realm world generation is disabled: required Level 4 landform '{0}' was not loaded.",
+                    ShadowForestLandformCode
+                );
+                return;
+            }
             api.Logger.Notification(
-                "[Apprentice] Concentric realms profile active: Homeland 0-{0:0}, Barren Desert {0:0}-{1:0}, Deep Sea {1:0}-{2:0} (depth {3}, shore width {4}), Endless Forest {2:0}-{5:0} (landform {6}, sea-level climate {7} C/{8} rainfall).",
+                "[Apprentice] Concentric realms profile active: Homeland 0-{0:0}, Barren Desert {0:0}-{1:0}, Deep Sea {1:0}-{2:0} (depth {3}, shore width {4}), Endless Forest {2:0}-{5:0} (landform {6}, sea-level climate {7} C/{8} rainfall), Shadow Forest {5:0}-{9:0} (landform {10}, sea-level climate {11} C/{12} rainfall).",
                 state.BaseRadius,
                 state.BaseRadius + state.RingWidth,
                 state.BaseRadius + state.RingWidth * 2,
@@ -406,7 +542,11 @@ namespace Apprentice
                 state.BaseRadius + state.RingWidth * 3,
                 EndlessForestLandformCode,
                 EndlessForestTemperatureCelsius,
-                EndlessForestRainfall
+                EndlessForestRainfall,
+                state.BaseRadius + state.RingWidth * 4,
+                ShadowForestLandformCode,
+                ShadowForestTemperatureCelsius,
+                ShadowForestRainfall
             );
         }
 
@@ -496,6 +636,12 @@ namespace Apprentice
             RewriteDesertMaps(mapRegion, state, regionX, regionZ);
             RewriteDeepSeaMaps(mapRegion, state, regionX, regionZ);
             RewriteEndlessForestMaps(
+                mapRegion,
+                state,
+                regionX,
+                regionZ
+            );
+            RewriteShadowForestMaps(
                 mapRegion,
                 state,
                 regionX,
@@ -646,6 +792,84 @@ namespace Apprentice
                 _ => value
             );
 
+        private static int ApplyShadowForestDensityMap(
+            IntDataMap2D map,
+            DangerWorldState state,
+            int regionX,
+            int regionZ,
+            int regionSize,
+            int maximumDensity) =>
+            TransformLevelMap(
+                map,
+                state,
+                ShadowForestLevel,
+                regionX,
+                regionZ,
+                regionSize,
+                (_, worldX, worldZ) =>
+                    GetShadowForestDensity(
+                        worldX,
+                        worldZ,
+                        maximumDensity
+                    )
+            );
+
+        private static int ApplyShadowForestUpheavalMap(
+            IntDataMap2D map,
+            DangerWorldState state,
+            int regionX,
+            int regionZ,
+            int regionSize) =>
+            TransformLevelMap(
+                map,
+                state,
+                ShadowForestLevel,
+                regionX,
+                regionZ,
+                regionSize,
+                (existing, worldX, worldZ) =>
+                {
+                    double blend = GetShadowForestOuterBlend(
+                        state,
+                        worldX,
+                        worldZ
+                    );
+                    return Math.Clamp(
+                        (int)Math.Round(
+                            existing +
+                            (ShadowForestUpheaval - existing) * blend,
+                            MidpointRounding.AwayFromZero
+                        ),
+                        0,
+                        255
+                    );
+                }
+            );
+
+        private static int ApplyShadowForestLandformMap(
+            IntDataMap2D map,
+            DangerWorldState state,
+            int regionX,
+            int regionZ,
+            int regionSize,
+            int landformIndex) =>
+            TransformLevelMap(
+                map,
+                state,
+                ShadowForestLevel,
+                regionX,
+                regionZ,
+                regionSize,
+                (existing, worldX, worldZ) =>
+                    GetShadowForestOuterBlend(
+                        state,
+                        worldX,
+                        worldZ
+                    ) >= 1
+                        ? landformIndex
+                        : existing
+            );
+
         private static int TransformLevelMap(
             IntDataMap2D map,
             DangerWorldState state,
@@ -654,6 +878,26 @@ namespace Apprentice
             int regionZ,
             int regionSize,
             System.Func<int, int> transform)
+        {
+            return TransformLevelMap(
+                map,
+                state,
+                level,
+                regionX,
+                regionZ,
+                regionSize,
+                (existing, _, _) => transform(existing)
+            );
+        }
+
+        private static int TransformLevelMap(
+            IntDataMap2D map,
+            DangerWorldState state,
+            int level,
+            int regionX,
+            int regionZ,
+            int regionSize,
+            System.Func<int, double, double, int> transform)
         {
             if (map?.Data == null || map.Size <= 0 ||
                 map.InnerSize <= 0)
@@ -684,11 +928,126 @@ namespace Apprentice
                     }
 
                     int index = row + x;
-                    map.Data[index] = transform(map.Data[index]);
+                    map.Data[index] = transform(
+                        map.Data[index],
+                        worldX,
+                        worldZ
+                    );
                     transformed++;
                 }
             }
             return transformed;
+        }
+
+        private static int GetShadowForestDensity(
+            double worldX,
+            double worldZ,
+            int maximumDensity)
+        {
+            int cellX = (int)Math.Floor(
+                worldX / ShadowForestClearingCellSize
+            );
+            int cellZ = (int)Math.Floor(
+                worldZ / ShadowForestClearingCellSize
+            );
+            double densityScale = 1;
+
+            for (int offsetZ = -1; offsetZ <= 1; offsetZ++)
+            {
+                for (int offsetX = -1; offsetX <= 1; offsetX++)
+                {
+                    int clearingCellX = cellX + offsetX;
+                    int clearingCellZ = cellZ + offsetZ;
+                    ulong hash = StableCellHash(
+                        clearingCellX,
+                        clearingCellZ
+                    );
+                    double offsetUnitX =
+                        (hash & 0xffff) / 65535d;
+                    double offsetUnitZ =
+                        ((hash >> 16) & 0xffff) / 65535d;
+                    double radiusUnit =
+                        ((hash >> 32) & 0xffff) / 65535d;
+                    double centerX =
+                        (clearingCellX + 0.2 + offsetUnitX * 0.6) *
+                        ShadowForestClearingCellSize;
+                    double centerZ =
+                        (clearingCellZ + 0.2 + offsetUnitZ * 0.6) *
+                        ShadowForestClearingCellSize;
+                    double radius =
+                        ShadowForestClearingMinimumRadius +
+                        radiusUnit *
+                        ShadowForestClearingRadiusVariation;
+                    double dx = worldX - centerX;
+                    double dz = worldZ - centerZ;
+                    double distanceSquared = dx * dx + dz * dz;
+                    if (distanceSquared >= radius * radius)
+                    {
+                        continue;
+                    }
+
+                    double normalizedDistance =
+                        Math.Sqrt(distanceSquared) / radius;
+                    // Smoothly restore the canopy at the rim. The center
+                    // remains open enough to read as a deliberate clearing,
+                    // while interpolation cannot create a hard square seam.
+                    double smoothEdge =
+                        normalizedDistance * normalizedDistance *
+                        (3 - 2 * normalizedDistance);
+                    densityScale = Math.Min(
+                        densityScale,
+                        smoothEdge
+                    );
+                }
+            }
+
+            return Math.Clamp(
+                (int)Math.Round(
+                    maximumDensity * densityScale,
+                    MidpointRounding.AwayFromZero
+                ),
+                0,
+                maximumDensity
+            );
+        }
+
+        private static double GetShadowForestOuterBlend(
+            DangerWorldState state,
+            double worldX,
+            double worldZ)
+        {
+            double dx = worldX - state.AnchorX;
+            double dz = worldZ - state.AnchorZ;
+            double distance = Math.Sqrt(dx * dx + dz * dz);
+            double distanceFromOuterEdge =
+                WorldZoneLayout.GetOuterRadius(
+                    state,
+                    ShadowForestLevel
+                ) - distance;
+            double normalized = Math.Clamp(
+                distanceFromOuterEdge /
+                    ShadowForestOuterTransitionWidth,
+                0,
+                1
+            );
+            return normalized * normalized * (3 - 2 * normalized);
+        }
+
+        private static ulong StableCellHash(int cellX, int cellZ)
+        {
+            unchecked
+            {
+                ulong value =
+                    (uint)cellX * 0x9E3779B185EBCA87UL ^
+                    (uint)cellZ * 0xC2B2AE3D27D4EB4FUL ^
+                    0x534841444F57464FUL;
+                value ^= value >> 30;
+                value *= 0xBF58476D1CE4E5B9UL;
+                value ^= value >> 27;
+                value *= 0x94D049BB133111EBUL;
+                value ^= value >> 31;
+                return value;
+            }
         }
 
         private void SculptDeepSeaBeforeVegetation(
@@ -935,9 +1294,18 @@ namespace Apprentice
                     chunkZ,
                     ChunkSize
                 );
+            bool insideShadowForest =
+                WorldZoneLayout.ChunkFullyInsideLevel(
+                    activeState,
+                    ShadowForestLevel,
+                    chunkX,
+                    chunkZ,
+                    ChunkSize
+                );
             if (!insideDesert &&
                 !insideDeepSea &&
-                !insideEndlessForest)
+                !insideEndlessForest &&
+                !insideShadowForest)
             {
                 return null;
             }
@@ -974,6 +1342,14 @@ namespace Apprentice
             WorldZoneLayout.RectangleIntersectsLevel(
                 state,
                 EndlessForestLevel,
+                schematicLocation.X1,
+                schematicLocation.Z1,
+                schematicLocation.X2,
+                schematicLocation.Z2
+            ) ||
+            WorldZoneLayout.RectangleIntersectsLevel(
+                state,
+                ShadowForestLevel,
                 schematicLocation.X1,
                 schematicLocation.Z1,
                 schematicLocation.X2,
@@ -1026,6 +1402,7 @@ namespace Apprentice
             globalConfig = null;
             deepSeaFloorNoise = null;
             endlessForestLandformIndex = -1;
+            shadowForestLandformIndex = -1;
             api.Event.OnTrySpawnEntity -= OnTrySpawnEntity;
             if (structures != null)
             {

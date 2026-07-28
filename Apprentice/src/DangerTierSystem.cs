@@ -471,9 +471,11 @@ namespace Apprentice
 
             foreach (EcologyDefinition loot in registry.Ecology)
             {
-                if (tier < loot.MinimumTier) continue;
+                int allowedLevelOrdinal =
+                    loot.GetAllowedLevelOrdinal(tier);
+                if (allowedLevelOrdinal <= 0) continue;
                 double chance = Math.Clamp(
-                    loot.ChancePerTier * (tier - loot.MinimumTier + 1),
+                    loot.ChancePerTier * allowedLevelOrdinal,
                     0,
                     0.75
                 );
@@ -483,7 +485,7 @@ namespace Apprentice
                 if (collectible == null) continue;
                 int quantity = Math.Min(
                     loot.MaximumQuantity,
-                    1 + Math.Max(0, tier - loot.MinimumTier) / 3
+                    1 + (allowedLevelOrdinal - 1) / 3
                 );
                 api.World.SpawnItemEntity(
                     new ItemStack(collectible, quantity),

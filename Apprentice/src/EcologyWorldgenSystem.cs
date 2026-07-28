@@ -70,7 +70,9 @@ namespace Apprentice
             IMapChunk mapChunk = request.Chunks[0].MapChunk;
             foreach (EcologyDefinition definition in definitions)
             {
-                if (tier < definition.MinimumTier ||
+                int allowedLevelOrdinal =
+                    definition.GetAllowedLevelOrdinal(tier);
+                if (allowedLevelOrdinal <= 0 ||
                     !blockIds.TryGetValue(definition.Id, out int blockId))
                 {
                     continue;
@@ -82,7 +84,7 @@ namespace Apprentice
                 random.InitPositionSeed(request.ChunkX, request.ChunkZ);
                 double chance = Math.Clamp(
                     definition.WorldgenChancePerTier *
-                        (tier - definition.MinimumTier + 1),
+                        allowedLevelOrdinal,
                     0,
                     0.3
                 );

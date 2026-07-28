@@ -28,6 +28,16 @@ MAP_RESTRICTION_SOURCE_PATH = (
     / "src"
     / "EndlessForestMapRestrictionSystem.cs"
 )
+ECOLOGY_SOURCE_PATH = (
+    REPOSITORY_ROOT
+    / "src"
+    / "EcologyWorldgenSystem.cs"
+)
+DANGER_SOURCE_PATH = (
+    REPOSITORY_ROOT
+    / "src"
+    / "DangerTierSystem.cs"
+)
 
 EXPECTED_REALMS = [
     "Homeland",
@@ -159,6 +169,31 @@ def main() -> None:
     worldgen_source = WORLDGEN_SOURCE_PATH.read_text(encoding="utf-8")
     map_restriction_source = MAP_RESTRICTION_SOURCE_PATH.read_text(
         encoding="utf-8"
+    )
+    ecology_source = ECOLOGY_SOURCE_PATH.read_text(encoding="utf-8")
+    danger_source = DANGER_SOURCE_PATH.read_text(encoding="utf-8")
+
+    ecology = {
+        entry["Id"]: entry
+        for entry in config["Ecology"]
+    }
+    require(
+        ecology["venomberry"]["AllowedLevels"] == [3, 6],
+        "Venomberry must be limited to Endless Forest and Poison Mire",
+    )
+    require(
+        ecology["gloamcap"]["AllowedLevels"] == [4, 6],
+        "Gloamcap must be limited to Shadow Forest and Poison Mire",
+    )
+    require(
+        ecology["dangerous-tissue"]["AllowedLevels"]
+        == [4, 5, 6, 7, 8, 9, 10],
+        "Dangerous Tissue must be limited to hostile drops at Levels 4-10",
+    )
+    require(
+        "GetAllowedLevelOrdinal(tier)" in ecology_source
+        and "GetAllowedLevelOrdinal(tier)" in danger_source,
+        "AllowedLevels must guard both plant generation and hostile drops",
     )
     require(
         re.search(
@@ -302,6 +337,75 @@ def main() -> None:
             "player's preference after exit"
         ),
     )
+    require(
+        "private const int ShadowForestLevel = 4;" in worldgen_source,
+        "Shadow Forest must remain Level 4",
+    )
+    require(
+        "private const int ShadowForestDensity = 255;"
+        in worldgen_source
+        and "private const int ShadowForestShrubDensity = 196;"
+        in worldgen_source,
+        "Shadow Forest must retain its dense canopy and restrained shrubs",
+    )
+    require(
+        "private const int ShadowForestUpheaval = 176;"
+        in worldgen_source
+        and '"flathillvalley"' in worldgen_source,
+        "Shadow Forest must use lower-relief valley terrain than Level 3",
+    )
+    require(
+        "private const int ShadowForestOuterTransitionWidth = 128;"
+        in worldgen_source
+        and "GetShadowForestOuterBlend" in worldgen_source
+        and "ApplyShadowForestLandformMap" in worldgen_source
+        and "ApplyShadowForestUpheavalMap" in worldgen_source,
+        (
+            "Shadow Forest must retain a 128-block outer terrain transition "
+            "until Level 5 has its own generator"
+        ),
+    )
+    require(
+        "GetShadowForestDensity" in worldgen_source
+        and "StableCellHash" in worldgen_source,
+        "Shadow Forest clearings must be deterministic and seam-free",
+    )
+    require(
+        re.search(
+            r"RewriteShadowForestMaps\s*\(.*?"
+            r"mapRegion\.ClimateMap.*?"
+            r"mapRegion\.ForestMap.*?"
+            r"mapRegion\.ShrubMap.*?"
+            r"mapRegion\.OceanMap.*?"
+            r"mapRegion\.UpheavelMap.*?"
+            r"mapRegion\.LandformMap",
+            worldgen_source,
+            re.DOTALL,
+        )
+        is not None,
+        (
+            "Shadow Forest must rewrite climate, forest, shrub, ocean, "
+            "upheaval and landform maps together"
+        ),
+    )
+    require(
+        "insideShadowForest" in worldgen_source,
+        "Shadow Forest must suppress ordinary non-tree surface patches",
+    )
+    broad_placement_body = re.search(
+        r"public bool PreventPlacementAt\(.*?;"
+        r"\s*public bool PreventPlacementBroadlyAt",
+        worldgen_source,
+        re.DOTALL,
+    )
+    require(
+        broad_placement_body is not None
+        and "ShadowForestLevel" not in broad_placement_body.group(0),
+        (
+            "Shadow Forest must not use broad placement suppression because "
+            "that would also remove its trees"
+        ),
+    )
 
     anchor_x = 500_000.0
     anchor_z = 500_000.0
@@ -337,6 +441,8 @@ def main() -> None:
     deep_sea_outer = base_radius + ring_width * 2
     endless_forest_inner = deep_sea_outer
     endless_forest_outer = base_radius + ring_width * 3
+    shadow_forest_inner = endless_forest_outer
+    shadow_forest_outer = base_radius + ring_width * 4
     for radius, expected in (
         (endless_forest_inner + epsilon, 3),
         ((endless_forest_inner + endless_forest_outer) / 2, 3),
@@ -356,6 +462,29 @@ def main() -> None:
             actual == expected,
             (
                 f"Endless Forest radius {radius} resolved to level "
+                f"{actual}, expected {expected}"
+            ),
+        )
+
+    for radius, expected in (
+        (shadow_forest_inner + epsilon, 4),
+        ((shadow_forest_inner + shadow_forest_outer) / 2, 4),
+        (shadow_forest_outer, 4),
+        (shadow_forest_outer + epsilon, 5),
+    ):
+        actual = level_at(
+            anchor_x + radius,
+            anchor_z,
+            anchor_x,
+            anchor_z,
+            base_radius,
+            ring_width,
+            maximum_level,
+        )
+        require(
+            actual == expected,
+            (
+                f"Shadow Forest radius {radius} resolved to level "
                 f"{actual}, expected {expected}"
             ),
         )
@@ -426,8 +555,9 @@ def main() -> None:
         "World-zone validation passed: 10,000-block Homeland, "
         "5,000-block rings, exact boundaries, continuous Level 2 core at "
         "2,160 angular samples, Level 3 valley/slope/plateau forest climate, "
-        "difficult-terrain/map restriction contract, 20,000 deterministic "
-        "samples."
+        "difficult-terrain/map restriction contract, Level 4 lower-relief "
+        "valley/clearing contract, realm ecology allowlists, 20,000 "
+        "deterministic samples."
     )
 
 

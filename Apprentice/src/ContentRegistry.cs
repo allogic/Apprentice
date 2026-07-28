@@ -92,11 +92,18 @@ namespace Apprentice
         public bool Enabled { get; set; } = true;
         public string DropCode { get; set; } = string.Empty;
         public int MinimumTier { get; set; }
+        public List<int> AllowedLevels { get; set; } = new();
         public double ChancePerTier { get; set; }
         public int MaximumQuantity { get; set; } = 1;
         public string? WorldgenBlockCode { get; set; }
         public double WorldgenChancePerTier { get; set; }
         public int WorldgenAttemptsPerChunk { get; set; } = 1;
+
+        internal int GetAllowedLevelOrdinal(int level)
+        {
+            int index = AllowedLevels.IndexOf(level);
+            return index < 0 ? 0 : index + 1;
+        }
     }
 
     /// <summary>
@@ -530,11 +537,21 @@ namespace Apprentice
             value.WorldgenBlockCode = string.IsNullOrWhiteSpace(value.WorldgenBlockCode)
                 ? null
                 : NormalizeCode(value.WorldgenBlockCode);
+            value.AllowedLevels = (value.AllowedLevels ?? new List<int>())
+                .Distinct()
+                .OrderBy(level => level)
+                .ToList();
             if (!value.Enabled) return "definition is disabled";
             if (value.SchemaVersion < 1) return "SchemaVersion must be positive";
             if (string.IsNullOrWhiteSpace(value.Id)) return "Id is required";
             if (!IsApprenticeCode(value.DropCode)) return "DropCode must be namespaced under apprentice";
             if (value.MinimumTier < 1 || value.MinimumTier > 10) return "MinimumTier must be between 1 and 10";
+            if (value.AllowedLevels.Count == 0)
+                return "AllowedLevels must contain at least one realm level";
+            if (value.AllowedLevels.Any(level => level < 1 || level > 10))
+                return "AllowedLevels entries must be between 1 and 10";
+            if (value.AllowedLevels[0] != value.MinimumTier)
+                return "MinimumTier must equal the first AllowedLevels entry";
             if (value.ChancePerTier <= 0 || value.ChancePerTier > 1 || !double.IsFinite(value.ChancePerTier))
                 return "ChancePerTier must be finite and in (0, 1]";
             if (value.MaximumQuantity < 1 || value.MaximumQuantity > 64) return "MaximumQuantity must be between 1 and 64";
