@@ -804,7 +804,6 @@ namespace Apprentice
             {
                 string confirmedRaceClass = GetClassCode(player);
                 ConfirmedRaceClasses[__instance] = confirmedRaceClass;
-                SendBodyPacket(player, confirmedRaceClass);
             }
             SetDialogTab(__instance, 0);
             AccessTools.Method(__instance.GetType(), "ComposeGuis")?.Invoke(__instance, null);

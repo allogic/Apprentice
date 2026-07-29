@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
+using Vintagestory.API.Server;
 
 namespace Apprentice
 {
@@ -37,33 +38,36 @@ namespace Apprentice
 			CommandArgumentParsers parsers = api.ChatCommands.Parsers;
 			api.ChatCommands.Create("scythecal")
 				.WithDescription("Live War Scythe third-person pose calibration")
+				.RequiresPrivilege(Privilege.chat)
 				.WithAdditionalInformation(
 					"Components: tx ty tz rx ry rz ox oy oz scale. " +
 					"Use .scythecal <component> <amount> for a direct adjustment, " +
 					"Use .scythecal add <component> <amount>, .scythecal set <component> <value>, " +
 					".scythecal show, .scythecal reset, or .scythecal export."
 				)
-				.BeginSubCommand("show").HandleWith(Show).EndSubCommand()
+				.BeginSubCommand("show").RequiresPrivilege(Privilege.chat).HandleWith(Show).EndSubCommand()
 				.BeginSubCommand("add")
+					.RequiresPrivilege(Privilege.chat)
 					.WithArgs(parsers.WordRange("component", Components), parsers.Float("amount"))
 					.HandleWith(Add)
 				.EndSubCommand()
 				.BeginSubCommand("set")
+					.RequiresPrivilege(Privilege.chat)
 					.WithArgs(parsers.WordRange("component", Components), parsers.Float("value"))
 					.HandleWith(Set)
 				.EndSubCommand()
-				.BeginSubCommand("tx").WithArgs(parsers.Float("amount")).HandleWith(args => AddDirect("tx", args)).EndSubCommand()
-				.BeginSubCommand("ty").WithArgs(parsers.Float("amount")).HandleWith(args => AddDirect("ty", args)).EndSubCommand()
-				.BeginSubCommand("tz").WithArgs(parsers.Float("amount")).HandleWith(args => AddDirect("tz", args)).EndSubCommand()
-				.BeginSubCommand("rx").WithArgs(parsers.Float("amount")).HandleWith(args => AddDirect("rx", args)).EndSubCommand()
-				.BeginSubCommand("ry").WithArgs(parsers.Float("amount")).HandleWith(args => AddDirect("ry", args)).EndSubCommand()
-				.BeginSubCommand("rz").WithArgs(parsers.Float("amount")).HandleWith(args => AddDirect("rz", args)).EndSubCommand()
-				.BeginSubCommand("ox").WithArgs(parsers.Float("amount")).HandleWith(args => AddDirect("ox", args)).EndSubCommand()
-				.BeginSubCommand("oy").WithArgs(parsers.Float("amount")).HandleWith(args => AddDirect("oy", args)).EndSubCommand()
-				.BeginSubCommand("oz").WithArgs(parsers.Float("amount")).HandleWith(args => AddDirect("oz", args)).EndSubCommand()
-				.BeginSubCommand("scale").WithArgs(parsers.Float("amount")).HandleWith(args => AddDirect("scale", args)).EndSubCommand()
-				.BeginSubCommand("reset").HandleWith(Reset).EndSubCommand()
-				.BeginSubCommand("export").HandleWith(Export).EndSubCommand();
+				.BeginSubCommand("tx").RequiresPrivilege(Privilege.chat).WithArgs(parsers.Float("amount")).HandleWith(args => AddDirect("tx", args)).EndSubCommand()
+				.BeginSubCommand("ty").RequiresPrivilege(Privilege.chat).WithArgs(parsers.Float("amount")).HandleWith(args => AddDirect("ty", args)).EndSubCommand()
+				.BeginSubCommand("tz").RequiresPrivilege(Privilege.chat).WithArgs(parsers.Float("amount")).HandleWith(args => AddDirect("tz", args)).EndSubCommand()
+				.BeginSubCommand("rx").RequiresPrivilege(Privilege.chat).WithArgs(parsers.Float("amount")).HandleWith(args => AddDirect("rx", args)).EndSubCommand()
+				.BeginSubCommand("ry").RequiresPrivilege(Privilege.chat).WithArgs(parsers.Float("amount")).HandleWith(args => AddDirect("ry", args)).EndSubCommand()
+				.BeginSubCommand("rz").RequiresPrivilege(Privilege.chat).WithArgs(parsers.Float("amount")).HandleWith(args => AddDirect("rz", args)).EndSubCommand()
+				.BeginSubCommand("ox").RequiresPrivilege(Privilege.chat).WithArgs(parsers.Float("amount")).HandleWith(args => AddDirect("ox", args)).EndSubCommand()
+				.BeginSubCommand("oy").RequiresPrivilege(Privilege.chat).WithArgs(parsers.Float("amount")).HandleWith(args => AddDirect("oy", args)).EndSubCommand()
+				.BeginSubCommand("oz").RequiresPrivilege(Privilege.chat).WithArgs(parsers.Float("amount")).HandleWith(args => AddDirect("oz", args)).EndSubCommand()
+				.BeginSubCommand("scale").RequiresPrivilege(Privilege.chat).WithArgs(parsers.Float("amount")).HandleWith(args => AddDirect("scale", args)).EndSubCommand()
+				.BeginSubCommand("reset").RequiresPrivilege(Privilege.chat).HandleWith(Reset).EndSubCommand()
+				.BeginSubCommand("export").RequiresPrivilege(Privilege.chat).HandleWith(Export).EndSubCommand();
 
 			api.Logger.Notification("[Apprentice] War Scythe live calibration enabled. Use .scythecal show.");
 		}

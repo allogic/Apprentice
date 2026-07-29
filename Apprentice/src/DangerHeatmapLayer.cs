@@ -12,16 +12,22 @@ using Vintagestory.GameContent;
 namespace Apprentice
 {
     /// <summary>
-    /// One isolated world-map layer. The radial bitmap is rebuilt only when
-    /// the server-owned anchor/ring/palette cache key changes; zooming merely
-    /// rescales the existing texture.
+    /// One isolated world-map layer. It reprojects its cached radial bitmap
+    /// while the viewport moves and rebuilds only after the view settles or
+    /// the server-owned visual state changes.
     /// </summary>
     public sealed class DangerHeatmapLayer : MarkerMapLayer
     {
-        private const int TextureSize = 512;
+        // The overlay contains only eleven flat concentric color regions.
+        // A filtered 256px surface preserves their appearance while reducing
+        // Cairo work and GPU upload traffic to one quarter of the old 512px
+        // texture.
+        private const int TextureSize = 256;
         private const int LegendWidth = 238;
         private const int LegendRowHeight = 19;
         private const int LegendPadding = 8;
+        private const float ViewportSettleSeconds = 0.12f;
+        private const long SharedStateRequestCooldownMs = 10000;
         private const double OverlayAlpha = 0.24;
         private const double FullMapMinimumWidth = 500;
         private const double FullMapMinimumHeight = 400;
@@ -40,8 +46,14 @@ namespace Apprentice
         private double cachedViewZ1 = double.NaN;
         private double cachedViewX2 = double.NaN;
         private double cachedViewZ2 = double.NaN;
+        private double pendingViewX1 = double.NaN;
+        private double pendingViewZ1 = double.NaN;
+        private double pendingViewX2 = double.NaN;
+        private double pendingViewZ2 = double.NaN;
+        private float pendingViewStableSeconds;
         private float stateRequestCooldown;
         private bool loggedFirstRender;
+        private bool loggedFirstTextureBuild;
 
         public override bool RequireChunkLoaded => false;
         public override string Title =>
@@ -81,7 +93,10 @@ namespace Apprentice
             int x2,
             int z2)
         {
-            SendState(fromPlayer);
+            // The realm snapshot is independent of the visible map bounds.
+            // Sending it for every pan/zoom event creates duplicate client
+            // work. PlayerReady, an explicit request and OnMapOpenedServer
+            // already cover the complete layer lifecycle.
         }
 
         public override void OnMapOpenedServer(IServerPlayer fromPlayer)
@@ -100,7 +115,7 @@ namespace Apprentice
             List<FastVec2i> nowVisible,
             List<FastVec2i> nowHidden)
         {
-            SendState(fromPlayer);
+            // See the current bounds overload above.
         }
 
         internal bool SendState(IServerPlayer player)
@@ -176,6 +191,11 @@ namespace Apprentice
                 return;
             }
 
+            if (HasSameVisualState(state, received))
+            {
+                return;
+            }
+
             state = received;
             // Enabled is the server feature switch.  Active is the user's
             // map-tab choice and must remain independently toggleable.
@@ -224,7 +244,17 @@ namespace Apprentice
                 return;
             }
 
-            stateRequestCooldown = 2f;
+            long now = capi.ElapsedMilliseconds;
+            long lastRequest =
+                DangerHeatmapClientRuntime.LastStateRequestMs;
+            if (lastRequest != long.MinValue &&
+                now - lastRequest < SharedStateRequestCooldownMs)
+            {
+                return;
+            }
+
+            stateRequestCooldown = 10f;
+            DangerHeatmapClientRuntime.LastStateRequestMs = now;
             Action? request = DangerHeatmapClientRuntime.RequestState;
             if (request == null)
             {
@@ -261,13 +291,20 @@ namespace Apprentice
 
         private void InvalidateViewTexture()
         {
+            overlayTexture?.Dispose();
+            overlayTexture = null;
             cachedViewX1 = double.NaN;
             cachedViewZ1 = double.NaN;
             cachedViewX2 = double.NaN;
             cachedViewZ2 = double.NaN;
+            pendingViewX1 = double.NaN;
+            pendingViewZ1 = double.NaN;
+            pendingViewX2 = double.NaN;
+            pendingViewZ2 = double.NaN;
+            pendingViewStableSeconds = 0;
         }
 
-        private void EnsureViewportTexture(GuiElementMap map)
+        private void EnsureViewportTexture(GuiElementMap map, float dt)
         {
             if (capi == null || state == null || state.Palette == null ||
                 state.Palette.Length != state.MaximumTier + 1)
@@ -285,12 +322,45 @@ namespace Apprentice
                 return;
             }
 
-            double viewWidth = Math.Max(1, view.X2 - view.X1);
-            double viewHeight = Math.Max(1, view.Z2 - view.Z1);
+            bool samePendingView =
+                Math.Abs(view.X1 - pendingViewX1) < 2 &&
+                Math.Abs(view.Z1 - pendingViewZ1) < 2 &&
+                Math.Abs(view.X2 - pendingViewX2) < 2 &&
+                Math.Abs(view.Z2 - pendingViewZ2) < 2;
+            if (!samePendingView)
+            {
+                pendingViewX1 = view.X1;
+                pendingViewZ1 = view.Z1;
+                pendingViewX2 = view.X2;
+                pendingViewZ2 = view.Z2;
+                pendingViewStableSeconds = 0;
+                return;
+            }
+
+            pendingViewStableSeconds += Math.Clamp(
+                dt,
+                0,
+                0.05f
+            );
+            if (pendingViewStableSeconds < ViewportSettleSeconds)
+            {
+                return;
+            }
+
+            double viewWidth = Math.Max(
+                1,
+                pendingViewX2 - pendingViewX1
+            );
+            double viewHeight = Math.Max(
+                1,
+                pendingViewZ2 - pendingViewZ1
+            );
             double scaleX = TextureSize / viewWidth;
             double scaleY = TextureSize / viewHeight;
-            double centerX = (state.AnchorX - view.X1) * scaleX;
-            double centerY = (state.AnchorZ - view.Z1) * scaleY;
+            double centerX =
+                (state.AnchorX - pendingViewX1) * scaleX;
+            double centerY =
+                (state.AnchorZ - pendingViewZ1) * scaleY;
 
             using ImageSurface surface = new((Format)0, TextureSize, TextureSize);
             using Context context = new(surface);
@@ -308,7 +378,7 @@ namespace Apprentice
 
             // Build a viewport-sized overlay instead of scaling one world-size
             // quad to tens of thousands of GUI pixels.  Cairo clips these
-            // ellipses into the 512px surface, then the GPU draws one ordinary
+            // ellipses into the 256px surface, then the GPU draws one ordinary
             // map-sized texture. Operator.Source keeps every tier a distinct
             // tint instead of alpha-blending all inner disks together.
             for (int tier = state.MaximumTier - 1; tier >= 0; tier--)
@@ -345,10 +415,18 @@ namespace Apprentice
                 ref texture
             );
             overlayTexture = texture;
-            cachedViewX1 = view.X1;
-            cachedViewZ1 = view.Z1;
-            cachedViewX2 = view.X2;
-            cachedViewZ2 = view.Z2;
+            cachedViewX1 = pendingViewX1;
+            cachedViewZ1 = pendingViewZ1;
+            cachedViewX2 = pendingViewX2;
+            cachedViewZ2 = pendingViewZ2;
+            if (!loggedFirstTextureBuild)
+            {
+                capi.Logger.Notification(
+                    "[Apprentice] Deferred danger heatmap texture ready ({0}x{0}).",
+                    TextureSize
+                );
+                loggedFirstTextureBuild = true;
+            }
         }
 
         private void RebuildLegendTexture()
@@ -457,7 +535,7 @@ namespace Apprentice
                 return;
             }
 
-            EnsureViewportTexture(map);
+            EnsureViewportTexture(map, dt);
             if (overlayTexture == null || overlayTexture.Disposed) return;
 
             if (!loggedFirstRender)
@@ -476,12 +554,33 @@ namespace Apprentice
             // rectangle on some GPUs.  Depth 55 intentionally sits above
             // vanilla terrain (50) and below waypoint icons (60).
             IRenderAPI render = capi.Render;
+            Cuboidd currentView = map.CurrentBlockViewBounds;
+            double currentWidth = Math.Max(
+                1,
+                currentView.X2 - currentView.X1
+            );
+            double currentHeight = Math.Max(
+                1,
+                currentView.Z2 - currentView.Z1
+            );
+            double renderX = map.Bounds.renderX +
+                (cachedViewX1 - currentView.X1) /
+                    currentWidth * map.Bounds.OuterWidth;
+            double renderY = map.Bounds.renderY +
+                (cachedViewZ1 - currentView.Z1) /
+                    currentHeight * map.Bounds.OuterHeight;
+            double renderWidth =
+                (cachedViewX2 - cachedViewX1) /
+                    currentWidth * map.Bounds.OuterWidth;
+            double renderHeight =
+                (cachedViewZ2 - cachedViewZ1) /
+                    currentHeight * map.Bounds.OuterHeight;
             render.Render2DTexturePremultipliedAlpha(
                 overlayTexture.TextureId,
-                map.Bounds.renderX,
-                map.Bounds.renderY,
-                map.Bounds.OuterWidth,
-                map.Bounds.OuterHeight,
+                renderX,
+                renderY,
+                renderWidth,
+                renderHeight,
                 HeatmapRingDepth
             );
             if (legendTexture != null && !legendTexture.Disposed)
@@ -510,6 +609,56 @@ namespace Apprentice
                 Convert.ToInt32(value.Substring(3, 2), 16) / 255d,
                 Convert.ToInt32(value.Substring(5, 2), 16) / 255d
             );
+        }
+
+        private static bool HasSameVisualState(
+            DangerWorldState? current,
+            DangerWorldState received)
+        {
+            if (current == null ||
+                current.SchemaVersion != received.SchemaVersion ||
+                current.Enabled != received.Enabled ||
+                current.AnchorX != received.AnchorX ||
+                current.AnchorZ != received.AnchorZ ||
+                current.BaseRadius != received.BaseRadius ||
+                current.RingWidth != received.RingWidth ||
+                current.MaximumTier != received.MaximumTier ||
+                current.WorldgenProfile != received.WorldgenProfile ||
+                current.RealmWorldgenEnabled !=
+                    received.RealmWorldgenEnabled)
+            {
+                return false;
+            }
+
+            return SameStrings(current.Palette, received.Palette) &&
+                SameStrings(current.RealmNames, received.RealmNames);
+        }
+
+        private static bool SameStrings(
+            string[]? first,
+            string[]? second)
+        {
+            if (ReferenceEquals(first, second))
+            {
+                return true;
+            }
+            if (first == null || second == null ||
+                first.Length != second.Length)
+            {
+                return false;
+            }
+
+            for (int index = 0; index < first.Length; index++)
+            {
+                if (!string.Equals(
+                    first[index],
+                    second[index],
+                    StringComparison.Ordinal))
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         public override void Dispose()

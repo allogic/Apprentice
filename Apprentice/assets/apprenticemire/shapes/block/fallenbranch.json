@@ -1,0 +1,19 @@
+{
+  "textureWidth": 16,
+  "textureHeight": 16,
+  "elements": [
+    {
+      "name": "branch",
+      "from": [1, 1, 6],
+      "to": [15, 4, 10],
+      "faces": {
+        "north": { "texture": "#bark" },
+        "east": { "texture": "#top" },
+        "south": { "texture": "#bark" },
+        "west": { "texture": "#top" },
+        "up": { "texture": "#bark" },
+        "down": { "texture": "#bark" }
+      }
+    }
+  ]
+}

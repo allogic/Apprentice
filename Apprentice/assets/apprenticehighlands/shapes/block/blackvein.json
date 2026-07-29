@@ -1,0 +1,49 @@
+{
+  "textureWidth": 16,
+  "textureHeight": 16,
+  "elements": [
+    {
+      "name": "spine",
+      "from": [0, 0, 6],
+      "to": [16, 1, 10],
+      "faces": {
+        "north": { "texture": "#vein" },
+        "east": { "texture": "#vein" },
+        "south": { "texture": "#vein" },
+        "west": { "texture": "#vein" },
+        "up": { "texture": "#vein" },
+        "down": { "texture": "#vein" }
+      }
+    },
+    {
+      "name": "branch-a",
+      "from": [2, 0, 2],
+      "to": [5, 1, 8],
+      "rotationOrigin": [4, 0, 7],
+      "rotationY": -24,
+      "faces": {
+        "north": { "texture": "#vein" },
+        "east": { "texture": "#vein" },
+        "south": { "texture": "#vein" },
+        "west": { "texture": "#vein" },
+        "up": { "texture": "#vein" },
+        "down": { "texture": "#vein" }
+      }
+    },
+    {
+      "name": "branch-b",
+      "from": [11, 0, 8],
+      "to": [14, 1, 15],
+      "rotationOrigin": [12, 0, 9],
+      "rotationY": 28,
+      "faces": {
+        "north": { "texture": "#vein" },
+        "east": { "texture": "#vein" },
+        "south": { "texture": "#vein" },
+        "west": { "texture": "#vein" },
+        "up": { "texture": "#vein" },
+        "down": { "texture": "#vein" }
+      }
+    }
+  ]
+}

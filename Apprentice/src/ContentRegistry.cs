@@ -91,6 +91,7 @@ namespace Apprentice
         public string Id { get; set; } = string.Empty;
         public bool Enabled { get; set; } = true;
         public string DropCode { get; set; } = string.Empty;
+        public bool EntityDropEnabled { get; set; }
         public int MinimumTier { get; set; }
         public List<int> AllowedLevels { get; set; } = new();
         public double ChancePerTier { get; set; }
@@ -552,9 +553,17 @@ namespace Apprentice
                 return "AllowedLevels entries must be between 1 and 10";
             if (value.AllowedLevels[0] != value.MinimumTier)
                 return "MinimumTier must equal the first AllowedLevels entry";
-            if (value.ChancePerTier <= 0 || value.ChancePerTier > 1 || !double.IsFinite(value.ChancePerTier))
-                return "ChancePerTier must be finite and in (0, 1]";
+            if (value.EntityDropEnabled &&
+                (value.ChancePerTier <= 0 ||
+                 value.ChancePerTier > 1 ||
+                 !double.IsFinite(value.ChancePerTier)))
+                return "ChancePerTier must be finite and in (0, 1] when entity drops are enabled";
+            if (!value.EntityDropEnabled && value.ChancePerTier != 0)
+                return "ChancePerTier must be 0 when entity drops are disabled";
             if (value.MaximumQuantity < 1 || value.MaximumQuantity > 64) return "MaximumQuantity must be between 1 and 64";
+            if (!value.EntityDropEnabled &&
+                value.WorldgenBlockCode == null)
+                return "Ecology entries must enable entity drops, world generation, or both";
             if (value.WorldgenBlockCode != null &&
                 !HasAssetDomain(value.WorldgenBlockCode))
                 return "WorldgenBlockCode must contain an asset domain";

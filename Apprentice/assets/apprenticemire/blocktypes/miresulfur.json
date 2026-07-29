@@ -1,0 +1,17 @@
+{
+  "code": "miresulfur",
+  "class": "Block",
+  "drawtype": "cube",
+  "shape": { "base": "game:block/basic/cube" },
+  "textures": { "all": { "base": "apprenticemire:block/miresulfur" } },
+  "blockmaterial": "Soil",
+  "resistance": 0.7,
+  "fertility": 0,
+  "creativeinventory": { "terrain": ["*"], "apprentice": ["*"] },
+  "sounds": {
+    "hit": "game:block/gravel",
+    "break": "game:block/gravel",
+    "place": "game:block/gravel",
+    "walk": "game:walk/gravel"
+  }
+}

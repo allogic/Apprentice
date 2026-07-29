@@ -203,7 +203,8 @@ namespace Apprentice
                 {
                     current.RemainingSeconds = Math.Min(
                         current.MaximumRemainingSeconds,
-                        Math.Max(current.RemainingSeconds, poison.DurationSeconds)
+                        current.RemainingSeconds +
+                            poison.DurationSeconds
                     );
                     current.AttackerEntityId = attackerEntityId;
                     Save(target, current, poison.SchemaVersion);

@@ -1,0 +1,22 @@
+{
+  "code": "wraithwood",
+  "class": "Block",
+  "shape": { "base": "game:block/basic/cube" },
+  "drawtype": "cube",
+  "textures": {
+    "all": { "base": "game:block/wood/charred" }
+  },
+  "blockmaterial": "Wood",
+  "replaceable": 150,
+  "resistance": 2.5,
+  "lightAbsorption": 0,
+  "sidesolid": { "all": true },
+  "sideopaque": { "all": true },
+  "drops": [],
+  "sounds": {
+    "walk": "game:walk/wood",
+    "hit": "game:block/wood",
+    "break": "game:block/chop",
+    "place": "game:block/wood"
+  }
+}

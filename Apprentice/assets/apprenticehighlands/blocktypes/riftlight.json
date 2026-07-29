@@ -1,0 +1,27 @@
+{
+  "code": "riftlight",
+  "class": "Block",
+  "shape": { "base": "game:block/basic/cube" },
+  "drawtype": "cube",
+  "textures": {
+    "all": {
+      "base": "game:block/stone/rock/obsidian1"
+    }
+  },
+  "blockmaterial": "Glass",
+  "replaceable": 150,
+  "resistance": 6,
+  "lightAbsorption": 0,
+  "lightHsv": [205, 7, 18],
+  "sidesolid": { "all": true },
+  "sideopaque": { "all": false },
+  "creativeinventory": {
+    "apprentice": ["*"]
+  },
+  "sounds": {
+    "walk": "game:walk/stone",
+    "hit": "game:block/rock-hit-pickaxe",
+    "break": "game:block/rock-break-pickaxe",
+    "place": "game:block/rock"
+  }
+}

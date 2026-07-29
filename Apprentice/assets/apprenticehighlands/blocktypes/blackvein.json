@@ -1,0 +1,24 @@
+{
+  "code": "blackvein",
+  "class": "Block",
+  "drawtype": "json",
+  "shape": {
+    "base": "apprenticehighlands:block/blackvein"
+  },
+  "textures": {
+    "vein": {
+      "base": "game:block/stone/rock/obsidian1"
+    }
+  },
+  "blockmaterial": "Stone",
+  "randomizeRotations": true,
+  "renderpass": "OpaqueNoCull",
+  "replaceable": 6500,
+  "resistance": 0.4,
+  "lightAbsorption": 0,
+  "sidesolid": { "all": false },
+  "sideopaque": { "all": false },
+  "collisionbox": null,
+  "selectionbox": null,
+  "drops": []
+}

@@ -9,7 +9,7 @@
 	],
 	"description": "Character progression, race-first creation, Grandmaster discoveries, advanced metals, arrow poison, and concentric realms.",
 	"website": "https://github.com/allogic/Apprentice",
-	"version": "2.7.0-dev.20260728.100",
+	"version": "2.7.0-dev.20260728.108",
 	"dependencies": {
 		"game": "1.22.3",
 		"vsimgui": "1.2.7"

@@ -1,0 +1,17 @@
+{
+  "code": "mireash",
+  "class": "Block",
+  "drawtype": "cube",
+  "shape": { "base": "game:block/basic/cube" },
+  "textures": { "all": { "base": "apprenticemire:block/mireash" } },
+  "blockmaterial": "Soil",
+  "resistance": 0.8,
+  "fertility": 0,
+  "creativeinventory": { "terrain": ["*"], "apprentice": ["*"] },
+  "sounds": {
+    "hit": "game:block/gravel",
+    "break": "game:block/gravel",
+    "place": "game:block/gravel",
+    "walk": "game:walk/gravel"
+  }
+}

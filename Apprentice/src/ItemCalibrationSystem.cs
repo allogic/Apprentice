@@ -70,16 +70,19 @@ namespace Apprentice
 
 		internal static void RegisterServerCommand(
 			ICoreServerAPI api,
-			IServerNetworkChannel channel)
+			IServerNetworkChannel channel,
+			EcologyWorldgenSystem ecologyWorldgenSystem)
 		{
 			CommandArgumentParsers parsers = api.ChatCommands.Parsers;
 			api.ChatCommands.Create("apprentice")
 				.WithDescription("Apprentice administration and developer tools")
-				.RequiresPlayer()
+				.RequiresPrivilege(Privilege.chat)
 				.BeginSubCommand("calibrate")
 					.WithDescription(
 						"Live third-person held-item transform calibration"
 					)
+					.RequiresPrivilege(Privilege.chat)
+					.RequiresPlayer()
 					.WithAdditionalInformation(
 						"Components: tx ty tz rx ry rz ox oy oz scale. " +
 						"Use an exact item code (game:axe-copper) or a unique short path."
@@ -99,11 +102,37 @@ namespace Apprentice
 					.WithDescription(
 						"Inspect the active concentric-realm save profile"
 					)
+					.RequiresPrivilege(Privilege.chat)
 					.BeginSubCommand("status")
 						.WithDescription(
 							"Show the current realm and whether biome generation is active"
 						)
+						.RequiresPrivilege(Privilege.chat)
+						.RequiresPlayer()
 						.HandleWith(BuildRealmStatus)
+					.EndSubCommand()
+				.EndSubCommand()
+				.BeginSubCommand("ecology")
+					.WithDescription(
+						"Inspect Apprentice ecology world generation"
+					)
+					.RequiresPrivilege(Privilege.controlserver)
+					.BeginSubCommand("probe")
+						.WithDescription(
+							"Generate and scan deterministic scratch chunks for Apprentice plants"
+						)
+						.WithAdditionalInformation(
+							"Runs the real worldgen pipeline through PeekChunkColumn. " +
+							"No saved or loaded chunks are modified."
+						)
+						.WithExamples(new[]
+						{
+							"/apprentice ecology probe"
+						})
+						.RequiresPrivilege(Privilege.controlserver)
+						.HandleWith(
+							ecologyWorldgenSystem.StartWorldgenProbe
+						)
 					.EndSubCommand()
 				.EndSubCommand();
 		}
@@ -566,6 +595,7 @@ namespace Apprentice
 				.WithDescription(
 					"Compatibility alias for War Scythe calibration"
 				)
+				.RequiresPrivilege(Privilege.chat)
 				.WithAdditionalInformation(
 					"Prefer /apprentice calibrate apprentice:warscythe ..."
 				)

@@ -30,6 +30,7 @@ namespace Apprentice
                 "standard" => (0.3, 12),
                 "potent" => (0.4, 16),
                 "grandmaster" => (0.5, 20),
+                "toxicwater" => (0.6, 24),
                 _ => (0, 0)
             };
 

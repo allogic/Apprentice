@@ -1,0 +1,87 @@
+{
+  "SchemaVersion": 1,
+  "Levels": [
+    {
+      "Level": 1,
+      "Name": "Barren Desert",
+      "PageCode": "apprentice-realm-barren-desert",
+      "TitleKey": "apprentice:handbook-realm-barren-desert-title",
+      "TextKey": "apprentice:handbook-realm-barren-desert-text",
+      "RecipeIds": []
+    },
+    {
+      "Level": 2,
+      "Name": "Deep Sea",
+      "PageCode": "apprentice-realm-deep-sea",
+      "TitleKey": "apprentice:handbook-realm-deep-sea-title",
+      "TextKey": "apprentice:handbook-realm-deep-sea-text",
+      "RecipeIds": []
+    },
+    {
+      "Level": 3,
+      "Name": "Endless Forest",
+      "PageCode": "apprentice-realm-endless-forest",
+      "TitleKey": "apprentice:handbook-realm-endless-forest-title",
+      "TextKey": "apprentice:handbook-realm-endless-forest-text",
+      "RecipeIds": []
+    },
+    {
+      "Level": 4,
+      "Name": "Shadow Forest",
+      "PageCode": "apprentice-realm-shadow-forest",
+      "TitleKey": "apprentice:handbook-realm-shadow-forest-title",
+      "TextKey": "apprentice:handbook-realm-shadow-forest-text",
+      "RecipeIds": []
+    },
+    {
+      "Level": 5,
+      "Name": "Frozen Expanse",
+      "PageCode": "apprentice-realm-frozen-expanse",
+      "TitleKey": "apprentice:handbook-realm-frozen-expanse-title",
+      "TextKey": "apprentice:handbook-realm-frozen-expanse-text",
+      "RecipeIds": []
+    },
+    {
+      "Level": 6,
+      "Name": "Poison Mire",
+      "PageCode": "apprentice-realm-poison-mire",
+      "TitleKey": "apprentice:handbook-realm-poison-mire-title",
+      "TextKey": "apprentice:handbook-realm-poison-mire-text",
+      "RecipeIds": [
+        "apprentice:coat-arrows-toxicwater"
+      ]
+    },
+    {
+      "Level": 7,
+      "Name": "Shattered Highlands",
+      "PageCode": "apprentice-realm-shattered-highlands",
+      "TitleKey": "apprentice:handbook-realm-shattered-highlands-title",
+      "TextKey": "apprentice:handbook-realm-shattered-highlands-text",
+      "RecipeIds": []
+    },
+    {
+      "Level": 8,
+      "Name": "Crystal Labyrinth",
+      "PageCode": "apprentice-realm-crystal-labyrinth",
+      "TitleKey": "apprentice:handbook-realm-crystal-labyrinth-title",
+      "TextKey": "apprentice:handbook-realm-crystal-labyrinth-text",
+      "RecipeIds": []
+    },
+    {
+      "Level": 9,
+      "Name": "Ashen March",
+      "PageCode": "apprentice-realm-ashen-march",
+      "TitleKey": "apprentice:handbook-realm-ashen-march-title",
+      "TextKey": "apprentice:handbook-realm-ashen-march-text",
+      "RecipeIds": []
+    },
+    {
+      "Level": 10,
+      "Name": "Hell",
+      "PageCode": "apprentice-realm-hell",
+      "TitleKey": "apprentice:handbook-realm-hell-title",
+      "TextKey": "apprentice:handbook-realm-hell-text",
+      "RecipeIds": []
+    }
+  ]
+}
