@@ -1,0 +1,19 @@
+{
+  "textureWidth": 16,
+  "textureHeight": 16,
+  "elements": [
+    {
+      "name": "crust",
+      "from": [1, 0, 1],
+      "to": [15, 1, 15],
+      "faces": {
+        "north": { "texture": "#crust" },
+        "east": { "texture": "#crust" },
+        "south": { "texture": "#crust" },
+        "west": { "texture": "#crust" },
+        "up": { "texture": "#crust" },
+        "down": { "texture": "#crust" }
+      }
+    }
+  ]
+}

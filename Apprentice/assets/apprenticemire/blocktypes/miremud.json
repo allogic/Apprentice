@@ -1,0 +1,17 @@
+{
+  "code": "miremud",
+  "class": "Block",
+  "drawtype": "cube",
+  "shape": { "base": "game:block/basic/cube" },
+  "textures": { "all": { "base": "apprenticemire:block/miremud" } },
+  "blockmaterial": "Soil",
+  "resistance": 0.5,
+  "fertility": 0,
+  "creativeinventory": { "terrain": ["*"], "apprentice": ["*"] },
+  "sounds": {
+    "hit": "game:block/mud",
+    "break": "game:block/mud",
+    "place": "game:block/mud",
+    "walk": "game:walk/mud"
+  }
+}

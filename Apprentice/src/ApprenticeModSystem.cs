@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
+using Vintagestory.API.Common.Entities;
 using Vintagestory.API.Datastructures;
 using Vintagestory.API.Server;
 using Vintagestory.GameContent;
@@ -19,7 +20,7 @@ namespace Apprentice
 
 	public sealed class ApprenticeModSystem : ModSystem
 	{
-		private const string PlaytestVersion = "2.7.0-dev.20260728.100";
+		private const string PlaytestVersion = "2.7.0-dev.20260728.108";
 		private const string BowAssetFingerprint = "BOW-DARKWOOD-OXBLOOD-C-AXIS2-EDIT1-UV1-DRAW5";
 		private const string ReviewedAssetFingerprint = "ITEMS-RUNEBOUND5-GILDED2-SUNLANCE2-KITS-HANDANCHOR-TRAP-CHAIN-SHIELD-SIDEWAYS-FISHING-NATIVE-METALS-APPRENTICE2-LEGENDARY9";
 		private static readonly string[] ExpectedBowShapeCodes =
@@ -690,15 +691,19 @@ namespace Apprentice
 			poisonEffectSystem = new PoisonEffectSystem(api, contentRegistry);
 			legendaryWeaponSystem =
 				new LegendaryWeaponSystem(api);
-			ecologyWorldgenSystem = new EcologyWorldgenSystem(api, contentRegistry);
+			EcologyWorldgenSystem ecology =
+				new EcologyWorldgenSystem(api, contentRegistry);
+			ecologyWorldgenSystem = ecology;
 			ApprenticeAnimationSystem.RegisterServerHandler(
 				api,
 				networkChannel,
 				WarScytheAnimation
 			);
-			ItemCalibrationSystem.RegisterServerCommand(
+			ApprenticeServerCommandRegistration.Register(
 				api,
-				networkChannel
+				networkChannel,
+				ecology,
+				concentricRealmWorldgenSystem
 			);
 		}
 		public override void StartClientSide(ICoreClientAPI api)
@@ -788,8 +793,6 @@ namespace Apprentice
 				api.Logger.Error(exception);
 			}
 
-			DashBehaviour.Register(api);
-			TrueThirdPerson.Register(api);
 		}
 
 		public override void Dispose()
@@ -829,6 +832,8 @@ namespace Apprentice
 			overlayManager = null;
 			DangerHeatmapClientRuntime.RequestState = null;
 			DangerHeatmapClientRuntime.LatestState = null;
+			DangerHeatmapClientRuntime.LastStateRequestMs =
+				long.MinValue;
 			warScytheAnimation = null;
 
 			base.Dispose();

@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
+using Vintagestory.API.Server;
 
 namespace Apprentice
 {
@@ -24,22 +25,25 @@ namespace Apprentice
 			CommandArgumentParsers parsers = api.ChatCommands.Parsers;
 			api.ChatCommands.Create("swordcal")
 				.WithDescription("Live Manaburn Sword third-person pose calibration")
+				.RequiresPrivilege(Privilege.chat)
 				.WithAdditionalInformation(
 					"Components: tx ty tz rx ry rz ox oy oz scale. " +
 					"Use .swordcal add <component> <amount>, .swordcal set <component> <value>, " +
 					".swordcal show, .swordcal reset, or .swordcal export."
 				)
-				.BeginSubCommand("show").HandleWith(Show).EndSubCommand()
+				.BeginSubCommand("show").RequiresPrivilege(Privilege.chat).HandleWith(Show).EndSubCommand()
 				.BeginSubCommand("add")
+					.RequiresPrivilege(Privilege.chat)
 					.WithArgs(parsers.WordRange("component", Components), parsers.Float("amount"))
 					.HandleWith(Add)
 				.EndSubCommand()
 				.BeginSubCommand("set")
+					.RequiresPrivilege(Privilege.chat)
 					.WithArgs(parsers.WordRange("component", Components), parsers.Float("value"))
 					.HandleWith(Set)
 				.EndSubCommand()
-				.BeginSubCommand("reset").HandleWith(Reset).EndSubCommand()
-				.BeginSubCommand("export").HandleWith(Export).EndSubCommand();
+				.BeginSubCommand("reset").RequiresPrivilege(Privilege.chat).HandleWith(Reset).EndSubCommand()
+				.BeginSubCommand("export").RequiresPrivilege(Privilege.chat).HandleWith(Export).EndSubCommand();
 
 			api.Logger.Notification("[Apprentice] Manaburn Sword live calibration enabled. Use .swordcal show.");
 		}

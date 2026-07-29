@@ -1,0 +1,98 @@
+{
+  "code": "gloom",
+  "class": "Block",
+  "shape": {
+    "base": "game:block/basic/invisible"
+  },
+  "drawtype": "json",
+  "renderpass": "transparent",
+  "blockmaterial": "Air",
+  "replaceable": 10000,
+  "lightAbsorption": 0,
+  "sidesolid": {
+    "all": false
+  },
+  "sideopaque": {
+    "all": false
+  },
+  "collisionbox": null,
+  "selectionbox": null,
+  "drops": [],
+  "particleProperties": [
+    {
+      "hsvaColor": [
+        {
+          "avg": 158,
+          "var": 16
+        },
+        {
+          "avg": 40,
+          "var": 12
+        },
+        {
+          "avg": 54,
+          "var": 14
+        },
+        {
+          "avg": 68,
+          "var": 18
+        }
+      ],
+      "opacityEvolve": {
+        "transform": "quadratic",
+        "factor": -0.9
+      },
+      "gravityEffect": {
+        "avg": 0,
+        "var": 0
+      },
+      "posOffset": [
+        {
+          "avg": 0.5,
+          "var": 1.6
+        },
+        {
+          "avg": 0.12,
+          "var": 0.22
+        },
+        {
+          "avg": 0.5,
+          "var": 1.6
+        }
+      ],
+      "velocity": [
+        {
+          "avg": 0.004,
+          "var": 0.012
+        },
+        {
+          "avg": 0.006,
+          "var": 0.006
+        },
+        {
+          "avg": -0.003,
+          "var": 0.012
+        }
+      ],
+      "quantity": {
+        "avg": 0.045,
+        "var": 0.012
+      },
+      "terrainCollision": false,
+      "size": {
+        "avg": 2.8,
+        "var": 0.8
+      },
+      "sizeEvolve": {
+        "transform": "linear",
+        "factor": 0.65
+      },
+      "particleModel": "Quad",
+      "lifeLength": {
+        "avg": 8.5,
+        "var": 2
+      },
+      "selfPropelled": true
+    }
+  ]
+}

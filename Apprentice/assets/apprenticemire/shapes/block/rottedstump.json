@@ -1,0 +1,19 @@
+{
+  "textureWidth": 16,
+  "textureHeight": 16,
+  "elements": [
+    {
+      "name": "stump",
+      "from": [3, 0, 3],
+      "to": [13, 9, 13],
+      "faces": {
+        "north": { "texture": "#bark" },
+        "east": { "texture": "#bark" },
+        "south": { "texture": "#bark" },
+        "west": { "texture": "#bark" },
+        "up": { "texture": "#top" },
+        "down": { "texture": "#bark" }
+      }
+    }
+  ]
+}

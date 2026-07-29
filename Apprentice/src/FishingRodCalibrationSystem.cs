@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
+using Vintagestory.API.Server;
 
 namespace Apprentice
 {
@@ -28,15 +29,18 @@ namespace Apprentice
             CommandArgumentParsers parsers = api.ChatCommands.Parsers;
             api.ChatCommands.Create("rodcal")
                 .WithDescription("Live Master Fishing Rod third-person pose calibration")
+                .RequiresPrivilege(Privilege.chat)
                 .WithAdditionalInformation(
                     "Components: tx ty tz rx ry rz ox oy oz scale. " +
                     "Use .rodcal add <component> <amount>, .rodcal set <component> <value>, " +
                     ".rodcal show, or .rodcal reset. Changes are client-side and live."
                 )
                 .BeginSubCommand("show")
+                    .RequiresPrivilege(Privilege.chat)
                     .HandleWith(Show)
                 .EndSubCommand()
                 .BeginSubCommand("add")
+                    .RequiresPrivilege(Privilege.chat)
                     .WithArgs(
                         parsers.WordRange("component", Components),
                         parsers.Float("amount")
@@ -44,6 +48,7 @@ namespace Apprentice
                     .HandleWith(Add)
                 .EndSubCommand()
                 .BeginSubCommand("set")
+                    .RequiresPrivilege(Privilege.chat)
                     .WithArgs(
                         parsers.WordRange("component", Components),
                         parsers.Float("value")
@@ -51,9 +56,11 @@ namespace Apprentice
                     .HandleWith(Set)
                 .EndSubCommand()
                 .BeginSubCommand("reset")
+                    .RequiresPrivilege(Privilege.chat)
                     .HandleWith(Reset)
                 .EndSubCommand()
                 .BeginSubCommand("export")
+                    .RequiresPrivilege(Privilege.chat)
                     .HandleWith(Export)
                 .EndSubCommand();
 

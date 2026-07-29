@@ -1,0 +1,143 @@
+{
+  "code": "toxicwater",
+  "classByType": {
+    "toxicwater-d-*": "ApprenticeToxicWaterfall",
+    "toxicwater-still-*": "ApprenticeToxicWater",
+    "*": "ApprenticeToxicWaterFlowing"
+  },
+  "behaviors": [
+    {
+      "name": "FiniteSpreadingLiquid",
+      "properties": {
+        "spreadDelay": 110,
+        "liquidCollisionSound": "sizzle",
+        "sourceReplacementCode": "rock-obsidian",
+        "flowingReplacementCode": "rock-basalt",
+        "collidesWith": "lava"
+      }
+    }
+  ],
+  "attributes": {
+    "apprenticePoison": "toxicwater",
+    "smothersFire": true,
+    "handbook": { "exclude": true },
+    "pushVectorByType": {
+      "toxicwater-n-*": { "x": 0, "y": 0, "z": -0.0015 },
+      "toxicwater-ne-*": { "x": 0.0015, "y": 0, "z": -0.0015 },
+      "toxicwater-e-*": { "x": 0.0015, "y": 0, "z": 0 },
+      "toxicwater-se-*": { "x": 0.0015, "y": 0, "z": 0.0015 },
+      "toxicwater-s-*": { "x": 0, "y": 0, "z": 0.0015 },
+      "toxicwater-sw-*": { "x": -0.0015, "y": 0, "z": 0.0015 },
+      "toxicwater-w-*": { "x": -0.0015, "y": 0, "z": 0 },
+      "toxicwater-nw-*": { "x": -0.0015, "y": 0, "z": 0.0015 },
+      "toxicwater-d-*": { "x": 0, "y": -0.003, "z": 0 }
+    },
+    "waterTightContainerProps": {
+      "containable": true,
+      "itemsPerLitre": 0.001,
+      "whenFilled": {
+        "stack": {
+          "type": "item",
+          "code": "apprenticemire:toxicwaterportion"
+        }
+      }
+    }
+  },
+  "shape": { "base": "game:block/basic/cube" },
+  "variantgroups": [
+    {
+      "code": "flow",
+      "states": ["n", "ne", "e", "se", "s", "sw", "w", "nw", "d", "still"]
+    },
+    {
+      "code": "height",
+      "states": ["1", "2", "3", "4", "5", "6", "7"]
+    }
+  ],
+  "drawtype": "liquid",
+  "renderpass": "liquid",
+  "matterstate": "liquid",
+  "blockmaterial": "water",
+  "faceCullMode": "liquid",
+  "liquidCode": "toxicwater",
+  "snowCoverage": false,
+  "materialdensity": 1120,
+  "creativeinventory": {
+    "general": ["toxicwater-still-7"],
+    "terrain": ["toxicwater-still-7"],
+    "apprentice": ["toxicwater-still-7"]
+  },
+  "replaceable": 9500,
+  "lightAbsorption": 2,
+  "drops": [],
+  "liquidLevelByType": {
+    "*-1": 1,
+    "*-2": 2,
+    "*-3": 3,
+    "*-4": 4,
+    "*-5": 5,
+    "*-6": 6,
+    "*-7": 7
+  },
+  "textures": {
+    "all": { "base": "apprenticemire:block/liquid/toxicwater" },
+    "specialSecondTexture": {
+      "base": "apprenticemire:block/liquid/toxicwater2"
+    }
+  },
+  "sidesolid": { "all": false },
+  "sideopaque": { "all": false },
+  "collisionbox": null,
+  "selectionbox": null,
+  "soundsByType": {
+    "toxicwater-still-*": {
+      "place": "game:block/water",
+      "inside": "game:walk/water",
+      "ambient": "game:environment/waterwaves",
+      "ambientBlockCount": 50
+    },
+    "toxicwater-d-*": {
+      "place": "game:block/water",
+      "inside": "game:walk/water",
+      "ambient": "game:environment/waterfall"
+    },
+    "*": {
+      "place": "game:block/water",
+      "inside": "game:walk/water",
+      "ambient": "game:environment/creek"
+    }
+  },
+  "particlePropertiesByType": {
+    "*": [
+      {
+        "hsvaColor": [
+          { "avg": 59, "var": 10 },
+          { "avg": 185, "var": 28 },
+          { "avg": 146, "var": 22 },
+          { "avg": 180, "var": 25 }
+        ],
+        "opacityEvolve": { "transform": "quadratic", "factor": -3.5 },
+        "gravityEffect": { "avg": -0.03, "var": 0.02 },
+        "posOffset": [
+          { "avg": 0.5, "var": 0.5 },
+          { "avg": 0.72, "var": 0.08 },
+          { "avg": 0.5, "var": 0.5 }
+        ],
+        "velocity": [
+          { "avg": 0, "var": 0.015 },
+          { "avg": 0.035, "var": 0.02 },
+          { "avg": 0, "var": 0.015 }
+        ],
+        "quantity": { "avg": 0.18, "var": 0.06 },
+        "lifeLength": { "avg": 1.4, "var": 0.5 },
+        "size": { "avg": 0.18, "var": 0.08 },
+        "sizeEvolve": { "transform": "linear", "factor": 0.4 },
+        "particleModel": "Quad",
+        "selfPropelled": true
+      }
+    ]
+  },
+  "heldTpIdleAnimation": "holdbothhandslarge",
+  "heldRightReadyAnimation": "heldblockready",
+  "heldTpUseAnimation": "twohandplaceblock"
+}

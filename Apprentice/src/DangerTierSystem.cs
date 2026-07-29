@@ -471,6 +471,12 @@ namespace Apprentice
 
             foreach (EcologyDefinition loot in registry.Ecology)
             {
+                // World-generated plants are not generic creature body loot.
+                // A future humanoid alchemist/assassin loot table must opt in
+                // through its own explicit entity profile instead of weakening
+                // this ecology boundary.
+                if (!loot.EntityDropEnabled) continue;
+
                 int allowedLevelOrdinal =
                     loot.GetAllowedLevelOrdinal(tier);
                 if (allowedLevelOrdinal <= 0) continue;

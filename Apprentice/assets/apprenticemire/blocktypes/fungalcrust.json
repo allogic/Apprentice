@@ -1,0 +1,22 @@
+{
+  "code": "fungalcrust",
+  "class": "Block",
+  "drawtype": "json",
+  "shape": { "base": "apprenticemire:block/fungalcrust" },
+  "textures": {
+    "crust": { "base": "apprenticemire:block/fungalcrust" }
+  },
+  "blockmaterial": "Plant",
+  "randomizeRotations": true,
+  "sideopaque": { "all": false },
+  "sidesolid": { "all": false },
+  "replaceable": 6000,
+  "lightAbsorption": 0,
+  "resistance": 0.1,
+  "collisionbox": null,
+  "selectionbox": {
+    "x1": 0.05, "y1": 0, "z1": 0.05,
+    "x2": 0.95, "y2": 0.08, "z2": 0.95
+  },
+  "drops": []
+}

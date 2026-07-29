@@ -1,0 +1,28 @@
+{
+  "code": "wraiththorn",
+  "class": "Block",
+  "shape": { "base": "game:block/basic/cross" },
+  "textures": {
+    "north": { "base": "apprenticehighlands:block/wraiththorn" },
+    "south": { "base": "apprenticehighlands:block/wraiththorn" }
+  },
+  "drawtype": "json",
+  "renderpass": "OpaqueNoCull",
+  "blockmaterial": "Plant",
+  "randomizeRotations": true,
+  "sideopaque": { "all": false },
+  "sidesolid": { "all": false },
+  "replaceable": 6000,
+  "lightAbsorption": 0,
+  "resistance": 0.5,
+  "collisionbox": null,
+  "selectionbox": {
+    "x1": 0.05,
+    "y1": 0,
+    "z1": 0.05,
+    "x2": 0.95,
+    "y2": 0.8,
+    "z2": 0.95
+  },
+  "drops": []
+}

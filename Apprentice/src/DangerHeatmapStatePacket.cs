@@ -15,6 +15,8 @@ namespace Apprentice
         internal static Action? RequestState { get; set; }
         internal static DangerHeatmapStatePacket? LatestState { get; set; }
         internal static DangerHeatmapLayer? Layer { get; set; }
+        internal static long LastStateRequestMs { get; set; } =
+            long.MinValue;
     }
 
     /// <summary>

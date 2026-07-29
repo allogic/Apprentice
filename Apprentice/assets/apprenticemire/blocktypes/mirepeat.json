@@ -1,0 +1,17 @@
+{
+  "code": "mirepeat",
+  "class": "Block",
+  "drawtype": "cube",
+  "shape": { "base": "game:block/basic/cube" },
+  "textures": { "all": { "base": "apprenticemire:block/mirepeat" } },
+  "blockmaterial": "Soil",
+  "resistance": 0.6,
+  "fertility": 0,
+  "creativeinventory": { "terrain": ["*"], "apprentice": ["*"] },
+  "sounds": {
+    "hit": "game:block/dirt",
+    "break": "game:block/dirt",
+    "place": "game:block/dirt",
+    "walk": "game:walk/dirt"
+  }
+}

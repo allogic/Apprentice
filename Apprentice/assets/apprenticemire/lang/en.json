@@ -1,0 +1,17 @@
+{
+  "block-miremist": "Mire Mist",
+  "block-mirepeat": "Black Mire Peat",
+  "block-miremud": "Decaying Mire Mud",
+  "block-mireash": "Ash-Crusted Mire Soil",
+  "block-miresulfur": "Sulphur-Stained Mire Soil",
+  "block-toxicwater-*": "Toxicwater",
+  "item-toxicwaterportion": "Toxicwater",
+  "incontainer-item-toxicwaterportion": "Toxicwater",
+  "itemdesc-toxicwaterportion": "Poisons living beings on contact and coats arrows after the Poison Mire is discovered. Nothing that drinks from the mire survives unchanged.",
+  "block-deadgrass": "Dead Grass",
+  "block-deadreeds": "Broken Dead Reeds",
+  "block-thornbush": "Leafless Thorn Bush",
+  "block-rottedstump": "Rotten Stump",
+  "block-fallenbranch": "Fallen Rotten Branch",
+  "block-fungalcrust": "Black Fungal Crust"
+}

@@ -1,5 +1,5 @@
 {
-  "SchemaVersion": 1,
+  "SchemaVersion": 2,
   "GrandmasterArtifacts": [
     { "SchemaVersion": 1, "Code": "apprentice:mastersurveykit", "Profession": "miner", "Kind": "item", "Feature": "Condenses prospecting samples into a vein report." },
     { "SchemaVersion": 1, "Code": "apprentice:joinersbench", "Profession": "woodworker", "Kind": "block", "Feature": "Precision beams, fitted frames and replaceable handles." },
@@ -252,7 +252,8 @@
     { "SchemaVersion": 1, "Id": "mild", "ArrowCode": "apprentice:arrow-poison-mild", "DamagePerSecond": 0.2, "DurationSeconds": 8, "MaximumDurationSeconds": 12 },
     { "SchemaVersion": 1, "Id": "standard", "ArrowCode": "apprentice:arrow-poison-standard", "DamagePerSecond": 0.3, "DurationSeconds": 12, "MaximumDurationSeconds": 18 },
     { "SchemaVersion": 1, "Id": "potent", "ArrowCode": "apprentice:arrow-poison-potent", "DamagePerSecond": 0.4, "DurationSeconds": 16, "MaximumDurationSeconds": 24 },
-    { "SchemaVersion": 1, "Id": "grandmaster", "ArrowCode": "apprentice:arrow-poison-grandmaster", "DamagePerSecond": 0.5, "DurationSeconds": 20, "MaximumDurationSeconds": 30, "RequiredDiscovery": "hivealchemist" }
+    { "SchemaVersion": 1, "Id": "grandmaster", "ArrowCode": "apprentice:arrow-poison-grandmaster", "DamagePerSecond": 0.5, "DurationSeconds": 20, "MaximumDurationSeconds": 30, "RequiredDiscovery": "hivealchemist" },
+    { "SchemaVersion": 1, "Id": "toxicwater", "ArrowCode": "apprentice:arrow-poison-toxicwater", "DamagePerSecond": 0.6, "DurationSeconds": 24, "MaximumDurationSeconds": 36 }
   ],
   "Danger": {
     "SchemaVersion": 3, "Enabled": true, "BaseRadius": 10000, "RingWidth": 5000,
@@ -270,8 +271,8 @@
     "RealmNames": ["Homeland", "Barren Desert", "Deep Sea", "Endless Forest", "Shadow Forest", "Frozen Expanse", "Poison Mire", "Shattered Highlands", "Crystal Labyrinth", "Ashen March", "Hell"]
   },
   "Ecology": [
-    { "SchemaVersion": 1, "Id": "venomberry", "DropCode": "apprentice:venomberry", "MinimumTier": 3, "AllowedLevels": [3, 6], "ChancePerTier": 0.012, "MaximumQuantity": 2, "WorldgenBlockCode": "apprentice:venomberryplant", "WorldgenChancePerTier": 0.018, "WorldgenAttemptsPerChunk": 2 },
-    { "SchemaVersion": 1, "Id": "gloamcap", "DropCode": "apprentice:gloamcap", "MinimumTier": 4, "AllowedLevels": [4, 6], "ChancePerTier": 0.010, "MaximumQuantity": 2, "WorldgenBlockCode": "apprentice:gloamcapplant", "WorldgenChancePerTier": 0.012, "WorldgenAttemptsPerChunk": 2 },
-    { "SchemaVersion": 1, "Id": "dangerous-tissue", "DropCode": "apprentice:dangerous-tissue", "MinimumTier": 4, "AllowedLevels": [4, 5, 6, 7, 8, 9, 10], "ChancePerTier": 0.015, "MaximumQuantity": 3 }
+    { "SchemaVersion": 2, "Id": "venomberry", "DropCode": "apprentice:venomberry", "EntityDropEnabled": false, "MinimumTier": 3, "AllowedLevels": [3, 6], "ChancePerTier": 0, "MaximumQuantity": 2, "WorldgenBlockCode": "apprentice:venomberryplant", "WorldgenChancePerTier": 0.018, "WorldgenAttemptsPerChunk": 2 },
+    { "SchemaVersion": 2, "Id": "gloamcap", "DropCode": "apprentice:gloamcap", "EntityDropEnabled": false, "MinimumTier": 4, "AllowedLevels": [4, 6], "ChancePerTier": 0, "MaximumQuantity": 2, "WorldgenBlockCode": "apprentice:gloamcapplant", "WorldgenChancePerTier": 0.012, "WorldgenAttemptsPerChunk": 2 },
+    { "SchemaVersion": 2, "Id": "dangerous-tissue", "DropCode": "apprentice:dangerous-tissue", "EntityDropEnabled": true, "MinimumTier": 4, "AllowedLevels": [4, 5, 6, 7, 8, 9, 10], "ChancePerTier": 0.015, "MaximumQuantity": 3 }
   ]
 }

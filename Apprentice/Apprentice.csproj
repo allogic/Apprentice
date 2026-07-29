@@ -59,6 +59,15 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <CopyToPublishDirectory>Always</CopyToPublishDirectory>
   </Content>
+
+  <!--
+    .103 retired the empty vanilla fruiting-bush patch and its unused
+    vanilla-style shape. Exclude both explicitly so extracting a current
+    source update over an older checkout cannot copy either leftover into
+    the built mod.
+  -->
+  <Content Remove="assets\apprentice\patches\2.7\venomberry-fruitingbush.json" />
+  <Content Remove="assets\apprentice\shapes\block\2.7\venomberry-fruitingbush.json" />
 </ItemGroup>
 
 <ItemGroup>
@@ -84,6 +93,7 @@
 
 <Target Name="RejectLegacyCharacterClassOverrides" BeforeTargets="PrepareForBuild">
   <Message Condition="Exists('src\animation\WarScytheOffhandIkSolver.cs')" Importance="high" Text="Ignoring stale src/animation/WarScytheOffhandIkSolver.cs from .76-.79. It is not part of the .86 OverhaulLib reference animation pipeline and may be deleted." />
+  <Message Condition="Exists('assets\apprentice\patches\2.7\venomberry-fruitingbush.json') Or Exists('assets\apprentice\shapes\block\2.7\venomberry-fruitingbush.json')" Importance="high" Text="Ignoring obsolete Venomberry fruiting-bush assets. .103 uses only apprentice:venomberryplant and these two leftovers may be deleted." />
   <Error Condition="Exists('assets\game\config\characterclasses.json')" Text="Remove Apprentice/assets/game/config/characterclasses.json. Apprentice retains the engine class roster and filters only its Race dialog. Extract the source into a new directory instead of overlaying an older checkout." />
   <Error Condition="Exists('assets\apprentice\patches\replace-vanilla-characterclasses.json')" Text="Remove the stale replace-vanilla-characterclasses.json patch. Apprentice must retain vanilla classes for engine and mod compatibility." />
   <Error Condition="Exists('assets\apprentice\patches\2.7\war-scythe-player-animations.json')" Text="Remove the rejected .71 War Scythe player-animation patch. .86 uses the adapted OverhaulLib Legacy AnimationJson-to-ElementPose pipeline and its animation-editor history as one ownership path; the rejected .76-.79 IK and .80-.84 experimental preview/proof paths are absent. Extract the source into a new directory instead of overlaying an older build." />
@@ -105,7 +115,9 @@
        Keep representative server, client, model and gameplay assets as hard
        sentinels so Visual Studio cannot silently launch an incomplete mod. -->
   <ItemGroup>
-    <SourceLooseModAsset Include="$(MSBuildProjectDirectory)\assets\**\*" />
+    <SourceLooseModAsset
+      Include="$(MSBuildProjectDirectory)\assets\**\*"
+      Exclude="$(MSBuildProjectDirectory)\assets\apprentice\patches\2.7\venomberry-fruitingbush.json;$(MSBuildProjectDirectory)\assets\apprentice\shapes\block\2.7\venomberry-fruitingbush.json" />
     <BuiltLooseModAsset Include="$(TargetDir)assets\**\*" />
     <RequiredLooseModAsset Include="$(TargetDir)modinfo.json" />
     <RequiredLooseModAsset Include="$(TargetDir)assets\apprentice\config\class.json" />
