@@ -1,4 +1,5 @@
 using HarmonyLib;
+using Microsoft.Win32;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,10 @@ using Vintagestory.GameContent;
 
 namespace Apprentice
 {
+	using static Apprentice.src._burgi.Behaviour;
+	using static Apprentice.src._burgi.WorldGen;
+	using static Apprentice.src._burgi.Shader;
+
 	public sealed class ApprenticeModSystem : ModSystem
 	{
 		private const string PlaytestVersion = "2.7.0-dev.20260728.108";
@@ -382,6 +387,8 @@ namespace Apprentice
 					.RegisterMessageType<SkillPurchaseResultPacket>()
 					.RegisterMessageType<WarScytheAnimationPacket>()
 					.RegisterMessageType<ItemCalibrationCommandPacket>();
+
+				// Vulcanic.Register(sapi); // TODO
 			}
 			else
 			{

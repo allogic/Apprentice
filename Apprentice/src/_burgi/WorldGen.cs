@@ -20,14 +20,14 @@ namespace Apprentice.src._burgi
 			private static IBlockAccessor? chunkGenBlockAccessor = null;
 			private static IBlockAccessor? worldBlockAccessor = null;
 
-			static public void Register(ICoreServerAPI api)
+			public static void Register(ICoreServerAPI api)
 			{
 				serverApi = api;
 				serverApi.Event.ChunkColumnGeneration(OnChunkColumnGeneration, EnumWorldGenPass.Terrain, "standard");
 				serverApi.Event.GetWorldgenBlockAccessor(OnWorldGenBlockAccessor);
-
+			
 				worldBlockAccessor = serverApi.World.BlockAccessor;
-
+			
 				// int airId = serverApi.World.GetBlock(new AssetLocation("air")).BlockId;
 				// int stoneId = serverApi.World.GetBlock(new AssetLocation("rock-granite")).BlockId;
 			}
