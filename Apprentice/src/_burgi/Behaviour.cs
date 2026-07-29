@@ -161,6 +161,7 @@ namespace Apprentice.src._burgi
 			private bool jumpAllowed = true;
 			private bool doubleDashAllowed = true;
 			private bool isRunning = false;
+			private bool suppressMouseInput = false;
 
 			private float physicSpeedFactor = 8.356F;
 			private float maxVelocity = 0.3F;
@@ -1513,6 +1514,7 @@ namespace Apprentice.src._burgi
 			private void OnMouseDown(MouseEvent e)
 			{
 				if (enable == false) return;
+				if (suppressMouseInput == true) return;
 
 				if (e.Button == EnumMouseButton.Left)
 				{
@@ -1540,6 +1542,8 @@ namespace Apprentice.src._burgi
 					if (ImGui.BeginTabItem("General"))
 					{
 						ImGui.Checkbox("enable", ref enable);
+						ImGui.Checkbox("suppressMouseInput", ref suppressMouseInput);
+						ImGui.SeparatorText("Cooldowns");
 						ImGui.Checkbox("enableLineGizmo", ref lineGizmo.gizmoEnable);
 						ImGui.DragInt("dashCooldownMs", ref dashCooldownMs);
 						ImGui.DragInt("jumpCooldownMs", ref jumpCooldownMs);
