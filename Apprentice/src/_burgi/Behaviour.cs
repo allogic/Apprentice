@@ -1,13 +1,16 @@
-﻿using HarmonyLib;
+﻿using Apprentice.AnimationReference;
+using HarmonyLib;
 using ImGuiNET;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Numerics;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
 using Vintagestory.API.MathTools;
 using Vintagestory.Client.NoObf;
+using Vintagestory.GameContent;
 using VSImGui;
 using VSImGui.API;
 
@@ -19,7 +22,6 @@ using VSImGui.API;
 namespace Apprentice.src._burgi
 {
 	using static Apprentice.src._burgi.Shader;
-	using static Apprentice.src._burgi.Shader.ObamaPrism;
 
 	internal class Behaviour
 	{
@@ -33,6 +35,7 @@ namespace Apprentice.src._burgi
 
 			internal enum Directional8
 			{
+				DIR8_CENTER = -1,
 				DIR8_FORWARD = 0,
 				DIR8_FORWARD_LEFT,
 				DIR8_LEFT,
@@ -72,6 +75,8 @@ namespace Apprentice.src._burgi
 				JUMP_SEQUENCE_STATE_STOP,
 			}
 
+			private static Directional8 currDirection8 = Directional8.DIR8_CENTER;
+			private static Directional8 prevDirection8 = Directional8.DIR8_CENTER;
 			private static SequenceType sequenceType = SequenceType.SEQUENCE_TYPE_NONE;
 			private static DashSequenceState dashSequenceState = DashSequenceState.DASH_SEQUENCE_STATE_IDLE;
 			private static AttackSequenceState attackSequenceState = AttackSequenceState.ATTACK_SEQUENCE_STATE_IDLE;
@@ -80,32 +85,32 @@ namespace Apprentice.src._burgi
 			private static IList<string> whitelistedAnimationCodes = [
 				// Movement
 				"dash-forward",
-			"dash-back",
-			"dash-left",
-			"dash-right",
+				"dash-back",
+				"dash-left",
+				"dash-right",
 
-			"sprint-forward",
-			"sprint-back",
+				"sprint-forward",
+				"sprint-back",
 
-			"strafe-forward-right-45",
-			"strafe-forward-left-45",
-			"strafe-forward-right-90",
-			"strafe-forward-left-90",
+				"strafe-forward-right-45",
+				"strafe-forward-left-45",
+				"strafe-forward-right-90",
+				"strafe-forward-left-90",
 
-			"strafe-back-right-45",
-			"strafe-back-left-45",
-			"strafe-back-right-90",
-			"strafe-back-left-90",
+				"strafe-back-right-45",
+				"strafe-back-left-45",
+				"strafe-back-right-90",
+				"strafe-back-left-90",
 
-			// Combat
-			"hold-weapon-combat-passive",
+				// Combat
+				"hold-weapon-combat-passive",
 
-			// Game
-			"swordhit",
-			"swordhit2",
-			"cleaverhit",
-			"bowaimlong",
-		];
+				// Game
+				"swordhit",
+				"swordhit2",
+				"cleaverhit",
+				"bowaimlong",
+			];
 
 			[HarmonyPatch(typeof(AnimationManager), nameof(AnimationManager.StartAnimation), [typeof(AnimationMetaData)])]
 			internal class AnimationManager_StartAnimation0_Patch
@@ -136,7 +141,11 @@ namespace Apprentice.src._burgi
 			private readonly AssetLocation wooshSound1 = new("apprentice", "sounds/woosh-1");
 			private readonly AssetLocation wooshSound2 = new("apprentice", "sounds/woosh-2");
 			private readonly AssetLocation wooshSound3 = new("apprentice", "sounds/woosh-3");
-			// TODO: add missing footstep sfx..
+			private readonly AssetLocation footstepGrassSound1 = new("apprentice", "sounds/footstep-grass-1");
+			private readonly AssetLocation footstepGrassSound2 = new("apprentice", "sounds/footstep-grass-2");
+			private readonly AssetLocation footstepGrassSound3 = new("apprentice", "sounds/footstep-grass-3");
+			private readonly AssetLocation footstepGrassSound4 = new("apprentice", "sounds/footstep-grass-4");
+			private readonly AssetLocation footstepGrassSound5 = new("apprentice", "sounds/footstep-grass-5");
 
 			private LineGizmo? lineGizmo = null;
 			private MotionBlur? motionBlur = null;
@@ -151,6 +160,7 @@ namespace Apprentice.src._burgi
 			private bool attackAllowed = true;
 			private bool jumpAllowed = true;
 			private bool doubleDashAllowed = true;
+			private bool isRunning = false;
 
 			private float physicSpeedFactor = 8.356F;
 			private float maxVelocity = 0.3F;
@@ -162,7 +172,7 @@ namespace Apprentice.src._burgi
 			private float attackHorizontalImpulse = 0.15F;
 			private float jumpHorizontalImpulse = 0.15F;
 
-			private float runAnimationDeadzone = 0.001F;
+			private float runAnimationDeadzone = 0.01F;
 
 			private float animationSpeedDash = 2.5F;
 			private float animationSpeedJump = 2.5F;
@@ -170,11 +180,19 @@ namespace Apprentice.src._burgi
 			private float animationSpeedSwordHit2 = 2.5F;
 			private float animationSpeedCleaverHit = 2.5F;
 			private float animationSpeedSprintForward = 0.7F;
-			private float animationSpeedSprintBack = 0.7F;
+			private float animationSpeedSprintBack = 0.5F;
 			private float animationSpeedStrafeForwardLeft90 = 0.6F;
 			private float animationSpeedStrafeForwardRight90 = 0.6F;
 			private float animationSpeedStrafeForwardLeft45 = 0.6F;
 			private float animationSpeedStrafeForwardRight45 = 0.6F;
+			private float animationSpeedRunMultiplier = 2.1F;
+
+			private float motionSpeedSprintForward = 1.0F;
+			private float motionSpeedSprintBack = 1.0F;
+			private float motionSpeedStrafeForwardLeft90 = 1.0F;
+			private float motionSpeedStrafeForwardLeft45 = 1.0F;
+			private float motionSpeedStrafeForwardRight90 = 1.0F;
+			private float motionSpeedStrafeForwardRight45 = 1.0F;
 
 			private int dashCooldownMs = 1500;
 			private int jumpCooldownMs = 150;
@@ -192,6 +210,44 @@ namespace Apprentice.src._burgi
 			private Vec3d attackDirection = new(0, 0, 0);
 			private Vec3d jumpDirection = new(0, 0, 0);
 
+			private RunningAnimation? runningRunAnimation = null;
+			private RunningAnimation? runningCombatAnimation = null;
+
+			// private float currAnimationFrame = 0;
+			// private float prevAnimationFrame = 0;
+
+			// private bool leftFootSoundReset = true;
+			// private bool rightFootSoundReset = true;
+
+			Dictionary<string, float> strafeAimWeights = new Dictionary<string, float>()
+			{
+				{ "UpperTorso", 0.0F },
+				{ "UpperArmR", 0.0F },
+				{ "UpperArmL", 0.0F },
+				{ "Neck", 0.0F },
+				{ "UpperBackAttachment", 0.0F },
+				{ "LowerArmR", 0.0F },
+				{ "LowerArmL", 0.0F },
+				{ "ShoulderAttachment", 0.0F },
+				{ "Head", 0.0F },
+				{ "ItemAnchor", 0.0F },
+				{ "ItemAnchorL", 0.0F },
+			};
+			Dictionary<string, EnumAnimationBlendMode> strafeAimBlendModes = new Dictionary<string, EnumAnimationBlendMode>()
+			{
+				{ "UpperTorso", EnumAnimationBlendMode.Add },
+				{ "UpperArmR", EnumAnimationBlendMode.Add },
+				{ "UpperArmL", EnumAnimationBlendMode.Add },
+				{ "Neck", EnumAnimationBlendMode.Add },
+				{ "UpperBackAttachment", EnumAnimationBlendMode.Add },
+				{ "LowerArmR", EnumAnimationBlendMode.Add },
+				{ "LowerArmL", EnumAnimationBlendMode.Add },
+				{ "ShoulderAttachment", EnumAnimationBlendMode.Add },
+				{ "Head", EnumAnimationBlendMode.Add },
+				{ "ItemAnchor", EnumAnimationBlendMode.Add },
+				{ "ItemAnchorL", EnumAnimationBlendMode.Add },
+			};
+
 			#region Dash Animations
 			private AnimationMetaData dashForwardData = new()
 			{
@@ -203,11 +259,11 @@ namespace Apprentice.src._burgi
 				AnimationSpeed = 1.0F,
 				BlendMode = EnumAnimationBlendMode.Add,
 				ElementWeight = {
-				{ "root", 1.0F },
-			},
+					{ "root", 1.0F },
+				},
 				ElementBlendMode = {
-				{ "root", EnumAnimationBlendMode.Add },
-			},
+					{ "root", EnumAnimationBlendMode.Add },
+				},
 			};
 			private AnimationMetaData dashBackData = new()
 			{
@@ -219,11 +275,11 @@ namespace Apprentice.src._burgi
 				AnimationSpeed = 1.0F,
 				BlendMode = EnumAnimationBlendMode.Add,
 				ElementWeight = {
-				{ "root", 1.0F },
-			},
+					{ "root", 1.0F },
+				},
 				ElementBlendMode = {
-				{ "root", EnumAnimationBlendMode.Add },
-			},
+					{ "root", EnumAnimationBlendMode.Add },
+				},
 			};
 			private AnimationMetaData dashLeftData = new()
 			{
@@ -235,11 +291,11 @@ namespace Apprentice.src._burgi
 				AnimationSpeed = 1.0F,
 				BlendMode = EnumAnimationBlendMode.Add,
 				ElementWeight = {
-				{ "root", 1.0F },
-			},
+					{ "root", 1.0F },
+				},
 				ElementBlendMode = {
-				{ "root", EnumAnimationBlendMode.Add },
-			},
+					{ "root", EnumAnimationBlendMode.Add },
+				},
 			};
 			private AnimationMetaData dashRightData = new()
 			{
@@ -251,113 +307,113 @@ namespace Apprentice.src._burgi
 				AnimationSpeed = 1.0F,
 				BlendMode = EnumAnimationBlendMode.Add,
 				ElementWeight = {
-				{ "root", 1.0F },
-			},
+					{ "root", 1.0F },
+				},
 				ElementBlendMode = {
-				{ "root", EnumAnimationBlendMode.Add },
-			},
+					{ "root", EnumAnimationBlendMode.Add },
+				},
 			};
 			#endregion
 
-			#region Run Animations
-			private AnimationMetaData sprintForwardData = new()
+			#region Strafing Animations
+			private AnimationMetaData[] strafingAnimations =
 			{
-				Animation = "sprint-forward",
-				Code = "sprint-forward",
-				Weight = 1.0F,
-				SupressDefaultAnimation = true,
-				ClientSide = true,
-				AnimationSpeed = 1.0F,
-				BlendMode = EnumAnimationBlendMode.Add,
-				ElementWeight = {
-				{ "root", 1.0F },
-			},
-				ElementBlendMode = {
-				{ "root", EnumAnimationBlendMode.Add },
-			},
-			};
-			private AnimationMetaData sprintBackData = new()
-			{
-				Animation = "sprint-back",
-				Code = "sprint-back",
-				Weight = 1.0F,
-				SupressDefaultAnimation = true,
-				ClientSide = true,
-				AnimationSpeed = 1.0F,
-				BlendMode = EnumAnimationBlendMode.Add,
-				ElementWeight = {
-				{ "root", 1.0F },
-			},
-				ElementBlendMode = {
-				{ "root", EnumAnimationBlendMode.Add },
-			},
-			};
-			#endregion
-
-			#region Strafe Animations
-			private AnimationMetaData strafeForwardLeft90Data = new()
-			{
-				Animation = "strafe-forward-left-90",
-				Code = "strafe-forward-left-90",
-				Weight = 1.0F,
-				SupressDefaultAnimation = true,
-				ClientSide = true,
-				AnimationSpeed = 1.0F,
-				BlendMode = EnumAnimationBlendMode.Add,
-				ElementWeight = {
-				{ "root", 1.0F },
-			},
-				ElementBlendMode = {
-				{ "root", EnumAnimationBlendMode.Add },
-			},
-			};
-			private AnimationMetaData strafeForwardLeft45Data = new()
-			{
-				Animation = "strafe-forward-left-45",
-				Code = "strafe-forward-left-45",
-				Weight = 1.0F,
-				SupressDefaultAnimation = true,
-				ClientSide = true,
-				AnimationSpeed = 1.0F,
-				BlendMode = EnumAnimationBlendMode.Add,
-				ElementWeight = {
-				{ "root", 1.0F },
-			},
-				ElementBlendMode = {
-				{ "root", EnumAnimationBlendMode.Add },
-			},
-			};
-			private AnimationMetaData strafeForwardRight90Data = new()
-			{
-				Animation = "strafe-forward-right-90",
-				Code = "strafe-forward-right-90",
-				Weight = 1.0F,
-				SupressDefaultAnimation = true,
-				ClientSide = true,
-				AnimationSpeed = 1.0F,
-				BlendMode = EnumAnimationBlendMode.Add,
-				ElementWeight = {
-				{ "root", 1.0F },
-			},
-				ElementBlendMode = {
-				{ "root", EnumAnimationBlendMode.Add },
-			},
-			};
-			private AnimationMetaData strafeForwardRight45Data = new()
-			{
-				Animation = "strafe-forward-right-45",
-				Code = "strafe-forward-right-45",
-				Weight = 1.0F,
-				SupressDefaultAnimation = true,
-				ClientSide = true,
-				AnimationSpeed = 1.0F,
-				BlendMode = EnumAnimationBlendMode.Add,
-				ElementWeight = {
-				{ "root", 1.0F },
-			},
-				ElementBlendMode = {
-				{ "root", EnumAnimationBlendMode.Add },
-			},
+				// DIR8_FORWARD
+				new AnimationMetaData {
+					Animation = "sprint-forward",
+					Code = "sprint-forward",
+					Weight = 1.0F,
+					SupressDefaultAnimation = true,
+					ClientSide = true,
+					AnimationSpeed = 1.0F,
+					BlendMode = EnumAnimationBlendMode.Add,
+					ElementWeight = { },
+					ElementBlendMode = { },
+				},
+				// DIR8_FORWARD_LEFT
+				new AnimationMetaData {
+					Animation = "strafe-forward-left-45",
+					Code = "strafe-forward-left-45",
+					Weight = 1.0F,
+					SupressDefaultAnimation = true,
+					ClientSide = true,
+					AnimationSpeed = 1.0F,
+					BlendMode = EnumAnimationBlendMode.Add,
+					ElementWeight = { },
+					ElementBlendMode = { },
+				},
+				// DIR8_LEFT
+				new AnimationMetaData {
+					Animation = "strafe-forward-left-90",
+					Code = "strafe-forward-left-90",
+					Weight = 1.0F,
+					SupressDefaultAnimation = true,
+					ClientSide = true,
+					AnimationSpeed = 1.0F,
+					BlendMode = EnumAnimationBlendMode.Add,
+					ElementWeight = { },
+					ElementBlendMode = { },
+				},
+				// DIR8_BACK_LEFT
+				new AnimationMetaData {
+					Animation = "sprint-back-left-45",
+					Code = "sprint-back-left-45",
+					Weight = 1.0F,
+					SupressDefaultAnimation = true,
+					ClientSide = true,
+					AnimationSpeed = 1.0F,
+					BlendMode = EnumAnimationBlendMode.Add,
+					ElementWeight = { },
+					ElementBlendMode = { },
+				},
+				// DIR8_BACK
+				new AnimationMetaData {
+					Animation = "sprint-back",
+					Code = "sprint-back",
+					Weight = 1.0F,
+					SupressDefaultAnimation = true,
+					ClientSide = true,
+					AnimationSpeed = 1.0F,
+					BlendMode = EnumAnimationBlendMode.Add,
+					ElementWeight = { },
+					ElementBlendMode = { },
+				},
+				// DIR8_BACK_RIGHT
+				new AnimationMetaData {
+					Animation = "strafe-back-right-45",
+					Code = "strafe-back-right-45",
+					Weight = 1.0F,
+					SupressDefaultAnimation = true,
+					ClientSide = true,
+					AnimationSpeed = 1.0F,
+					BlendMode = EnumAnimationBlendMode.Add,
+					ElementWeight = { },
+					ElementBlendMode = { },
+				},
+				// DIR8_RIGHT
+				new AnimationMetaData {
+					Animation = "strafe-forward-right-90",
+					Code = "strafe-forward-right-90",
+					Weight = 1.0F,
+					SupressDefaultAnimation = true,
+					ClientSide = true,
+					AnimationSpeed = 1.0F,
+					BlendMode = EnumAnimationBlendMode.Add,
+					ElementWeight = { },
+					ElementBlendMode = { },
+				},
+				// DIR8_FORWARD_RIGHT
+				new AnimationMetaData {
+					Animation = "strafe-forward-right-45",
+					Code = "strafe-forward-right-45",
+					Weight = 1.0F,
+					SupressDefaultAnimation = true,
+					ClientSide = true,
+					AnimationSpeed = 1.0F,
+					BlendMode = EnumAnimationBlendMode.Add,
+					ElementWeight = { },
+					ElementBlendMode = { },
+				},
 			};
 			#endregion
 
@@ -369,22 +425,26 @@ namespace Apprentice.src._burgi
 				Weight = 1.0F,
 				SupressDefaultAnimation = true,
 				ClientSide = true,
-				AnimationSpeed = 0.8F,
+				AnimationSpeed = 1.0F,
 				BlendMode = EnumAnimationBlendMode.Add,
 				ElementWeight = {
-				{ "UpperTorso", 0.2F },
-				{ "UpperArmR", 1.0F },
-				{ "UpperArmL", 1.0F },
-				{ "Neck", 1.0F },
-				{ "UpperBackAttachment", 1.0F },
-			},
+					{ "root", 0.0F },
+					{ "LowerTorso", 0.0F },
+					{ "UpperTorso", 1.0F },
+					{ "UpperArmR", 1.0F },
+					{ "UpperArmL", 1.0F },
+					{ "Neck", 1.0F },
+					{ "UpperBackAttachment", 1.0F },
+				},
 				ElementBlendMode = {
-				{ "UpperTorso", EnumAnimationBlendMode.AddAverage },
-				{ "UpperArmR", EnumAnimationBlendMode.Add },
-				{ "UpperArmL", EnumAnimationBlendMode.Add },
-				{ "Neck", EnumAnimationBlendMode.Add },
-				{ "UpperBackAttachment", EnumAnimationBlendMode.Add },
-			},
+					{ "root", EnumAnimationBlendMode.Add },
+					{ "LowerTorso", EnumAnimationBlendMode.Add },
+					{ "UpperTorso", EnumAnimationBlendMode.Add },
+					{ "UpperArmR", EnumAnimationBlendMode.Add },
+					{ "UpperArmL", EnumAnimationBlendMode.Add },
+					{ "Neck", EnumAnimationBlendMode.Add },
+					{ "UpperBackAttachment", EnumAnimationBlendMode.Add },
+				},
 			};
 			#endregion
 
@@ -399,11 +459,11 @@ namespace Apprentice.src._burgi
 				AnimationSpeed = 0.8F,
 				BlendMode = EnumAnimationBlendMode.Add,
 				ElementWeight = {
-				{ "UpperTorso", 1.0F },
-			},
-				ElementBlendMode = {
-				{ "UpperTorso", EnumAnimationBlendMode.Add },
-			},
+					{ "UpperTorso", 1.0F },
+				},
+					ElementBlendMode = {
+					{ "UpperTorso", EnumAnimationBlendMode.Add },
+				},
 			};
 			private AnimationMetaData swordHit2Data = new()
 			{
@@ -415,11 +475,11 @@ namespace Apprentice.src._burgi
 				AnimationSpeed = 0.8F,
 				BlendMode = EnumAnimationBlendMode.Add,
 				ElementWeight = {
-				{ "UpperTorso", 1.0F },
-			},
-				ElementBlendMode = {
-				{ "UpperTorso", EnumAnimationBlendMode.Add },
-			},
+					{ "UpperTorso", 1.0F },
+				},
+					ElementBlendMode = {
+					{ "UpperTorso", EnumAnimationBlendMode.Add },
+				},
 			};
 			private AnimationMetaData cleaverHitData = new()
 			{
@@ -431,11 +491,11 @@ namespace Apprentice.src._burgi
 				AnimationSpeed = 0.8F,
 				BlendMode = EnumAnimationBlendMode.Add,
 				ElementWeight = {
-				{ "UpperTorso", 1.0F },
-			},
-				ElementBlendMode = {
-				{ "UpperTorso", EnumAnimationBlendMode.Add },
-			},
+					{ "UpperTorso", 1.0F },
+				},
+					ElementBlendMode = {
+					{ "UpperTorso", EnumAnimationBlendMode.Add },
+				},
 			};
 			private AnimationMetaData bowAimLongData = new()
 			{
@@ -447,18 +507,19 @@ namespace Apprentice.src._burgi
 				AnimationSpeed = 0.5F,
 				BlendMode = EnumAnimationBlendMode.Add,
 				ElementWeight = {
-				{ "UpperTorso", 1.0F },
-			},
-				ElementBlendMode = {
-				{ "UpperTorso", EnumAnimationBlendMode.Add },
-			},
+					{ "UpperTorso", 1.0F },
+				},
+					ElementBlendMode = {
+					{ "UpperTorso", EnumAnimationBlendMode.Add },
+				},
 			};
 			#endregion
 
 			public static void Register(ICoreClientAPI api)
 			{
 				clientApi = api;
-				clientApi.Event.PlayerJoin += (IClientPlayer byPlayer) => {
+				clientApi.Event.PlayerJoin += (IClientPlayer byPlayer) =>
+				{
 					byPlayer.Entity.AddBehavior(new DashBehaviour(byPlayer.Entity));
 				};
 			}
@@ -484,11 +545,19 @@ namespace Apprentice.src._burgi
 				harmonyInstance.CreateClassProcessor(typeof(AnimationManager_StartAnimation1_Patch)).Patch();
 
 				// Register hotkey's
-				clientApi.Input.RegisterHotKey("dash_reset", "", GlKeys.ShiftLeft, HotkeyType.MovementControls);
+				clientApi.Input.RegisterHotKey("sprint_w", "", GlKeys.W, HotkeyType.MovementControls);
+				clientApi.Input.RegisterHotKey("sprint_a", "", GlKeys.A, HotkeyType.MovementControls);
+				clientApi.Input.RegisterHotKey("sprint_s", "", GlKeys.S, HotkeyType.MovementControls);
+				clientApi.Input.RegisterHotKey("sprint_d", "", GlKeys.D, HotkeyType.MovementControls);
+				clientApi.Input.RegisterHotKey("sprint", "", GlKeys.ShiftLeft, HotkeyType.MovementControls);
 				clientApi.Input.RegisterHotKey("reset", "", GlKeys.B, HotkeyType.GUIOrOtherControls);
 
 				// Register hotkey handler's
-				clientApi.Input.SetHotKeyHandler("dash_reset", OnDashReset);
+				clientApi.Input.SetHotKeyHandler("sprint_w", OnSprintW);
+				clientApi.Input.SetHotKeyHandler("sprint_a", OnSprintA);
+				clientApi.Input.SetHotKeyHandler("sprint_s", OnSprintS);
+				clientApi.Input.SetHotKeyHandler("sprint_d", OnSprintD);
+				clientApi.Input.SetHotKeyHandler("sprint", OnSprint);
 				clientApi.Input.SetHotKeyHandler("reset", OnReset);
 
 				// Register event's
@@ -501,6 +570,7 @@ namespace Apprentice.src._burgi
 			}
 			public override void OnGameTick(float deltaTime)
 			{
+				if (enable == false) return;
 				if (clientApi == null) return;
 				if (motionBlur == null) return;
 				if (darkAges == null) return;
@@ -514,6 +584,30 @@ namespace Apprentice.src._burgi
 				EntityPlayer entityPlayer = clientApi.World.Player.Entity;
 				EntityControls controls = entityPlayer.Controls;
 				EntityPos transform = entityPlayer.Pos;
+
+				// Check if not running anymore
+				if (!clientApi.Input.KeyboardKeyState[(int)GlKeys.ShiftLeft] &&
+					!clientApi.Input.KeyboardKeyState[(int)GlKeys.ShiftRight])
+				{
+					isRunning = false;
+				}
+
+				// Adjust move speed of player
+				// if (isRunning)
+				// {
+				// 	entityPlayer.Stats.Set("walkspeed", "mymod", 1.5f, true);
+				// 	entityPlayer.Stats.Set("runspeed", "mymod", 1.5f, true);
+				// 	entityPlayer.Stats.Set("jumpheight", "mymod", 1.2f, true);
+				// }
+				// else
+				// {
+				// 	float speed = entityPlayer.Stats.Get
+				// }
+
+				// Force body yaw
+				// transform.Yaw = 0.0F;
+				// entityPlayer.BodyYaw = 0.0F;
+				// clientApi.World.Player.CameraYaw = 0.0F;
 
 				// Execute based on sequence type
 				switch (sequenceType)
@@ -536,19 +630,13 @@ namespace Apprentice.src._burgi
 				// Play animation when player is running
 				if (enableRunAnimations)
 				{
-					if (transform.Motion.Length() > runAnimationDeadzone)
+					float motionLength = (float)transform.Motion.Length();
+
+					if (motionLength > runAnimationDeadzone)
 					{
 						// Compute local direction
 						Vec3d localForward = transform.GetViewVector().ToVec3d();
 						Vec3d localRight = BurgiMath.WorldUp.Cross(localForward).Normalize();
-
-						// Stop animations
-						if (entity.AnimManager.IsAnimationActive([sprintForwardData.Code])) entity.AnimManager.StopAnimation(sprintForwardData.Code);
-						if (entity.AnimManager.IsAnimationActive([sprintBackData.Code])) entity.AnimManager.StopAnimation(sprintBackData.Code);
-						if (entity.AnimManager.IsAnimationActive([strafeForwardLeft90Data.Code])) entity.AnimManager.StopAnimation(strafeForwardLeft90Data.Code);
-						if (entity.AnimManager.IsAnimationActive([strafeForwardLeft45Data.Code])) entity.AnimManager.StopAnimation(strafeForwardLeft45Data.Code);
-						if (entity.AnimManager.IsAnimationActive([strafeForwardRight90Data.Code])) entity.AnimManager.StopAnimation(strafeForwardRight90Data.Code);
-						if (entity.AnimManager.IsAnimationActive([strafeForwardRight45Data.Code])) entity.AnimManager.StopAnimation(strafeForwardRight45Data.Code);
 
 						// Compute quadrant angle of motion vector
 						double x = transform.Motion.Dot(localRight);
@@ -560,115 +648,117 @@ namespace Apprentice.src._burgi
 						if (degrees < 0) degrees += 360.0;
 
 						// Round to nearest 45 degrees
-						Directional8 direction = (Directional8)((int)Math.Round(degrees / 45.0) % 8);
+						prevDirection8 = currDirection8;
+						currDirection8 = (Directional8)((int)Math.Round(degrees / 45.0) % 8);
 
 						// Start strafe animation based on quadrant angle
 						if (entityPlayer.AnimManager != null)
 						{
 							if (entityPlayer.AnimManager.Animator != null)
 							{
-								switch (direction)
+								if (currDirection8 != prevDirection8)
 								{
-									case Directional8.DIR8_FORWARD:
-										{
-											// Set runtime animation data
-											sprintForwardData.AnimationSpeed = animationSpeedSprintForward;
+									// Stop animation
+									if (runningRunAnimation != null)
+									{
+										entity.AnimManager.StopAnimation(runningRunAnimation.Animation.Code);
 
-											// Sprint forward
-											if (entity.AnimManager.StartAnimation(sprintForwardData))
+										runningRunAnimation = null;
+									}
+
+									// Start animation
+									if (entity.AnimManager.StartAnimation(strafingAnimations[(int)currDirection8]))
+									{
+										runningRunAnimation = entity.AnimManager.GetAnimationState(strafingAnimations[(int)currDirection8].Code);
+									}
+
+									// Set initial running animation data
+									if (runningRunAnimation != null)
+									{
+										runningRunAnimation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Repeat;
+										runningRunAnimation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.Rewind;
+									}
+								}
+
+								// Set runtime animation data
+								if (runningRunAnimation != null)
+								{
+									// Set weights
+									strafingAnimations[(int)currDirection8].ElementWeight = enableBlendAttackPose
+										? strafeAimWeights
+										: [];
+
+									// Set blend mode
+									strafingAnimations[(int)currDirection8].ElementBlendMode = enableBlendAttackPose
+										? strafeAimBlendModes
+										: [];
+
+									// Set animation speed
+									float targetSpeed = 1.0F;
+									switch (currDirection8)
+									{
+										case Directional8.DIR8_FORWARD: targetSpeed = animationSpeedSprintForward * motionSpeedSprintForward; break;
+										case Directional8.DIR8_FORWARD_LEFT: targetSpeed = animationSpeedStrafeForwardLeft45 * motionSpeedStrafeForwardLeft45; break;
+										case Directional8.DIR8_LEFT: targetSpeed = animationSpeedStrafeForwardLeft90 * motionSpeedStrafeForwardLeft90; break;
+										case Directional8.DIR8_BACK_LEFT: break; // TODO
+										case Directional8.DIR8_BACK: break; // TODO
+										case Directional8.DIR8_BACK_RIGHT: break; // TODO
+										case Directional8.DIR8_RIGHT: targetSpeed = animationSpeedStrafeForwardRight90 * motionSpeedStrafeForwardRight90; break;
+										case Directional8.DIR8_FORWARD_RIGHT: targetSpeed = animationSpeedStrafeForwardRight45 * motionSpeedStrafeForwardRight45; break;
+									}
+									if (isRunning)
+									{
+										targetSpeed *= animationSpeedRunMultiplier;
+									}
+									strafingAnimations[(int)currDirection8].AnimationSpeed = targetSpeed;
+
+									/*
+									// Play footstep sounds
+									int totalFrames = currRunningAnimation.Animation.QuantityFrames;
+									prevAnimationFrame = currAnimationFrame;
+									currAnimationFrame = Math.Min(totalFrames - 1, (int)(currRunningAnimation.CurrentFrame * totalFrames));
+									if (currAnimationFrame < prevAnimationFrame)
+									{
+										leftFootSoundReset = true;
+										rightFootSoundReset = true;
+									}
+									if (currAnimationFrame != prevAnimationFrame)
+									{
+										AssetLocation[] footsteps = [footstepGrassSound1, footstepGrassSound2, footstepGrassSound3, footstepGrassSound4, footstepGrassSound5];
+										AssetLocation footstep = footsteps[Random.Shared.Next(footsteps.Length)];
+
+										if (leftFootSoundReset)
+										{
+											if (currAnimationFrame >= 3)
 											{
-												RunningAnimation animation = entity.AnimManager.GetAnimationState(sprintForwardData.Code);
-												animation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Repeat;
-												animation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.Rewind;
+												clientApi.World.PlaySoundAt(footstep, entity);
+												leftFootSoundReset = false;
 											}
-
-											break;
 										}
-									case Directional8.DIR8_FORWARD_LEFT:
-										{
-											// Set runtime animation data
-											strafeForwardLeft45Data.AnimationSpeed = animationSpeedStrafeForwardLeft45;
 
-											// Strafe forward left 45
-											if (entity.AnimManager.StartAnimation(strafeForwardLeft45Data))
+										if (rightFootSoundReset)
+										{
+											if (currAnimationFrame >= 15)
 											{
-												RunningAnimation animation = entity.AnimManager.GetAnimationState(strafeForwardLeft45Data.Code);
-												animation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Repeat;
-												animation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.Rewind;
+												clientApi.World.PlaySoundAt(footstep, entity);
+												rightFootSoundReset = false;
 											}
-
-											break;
 										}
-									case Directional8.DIR8_LEFT:
-										{
-											// Set runtime animation data
-											strafeForwardLeft90Data.AnimationSpeed = animationSpeedStrafeForwardLeft90;
-
-											// Strafe forward left 90
-											if (entity.AnimManager.StartAnimation(strafeForwardLeft90Data))
-											{
-												RunningAnimation animation = entity.AnimManager.GetAnimationState(strafeForwardLeft90Data.Code);
-												animation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Repeat;
-												animation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.Rewind;
-											}
-
-											break;
-										}
-									case Directional8.DIR8_BACK_LEFT:
-										{
-											break;
-										}
-									case Directional8.DIR8_BACK:
-										{
-											break;
-										}
-									case Directional8.DIR8_BACK_RIGHT:
-										{
-											break;
-										}
-									case Directional8.DIR8_RIGHT:
-										{
-											// Set runtime animation data
-											strafeForwardRight90Data.AnimationSpeed = animationSpeedStrafeForwardRight90;
-
-											// Strafe forward right 90
-											if (entity.AnimManager.StartAnimation(strafeForwardRight90Data))
-											{
-												RunningAnimation animation = entity.AnimManager.GetAnimationState(strafeForwardRight90Data.Code);
-												animation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Repeat;
-												animation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.Rewind;
-											}
-
-											break;
-										}
-									case Directional8.DIR8_FORWARD_RIGHT:
-										{
-											// Set runtime animation data
-											strafeForwardRight45Data.AnimationSpeed = animationSpeedStrafeForwardRight45;
-
-											// Strafe forward right 45
-											if (entity.AnimManager.StartAnimation(strafeForwardRight45Data))
-											{
-												RunningAnimation animation = entity.AnimManager.GetAnimationState(strafeForwardRight45Data.Code);
-												animation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Repeat;
-												animation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.Rewind;
-											}
-
-											break;
-										}
+									}
+									*/
 								}
 							}
 						}
 					}
 					else
 					{
-						// Stop animations
-						if (entity.AnimManager.IsAnimationActive([sprintForwardData.Code])) entity.AnimManager.StopAnimation(sprintForwardData.Code);
-						if (entity.AnimManager.IsAnimationActive([sprintBackData.Code])) entity.AnimManager.StopAnimation(sprintBackData.Code);
-						if (entity.AnimManager.IsAnimationActive([strafeForwardLeft90Data.Code])) entity.AnimManager.StopAnimation(strafeForwardLeft90Data.Code);
-						if (entity.AnimManager.IsAnimationActive([strafeForwardLeft45Data.Code])) entity.AnimManager.StopAnimation(strafeForwardLeft45Data.Code);
-						if (entity.AnimManager.IsAnimationActive([strafeForwardRight90Data.Code])) entity.AnimManager.StopAnimation(strafeForwardRight90Data.Code);
-						if (entity.AnimManager.IsAnimationActive([strafeForwardRight45Data.Code])) entity.AnimManager.StopAnimation(strafeForwardRight45Data.Code);
+						// Stop animation
+						if (runningRunAnimation != null)
+						{
+							entity.AnimManager.StopAnimation(runningRunAnimation.Animation.Code);
+
+							runningRunAnimation = null;
+						}
 					}
 				}
 
@@ -706,12 +796,9 @@ namespace Apprentice.src._burgi
 #endif
 
 				// Update obama prism
-				if (obamaPrism != null)
+				if (obamaPrism.obamaEnable)
 				{
-					if (obamaPrism.obamaEnable)
-					{
-						obamaPrism.Update(deltaTime);
-					}
+					obamaPrism.Update(deltaTime);
 				}
 			}
 
@@ -1224,11 +1311,43 @@ namespace Apprentice.src._burgi
 				}
 			}
 
+			private bool OnSprintW(KeyCombination keyComb)
+			{
+				if (enable == false) return false;
+
+				currDirection8 = Directional8.DIR8_CENTER;
+
+				return true;
+			}
+			private bool OnSprintA(KeyCombination keyComb)
+			{
+				if (enable == false) return false;
+
+				currDirection8 = Directional8.DIR8_CENTER;
+
+				return true;
+			}
+			private bool OnSprintS(KeyCombination keyComb)
+			{
+				if (enable == false) return false;
+
+				currDirection8 = Directional8.DIR8_CENTER;
+
+				return true;
+			}
+			private bool OnSprintD(KeyCombination keyComb)
+			{
+				if (enable == false) return false;
+
+				currDirection8 = Directional8.DIR8_CENTER;
+
+				return true;
+			}
 			private bool OnDashReset(KeyCombination keyComb)
 			{
-				if (enable == false) return true;
-				if (clientApi == null) return true;
-				if (motionBlur == null) return true;
+				if (enable == false) return false;
+				if (clientApi == null) return false;
+				if (motionBlur == null) return false;
 
 				EntityPlayer entityPlayer = clientApi.World.Player.Entity;
 				EntityPos transform = entityPlayer.Pos;
@@ -1283,13 +1402,24 @@ namespace Apprentice.src._burgi
 
 				return true;
 			}
+			private bool OnSprint(KeyCombination keyComb)
+			{
+				if (enable == false) return false;
+
+				isRunning = true;
+
+				return true;
+			}
 			private bool OnReset(KeyCombination keyComb)
 			{
+				if (enable == false) return false;
+
 				// Stop all animations
 				entity.AnimManager.StopAllAnimations();
 
 				return true;
 			}
+
 			private void OnAttackReset()
 			{
 				if (enable == false) return;
@@ -1358,22 +1488,28 @@ namespace Apprentice.src._burgi
 
 				if (enableBlendAttackPose)
 				{
-					// Set runtime animation data
-					holdWeaponCombatPassiveData.AnimationSpeed = 1.0F; // TODO
-
-					// Start random attack animation
+					// Start animation
 					entity.AnimManager.StartAnimation(holdWeaponCombatPassiveData);
-					RunningAnimation animation = entity.AnimManager.GetAnimationState(holdWeaponCombatPassiveData.Code);
-					animation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
-					animation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
+
+					// Get running animation
+					runningCombatAnimation = entity.AnimManager.GetAnimationState(holdWeaponCombatPassiveData.Code);
+
+					// Set initial animation state
+					if (runningCombatAnimation != null)
+					{
+						runningCombatAnimation.Animation.OnAnimationEnd = EnumEntityAnimationEndHandling.Hold;
+						runningCombatAnimation.Animation.OnActivityStopped = EnumEntityActivityStoppedHandling.PlayTillEnd;
+					}
 				}
 				else
 				{
-					// Stop attack animation only
-					if (entity.AnimManager.IsAnimationActive([holdWeaponCombatPassiveData.Code])) entity.AnimManager.StopAnimation(holdWeaponCombatPassiveData.Code);
+					// Stop animation
+					if (runningCombatAnimation != null)
+					{
+						entity.AnimManager.StopAnimation(runningCombatAnimation.Animation.Code);
+					}
 				}
 			}
-
 			private void OnMouseDown(MouseEvent e)
 			{
 				if (enable == false) return;
@@ -1390,7 +1526,6 @@ namespace Apprentice.src._burgi
 
 				e.Handled = true;
 			}
-
 			private CallbackGUIStatus OnImGuiDraw(float deltaSeconds)
 			{
 				if (lineGizmo == null) return CallbackGUIStatus.DontGrabMouse;
@@ -1451,6 +1586,7 @@ namespace Apprentice.src._burgi
 					if (ImGui.BeginTabItem("Animation"))
 					{
 						ImGui.Checkbox("enableRunAnimations", ref enableRunAnimations);
+						ImGui.DragFloat("runAnimationDeadzone", ref runAnimationDeadzone, 0.1F);
 						ImGui.SeparatorText("Animation Speed");
 						ImGui.DragFloat("animationSpeedDash", ref animationSpeedDash, 0.1F, 0.0F, 20.0F);
 						ImGui.DragFloat("animationSpeedJump", ref animationSpeedJump, 0.1F, 0.0F, 20.0F);
@@ -1463,6 +1599,14 @@ namespace Apprentice.src._burgi
 						ImGui.DragFloat("animationSpeedStrafeForwardRight90", ref animationSpeedStrafeForwardRight90, 0.1F, 0.0F, 20.0F);
 						ImGui.DragFloat("animationSpeedStrafeForwardLeft45", ref animationSpeedStrafeForwardLeft45, 0.1F, 0.0F, 20.0F);
 						ImGui.DragFloat("animationSpeedStrafeForwardRight45", ref animationSpeedStrafeForwardRight45, 0.1F, 0.0F, 20.0F);
+						ImGui.DragFloat("animationSpeedRunMultiplier", ref animationSpeedRunMultiplier, 0.1F, 0.0F, 20.0F);
+						ImGui.SeparatorText("Motion Speed");
+						ImGui.DragFloat("motionSpeedSprintForward", ref motionSpeedSprintForward, 0.1F, 0.0F, 20.0F);
+						ImGui.DragFloat("motionSpeedSprintBack", ref motionSpeedSprintBack, 0.1F, 0.0F, 20.0F);
+						ImGui.DragFloat("motionSpeedStrafeForwardLeft90", ref motionSpeedStrafeForwardLeft90, 0.1F, 0.0F, 20.0F);
+						ImGui.DragFloat("motionSpeedStrafeForwardRight90", ref motionSpeedStrafeForwardRight90, 0.1F, 0.0F, 20.0F);
+						ImGui.DragFloat("motionSpeedStrafeForwardLeft45", ref motionSpeedStrafeForwardLeft45, 0.1F, 0.0F, 20.0F);
+						ImGui.DragFloat("motionSpeedStrafeForwardRight45", ref motionSpeedStrafeForwardRight45, 0.1F, 0.0F, 20.0F);
 						ImGui.SeparatorText("Frame Counts");
 						ImGui.DragInt("dashFrameCount", ref dashFrameCount);
 						ImGui.DragInt("dashRetractFrameCount", ref dashRetractFrameCount);
@@ -1498,7 +1642,7 @@ namespace Apprentice.src._burgi
 			private static LineGizmo? lineGizmo = null;
 
 			private static Vec3f cameraRootOffset = new(-0.17F, 0.03F, -0.33F);
-			private static float bobbingAmount = 4.0F;
+			private static float bobbingAmount = 2.0F;
 			private static float yawRotationAmount = 0.012F;
 			private static float pitchRotationAmount = 0.02F;
 
@@ -1665,7 +1809,8 @@ namespace Apprentice.src._burgi
 			public static void Register(ICoreClientAPI api)
 			{
 				clientApi = api;
-				clientApi.Event.PlayerJoin += (IClientPlayer byPlayer) => {
+				clientApi.Event.PlayerJoin += (IClientPlayer byPlayer) =>
+				{
 					byPlayer.Entity.AddBehavior(new TrueThirdPerson(byPlayer.Entity));
 				};
 			}
