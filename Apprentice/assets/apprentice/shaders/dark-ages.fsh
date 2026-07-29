@@ -72,7 +72,9 @@ void main()
 
 	if (depthLinear > darkRadius)
 	{
-		fragColor = vec4(depthLinear, depthLinear, depthLinear, 1);
+		// fragColor = vec4(depthLinear, depthLinear, depthLinear, 1);
+
+		discard;
 	}
 	else
 	{
@@ -80,6 +82,7 @@ void main()
 		// vec3 worldPosition = ReconstructWorldPosition(uv, depthLinear);
 		// float dist = length(worldPosition - playerPosition.xyz);
 
-		fragColor = texture(colorTex, texCoord);
+		// fragColor = texture(colorTex, texCoord);
+		fragColor = vec4(depthLinear, depthLinear, depthLinear, 1);
 	}
 }
