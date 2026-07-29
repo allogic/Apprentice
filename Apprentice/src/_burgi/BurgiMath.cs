@@ -13,6 +13,13 @@ namespace Apprentice.src._burgi
 		public static readonly Vec3d WorldDown = new(0, -1, 0);
 		public static readonly Vec3d WorldBack = new(0, 0, -1);
 
+		public static readonly Vec3f WorldRightF = new(1, 0, 0);
+		public static readonly Vec3f WorldUpF = new(0, 1, 0);
+		public static readonly Vec3f WorldForwardF = new(0, 0, 1);
+		public static readonly Vec3f WorldLeftF = new(-1, 0, 0);
+		public static readonly Vec3f WorldDownF = new(0, -1, 0);
+		public static readonly Vec3f WorldBackF = new(0, 0, -1);
+
 		public static readonly float RAD_TO_DEG = 57.29577951308232286465F;
 		public static readonly float DEG_TO_RAD = 0.017453292519943295470F;
 

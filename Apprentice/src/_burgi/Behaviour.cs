@@ -1,17 +1,13 @@
-﻿using System;
+﻿using HarmonyLib;
+using ImGuiNET;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
-
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
 using Vintagestory.API.MathTools;
 using Vintagestory.Client.NoObf;
-
-using HarmonyLib;
-
-using ImGuiNET;
-
 using VSImGui;
 using VSImGui.API;
 
@@ -23,6 +19,7 @@ using VSImGui.API;
 namespace Apprentice.src._burgi
 {
 	using static Apprentice.src._burgi.Shader;
+	using static Apprentice.src._burgi.Shader.ObamaPrism;
 
 	internal class Behaviour
 	{
@@ -144,6 +141,7 @@ namespace Apprentice.src._burgi
 			private LineGizmo? lineGizmo = null;
 			private MotionBlur? motionBlur = null;
 			private DarkAges? darkAges = null;
+			private ObamaPrism? obamaPrism = null;
 			private Harmony? harmonyInstance = null;
 			private ImGuiModSystem? imguiInstance = null;
 
@@ -472,6 +470,7 @@ namespace Apprentice.src._burgi
 				// TODO: fix api injection
 				motionBlur = new(clientApi);
 				darkAges = new(clientApi);
+				obamaPrism = new(clientApi, 32);
 				harmonyInstance = new("Vintagestory.API.Common");
 #if DEBUG
 				lineGizmo = new(clientApi, 1000);
@@ -504,6 +503,8 @@ namespace Apprentice.src._burgi
 			{
 				if (clientApi == null) return;
 				if (motionBlur == null) return;
+				if (darkAges == null) return;
+				if (obamaPrism == null) return;
 				if (harmonyInstance == null) return;
 
 #if DEBUG
@@ -704,6 +705,14 @@ namespace Apprentice.src._burgi
 				}
 #endif
 
+				// Update obama prism
+				if (obamaPrism != null)
+				{
+					if (obamaPrism.obamaEnable)
+					{
+						obamaPrism.Update(deltaTime);
+					}
+				}
 			}
 
 			private void DashSequenceTick(float deltaTime)
@@ -1387,6 +1396,7 @@ namespace Apprentice.src._burgi
 				if (lineGizmo == null) return CallbackGUIStatus.DontGrabMouse;
 				if (motionBlur == null) return CallbackGUIStatus.DontGrabMouse;
 				if (darkAges == null) return CallbackGUIStatus.DontGrabMouse;
+				if (obamaPrism == null) return CallbackGUIStatus.DontGrabMouse;
 
 				ImGui.Begin("Ushigatana");
 
@@ -1412,6 +1422,13 @@ namespace Apprentice.src._burgi
 						ImGui.DragFloat("darkIntensity", ref darkAges.darkIntensity, 0.1F, 0.0F, 10.0F);
 						ImGui.DragFloat("darkRadius", ref darkAges.darkRadius, 0.001F, -10000.0F, 10000.0F); // TODO
 						ImGui.DragFloat("depthFactor", ref darkAges.depthFactor, 0.001F, -10000.0F, 10000.0F); // TODO
+						ImGui.SeparatorText("Obama");
+						ImGui.Checkbox("obamaEnable", ref obamaPrism.obamaEnable);
+						ImGui.DragFloat("obamaMaxVelocity", ref obamaPrism.obamaMaxVelocity, 0.1F);
+						ImGui.DragFloat("obamaRandDistance", ref obamaPrism.obamaRandDistance, 0.1F);
+						ImGui.DragFloat("obamaUpOffset", ref obamaPrism.obamaUpOffset, 0.1F);
+						ImGui.DragFloat("obamaForwardOffset", ref obamaPrism.obamaForwardOffset, 0.1F);
+						ImGui.DragInt("obamaUpdateFrames", ref obamaPrism.obamaUpdateFrames);
 						ImGui.EndTabItem();
 					}
 

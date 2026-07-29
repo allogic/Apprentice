@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
@@ -588,6 +589,262 @@ namespace Apprentice.src._burgi
 				}
 			}
 			#endregion
+		}
+		internal class ObamaPrism : IRenderer
+		{
+			private readonly ICoreClientAPI clientApi;
+			private readonly IClientEventAPI eventApi;
+			private readonly IRenderAPI renderApi;
+			private readonly IShaderAPI shaderApi;
+
+			internal class Obama
+			{
+				public int index;
+				public Vec3f randomOffset;
+				public Matrixf transform;
+				public Vec3f targetPosition;
+				public Vec4f targetRotation;
+				public Vec3f prevTargetPosition; // TODO: maybe obsolete..
+				public Vec4f prevTargetRotation; // TODO: maybe obsolete..
+				public Vec3f linearVelocity;
+
+				public Obama(int i, Random random)
+				{
+					index = i;
+					randomOffset = new(
+						(float)random.NextDouble(),
+						(float)random.NextDouble(),
+						(float)random.NextDouble());
+					transform = Matrixf.Create();
+					targetPosition = new(0, 0, 0);
+					targetRotation = new(0, 0, 0, 1);
+					prevTargetPosition = new(0, 0, 0);
+					prevTargetRotation = new(0, 0, 0, 1);
+					linearVelocity = new(0, 0, 0);
+				}
+			}
+
+			private readonly IShaderProgram obamaProgram;
+
+			private MeshData? mesh = null;
+			private MeshRef? meshRef = null;
+			private Random random = new();
+
+			private int obamaTexture = 0;
+
+			public bool obamaEnable = false;
+			public float obamaMaxVelocity = 0.05F;
+			public float obamaRandDistance = 2.0F;
+			public float obamaUpOffset = 2.0F;
+			public float obamaForwardOffset = 2.0F;
+			public int obamaUpdateFrames = 120;
+
+			private int obamaFrame = 0;
+
+			private float deltaTimeAcc = 0.0F;
+
+			public IList<Obama> obamas = [];
+
+			public double RenderOrder => 1.0;
+			public int RenderRange => 9999;
+
+			public ObamaPrism(ICoreClientAPI api, int obamaCount)
+			{
+				clientApi = api;
+				eventApi = api.Event;
+				renderApi = api.Render;
+				shaderApi = api.Shader;
+
+				// Create obamas
+				for (int i = 0; i < obamaCount; i++)
+				{
+					obamas.Add(new Obama(i, random));
+				}
+
+				// Create dark program
+				obamaProgram = shaderApi.NewShaderProgram();
+				obamaProgram.AssetDomain = "apprentice";
+				obamaProgram.VertexShader = shaderApi.NewShader(EnumShaderType.VertexShader);
+				obamaProgram.FragmentShader = shaderApi.NewShader(EnumShaderType.FragmentShader);
+				shaderApi.RegisterFileShaderProgram("obama-shader", obamaProgram);
+				obamaProgram.Compile();
+
+				// Create mesh
+				mesh = new(20, 60, false, true, false, false);
+				if (mesh != null)
+				{
+					int vertexCount = 0;
+
+					// Left
+					vertexCount = mesh.VerticesCount;
+					mesh.AddVertex(-0.5F, 0.0F, -0.5F, 1, 1);
+					mesh.AddVertex(0.0F, 0.6F, 0.0F, 0.5F, -0.134F);
+					mesh.AddVertex(-0.5F, 0.0F, 0.5F, 0, 1);
+					mesh.AddIndex(vertexCount + 0);
+					mesh.AddIndex(vertexCount + 2);
+					mesh.AddIndex(vertexCount + 1);
+
+					// Right
+					vertexCount = mesh.VerticesCount;
+					mesh.AddVertex(0.5F, 0.0F, 0.5F, 1, 1);
+					mesh.AddVertex(0.0F, 0.6F, 0.0F, 0.5F, -0.134F);
+					mesh.AddVertex(0.5F, 0.0F, -0.5F, 0, 1);
+					mesh.AddIndex(vertexCount + 0);
+					mesh.AddIndex(vertexCount + 2);
+					mesh.AddIndex(vertexCount + 1);
+
+					// Front
+					vertexCount = mesh.VerticesCount;
+					mesh.AddVertex(-0.5F, 0.0F, 0.5F, 1, 1);
+					mesh.AddVertex(0.0F, 0.6F, 0.0F, 0.5F, -0.134F);
+					mesh.AddVertex(0.5F, 0.0F, 0.5F, 0, 1);
+					mesh.AddIndex(vertexCount + 0);
+					mesh.AddIndex(vertexCount + 2);
+					mesh.AddIndex(vertexCount + 1);
+
+					// Back
+					vertexCount = mesh.VerticesCount;
+					mesh.AddVertex(0.5F, 0.0F, -0.5F, 1, 1);
+					mesh.AddVertex(0.0F, 0.6F, 0.0F, 0.5F, -0.134F);
+					mesh.AddVertex(-0.5F, 0.0F, -0.5F, 0, 1);
+					mesh.AddIndex(vertexCount + 0);
+					mesh.AddIndex(vertexCount + 2);
+					mesh.AddIndex(vertexCount + 1);
+
+					// Bottom
+					vertexCount = mesh.VerticesCount;
+					mesh.AddVertex(-0.5F, 0.0F, -0.5F, 0, 0);
+					mesh.AddVertex(0.5F, 0.0F, -0.5F, 0, 0);
+					mesh.AddVertex(0.5F, 0.0F, 0.5F, 0, 0);
+					mesh.AddVertex(-0.5F, 0.0F, 0.5F, 0, 0);
+					mesh.AddIndex(vertexCount + 0);
+					mesh.AddIndex(vertexCount + 1);
+					mesh.AddIndex(vertexCount + 2);
+					mesh.AddIndex(vertexCount + 0);
+					mesh.AddIndex(vertexCount + 2);
+					mesh.AddIndex(vertexCount + 3);
+
+					mesh.mode = EnumDrawMode.Triangles;
+				}
+				meshRef = renderApi.UploadMesh(mesh);
+
+				// Create obama texture
+				obamaTexture = renderApi.GetOrLoadTexture(new AssetLocation("apprentice", "textures/real-obama.png"));
+
+				// Register renderer
+				eventApi.RegisterRenderer(this, EnumRenderStage.Opaque);
+			}
+
+			public void OnRenderFrame(float deltaTime, EnumRenderStage stage)
+			{
+				if (stage != EnumRenderStage.Opaque) return;
+
+				EntityPlayer entityPlayer = clientApi.World.Player.Entity;
+				EntityPos transform = entityPlayer.Pos;
+
+				if (meshRef == null) return;
+
+				if (obamaEnable)
+				{
+					renderApi.GlDisableStencilTest();
+					renderApi.GlToggleBlend(false);
+					renderApi.GlEnableCullFace();
+
+					// Make it obama
+					renderApi.CurrentFrameBuffer = renderApi.FrameBuffers[(int)EnumFrameBuffer.Primary];
+					obamaProgram.Use();
+					obamaProgram.UniformMatrix("projectionMatrix", renderApi.CurrentProjectionMatrix);
+					obamaProgram.UniformMatrix("viewMatrix", renderApi.CurrentModelviewMatrix);
+					obamaProgram.BindTexture2D("tex", obamaTexture, 0);
+					foreach (Obama obama in obamas)
+					{
+						obamaProgram.UniformMatrix("modelMatrix", obama.transform.Values);
+						renderApi.RenderMesh(meshRef);
+					}
+					obamaProgram.Stop();
+
+					renderApi.GlToggleBlend(true);
+					renderApi.GlEnableStencilTest();
+					renderApi.GlDisableCullFace();
+				}
+			}
+
+			public void Update(float deltaTime)
+			{
+				EntityPlayer entityPlayer = clientApi.World.Player.Entity;
+				EntityPos transform = entityPlayer.Pos;
+
+				// Update obamas
+				if (obamaFrame > obamaUpdateFrames)
+				{
+					obamaFrame = 0;
+
+					// Compute local direction
+					Vec3f localForward = transform.GetViewVector();
+					Vec3f localRight = BurgiMath.WorldUpF.Cross(localForward).Normalize();
+					Vec3f localUp = localForward.Cross(localRight);
+
+					foreach (Obama obama in obamas)
+					{
+						float nextOffsetX = (random.NextSingle() * 2.0F - 1.0F) * obamaRandDistance;
+						float nextOffsetY = (random.NextSingle() * 2.0F - 1.0F) * obamaRandDistance;
+						float nextOffsetZ = (random.NextSingle() * 2.0F - 1.0F) * obamaRandDistance;
+
+						Vec3f targetPosition = transform.XYZFloat;
+
+						targetPosition += localForward * obamaForwardOffset;
+						targetPosition += localUp * obamaUpOffset;
+
+						obama.targetPosition.X = targetPosition.X + nextOffsetX;
+						obama.targetPosition.Y = targetPosition.Y + nextOffsetY;
+						obama.targetPosition.Z = targetPosition.Z + nextOffsetZ;
+					}
+				}
+
+				// Update obamas
+				foreach (Obama obama in obamas)
+				{
+					Vec3f currentPosition = new(
+						obama.transform.Values[12],
+						obama.transform.Values[13],
+						obama.transform.Values[14]
+					);
+
+					Vec3f linearDisplacement = obama.targetPosition - currentPosition;
+					obama.linearVelocity += linearDisplacement * deltaTime;
+					Vec3f obamaPosition = currentPosition + obama.linearVelocity;
+
+					// Clamp velocity
+					if (obama.linearVelocity.Length() > obamaMaxVelocity)
+					{
+						obama.linearVelocity = obama.linearVelocity.Normalize() * obamaMaxVelocity;
+					}
+
+					obama.transform.Values[12] = obamaPosition.X;
+					obama.transform.Values[13] = obamaPosition.Y;
+					obama.transform.Values[14] = obamaPosition.Z;
+
+					float rotX = MathF.Sin(deltaTimeAcc * obama.index) * 0.01F;
+					float rotZ = MathF.Cos(deltaTimeAcc * obama.index) * 0.01F;
+					float rotY = rotX + rotZ * 3.0F;
+
+					obama.transform.RotateX(rotX);
+					obama.transform.RotateY(rotY);
+					obama.transform.RotateZ(rotZ);
+				}
+
+				// Accumulate delta time
+				deltaTimeAcc += deltaTime;
+
+				// Increment obama frame
+				obamaFrame++;
+			}
+			public void Dispose()
+			{
+				eventApi.UnregisterRenderer(this, EnumRenderStage.Opaque);
+
+				renderApi.GLDeleteTexture(obamaTexture);
+			}
 		}
 	}
 }

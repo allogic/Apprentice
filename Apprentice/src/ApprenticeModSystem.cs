@@ -15,6 +15,7 @@ namespace Apprentice
 {
 	using static Apprentice.src._burgi.Behaviour;
 	using static Apprentice.src._burgi.WorldGen;
+	using static Apprentice.src._burgi.Shader;
 
 	public sealed class ApprenticeModSystem : ModSystem
 	{
@@ -386,9 +387,7 @@ namespace Apprentice
 					.RegisterMessageType<WarScytheAnimationPacket>()
 					.RegisterMessageType<ItemCalibrationCommandPacket>();
 
-				// TODO
-				// Vulcanic.Register(sapi);
-				// new Vulcanic(sapi);
+				// Vulcanic.Register(sapi); // TODO
 			}
 			else
 			{
