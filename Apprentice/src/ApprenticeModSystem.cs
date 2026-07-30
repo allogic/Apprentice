@@ -708,10 +708,103 @@ namespace Apprentice
 		}
 		public override void StartClientSide(ICoreClientAPI api)
 		{
+			if (clientNetworkChannel != null)
+			{
+				animationSystem = new ApprenticeAnimationSystem(
+					api,
+					clientNetworkChannel,
+					WarScytheAnimation
+				);
+				itemCalibrationSystem = new ItemCalibrationSystem(
+					api,
+					clientNetworkChannel,
+					item =>
+						animationSystem?.OpenEditorForItem(item) ==
+							true
+				);
+			}
+			else
+			{
+				api.Logger.Error(
+					"[Apprentice] War Scythe animation is unavailable because the client network channel is missing."
+				);
+			}
+
+			// Heatmap state is gameplay-owned and must not depend on optional
+			// client HUD construction succeeding later in this method.
+			if (clientNetworkChannel != null)
+			{
+				clientNetworkChannel.SetMessageHandler<DangerHeatmapStatePacket>(
+					OnDangerHeatmapState
+				);
+				DangerHeatmapClientRuntime.RequestState = () =>
+					clientNetworkChannel.SendPacket(
+						new DangerHeatmapRequestPacket()
+					);
+			}
+			else
+			{
+				api.Logger.Error(
+					"[Apprentice] The client network channel is missing; danger heatmap state cannot be received."
+				);
+			}
+
+			api.Event.RegisterCallback(
+				_ =>
+				{
+					bool heatmapRegistered = api.ModLoader
+						.GetModSystem<WorldMapManager>(true)
+						.MapLayers.Any(layer => layer is DangerHeatmapLayer);
+					if (heatmapRegistered)
+					{
+						api.Logger.Notification(
+							"[Apprentice] Danger heatmap map tab registered."
+						);
+					}
+					else
+					{
+						api.Logger.Error(
+							"[Apprentice] Danger heatmap map tab is missing. Remove stale Apprentice copies and install the complete 2.7.0 package."
+						);
+					}
+				},
+				1000
+			);
+			try
+			{
+				ClassConfig loadedClassConfig = classConfig ?? throw new InvalidOperationException("class.json was not loaded before client startup.");
+				SkillTreeConfig loadedSkillTreeConfig = skillTreeConfig ?? throw new InvalidOperationException("skilltrees.json was not loaded before client startup.");
+
+				IClientNetworkChannel networkChannel = clientNetworkChannel ?? throw new InvalidOperationException("The Apprentice client network channel was not registered.");
+
+				BaseConfig baseConfig = BaseConfigLoader.Load(api);
+
+				interfaceManager = new InterfaceManager(api, loadedClassConfig, loadedSkillTreeConfig, networkChannel);
+				overlayManager = new OverlayManager(api, baseConfig, loadedClassConfig);
+
+				networkChannel.SetMessageHandler<ExperienceNotificationPacket>(OnExperienceNotification);
+				networkChannel.SetMessageHandler<SkillPurchaseResultPacket>(OnSkillPurchaseResult);
+			}
+			catch (Exception exception)
+			{
+				api.Logger.Error(
+					"[Apprentice] Client-side startup failed. Server progression can continue, but the UI may be unavailable."
+				);
+				api.Logger.Error(exception);
+			}
+
 			// How does it feel..
 
-			DashBehaviour.Register(api);
-			TrueThirdPerson.Register(api);
+			DashBehaviour.clientApi = api;
+			TrueThirdPerson.clientApi = api;
+			AmbientCutscene.clientApi = api;
+
+			api.Event.PlayerJoin += (IClientPlayer byPlayer) =>
+			{
+				byPlayer.Entity.AddBehavior(new DashBehaviour(byPlayer.Entity));
+				byPlayer.Entity.AddBehavior(new TrueThirdPerson(byPlayer.Entity));
+				byPlayer.Entity.AddBehavior(new AmbientCutscene(byPlayer.Entity));
+			};
 		}
 
 		public override void Dispose()
