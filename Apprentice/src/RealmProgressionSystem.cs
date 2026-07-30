@@ -150,6 +150,10 @@ namespace Apprentice
 
         [ProtoMember(5)]
         public int RecipeCount { get; set; }
+
+        [ProtoMember(6)]
+        public List<RealmStructureLocation> Structures
+            { get; set; } = new();
     }
 
     /// <summary>
@@ -195,6 +199,7 @@ namespace Apprentice
         {
             Callbacks = null;
             LastDiscovery = null;
+            RealmStructureManager.ResetClientSnapshot();
         }
     }
 
@@ -327,6 +332,9 @@ namespace Apprentice
                     entity,
                     level
                 );
+                List<RealmStructureLocation> structures =
+                    RealmStructureManager
+                        .GetNearestCoordinates(player);
                 serverChannel?.SendPacket(
                     new RealmDiscoveryPacket
                     {
@@ -334,7 +342,8 @@ namespace Apprentice
                         DiscoveryMask = mask,
                         RealmName = realm.Name,
                         PageCode = realm.PageCode,
-                        RecipeCount = realm.RecipeIds.Count
+                        RecipeCount = realm.RecipeIds.Count,
+                        Structures = structures
                     },
                     player
                 );
@@ -449,6 +458,9 @@ namespace Apprentice
                     packet.RealmName,
                     packet.RecipeCount);
 
+            RealmStructureManager.ReceiveClientSnapshot(
+                packet.Structures
+            );
             RealmDiscoveryManager.Trigger(
                 packet,
                 exception =>
