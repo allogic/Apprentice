@@ -1,0 +1,71 @@
+{
+  "code": "coolingmagma",
+  "class": "BlockLava",
+  "attributes": {
+    "temperature": 1050,
+    "tempLossPerMeter": 90,
+    "handbook": {
+      "exclude": true
+    }
+  },
+  "shape": {
+    "base": "game:block/basic/cube"
+  },
+  "variantgroups": [
+    {
+      "code": "flow",
+      "states": [
+        "still"
+      ]
+    },
+    {
+      "code": "height",
+      "states": [
+        "7"
+      ]
+    }
+  ],
+  "drawtype": "liquid",
+  "renderpass": "liquid",
+  "matterstate": "liquid",
+  "blockmaterial": "Lava",
+  "faceCullMode": "liquid",
+  "liquidCode": "lava",
+  "snowCoverage": false,
+  "materialdensity": 2600,
+  "creativeinventory": {
+    "terrain": [
+      "coolingmagma-still-7"
+    ],
+    "apprentice": [
+      "coolingmagma-still-7"
+    ]
+  },
+  "replaceable": 9500,
+  "lightAbsorption": 1,
+  "lightHsv": [
+    8,
+    7,
+    12
+  ],
+  "drops": [],
+  "liquidLevelByType": {
+    "*-7": 7
+  },
+  "textures": {
+    "all": {
+      "base": "apprenticehighlands:block/liquid/coolingmagma"
+    },
+    "specialSecondTexture": {
+      "base": "apprenticehighlands:block/liquid/coolingmagma2"
+    }
+  },
+  "sidesolid": {
+    "all": false
+  },
+  "sideopaque": {
+    "all": false
+  },
+  "collisionbox": null,
+  "selectionbox": null
+}

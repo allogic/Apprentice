@@ -34,8 +34,14 @@ namespace Apprentice
             "apprenticehighlands:city-anchor/";
         private const string SectorPrefix =
             "apprenticehighlands:city-sector/";
+        private const string LootChestPrefix =
+            "apprenticehighlands:city-loot/";
         private const ulong CandidateSalt = 0x43495459414E4348UL;
         private const ulong CorruptionSalt = 0x484F4C4C4F57574EUL;
+        private const ulong LootSectorSalt = 0x4C4F4F5453454354UL;
+        private const ulong LootContentSalt = 0x4C4F4F544954454DUL;
+        private const int MinimumChestsPerCity = 9;
+        private const int ChestCountVariation = 5;
 
         private static readonly string[] CultureCodes =
         {
@@ -58,6 +64,14 @@ namespace Apprentice
         private readonly ICoreServerAPI api;
         private readonly object generationGate = new();
         private IWorldGenBlockAccessor? worldgenBlockAccessor;
+        private static IWorldGenBlockAccessor?
+            sharedWorldgenBlockAccessor;
+        private static System.Func<
+            DangerWorldState,
+            int,
+            int,
+            int,
+            bool>? plannedCityExclusion;
         private DangerWorldState? activeState;
         private WorldGenVillage[,] cityParts =
             new WorldGenVillage[0, 0];
@@ -68,6 +82,11 @@ namespace Apprentice
         private int basaltCrackedId;
         private int blackVeinId;
         private int gloomId;
+        private int lootMarkerId;
+        private int coolingMagmaSourceId;
+        private Block[] chestBlocks = Array.Empty<Block>();
+        private Dictionary<int, ResolvedLootTable> lootTables =
+            new();
         private bool initialized;
         private int loggedCities;
         private int loggedCorruptionChunks;
@@ -81,6 +100,7 @@ namespace Apprentice
         private static long candidateHashMatches;
         private static long valleyCandidateMatches;
         private static long nativePlacementFailures;
+        private static long generatedLootChests;
 
         internal ShatteredHighlandsRuinsGenerator(
             ICoreServerAPI api)
@@ -90,6 +110,33 @@ namespace Apprentice
         }
 
         internal bool Initialized => initialized;
+
+        internal static IWorldGenBlockAccessor?
+            SharedWorldgenBlockAccessor =>
+                sharedWorldgenBlockAccessor;
+
+        internal static bool IsWithinPlannedCityFootprint(
+            DangerWorldState state,
+            int worldX,
+            int worldZ,
+            int additionalRadius)
+        {
+            System.Func<
+                DangerWorldState,
+                int,
+                int,
+                int,
+                bool>? resolver =
+                    System.Threading.Volatile.Read(
+                        ref plannedCityExclusion
+                    );
+            return resolver?.Invoke(
+                state,
+                worldX,
+                worldZ,
+                additionalRadius
+            ) == true;
+        }
 
         internal static long GeneratedCities =>
             System.Threading.Interlocked.Read(ref generatedCities);
@@ -103,11 +150,18 @@ namespace Apprentice
         internal static long ScrubbedFlora =>
             System.Threading.Interlocked.Read(ref scrubbedFlora);
 
+        internal static long GeneratedLootChests =>
+            System.Threading.Interlocked.Read(
+                ref generatedLootChests
+            );
+
         internal void OnWorldgenBlockAccessor(
             IChunkProviderThread chunkProvider)
         {
             worldgenBlockAccessor =
                 chunkProvider.GetBlockAccessor(false);
+            sharedWorldgenBlockAccessor =
+                worldgenBlockAccessor;
         }
 
         internal bool Initialize(
@@ -264,17 +318,50 @@ namespace Apprentice
                 gloomId = ResolveBlockId(
                     "apprenticehighlands:gloom"
                 );
+                lootMarkerId = ResolveBlockId(
+                    "apprenticehighlands:lootmarker"
+                );
+                coolingMagmaSourceId = ResolveBlockId(
+                    "apprenticehighlands:coolingmagma-still-7"
+                );
                 if (obsidianId <= 0 ||
                     basaltId <= 0 ||
                     basaltGravelId <= 0 ||
                     basaltCrackedId <= 0 ||
                     blackVeinId <= 0 ||
-                    gloomId <= 0)
+                    gloomId <= 0 ||
+                    lootMarkerId <= 0 ||
+                    coolingMagmaSourceId <= 0)
                 {
                     throw new InvalidOperationException(
-                        "one or more Highlands corruption blocks did not load"
+                        "one or more Highlands city blocks did not load"
                     );
                 }
+                chestBlocks = new[]
+                    {
+                        "game:chest-north",
+                        "game:chest-east",
+                        "game:chest-south",
+                        "game:chest-west"
+                    }
+                    .Select(code =>
+                        api.World.GetBlock(
+                            new AssetLocation(code)
+                        )
+                    )
+                    .Where(block =>
+                        block != null &&
+                        block.Id > 0
+                    )
+                    .Cast<Block>()
+                    .ToArray();
+                if (chestBlocks.Length != 4)
+                {
+                    throw new InvalidOperationException(
+                        "the four oriented vanilla chest blocks did not load"
+                    );
+                }
+                lootTables = LoadLootTables();
 
                 PlayerSpawnPos? defaultSpawn =
                     api.WorldManager.SaveGame.DefaultSpawn;
@@ -290,6 +377,8 @@ namespace Apprentice
                         api.WorldManager.MapSizeZ / 2
                     );
                 activeState = state;
+                plannedCityExclusion =
+                    IsInsidePlannedCityFootprint;
                 initialized = true;
                 error = string.Empty;
                 return true;
@@ -307,6 +396,7 @@ namespace Apprentice
         internal void Reset()
         {
             activeState = null;
+            plannedCityExclusion = null;
             cityParts = new WorldGenVillage[0, 0];
             spawnPos = null;
             obsidianId = 0;
@@ -315,6 +405,13 @@ namespace Apprentice
             basaltCrackedId = 0;
             blackVeinId = 0;
             gloomId = 0;
+            lootMarkerId = 0;
+            coolingMagmaSourceId = 0;
+            chestBlocks = Array.Empty<Block>();
+            lootTables = new Dictionary<
+                int,
+                ResolvedLootTable
+            >();
             initialized = false;
             loggedCities = 0;
             loggedCorruptionChunks = 0;
@@ -353,6 +450,10 @@ namespace Apprentice
             );
             System.Threading.Interlocked.Exchange(
                 ref nativePlacementFailures,
+                0
+            );
+            System.Threading.Interlocked.Exchange(
+                ref generatedLootChests,
                 0
             );
         }
@@ -482,6 +583,38 @@ namespace Apprentice
                     climateBotRight,
                     modules
                 );
+                if (generated &&
+                    modules.Count > 0 &&
+                    partIndex == 0)
+                {
+                    FinalizeLandmarkFountain(
+                        blockAccessor,
+                        modules[0],
+                        isPrimaryCityChunk,
+                        request.ChunkX,
+                        request.ChunkZ
+                    );
+                }
+                if (generated &&
+                    modules.Count > 0 &&
+                    partIndex == 1)
+                {
+                    bool selectedForLoot =
+                        IsLootChestSector(
+                            city!,
+                            request.ChunkX,
+                            request.ChunkZ
+                        );
+                    FinalizeDistrictLoot(
+                        city!,
+                        blockAccessor,
+                        mapRegion,
+                        request.ChunkX,
+                        request.ChunkZ,
+                        modules[0],
+                        selectedForLoot
+                    );
+                }
                 if (generated && isPrimaryCityChunk)
                 {
                     string anchorCode =
@@ -659,6 +792,20 @@ namespace Apprentice
                     (long)maximumDistance *
                     maximumDistance;
         }
+
+        private bool IsInsidePlannedCityFootprint(
+            DangerWorldState state,
+            int worldX,
+            int worldZ,
+            int additionalRadius) =>
+            TryGetPlannedCity(
+                state,
+                worldX,
+                worldZ,
+                CityFootprintRadius +
+                    Math.Max(0, additionalRadius),
+                out _
+            );
 
         internal bool TryGetProbeCityCenter(
             DangerWorldState state,
@@ -1268,6 +1415,510 @@ namespace Apprentice
             return roll < 62
                 ? 1
                 : 3;
+        }
+
+        private static int GetCityChestCount(
+            ulong signature) =>
+            MinimumChestsPerCity +
+            (int)(signature %
+                ChestCountVariation);
+
+        private static bool IsLootChestSector(
+            PlannedCity city,
+            int chunkX,
+            int chunkZ)
+        {
+            int cityChunkX =
+                (int)Math.Floor(
+                    city.CenterX /
+                    (double)ChunkSize
+                );
+            int cityChunkZ =
+                (int)Math.Floor(
+                    city.CenterZ /
+                    (double)ChunkSize
+                );
+            List<LootSectorCandidate> candidates =
+                new();
+            for (int offsetZ = -8;
+                offsetZ <= 8;
+                offsetZ++)
+            {
+                for (int offsetX = -8;
+                    offsetX <= 8;
+                    offsetX++)
+                {
+                    int candidateChunkX =
+                        cityChunkX + offsetX;
+                    int candidateChunkZ =
+                        cityChunkZ + offsetZ;
+                    int candidateWorldX =
+                        candidateChunkX *
+                        ChunkSize +
+                        ChunkSize / 2;
+                    int candidateWorldZ =
+                        candidateChunkZ *
+                        ChunkSize +
+                        ChunkSize / 2;
+                    if (SelectPlannedCityPart(
+                            city,
+                            candidateChunkX,
+                            candidateChunkZ,
+                            candidateWorldX,
+                            candidateWorldZ
+                        ) != 1)
+                    {
+                        continue;
+                    }
+                    candidates.Add(
+                        new LootSectorCandidate(
+                            candidateChunkX,
+                            candidateChunkZ,
+                            StableHash(
+                                candidateChunkX,
+                                candidateChunkZ,
+                                city.Signature ^
+                                    LootSectorSalt
+                            )
+                        )
+                    );
+                }
+            }
+            candidates.Sort(
+                (left, right) =>
+                {
+                    int score =
+                        left.Score.CompareTo(
+                            right.Score
+                        );
+                    if (score != 0)
+                    {
+                        return score;
+                    }
+                    int z = left.ChunkZ.CompareTo(
+                        right.ChunkZ
+                    );
+                    return z != 0
+                        ? z
+                        : left.ChunkX.CompareTo(
+                            right.ChunkX
+                        );
+                }
+            );
+            int target = Math.Min(
+                GetCityChestCount(city.Signature),
+                candidates.Count
+            );
+            for (int index = 0;
+                index < target;
+                index++)
+            {
+                if (candidates[index].ChunkX ==
+                        chunkX &&
+                    candidates[index].ChunkZ ==
+                        chunkZ)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private void FinalizeDistrictLoot(
+            PlannedCity city,
+            IWorldGenBlockAccessor blockAccessor,
+            IMapRegion mapRegion,
+            int chunkX,
+            int chunkZ,
+            GeneratedStructure district,
+            bool selectedForLoot)
+        {
+            List<BlockPos> markers = new();
+            BlockPos sample = new(0);
+            Cuboidi location = district.Location;
+            for (int y = location.Y1;
+                y < location.Y2;
+                y++)
+            {
+                for (int z = location.Z1;
+                    z < location.Z2;
+                    z++)
+                {
+                    for (int x = location.X1;
+                        x < location.X2;
+                        x++)
+                    {
+                        sample.Set(x, y, z);
+                        if (blockAccessor
+                                .GetBlock(sample)
+                                .Id ==
+                            lootMarkerId)
+                        {
+                            markers.Add(
+                                new BlockPos(
+                                    x,
+                                    y,
+                                    z
+                                )
+                            );
+                        }
+                    }
+                }
+            }
+
+            BlockPos? selectedMarker = null;
+            if (selectedForLoot &&
+                markers.Count > 0)
+            {
+                markers.Sort(
+                    (left, right) =>
+                        StableHash(
+                            left.X,
+                            left.Z,
+                            city.Signature ^
+                                LootContentSalt ^
+                                (ulong)(uint)left.Y
+                        ).CompareTo(
+                            StableHash(
+                                right.X,
+                                right.Z,
+                                city.Signature ^
+                                    LootContentSalt ^
+                                    (ulong)(uint)right.Y
+                            )
+                        )
+                );
+                selectedMarker = markers[0];
+            }
+
+            foreach (BlockPos marker in markers)
+            {
+                blockAccessor.SetBlock(
+                    0,
+                    marker
+                );
+            }
+            if (!selectedForLoot)
+            {
+                return;
+            }
+            if (selectedMarker == null)
+            {
+                api.Logger.Error(
+                    "[Apprentice] Selected Level 7 loot district at {0},{1} contained no interior loot marker.",
+                    chunkX,
+                    chunkZ
+                );
+                return;
+            }
+
+            ulong chestHash = StableHash(
+                selectedMarker.X,
+                selectedMarker.Z,
+                city.Signature ^
+                    LootContentSalt
+            );
+            Block chest = chestBlocks[
+                (int)(chestHash %
+                    (ulong)chestBlocks.Length)
+            ];
+            bool placed =
+                chest.TryPlaceBlockForWorldGen(
+                    blockAccessor,
+                    selectedMarker,
+                    BlockFacing.UP,
+                    new LCGRandom(
+                        (long)(
+                            chestHash &
+                            0x7FFFFFFFFFFFFFFFUL
+                        )
+                    )
+                );
+            BlockEntity? blockEntity =
+                placed
+                    ? blockAccessor.GetBlockEntity(
+                        selectedMarker
+                    )
+                    : null;
+            if (!placed || blockEntity == null)
+            {
+                api.Logger.Error(
+                    "[Apprentice] Could not create the Level 7 loot chest at {0},{1},{2} in district {3},{4}.",
+                    selectedMarker.X,
+                    selectedMarker.Y,
+                    selectedMarker.Z,
+                    chunkX,
+                    chunkZ
+                );
+                return;
+            }
+
+            IBlockEntityContainer? container =
+                blockEntity as IBlockEntityContainer;
+            if (container?.Inventory == null)
+            {
+                // The worldgen block accessor creates the block entity before
+                // its normal chunk-load initialization. Vintage Story's
+                // worldgen chest pattern explicitly initializes it before the
+                // inventory is read or populated.
+                blockEntity.Initialize(api);
+                container =
+                    blockEntity as IBlockEntityContainer;
+            }
+            if (container?.Inventory == null)
+            {
+                api.Logger.Error(
+                    "[Apprentice] Level 7 loot chest at {0},{1},{2} has no initialized inventory in district {3},{4}.",
+                    selectedMarker.X,
+                    selectedMarker.Y,
+                    selectedMarker.Z,
+                    chunkX,
+                    chunkZ
+                );
+                blockAccessor.SetBlock(0, selectedMarker);
+                return;
+            }
+
+            int level = Math.Clamp(
+                WorldZoneLayout.GetLevelAt(
+                    activeState!,
+                    selectedMarker.X,
+                    selectedMarker.Z
+                ),
+                1,
+                9
+            );
+            PopulateLootChest(
+                container.Inventory,
+                level,
+                chestHash
+            );
+            blockEntity.MarkDirty(true);
+            blockAccessor.MarkBlockEntityDirty(
+                selectedMarker
+            );
+            mapRegion.AddGeneratedStructure(
+                new GeneratedStructure
+                {
+                    Code =
+                        LootChestPrefix +
+                        city.Signature
+                            .ToString("x16") +
+                        "/" +
+                        chunkX +
+                        "/" +
+                        chunkZ,
+                    Group = CityGroup,
+                    Location = new Cuboidi(
+                        selectedMarker.X,
+                        selectedMarker.Y,
+                        selectedMarker.Z,
+                        selectedMarker.X + 1,
+                        selectedMarker.Y + 1,
+                        selectedMarker.Z + 1
+                    ),
+                    SuppressTreesAndShrubs = true,
+                    SuppressRivulets = true
+                }
+            );
+            System.Threading.Interlocked.Increment(
+                ref generatedLootChests
+            );
+        }
+
+        private void FinalizeLandmarkFountain(
+            IWorldGenBlockAccessor blockAccessor,
+            GeneratedStructure landmark,
+            bool isPrimaryCityChunk,
+            int chunkX,
+            int chunkZ)
+        {
+            // Every landmark template contains the complete fountain court so
+            // whichever variant is selected for the city center is valid.
+            // Only that primary landmark keeps poison. Secondary monuments
+            // keep their basins but may not multiply the city's poison source.
+            if (isPrimaryCityChunk)
+            {
+                return;
+            }
+
+            Cuboidi location = landmark.Location;
+            BlockPos sample = new(0);
+            int convertedCells = 0;
+            for (int y = location.Y1;
+                y < location.Y2;
+                y++)
+            {
+                for (int z = location.Z1;
+                    z < location.Z2;
+                    z++)
+                {
+                    for (int x = location.X1;
+                        x < location.X2;
+                        x++)
+                    {
+                        sample.Set(x, y, z);
+                        Block solid =
+                            blockAccessor.GetBlock(
+                                sample
+                            );
+                        Block fluid =
+                            blockAccessor.GetBlock(
+                                sample,
+                                2
+                            );
+                        bool toxicSolid =
+                            IsToxicWater(solid);
+                        bool toxicFluid =
+                            IsToxicWater(fluid);
+                        if (!toxicSolid &&
+                            !toxicFluid)
+                        {
+                            continue;
+                        }
+                        if (toxicSolid)
+                        {
+                            blockAccessor.SetBlock(
+                                0,
+                                sample
+                            );
+                        }
+                        blockAccessor.SetBlock(
+                            coolingMagmaSourceId,
+                            sample,
+                            2
+                        );
+                        convertedCells++;
+                    }
+                }
+            }
+
+            if (convertedCells <= 0)
+            {
+                api.Logger.Warning(
+                    "[Apprentice] Secondary Level 7 landmark at {0},{1} contained no poisonous fountain cells to normalize.",
+                    chunkX,
+                    chunkZ
+                );
+            }
+        }
+
+        private static bool IsToxicWater(
+            Block block) =>
+            block?.Code != null &&
+            string.Equals(
+                block.Code.Domain,
+                "apprenticemire",
+                StringComparison.Ordinal
+            ) &&
+            block.Code.Path.StartsWith(
+                "toxicwater",
+                StringComparison.Ordinal
+            );
+
+        private void PopulateLootChest(
+            IInventory inventory,
+            int level,
+            ulong seed)
+        {
+            if (!lootTables.TryGetValue(
+                    level,
+                    out ResolvedLootTable? table))
+            {
+                throw new InvalidOperationException(
+                    $"missing resolved loot table for level {level}"
+                );
+            }
+            ulong randomState =
+                seed ^
+                LootContentSalt ^
+                (ulong)(uint)level;
+            int rolls = NextInclusive(
+                ref randomState,
+                table.MinimumRolls,
+                table.MaximumRolls
+            );
+            int slotCount = Math.Min(
+                rolls,
+                inventory.Count
+            );
+            for (int slotIndex = 0;
+                slotIndex < slotCount;
+                slotIndex++)
+            {
+                double selection =
+                    NextUnit(ref randomState) *
+                    table.TotalWeight;
+                ResolvedLootEntry selected =
+                    table.Entries[^1];
+                double cumulative = 0;
+                foreach (ResolvedLootEntry entry
+                    in table.Entries)
+                {
+                    cumulative += entry.Weight;
+                    if (selection < cumulative)
+                    {
+                        selected = entry;
+                        break;
+                    }
+                }
+                int quantity = NextInclusive(
+                    ref randomState,
+                    selected.MinimumQuantity,
+                    selected.MaximumQuantity
+                );
+                ItemSlot? slot =
+                    inventory[slotIndex];
+                if (slot == null)
+                {
+                    continue;
+                }
+                slot.Itemstack = new ItemStack(
+                    selected.Collectible,
+                    quantity
+                );
+                inventory.MarkSlotDirty(
+                    slotIndex
+                );
+            }
+        }
+
+        private static int NextInclusive(
+            ref ulong state,
+            int minimum,
+            int maximum)
+        {
+            ulong value = NextRandom(ref state);
+            return minimum +
+                (int)(value %
+                    (ulong)(
+                        maximum -
+                        minimum +
+                        1
+                    ));
+        }
+
+        private static double NextUnit(
+            ref ulong state) =>
+            (NextRandom(ref state) >> 11) *
+            (1.0 / 9007199254740992.0);
+
+        private static ulong NextRandom(
+            ref ulong state)
+        {
+            unchecked
+            {
+                state +=
+                    0x9E3779B97F4A7C15UL;
+                ulong value = state;
+                value =
+                    (value ^ (value >> 30)) *
+                    0xBF58476D1CE4E5B9UL;
+                value =
+                    (value ^ (value >> 27)) *
+                    0x94D049BB133111EBUL;
+                return value ^ (value >> 31);
+            }
         }
 
         private static bool IsPrimaryCityChunk(
@@ -2457,6 +3108,8 @@ namespace Apprentice
 
             List<GeneratedStructure> anchors = new();
             List<GeneratedStructure> modules = new();
+            List<GeneratedStructure> lootChests =
+                new();
             for (int regionZ = minRegionZ;
                 regionZ <= maxRegionZ;
                 regionZ++)
@@ -2483,6 +3136,13 @@ namespace Apprentice
                             true)
                         {
                             anchors.Add(structure);
+                        }
+                        else if (structure.Code?.StartsWith(
+                                LootChestPrefix,
+                                StringComparison.Ordinal) ==
+                            true)
+                        {
+                            lootChests.Add(structure);
                         }
                         else if (structure.Code?.StartsWith(
                                 "apprenticehighlands:" +
@@ -2545,6 +3205,57 @@ namespace Apprentice
                         StringComparison.Ordinal) ==
                     true
             );
+            Dictionary<string, int>
+                chestsBySignature =
+                    new(StringComparer.Ordinal);
+            foreach (GeneratedStructure chest
+                in lootChests)
+            {
+                string code = chest.Code ?? string.Empty;
+                string remainder = code.Substring(
+                    LootChestPrefix.Length
+                );
+                string signature =
+                    remainder.Split('/')[0];
+                chestsBySignature.TryGetValue(
+                    signature,
+                    out int count
+                );
+                chestsBySignature[signature] =
+                    count + 1;
+            }
+            int expectedLootChests = 0;
+            int lootContractViolations = 0;
+            foreach (string signature
+                in signatures)
+            {
+                if (!ulong.TryParse(
+                        signature,
+                        System.Globalization
+                            .NumberStyles
+                            .HexNumber,
+                        System.Globalization
+                            .CultureInfo
+                            .InvariantCulture,
+                        out ulong citySignature))
+                {
+                    lootContractViolations++;
+                    continue;
+                }
+                int expected =
+                    GetCityChestCount(
+                        citySignature
+                    );
+                expectedLootChests += expected;
+                chestsBySignature.TryGetValue(
+                    signature,
+                    out int actual
+                );
+                if (actual != expected)
+                {
+                    lootContractViolations++;
+                }
+            }
             int spacingViolations = 0;
             for (int first = 0;
                 first < anchors.Count;
@@ -2575,7 +3286,8 @@ namespace Apprentice
                 realmLeaks == 0 &&
                 boundaryLeaks == 0 &&
                 unique &&
-                spacingViolations == 0;
+                spacingViolations == 0 &&
+                lootContractViolations == 0;
             double cityMilliseconds =
                 System.Threading.Interlocked.Read(
                     ref cityGenerationTicks
@@ -2597,7 +3309,7 @@ namespace Apprentice
                 $"unique signatures={signatures.Count}/{anchors.Count}, "
             );
             result.Append(
-                $"landmarks={landmarkModules}, modules={modules.Count}, realm leaks={realmLeaks}, "
+                $"landmarks/fountains={landmarkModules}, modules={modules.Count}, loot chests={lootChests.Count}/{expectedLootChests}, loot contract violations={lootContractViolations}, realm leaks={realmLeaks}, "
             );
             result.Append(
                 $"border leaks={boundaryLeaks}, spacing violations={spacingViolations}, "
@@ -3088,6 +3800,116 @@ namespace Apprentice
             };
         }
 
+        private Dictionary<int, ResolvedLootTable>
+            LoadLootTables()
+        {
+            IAsset lootAsset = api.Assets.Get(
+                new AssetLocation(
+                    "apprenticehighlands",
+                    "config/city-loot.json"
+                )
+            );
+            CityLootConfig config =
+                lootAsset.ToObject<CityLootConfig>();
+            if (config == null ||
+                config.SchemaVersion != 1 ||
+                config.Levels == null)
+            {
+                throw new InvalidOperationException(
+                    "invalid Highlands city-loot schema"
+                );
+            }
+
+            Dictionary<int, ResolvedLootTable>
+                resolved = new();
+            int previousMinimumRolls = 0;
+            int previousMaximumRolls = 0;
+            for (int level = 1;
+                level <= 9;
+                level++)
+            {
+                string levelCode =
+                    level.ToString(
+                        System.Globalization
+                            .CultureInfo
+                            .InvariantCulture
+                    );
+                if (!config.Levels.TryGetValue(
+                        levelCode,
+                        out CityLootTableConfig? table) ||
+                    table == null ||
+                    table.MinimumRolls <= 0 ||
+                    table.MaximumRolls <
+                        table.MinimumRolls ||
+                    table.MaximumRolls > 16 ||
+                    table.MinimumRolls <
+                        previousMinimumRolls ||
+                    table.MaximumRolls <
+                        previousMaximumRolls ||
+                    table.Entries == null ||
+                    table.Entries.Length == 0)
+                {
+                    throw new InvalidOperationException(
+                        $"invalid Highlands city-loot table for level {level}"
+                    );
+                }
+
+                List<ResolvedLootEntry> entries =
+                    new();
+                double totalWeight = 0;
+                foreach (CityLootEntryConfig entry
+                    in table.Entries)
+                {
+                    if (entry == null ||
+                        string.IsNullOrWhiteSpace(
+                            entry.Code) ||
+                        entry.MinimumQuantity <= 0 ||
+                        entry.MaximumQuantity <
+                            entry.MinimumQuantity ||
+                        entry.Weight <= 0)
+                    {
+                        throw new InvalidOperationException(
+                            $"invalid Highlands city-loot entry for level {level}"
+                        );
+                    }
+                    AssetLocation location =
+                        new(entry.Code);
+                    CollectibleObject? collectible =
+                        api.World.GetItem(location);
+                    collectible ??=
+                        api.World.GetBlock(location);
+                    if (collectible == null)
+                    {
+                        throw new InvalidOperationException(
+                            $"missing Highlands city-loot collectible {entry.Code} for level {level}"
+                        );
+                    }
+                    entries.Add(
+                        new ResolvedLootEntry(
+                            collectible,
+                            entry.MinimumQuantity,
+                            entry.MaximumQuantity,
+                            entry.Weight
+                        )
+                    );
+                    totalWeight += entry.Weight;
+                }
+
+                resolved[level] =
+                    new ResolvedLootTable(
+                        table.MinimumRolls,
+                        table.MaximumRolls,
+                        entries.ToArray(),
+                        totalWeight
+                    );
+                previousMinimumRolls =
+                    table.MinimumRolls;
+                previousMaximumRolls =
+                    table.MaximumRolls;
+            }
+            return resolved;
+        }
+
         private int ResolveBlockId(string code) =>
             api.World.GetBlock(
                 new AssetLocation(code)
@@ -3225,6 +4047,94 @@ namespace Apprentice
                 value ^= value >> 31;
                 return value;
             }
+        }
+
+        private sealed class LootSectorCandidate
+        {
+            internal LootSectorCandidate(
+                int chunkX,
+                int chunkZ,
+                ulong score)
+            {
+                ChunkX = chunkX;
+                ChunkZ = chunkZ;
+                Score = score;
+            }
+
+            internal int ChunkX { get; }
+            internal int ChunkZ { get; }
+            internal ulong Score { get; }
+        }
+
+        private sealed class CityLootConfig
+        {
+            public int SchemaVersion { get; set; }
+
+            public Dictionary<
+                string,
+                CityLootTableConfig
+            > Levels { get; set; } = new();
+        }
+
+        private sealed class CityLootTableConfig
+        {
+            public int MinimumRolls { get; set; }
+            public int MaximumRolls { get; set; }
+
+            public CityLootEntryConfig[] Entries
+                { get; set; } =
+                Array.Empty<CityLootEntryConfig>();
+        }
+
+        private sealed class CityLootEntryConfig
+        {
+            public string Code { get; set; } =
+                string.Empty;
+            public int MinimumQuantity { get; set; }
+            public int MaximumQuantity { get; set; }
+            public double Weight { get; set; }
+        }
+
+        private sealed class ResolvedLootTable
+        {
+            internal ResolvedLootTable(
+                int minimumRolls,
+                int maximumRolls,
+                ResolvedLootEntry[] entries,
+                double totalWeight)
+            {
+                MinimumRolls = minimumRolls;
+                MaximumRolls = maximumRolls;
+                Entries = entries;
+                TotalWeight = totalWeight;
+            }
+
+            internal int MinimumRolls { get; }
+            internal int MaximumRolls { get; }
+            internal ResolvedLootEntry[] Entries
+                { get; }
+            internal double TotalWeight { get; }
+        }
+
+        private sealed class ResolvedLootEntry
+        {
+            internal ResolvedLootEntry(
+                CollectibleObject collectible,
+                int minimumQuantity,
+                int maximumQuantity,
+                double weight)
+            {
+                Collectible = collectible;
+                MinimumQuantity = minimumQuantity;
+                MaximumQuantity = maximumQuantity;
+                Weight = weight;
+            }
+
+            internal CollectibleObject Collectible
+                { get; }
+            internal int MinimumQuantity { get; }
+            internal int MaximumQuantity { get; }
+            internal double Weight { get; }
         }
 
         private sealed class CityAnchor

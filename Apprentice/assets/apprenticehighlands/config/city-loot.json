@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "levels": {
+    "1": {
+      "minimumRolls": 2,
+      "maximumRolls": 3,
+      "entries": [
+        { "code": "game:flaxfibers", "minimumQuantity": 4, "maximumQuantity": 10, "weight": 18 },
+        { "code": "game:bandage-clean", "minimumQuantity": 1, "maximumQuantity": 3, "weight": 12 },
+        { "code": "game:fat", "minimumQuantity": 1, "maximumQuantity": 3, "weight": 10 },
+        { "code": "game:gear-rusty", "minimumQuantity": 1, "maximumQuantity": 3, "weight": 5 }
+      ]
+    },
+    "2": {
+      "minimumRolls": 2,
+      "maximumRolls": 4,
+      "entries": [
+        { "code": "game:ingot-copper", "minimumQuantity": 1, "maximumQuantity": 3, "weight": 14 },
+        { "code": "game:leather-normal-plain", "minimumQuantity": 2, "maximumQuantity": 5, "weight": 12 },
+        { "code": "game:bandage-clean", "minimumQuantity": 2, "maximumQuantity": 4, "weight": 10 },
+        { "code": "game:gear-rusty", "minimumQuantity": 2, "maximumQuantity": 5, "weight": 8 }
+      ]
+    },
+    "3": {
+      "minimumRolls": 3,
+      "maximumRolls": 4,
+      "entries": [
+        { "code": "game:ingot-tinbronze", "minimumQuantity": 1, "maximumQuantity": 4, "weight": 14 },
+        { "code": "game:metalplate-tinbronze", "minimumQuantity": 1, "maximumQuantity": 2, "weight": 8 },
+        { "code": "game:gear-rusty", "minimumQuantity": 3, "maximumQuantity": 7, "weight": 10 },
+        { "code": "game:gear-temporal", "minimumQuantity": 1, "maximumQuantity": 1, "weight": 2 }
+      ]
+    },
+    "4": {
+      "minimumRolls": 3,
+      "maximumRolls": 5,
+      "entries": [
+        { "code": "game:ingot-iron", "minimumQuantity": 1, "maximumQuantity": 4, "weight": 14 },
+        { "code": "game:metalplate-iron", "minimumQuantity": 1, "maximumQuantity": 3, "weight": 9 },
+        { "code": "game:gear-rusty", "minimumQuantity": 4, "maximumQuantity": 9, "weight": 9 },
+        { "code": "game:gear-temporal", "minimumQuantity": 1, "maximumQuantity": 2, "weight": 4 },
+        { "code": "game:gem-olivine_peridot-rough", "minimumQuantity": 1, "maximumQuantity": 2, "weight": 2 }
+      ]
+    },
+    "5": {
+      "minimumRolls": 4,
+      "maximumRolls": 6,
+      "entries": [
+        { "code": "game:ingot-steel", "minimumQuantity": 1, "maximumQuantity": 4, "weight": 14 },
+        { "code": "game:metalplate-steel", "minimumQuantity": 1, "maximumQuantity": 3, "weight": 9 },
+        { "code": "game:metalchain-steel", "minimumQuantity": 1, "maximumQuantity": 4, "weight": 7 },
+        { "code": "game:gear-rusty", "minimumQuantity": 5, "maximumQuantity": 12, "weight": 8 },
+        { "code": "game:gear-temporal", "minimumQuantity": 1, "maximumQuantity": 2, "weight": 5 },
+        { "code": "game:gem-diamond-rough", "minimumQuantity": 1, "maximumQuantity": 1, "weight": 1 }
+      ]
+    },
+    "6": {
+      "minimumRolls": 4,
+      "maximumRolls": 6,
+      "entries": [
+        { "code": "game:ingot-steel", "minimumQuantity": 2, "maximumQuantity": 5, "weight": 13 },
+        { "code": "game:metalplate-steel", "minimumQuantity": 1, "maximumQuantity": 4, "weight": 9 },
+        { "code": "game:gear-rusty", "minimumQuantity": 6, "maximumQuantity": 14, "weight": 8 },
+        { "code": "game:gear-temporal", "minimumQuantity": 1, "maximumQuantity": 3, "weight": 6 },
+        { "code": "apprentice:arrow-poison-potent", "minimumQuantity": 2, "maximumQuantity": 6, "weight": 5 },
+        { "code": "apprentice:advancedtrapkit", "minimumQuantity": 1, "maximumQuantity": 1, "weight": 2 }
+      ]
+    },
+    "7": {
+      "minimumRolls": 5,
+      "maximumRolls": 7,
+      "entries": [
+        { "code": "game:ingot-steel", "minimumQuantity": 2, "maximumQuantity": 6, "weight": 13 },
+        { "code": "game:metalplate-steel", "minimumQuantity": 1, "maximumQuantity": 4, "weight": 9 },
+        { "code": "game:gear-rusty", "minimumQuantity": 7, "maximumQuantity": 16, "weight": 10 },
+        { "code": "game:gear-temporal", "minimumQuantity": 1, "maximumQuantity": 3, "weight": 7 },
+        { "code": "game:gem-diamond-rough", "minimumQuantity": 1, "maximumQuantity": 2, "weight": 2 },
+        { "code": "game:gem-emerald-rough", "minimumQuantity": 1, "maximumQuantity": 2, "weight": 2 },
+        { "code": "apprentice:ingot-starsteel", "minimumQuantity": 1, "maximumQuantity": 3, "weight": 5 },
+        { "code": "apprentice:ingot-aethersteel", "minimumQuantity": 1, "maximumQuantity": 2, "weight": 3 },
+        { "code": "apprentice:plate-starsteel", "minimumQuantity": 1, "maximumQuantity": 1, "weight": 2 },
+        { "code": "apprentice:plate-aethersteel", "minimumQuantity": 1, "maximumQuantity": 1, "weight": 1 },
+        { "code": "apprentice:arrow-poison-potent", "minimumQuantity": 3, "maximumQuantity": 8, "weight": 5 },
+        { "code": "apprentice:armorpaddingkit", "minimumQuantity": 1, "maximumQuantity": 1, "weight": 2 },
+        { "code": "apprentice:mastersurveykit", "minimumQuantity": 1, "maximumQuantity": 1, "weight": 1 },
+        { "code": "apprentice:advancedtrapkit", "minimumQuantity": 1, "maximumQuantity": 1, "weight": 2 }
+      ]
+    },
+    "8": {
+      "minimumRolls": 6,
+      "maximumRolls": 8,
+      "entries": [
+        { "code": "game:ingot-steel", "minimumQuantity": 3, "maximumQuantity": 8, "weight": 10 },
+        { "code": "game:gear-temporal", "minimumQuantity": 2, "maximumQuantity": 4, "weight": 8 },
+        { "code": "game:gem-diamond-rough", "minimumQuantity": 1, "maximumQuantity": 3, "weight": 3 },
+        { "code": "game:gem-emerald-rough", "minimumQuantity": 1, "maximumQuantity": 3, "weight": 3 },
+        { "code": "apprentice:ingot-starsteel", "minimumQuantity": 2, "maximumQuantity": 5, "weight": 8 },
+        { "code": "apprentice:ingot-aethersteel", "minimumQuantity": 1, "maximumQuantity": 4, "weight": 6 },
+        { "code": "apprentice:plate-starsteel", "minimumQuantity": 1, "maximumQuantity": 2, "weight": 4 },
+        { "code": "apprentice:plate-aethersteel", "minimumQuantity": 1, "maximumQuantity": 2, "weight": 3 },
+        { "code": "apprentice:armorpaddingkit", "minimumQuantity": 1, "maximumQuantity": 1, "weight": 3 },
+        { "code": "apprentice:mastersurveykit", "minimumQuantity": 1, "maximumQuantity": 1, "weight": 2 }
+      ]
+    },
+    "9": {
+      "minimumRolls": 7,
+      "maximumRolls": 9,
+      "entries": [
+        { "code": "game:gear-temporal", "minimumQuantity": 3, "maximumQuantity": 6, "weight": 8 },
+        { "code": "game:gem-diamond-rough", "minimumQuantity": 2, "maximumQuantity": 4, "weight": 4 },
+        { "code": "game:gem-emerald-rough", "minimumQuantity": 2, "maximumQuantity": 4, "weight": 4 },
+        { "code": "apprentice:ingot-starsteel", "minimumQuantity": 3, "maximumQuantity": 7, "weight": 9 },
+        { "code": "apprentice:ingot-aethersteel", "minimumQuantity": 3, "maximumQuantity": 6, "weight": 8 },
+        { "code": "apprentice:plate-starsteel", "minimumQuantity": 1, "maximumQuantity": 3, "weight": 5 },
+        { "code": "apprentice:plate-aethersteel", "minimumQuantity": 1, "maximumQuantity": 3, "weight": 5 },
+        { "code": "apprentice:armorpaddingkit", "minimumQuantity": 1, "maximumQuantity": 1, "weight": 4 },
+        { "code": "apprentice:mastersurveykit", "minimumQuantity": 1, "maximumQuantity": 1, "weight": 3 },
+        { "code": "apprentice:advancedtrapkit", "minimumQuantity": 1, "maximumQuantity": 1, "weight": 3 }
+      ]
+    }
+  }
+}

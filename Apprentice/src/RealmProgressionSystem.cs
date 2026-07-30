@@ -153,6 +153,52 @@ namespace Apprentice
     }
 
     /// <summary>
+    /// Public client-side callback surface for systems that must react when
+    /// the server confirms a new realm discovery.
+    /// </summary>
+    public static class RealmDiscoveryManager
+    {
+        public static RealmDiscoveryPacket? LastDiscovery
+        {
+            get;
+            private set;
+        }
+
+        public static event System.Action? Callbacks;
+
+        internal static void Trigger(
+            RealmDiscoveryPacket packet,
+            System.Action<Exception> onException)
+        {
+            LastDiscovery = packet;
+            System.Action? callbacks = Callbacks;
+            if (callbacks == null)
+            {
+                return;
+            }
+
+            foreach (Delegate registeredCallback in
+                callbacks.GetInvocationList())
+            {
+                try
+                {
+                    ((System.Action)registeredCallback)();
+                }
+                catch (Exception exception)
+                {
+                    onException(exception);
+                }
+            }
+        }
+
+        internal static void Reset()
+        {
+            Callbacks = null;
+            LastDiscovery = null;
+        }
+    }
+
+    /// <summary>
     /// Owns per-player realm discoveries, Toxicwater contact exposure and the
     /// locked Survival Handbook guide pages. It is intentionally independent
     /// from ApprenticeModSystem so realm progression does not modify shared
@@ -402,6 +448,18 @@ namespace Apprentice
                     "apprentice:realm-discovered-many-recipes",
                     packet.RealmName,
                     packet.RecipeCount);
+
+            RealmDiscoveryManager.Trigger(
+                packet,
+                exception =>
+                {
+                    clientApi.Logger.Error(
+                        "[Apprentice] A realm discovery callback failed."
+                    );
+                    clientApi.Logger.Error(exception);
+                }
+            );
+
             clientApi.TriggerIngameDiscovery(
                 this,
                 $"apprentice-realm-{packet.Level}-" +
@@ -479,6 +537,7 @@ namespace Apprentice
             clientChannel = null;
             handbookSystem = null;
             RealmProgressionRuntime.Catalog = new();
+            RealmDiscoveryManager.Reset();
             base.Dispose();
         }
     }

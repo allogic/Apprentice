@@ -5,7 +5,7 @@
   "drawtype": "cube",
   "textures": {
     "all": {
-      "base": "game:block/stone/rock/obsidian1"
+      "base": "apprenticehighlands:block/riftlight-ember"
     }
   },
   "blockmaterial": "Glass",

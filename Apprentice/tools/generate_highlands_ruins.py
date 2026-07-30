@@ -28,7 +28,11 @@ POLISHED = "game:rockpolished-basalt"
 OBSIDIAN = "game:rock-obsidian"
 METAL = "game:metalblock-corroded-riveted-iron"
 LIGHT = "apprenticehighlands:riftlight"
+EMBER_LIGHT = "apprenticehighlands:emberlight"
+LOOT_MARKER = "apprenticehighlands:lootmarker"
 WRAITHWOOD = "apprenticehighlands:wraithwood"
+LAVA = "apprenticehighlands:coolingmagma-still-7"
+TOXIC_WATER = "apprenticemire:toxicwater-still-7"
 
 CULTURES = (
     ("crownless", "Crownless Citadel", "fortress"),
@@ -306,6 +310,112 @@ class Model:
                     material,
                 )
 
+    def evil_lantern(self, x, z, seed, base_y=3):
+        light = LIGHT if stable_hash(seed, x, z) & 1 else EMBER_LIGHT
+        self.set(x, base_y, z, OBSIDIAN)
+        self.set(x, base_y + 1, z, METAL)
+        self.set(x, base_y + 2, z, light)
+
+    def wall_light(self, x, y, z, seed):
+        light = LIGHT if stable_hash(seed, x, y, z) & 1 else EMBER_LIGHT
+        self.set(x, y, z, light)
+
+    def magma_pool(self, x1, z1, x2, z2, y=3, seed=0):
+        if x2 - x1 < 4 or z2 - z1 < 4:
+            return
+        for z in range(z1, z2 + 1):
+            for x in range(x1, x2 + 1):
+                border = x in (x1, x2) or z in (z1, z2)
+                if border:
+                    shore = (
+                        OBSIDIAN
+                        if stable_hash(seed, x, z) % 4 == 0
+                        else CRACKED
+                    )
+                    self.set(x, y, z, shore)
+                    continue
+                self.set(
+                    x,
+                    y - 1,
+                    z,
+                    OBSIDIAN,
+                )
+                self.set(x, y, z, LAVA)
+
+        for x, z in (
+            (x1, z1),
+            (x2, z1),
+            (x1, z2),
+            (x2, z2),
+        ):
+            self.set(
+                x,
+                y + 1,
+                z,
+                EMBER_LIGHT,
+            )
+
+    def poison_fountain(self, center_x, center_z, y=3, seed=0):
+        """Build an unmistakable, open-air toxic fountain court.
+
+        Every landmark template contains one complete court so any selected
+        center variant is valid. Runtime keeps poison only in the primary city
+        landmark and converts all secondary courts to their planned liquid.
+        """
+        radius = 4
+        self.clear(
+            center_x - radius,
+            y,
+            center_z - radius,
+            center_x + radius,
+            self.size_y - 1,
+            center_z + radius,
+        )
+        self.floor(
+            center_x - radius,
+            center_z - radius,
+            center_x + radius,
+            center_z + radius,
+            y - 1,
+            CRACKED,
+            3,
+        )
+        for z in range(center_z - radius, center_z + radius + 1):
+            for x in range(center_x - radius, center_x + radius + 1):
+                distance = max(abs(x - center_x), abs(z - center_z))
+                if distance == radius:
+                    self.set(
+                        x,
+                        y,
+                        z,
+                        CRACKED
+                        if stable_hash(seed, x, z) % 3
+                        else OBSIDIAN,
+                    )
+                elif distance >= 2:
+                    self.set(x, y - 1, z, OBSIDIAN)
+                    self.set(x, y, z, TOXIC_WATER)
+
+        self.fill(
+            center_x - 1,
+            y,
+            center_z - 1,
+            center_x + 1,
+            y + 2,
+            center_z + 1,
+            OBSIDIAN,
+        )
+        self.set(center_x, y + 3, center_z, LIGHT)
+        self.set(center_x, y + 4, center_z, EMBER_LIGHT)
+        self.set(center_x, y + 5, center_z, EMBER_LIGHT)
+        for x, z in (
+            (center_x - radius, center_z - radius),
+            (center_x + radius, center_z - radius),
+            (center_x - radius, center_z + radius),
+            (center_x + radius, center_z + radius),
+        ):
+            self.evil_lantern(x, z, seed, y + 1)
+
     def dead_tree(self, x, z, height, seed):
         direction_x = -1 if stable_hash(seed, 1) & 1 else 1
         direction_z = -1 if stable_hash(seed, 2) & 1 else 1
@@ -329,7 +439,17 @@ class Model:
                     )
 
     def age(self, seed, intensity=12, protect_y=3):
-        protected = {OBSIDIAN, METAL, LIGHT, POLISHED, WRAITHWOOD}
+        protected = {
+            OBSIDIAN,
+            METAL,
+            LIGHT,
+            EMBER_LIGHT,
+            POLISHED,
+            WRAITHWOOD,
+            LOOT_MARKER,
+            LAVA,
+            TOXIC_WATER,
+        }
         for (x, y, z), block in list(self.blocks.items()):
             if y <= protect_y or block in protected:
                 continue
@@ -347,7 +467,16 @@ class Model:
 
     def add_corruption(self, seed, amount=7, add_light=False):
         for (x, y, z), block in list(self.blocks.items()):
-            if y <= 2 or block in (LIGHT, METAL, POLISHED, WRAITHWOOD):
+            if y <= 2 or block in (
+                LIGHT,
+                EMBER_LIGHT,
+                METAL,
+                POLISHED,
+                WRAITHWOOD,
+                LOOT_MARKER,
+                LAVA,
+                TOXIC_WATER,
+            ):
                 continue
             roll = stable_hash(seed, x * 3, y * 5, z * 7) % 100
             if roll < amount:
@@ -410,6 +539,8 @@ def citadel_landmark(variant):
     for x in (11, 15, 19):
         model.pillar(x, 15, 27, 50 - ((x + variant) % 4), OBSIDIAN, 2)
     model.rubble(15, 16, 5, 190 + variant)
+    for x, z in ((9, 15), (21, 15), (15, 9), (15, 21)):
+        model.evil_lantern(x, z, 198 + variant)
     model.dead_tree(7, 15, 16, 195 + variant)
     model.dead_tree(24, 16, 13, 197 + variant)
     model.age(200 + variant, 11 + variant)
@@ -436,6 +567,8 @@ def basilica_landmark(variant):
         model.fill(14 - radius, y, 24, 14 + radius, y, 26, POLISHED)
     for z in (9, 16, 24):
         model.set(14, 11, z, LIGHT)
+    for x, z in ((5, 5), (23, 5), (5, 26), (23, 26)):
+        model.evil_lantern(x, z, 618 + variant)
     model.rubble(9, 24, 5, 620 + variant)
     model.rubble(23, 9, 4, 625 + variant)
     model.dead_tree(3, 8, 14, 630 + variant)
@@ -457,8 +590,12 @@ def aqueduct_landmark(variant):
         model.pillar(x, 4, 3, 17 + (x % 5), OBSIDIAN)
         model.pillar(x, 16, 3, 15 + (x % 4), OBSIDIAN)
     model.ruined_building(8, 3, 15, 15, 21 + variant, 730 + variant)
+    model.magma_pool(2, 13, 9, 18, 3, 731 + variant)
+    model.magma_pool(21, 2, 28, 7, 3, 732 + variant)
     model.set(3, 34, 10, LIGHT)
     model.set(27, 33, 10, LIGHT)
+    for x, z in ((4, 10), (26, 10), (15, 2), (15, 18)):
+        model.evil_lantern(x, z, 734 + variant)
     model.rubble(15, 10, 5, 735 + variant)
     model.dead_tree(7, 17, 12, 740 + variant)
     model.age(220 + variant, 9 + variant)
@@ -498,8 +635,10 @@ def forum_landmark(variant):
             POLISHED if y % 5 == 0 else OBSIDIAN,
         )
     model.set(center, 47 - variant, center, LIGHT)
+    model.magma_pool(11, 23, 19, 28, 3, 821 + variant)
     for x, z in ((5, 5), (25, 5), (5, 25), (25, 25)):
         model.ruined_building(x - 3, z - 3, 7, 7, 14 + variant, x * z + variant)
+        model.evil_lantern(x, z, 825 + variant)
     model.rubble(23, 15, 5, 830 + variant)
     model.dead_tree(7, 16, 15, 835 + variant)
     model.age(230 + variant, 10 + variant)
@@ -527,6 +666,9 @@ def foundry_landmark(variant):
         model.pillar(x, 14, 3, 22 + (x % 5), METAL, 2)
     model.fill(8, 3, 9, 22, 8, 19, OBSIDIAN)
     model.clear(11, 4, 12, 19, 9, 16)
+    model.magma_pool(11, 12, 19, 16, 4, 925 + variant)
+    for x, z in ((9, 9), (21, 9), (9, 19), (21, 19)):
+        model.evil_lantern(x, z, 927 + variant)
     model.rubble(15, 25, 5, 930 + variant)
     model.dead_tree(3, 24, 13, 935 + variant)
     model.age(240 + variant, 10 + variant)
@@ -567,6 +709,9 @@ def necropolis_landmark(variant):
             model.set(lane + 1, 6, offset + 1, AGED)
     model.arch_x(15, 3, 5, 5, 17, BRICK)
     model.arch_x(15, 3, 25, 5, 17, BRICK)
+    model.magma_pool(11, 22, 19, 27, 3, 1026 + variant)
+    for x, z in ((8, 8), (22, 8), (8, 22), (22, 22)):
+        model.evil_lantern(x, z, 1028 + variant)
     model.rubble(15, 16, 5, 1030 + variant)
     model.dead_tree(6, 15, 17, 1035 + variant)
     model.dead_tree(25, 15, 15, 1040 + variant)
@@ -611,6 +756,7 @@ def district_model(culture, variant):
         (2, center_z + 3, center_x - street_width // 2 - 3, depth - 3),
         (center_x + 3, center_z + 3, width - 3, depth - 3),
     )
+    loot_markers = []
     for index, (x1, z1, x2, z2) in enumerate(plots):
         if x2 - x1 < 7 or z2 - z1 < 7:
             continue
@@ -637,6 +783,19 @@ def district_model(culture, variant):
             wall,
             accent,
         )
+        # One guaranteed interior marker per room. The runtime city planner
+        # turns exactly one marker into a filled chest only in the 9–13
+        # selected district sectors and removes every other marker.
+        marker_x = x1 + 2 + int(stable_hash(variant, index, 7) % max(1, x2 - x1 - 3))
+        marker_z = z1 + 2 + int(stable_hash(variant, index, 11) % max(1, z2 - z1 - 3))
+        loot_markers.append((marker_x, marker_z))
+        door_x = x1 + (x2 - x1) // 2
+        model.wall_light(
+            door_x,
+            min(building_height - 2, 6),
+            z1,
+            2050 + variant * 17 + index,
+        )
         if index % 2 == variant % 2:
             ledge_y = min(height - 3, building_height - 2)
             model.fill(
@@ -658,6 +817,14 @@ def district_model(culture, variant):
     elif culture == "aqueduct":
         for x in range(7, width - 5, 10):
             model.arch_x(x, 4, center_z, 4, 10 + variant, CRACKED)
+        model.magma_pool(
+            center_x - 4,
+            center_z - 4,
+            center_x + 4,
+            center_z + 4,
+            3,
+            2150 + variant,
+        )
     elif culture == "forum":
         for x, z in (
             (center_x - 6, center_z - 6),
@@ -670,6 +837,14 @@ def district_model(culture, variant):
     elif culture == "foundry":
         model.fill(center_x - 3, 4, center_z - 3, center_x + 3, 11, center_z + 3, METAL)
         model.pillar(center_x, center_z, 12, 25, METAL, 2)
+        model.magma_pool(
+            center_x - 4,
+            center_z - 4,
+            center_x + 4,
+            center_z + 4,
+            3,
+            2160 + variant,
+        )
     else:
         for x in range(5, width - 4, 6):
             model.fill(x, 4, center_z - 1, x + 2, 6, center_z + 1, OBSIDIAN)
@@ -684,8 +859,21 @@ def district_model(culture, variant):
         model.dead_tree(4, depth - 5, 11 + variant, 2250 + variant)
     if variant % 3 == 0:
         model.set(center_x, 5, center_z, LIGHT)
+    for x, z in (
+        (center_x - 5, center_z - 5),
+        (center_x + 5, center_z - 5),
+        (center_x - 5, center_z + 5),
+        (center_x + 5, center_z + 5),
+    ):
+        model.evil_lantern(x, z, 2280 + variant)
     model.age(2300 + variant + len(culture) * 41, 8 + variant)
     model.add_corruption(2400 + variant + len(culture) * 43, 5 + variant // 2)
+    # Marker placement is deliberately last: culture-specific courtyards,
+    # Rubble and cooling-magma courts may reshape the district, but may never
+    # consume an interior chest candidate.
+    for marker_x, marker_z in loot_markers:
+        model.clear(marker_x, 3, marker_z, marker_x, 4, marker_z)
+        model.set(marker_x, 3, marker_z, LOOT_MARKER)
     return model
 
 
@@ -743,6 +931,13 @@ def road_model(culture, variant):
         model.rubble(center_x + 7, center_z - 7, 4, 3000 + variant + len(culture) * 41)
     if variant in (0, 3):
         model.set(center_x + 5, 4, center_z + 5, LIGHT)
+    for x, z in (
+        (center_x - 6, center_z - 6),
+        (center_x + 6, center_z - 6),
+        (center_x - 6, center_z + 6),
+        (center_x + 6, center_z + 6),
+    ):
+        model.evil_lantern(x, z, 3050 + variant + len(culture))
     model.age(3100 + variant + len(culture) * 43, 5 + variant)
     return model
 
@@ -793,8 +988,22 @@ def remnant_model(culture, variant):
         model.rubble(center + 4, center - 5, 5, 4090 + variant)
     if variant == 5:
         model.set(center, 8, center, LIGHT)
+    if variant in (1, 4):
+        model.evil_lantern(center - 4, center, 4095 + variant)
+        model.evil_lantern(center + 4, center, 4097 + variant)
     model.age(4100 + variant + len(culture) * 47, 8 + variant)
     model.add_corruption(4200 + variant + len(culture) * 53, 6 + variant // 2)
+    # Even the most eroded outskirts retain one grounded beacon. This keeps
+    # the night skyline readable and gives the player a route cue between the
+    # dense city core and the remnant ring.
+    model.fill(center, 0, center, center, 3, center, OBSIDIAN)
+    model.set(center, 4, center, METAL)
+    model.set(
+        center,
+        5,
+        center,
+        LIGHT if variant & 1 else EMBER_LIGHT,
+    )
     return model
 
 
@@ -844,12 +1053,19 @@ def build_assets():
                 f"apprentice-highlands/{culture}/landmarks/"
                 f"landmark-{variant + 1}"
             )
+            landmark = LANDMARK_BUILDERS[culture](variant)
+            landmark.poison_fountain(
+                landmark.size_x // 2,
+                landmark.size_z - 6,
+                3,
+                5000 + variant + len(culture) * 67,
+            )
             write_json(
                 SCHEMATIC_ROOT
                 / culture
                 / "landmarks"
                 / f"landmark-{variant + 1}.json",
-                schematic_json(LANDMARK_BUILDERS[culture](variant)),
+                schematic_json(landmark),
             )
             offsets[relative] = -3
 

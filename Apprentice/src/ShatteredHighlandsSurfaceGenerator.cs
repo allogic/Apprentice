@@ -1,7 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
+using Vintagestory.API.MathTools;
 using Vintagestory.API.Server;
 using Vintagestory.ServerMods;
 
@@ -9,10 +12,11 @@ namespace Apprentice
 {
     /// <summary>
     /// Gives the whole Level 7 realm a permanent cursed identity without
-    /// changing terrain height, caves, fluids or the approved ground routes.
-    /// Natural surface layers become basaltic/obsidian corruption, ordinary
-    /// vegetation is killed or transformed, and sparse leafless wraith trees
-    /// create the haunted skyline outside the ruined valleys as well.
+    /// changing terrain height, caves or the approved ground routes. Natural
+    /// native Vintage Story hot springs and Apprentice cooling-magma lakes
+    /// share a deterministic 30/70 feature plan. Apprentice never constructs
+    /// hot springs: it only supplies GenHotSprings candidates and protects the
+    /// completed native feature from the later Highlands corruption pass.
     /// </summary>
     internal sealed class ShatteredHighlandsSurfaceGenerator
     {
@@ -25,11 +29,30 @@ namespace Apprentice
         private const ulong SurfaceSalt = 0x4355525345444C37UL;
         private const ulong FloraSalt = 0x5749544845524544UL;
         private const ulong TreeSalt = 0x5752414954485452UL;
+        private const ulong ThermalSalt = 0x544845524D414C37UL;
+        private const ulong LiquidTypeSalt = 0x4C41564137303330UL;
+        private const int LavaBasinPercent = 70;
+        private const int HotSpringBasinPercent = 30;
+        private const string HotSpringLocationsKey =
+            "hotspringlocations";
+        private const int LiquidFeatureCellSize = 256;
+        private const int NativeHotSpringRadius = 4;
+        private const int NativeHotSpringFootprintRadius =
+            NativeHotSpringRadius * 2;
+        private const int NativeHotSpringExclusionRadius = 20;
+        private const int NativeHotSpringCandidateInset =
+            NativeHotSpringFootprintRadius + 2;
+        private const int MagmaShoreRadius = 2;
+        private const byte NoHeatedLiquid = 0;
+        private const byte CoolingMagmaLiquid = 1;
 
         private readonly ICoreServerAPI api;
+        private readonly object liquidGenerationGate = new();
         private DangerWorldState? activeState;
         private bool initialized;
+        private bool nativeHotSpringPlannerRegistered;
         private int loggedChunks;
+        private int loggedNativeHotSpringPlans;
         private int basaltId;
         private int crackedBasaltId;
         private int basaltGravelId;
@@ -39,10 +62,19 @@ namespace Apprentice
         private int ashenWeedId;
         private int wraithThornId;
         private int wraithWoodId;
+        private int hotSpringWaterSourceId;
+        private int coolingMagmaSourceId;
+        private int legacyLavaSourceId;
         private static long affectedChunks;
         private static long exposedColumns;
         private static long transformedFlora;
         private static long generatedWraithTrees;
+        private static long scheduledNativeHotSprings;
+        private static long filteredNativeHotSprings;
+        private static long protectedNativeHotSpringColumns;
+        private static long suppressedOrdinaryWaterBlocks;
+        private static long convertedMagmaWaterBlocks;
+        private static long magmaShoreColumns;
         private static long generatorTicks;
 
         internal ShatteredHighlandsSurfaceGenerator(
@@ -72,6 +104,36 @@ namespace Apprentice
         internal static long GeneratedWraithTrees =>
             System.Threading.Interlocked.Read(
                 ref generatedWraithTrees
+            );
+
+        internal static long ScheduledNativeHotSprings =>
+            System.Threading.Interlocked.Read(
+                ref scheduledNativeHotSprings
+            );
+
+        internal static long FilteredNativeHotSprings =>
+            System.Threading.Interlocked.Read(
+                ref filteredNativeHotSprings
+            );
+
+        internal static long ProtectedNativeHotSpringColumns =>
+            System.Threading.Interlocked.Read(
+                ref protectedNativeHotSpringColumns
+            );
+
+        internal static long SuppressedOrdinaryWaterBlocks =>
+            System.Threading.Interlocked.Read(
+                ref suppressedOrdinaryWaterBlocks
+            );
+
+        internal static long ConvertedMagmaWaterBlocks =>
+            System.Threading.Interlocked.Read(
+                ref convertedMagmaWaterBlocks
+            );
+
+        internal static long MagmaShoreColumns =>
+            System.Threading.Interlocked.Read(
+                ref magmaShoreColumns
             );
 
         internal static double GeneratorMilliseconds =>
@@ -115,6 +177,27 @@ namespace Apprentice
             wraithWoodId = ResolveBlockId(
                 "apprenticehighlands:wraithwood"
             );
+            if (!HighlandsNativeHotSpringBlocks.TryResolve(
+                    api,
+                    out HighlandsNativeHotSpringBlocks?
+                        nativeHotSpringBlocks,
+                    out string nativeHotSpringError) ||
+                nativeHotSpringBlocks == null)
+            {
+                error =
+                    "base-game hot-spring blocks did not resolve: " +
+                    nativeHotSpringError;
+                ResetResolvedBlocks();
+                return false;
+            }
+            hotSpringWaterSourceId =
+                nativeHotSpringBlocks.BoilingWater.Id;
+            coolingMagmaSourceId = ResolveBlockId(
+                "apprenticehighlands:coolingmagma-still-7"
+            );
+            legacyLavaSourceId = ResolveBlockId(
+                "game:lava-still-7"
+            );
             if (basaltId <= 0 ||
                 crackedBasaltId <= 0 ||
                 basaltGravelId <= 0 ||
@@ -123,16 +206,28 @@ namespace Apprentice
                 gloomId <= 0 ||
                 ashenWeedId <= 0 ||
                 wraithThornId <= 0 ||
-                wraithWoodId <= 0)
+                wraithWoodId <= 0 ||
+                hotSpringWaterSourceId <= 0 ||
+                coolingMagmaSourceId <= 0 ||
+                legacyLavaSourceId <= 0)
             {
                 error =
-                    "one or more realm-wide Highlands corruption blocks did not load";
+                    "one or more realm-wide Highlands or base-game hot-spring blocks did not load";
                 ResetResolvedBlocks();
                 return false;
             }
 
             activeState = state;
             initialized = true;
+            if (!nativeHotSpringPlannerRegistered)
+            {
+                api.Event.ChunkColumnGeneration(
+                    OnTerrainFeaturesPlanNativeHotSprings,
+                    EnumWorldGenPass.TerrainFeatures,
+                    "standard"
+                );
+                nativeHotSpringPlannerRegistered = true;
+            }
             error = string.Empty;
             return true;
         }
@@ -142,6 +237,7 @@ namespace Apprentice
             activeState = null;
             initialized = false;
             loggedChunks = 0;
+            loggedNativeHotSpringPlans = 0;
             ResetResolvedBlocks();
             System.Threading.Interlocked.Exchange(
                 ref affectedChunks,
@@ -160,9 +256,427 @@ namespace Apprentice
                 0
             );
             System.Threading.Interlocked.Exchange(
+                ref scheduledNativeHotSprings,
+                0
+            );
+            System.Threading.Interlocked.Exchange(
+                ref filteredNativeHotSprings,
+                0
+            );
+            System.Threading.Interlocked.Exchange(
+                ref protectedNativeHotSpringColumns,
+                0
+            );
+            System.Threading.Interlocked.Exchange(
+                ref suppressedOrdinaryWaterBlocks,
+                0
+            );
+            System.Threading.Interlocked.Exchange(
+                ref convertedMagmaWaterBlocks,
+                0
+            );
+            System.Threading.Interlocked.Exchange(
+                ref magmaShoreColumns,
+                0
+            );
+            System.Threading.Interlocked.Exchange(
                 ref generatorTicks,
                 0
             );
+        }
+
+        private void OnTerrainFeaturesPlanNativeHotSprings(
+            IChunkColumnGenerateRequest request)
+        {
+            DangerWorldState? state = activeState;
+            if (!initialized ||
+                state == null ||
+                !WorldZoneLayout.ChunkIntersectsLevel(
+                    state,
+                    ShatteredHighlandsLevel,
+                    request.ChunkX,
+                    request.ChunkZ,
+                    ChunkSize))
+            {
+                return;
+            }
+
+            IMapChunk mapChunk =
+                request.Chunks[0].MapChunk;
+            Dictionary<Vec3i, HotSpringGenData>?
+                locations = mapChunk.GetModdata<
+                    Dictionary<Vec3i, HotSpringGenData>>(
+                        HotSpringLocationsKey,
+                        null
+                    );
+            bool changed = false;
+            int removed = 0;
+            if (locations != null &&
+                locations.Count > 0)
+            {
+                List<Vec3i> rejected = new();
+                foreach (Vec3i localPosition
+                    in locations.Keys)
+                {
+                    int worldX =
+                        request.ChunkX * ChunkSize +
+                        localPosition.X;
+                    int worldZ =
+                        request.ChunkZ * ChunkSize +
+                        localPosition.Z;
+                    if (!WorldZoneLayout.IsInsideLevelCore(
+                            state,
+                            ShatteredHighlandsLevel,
+                            BoundaryTransitionWidth +
+                                NativeHotSpringExclusionRadius,
+                            worldX + 0.5,
+                            worldZ + 0.5))
+                    {
+                        continue;
+                    }
+                    if (IsMagmaFeatureCell(
+                            worldX,
+                            worldZ) ||
+                        ShatteredHighlandsRuinsGenerator
+                            .IsWithinPlannedCityFootprint(
+                                state,
+                                worldX,
+                                worldZ,
+                                NativeHotSpringExclusionRadius
+                            ))
+                    {
+                        rejected.Add(localPosition);
+                    }
+                }
+                foreach (Vec3i localPosition
+                    in rejected)
+                {
+                    if (locations.Remove(localPosition))
+                    {
+                        removed++;
+                        changed = true;
+                    }
+                }
+            }
+
+            GetLiquidFeatureCellPlan(
+                request.ChunkX,
+                request.ChunkZ,
+                out int cellX,
+                out int cellZ,
+                out int ownerChunkX,
+                out int ownerChunkZ,
+                out int preferredLocalX,
+                out int preferredLocalZ
+            );
+            bool ownsNativeSpringCell =
+                request.ChunkX == ownerChunkX &&
+                request.ChunkZ == ownerChunkZ &&
+                !IsMagmaFeatureCellCoordinates(
+                    cellX,
+                    cellZ
+                );
+            if (ownsNativeSpringCell)
+            {
+                int preferredWorldX =
+                    request.ChunkX * ChunkSize +
+                    preferredLocalX;
+                int preferredWorldZ =
+                    request.ChunkZ * ChunkSize +
+                    preferredLocalZ;
+                bool nearExistingCandidate =
+                    locations?.Keys.Any(local =>
+                    {
+                        int dx =
+                            local.X - preferredLocalX;
+                        int dz =
+                            local.Z - preferredLocalZ;
+                        return dx * dx + dz * dz <=
+                            NativeHotSpringExclusionRadius *
+                            NativeHotSpringExclusionRadius;
+                    }) == true;
+                if (!nearExistingCandidate &&
+                    WorldZoneLayout.IsInsideLevelCore(
+                        state,
+                        ShatteredHighlandsLevel,
+                        BoundaryTransitionWidth +
+                            NativeHotSpringExclusionRadius,
+                        preferredWorldX + 0.5,
+                        preferredWorldZ + 0.5) &&
+                    !ShatteredHighlandsRuinsGenerator
+                        .IsWithinPlannedCityFootprint(
+                            state,
+                            preferredWorldX,
+                            preferredWorldZ,
+                            NativeHotSpringExclusionRadius
+                        ) &&
+                    TryChooseNativeHotSpringSite(
+                        request,
+                        preferredLocalX,
+                        preferredLocalZ,
+                        out Vec3i localPosition))
+                {
+                    locations ??=
+                        new Dictionary<
+                            Vec3i,
+                            HotSpringGenData
+                        >();
+                    locations[localPosition] =
+                        new HotSpringGenData
+                        {
+                            horRadius =
+                                NativeHotSpringRadius,
+                            verRadiusSq =
+                                NativeHotSpringRadius *
+                                NativeHotSpringRadius
+                        };
+                    changed = true;
+                    System.Threading.Interlocked.Increment(
+                        ref scheduledNativeHotSprings
+                    );
+                    if (System.Threading.Interlocked.Increment(
+                            ref loggedNativeHotSpringPlans
+                        ) <= 12)
+                    {
+                        api.Logger.Notification(
+                            "[Apprentice] Scheduled native Vintage Story Level 7 hot spring at {0},{1}; GenHotSprings owns validation and construction.",
+                            request.ChunkX * ChunkSize +
+                                localPosition.X,
+                            request.ChunkZ * ChunkSize +
+                                localPosition.Z
+                        );
+                    }
+                }
+            }
+
+            if (removed > 0)
+            {
+                System.Threading.Interlocked.Add(
+                    ref filteredNativeHotSprings,
+                    removed
+                );
+            }
+            if (changed && locations != null)
+            {
+                mapChunk.SetModdata(
+                    HotSpringLocationsKey,
+                    locations
+                );
+            }
+        }
+
+        private static void GetLiquidFeatureCellPlan(
+            int chunkX,
+            int chunkZ,
+            out int cellX,
+            out int cellZ,
+            out int ownerChunkX,
+            out int ownerChunkZ,
+            out int preferredLocalX,
+            out int preferredLocalZ)
+        {
+            int worldCenterX =
+                chunkX * ChunkSize + ChunkSize / 2;
+            int worldCenterZ =
+                chunkZ * ChunkSize + ChunkSize / 2;
+            cellX = FloorDiv(
+                worldCenterX,
+                LiquidFeatureCellSize
+            );
+            cellZ = FloorDiv(
+                worldCenterZ,
+                LiquidFeatureCellSize
+            );
+            ulong hash = StableHash(
+                cellX,
+                cellZ,
+                LiquidTypeSalt ^
+                    0x4E41544956454745UL
+            );
+            int chunksPerCell =
+                LiquidFeatureCellSize / ChunkSize;
+            int interiorChunkCount =
+                chunksPerCell - 2;
+            int originChunkX =
+                cellX * chunksPerCell;
+            int originChunkZ =
+                cellZ * chunksPerCell;
+            ownerChunkX =
+                originChunkX + 1 +
+                (int)(hash %
+                    (ulong)interiorChunkCount);
+            ownerChunkZ =
+                originChunkZ + 1 +
+                (int)((hash >> 11) %
+                    (ulong)interiorChunkCount);
+            int localRange =
+                ChunkSize -
+                NativeHotSpringCandidateInset * 2;
+            preferredLocalX =
+                NativeHotSpringCandidateInset +
+                (int)((hash >> 22) %
+                    (ulong)localRange);
+            preferredLocalZ =
+                NativeHotSpringCandidateInset +
+                (int)((hash >> 33) %
+                    (ulong)localRange);
+        }
+
+        private bool TryChooseNativeHotSpringSite(
+            IChunkColumnGenerateRequest request,
+            int preferredLocalX,
+            int preferredLocalZ,
+            out Vec3i localPosition)
+        {
+            ushort[] heights =
+                request.Chunks[0]
+                    .MapChunk
+                    .WorldGenTerrainHeightMap;
+            int bestRelief = int.MaxValue;
+            int bestDistance = int.MaxValue;
+            int bestX = 0;
+            int bestY = 0;
+            int bestZ = 0;
+            for (int offsetZ = -3;
+                offsetZ <= 3;
+                offsetZ++)
+            {
+                for (int offsetX = -3;
+                    offsetX <= 3;
+                    offsetX++)
+                {
+                    int localX =
+                        preferredLocalX + offsetX;
+                    int localZ =
+                        preferredLocalZ + offsetZ;
+                    if (!TryMeasureNativeHotSpringSite(
+                            request.Chunks,
+                            heights,
+                            localX,
+                            localZ,
+                            out int surfaceY,
+                            out int relief))
+                    {
+                        continue;
+                    }
+                    int distance =
+                        offsetX * offsetX +
+                        offsetZ * offsetZ;
+                    if (relief > bestRelief ||
+                        (relief == bestRelief &&
+                         distance >= bestDistance))
+                    {
+                        continue;
+                    }
+                    bestRelief = relief;
+                    bestDistance = distance;
+                    bestX = localX;
+                    bestY = surfaceY;
+                    bestZ = localZ;
+                }
+            }
+
+            if (bestRelief == int.MaxValue)
+            {
+                localPosition = new Vec3i(0, 0, 0);
+                return false;
+            }
+            localPosition =
+                new Vec3i(bestX, bestY, bestZ);
+            return true;
+        }
+
+        private bool TryMeasureNativeHotSpringSite(
+            IServerChunk[] chunks,
+            ushort[] heights,
+            int centerX,
+            int centerZ,
+            out int surfaceY,
+            out int relief)
+        {
+            surfaceY = 0;
+            relief = int.MaxValue;
+            if (centerX <
+                    NativeHotSpringCandidateInset ||
+                centerX >=
+                    ChunkSize -
+                    NativeHotSpringCandidateInset ||
+                centerZ <
+                    NativeHotSpringCandidateInset ||
+                centerZ >=
+                    ChunkSize -
+                    NativeHotSpringCandidateInset)
+            {
+                return false;
+            }
+
+            int minimumY = int.MaxValue;
+            int maximumY = int.MinValue;
+            long totalY = 0;
+            int samples = 0;
+            int radiusSquared =
+                NativeHotSpringFootprintRadius *
+                NativeHotSpringFootprintRadius;
+            for (int dz =
+                    -NativeHotSpringFootprintRadius;
+                dz <=
+                    NativeHotSpringFootprintRadius;
+                dz++)
+            {
+                for (int dx =
+                        -NativeHotSpringFootprintRadius;
+                    dx <=
+                        NativeHotSpringFootprintRadius;
+                    dx++)
+                {
+                    if (dx * dx + dz * dz >
+                        radiusSquared)
+                    {
+                        continue;
+                    }
+                    int localX = centerX + dx;
+                    int localZ = centerZ + dz;
+                    int terrainY = heights[
+                        localZ * ChunkSize + localX
+                    ];
+                    int fluidId = GetGeneratedFluidId(
+                        chunks,
+                        localX,
+                        terrainY + 1,
+                        localZ
+                    );
+                    if (fluidId > 0)
+                    {
+                        return false;
+                    }
+                    minimumY = Math.Min(
+                        minimumY,
+                        terrainY
+                    );
+                    maximumY = Math.Max(
+                        maximumY,
+                        terrainY
+                    );
+                    totalY += terrainY;
+                    samples++;
+                }
+            }
+            if (samples == 0 ||
+                maximumY - minimumY >= 4 ||
+                minimumY <
+                    api.World.SeaLevel + 2 ||
+                maximumY >=
+                    api.WorldManager.MapSizeY *
+                    0.88f)
+            {
+                return false;
+            }
+            surfaceY =
+                (int)Math.Round(
+                    totalY / (double)samples
+                );
+            relief = maximumY - minimumY;
+            return true;
         }
 
         internal void OnChunkColumnGeneration(
@@ -199,6 +713,42 @@ namespace Apprentice
             int changedColumns = 0;
             int changedFlora = 0;
             int treeCount = 0;
+            int suppressedWaterBlocks = 0;
+            int changedMagmaWaterBlocks = 0;
+            int protectedSpringColumns = 0;
+            int changedMagmaShoreColumns = 0;
+            bool[] nativeHotSpringReserved =
+                new bool[ChunkSize * ChunkSize];
+            byte[] heatedLiquidKinds =
+                new byte[ChunkSize * ChunkSize];
+            IWorldGenBlockAccessor? blockAccessor =
+                ShatteredHighlandsRuinsGenerator
+                    .SharedWorldgenBlockAccessor;
+            if (blockAccessor == null)
+            {
+                return;
+            }
+            lock (liquidGenerationGate)
+            {
+                blockAccessor.BeginColumn();
+                BuildNativeHotSpringReservation(
+                    request,
+                    heights,
+                    blockAccessor,
+                    nativeHotSpringReserved
+                );
+                ConvertNaturalWaterBasins(
+                    request,
+                    state,
+                    heights,
+                    rainHeights,
+                    nativeHotSpringReserved,
+                    heatedLiquidKinds,
+                    out suppressedWaterBlocks,
+                    out changedMagmaWaterBlocks
+                );
+            }
+
             for (int localZ = 0;
                 localZ < ChunkSize;
                 localZ++)
@@ -231,6 +781,11 @@ namespace Apprentice
                     {
                         continue;
                     }
+                    if (nativeHotSpringReserved[mapIndex])
+                    {
+                        protectedSpringColumns++;
+                        continue;
+                    }
 
                     ulong surfaceHash = StableHash(
                         worldX,
@@ -243,7 +798,22 @@ namespace Apprentice
                         SurfaceSalt ^
                             0x50415443484C3738UL
                     );
-                    if (realmStrength < 0.999 &&
+                    byte nearbyHeatedLiquid =
+                        GetNearbyHeatedLiquidKind(
+                            heatedLiquidKinds,
+                            localX,
+                            localZ,
+                            worldX,
+                            terrainY,
+                            worldZ,
+                            blockAccessor,
+                            out _
+                        );
+                    bool heatedLiquidInfluence =
+                        nearbyHeatedLiquid !=
+                            NoHeatedLiquid;
+                    if (!heatedLiquidInfluence &&
+                        realmStrength < 0.999 &&
                         surfaceHash % 1000 >=
                             (ulong)(
                                 realmStrength * 1000
@@ -267,12 +837,6 @@ namespace Apprentice
                             surfaceHash,
                             surfacePatchHash
                         );
-                    if (!transformedSurface)
-                    {
-                        continue;
-                    }
-                    changedColumns++;
-
                     changedFlora +=
                         TransformOrdinaryVegetation(
                             request.Chunks,
@@ -282,49 +846,82 @@ namespace Apprentice
                             rainHeights[mapIndex],
                             surfaceHash
                         );
-
-                    int openY = terrainY + 1;
-                    if (GetGeneratedBlockId(
-                            request.Chunks,
-                            localX,
-                            openY,
-                            localZ) == 0)
+                    if (transformedSurface)
                     {
-                        PlaceCursedGroundDetail(
-                            request.Chunks,
-                            localX,
-                            openY,
-                            localZ,
-                            surfaceHash,
-                            realmStrength
-                        );
-                    }
+                        changedColumns++;
 
-                    if (realmStrength >= 0.82 &&
-                        maximumSlope <= 2 &&
-                        IsWraithTreeAnchor(
-                            localX,
-                            localZ,
-                            surfaceHash) &&
-                        TryBuildWraithTree(
-                            request.Chunks,
-                            localX,
-                            terrainY + 1,
-                            localZ,
-                            surfaceHash,
-                            out int topY))
-                    {
-                        rainHeights[mapIndex] =
-                            (ushort)Math.Max(
-                                rainHeights[mapIndex],
-                                topY
+                        if (nearbyHeatedLiquid ==
+                            CoolingMagmaLiquid)
+                        {
+                            ulong magmaShoreHash =
+                                StableHash(
+                                    FloorDiv(worldX, 4),
+                                    FloorDiv(worldZ, 4),
+                                    ThermalSalt ^
+                                        0x4D41474D41534852UL
+                                );
+                            SetGeneratedBlock(
+                                request.Chunks,
+                                localX,
+                                terrainY,
+                                localZ,
+                                magmaShoreHash % 7 == 0
+                                    ? obsidianId
+                                    : magmaShoreHash % 5 == 0
+                                        ? crackedBasaltId
+                                        : basaltId
                             );
-                        treeCount++;
+                            changedMagmaShoreColumns++;
+                        }
+
+                        int openY = terrainY + 1;
+                        if (!heatedLiquidInfluence &&
+                            GetGeneratedBlockId(
+                                request.Chunks,
+                                localX,
+                                openY,
+                                localZ) == 0)
+                        {
+                            PlaceCursedGroundDetail(
+                                request.Chunks,
+                                localX,
+                                openY,
+                                localZ,
+                                surfaceHash,
+                                realmStrength
+                            );
+                        }
+
+                        if (!heatedLiquidInfluence &&
+                            realmStrength >= 0.82 &&
+                            maximumSlope <= 2 &&
+                            IsWraithTreeAnchor(
+                                localX,
+                                localZ,
+                                surfaceHash) &&
+                            TryBuildWraithTree(
+                                request.Chunks,
+                                localX,
+                                terrainY + 1,
+                                localZ,
+                                surfaceHash,
+                                out int topY))
+                        {
+                            rainHeights[mapIndex] =
+                                (ushort)Math.Max(
+                                    rainHeights[mapIndex],
+                                    topY
+                                );
+                            treeCount++;
+                        }
                     }
                 }
             }
 
-            if (changedColumns <= 0)
+            if (changedColumns <= 0 &&
+                suppressedWaterBlocks <= 0 &&
+                changedMagmaWaterBlocks <= 0 &&
+                protectedSpringColumns <= 0)
             {
                 return;
             }
@@ -347,6 +944,22 @@ namespace Apprentice
                 treeCount
             );
             System.Threading.Interlocked.Add(
+                ref protectedNativeHotSpringColumns,
+                protectedSpringColumns
+            );
+            System.Threading.Interlocked.Add(
+                ref suppressedOrdinaryWaterBlocks,
+                suppressedWaterBlocks
+            );
+            System.Threading.Interlocked.Add(
+                ref convertedMagmaWaterBlocks,
+                changedMagmaWaterBlocks
+            );
+            System.Threading.Interlocked.Add(
+                ref magmaShoreColumns,
+                changedMagmaShoreColumns
+            );
+            System.Threading.Interlocked.Add(
                 ref generatorTicks,
                 elapsed
             );
@@ -355,16 +968,636 @@ namespace Apprentice
                 ) <= 16)
             {
                 api.Logger.Notification(
-                    "[Apprentice] Cursed Level 7 landscape in chunk {0},{1}: surfaces={2}, flora transformed={3}, wraith trees={4}, generator={5:0.0} ms.",
+                    "[Apprentice] Cursed Level 7 landscape in chunk {0},{1}: surfaces={2}, flora transformed={3}, wraith trees={4}, cooling magma={5}, ordinary water removed={6}, native spring columns protected={7}, scorched magma shore={8}, generator={9:0.0} ms.",
                     request.ChunkX,
                     request.ChunkZ,
                     changedColumns,
                     changedFlora,
                     treeCount,
+                    changedMagmaWaterBlocks,
+                    suppressedWaterBlocks,
+                    protectedSpringColumns,
+                    changedMagmaShoreColumns,
                     Stopwatch.GetElapsedTime(started)
                         .TotalMilliseconds
                 );
             }
+        }
+
+        private void BuildNativeHotSpringReservation(
+            IChunkColumnGenerateRequest request,
+            ushort[] heights,
+            IWorldGenBlockAccessor blockAccessor,
+            bool[] reserved)
+        {
+            int chunkOriginX =
+                request.ChunkX * ChunkSize;
+            int chunkOriginZ =
+                request.ChunkZ * ChunkSize;
+            HashSet<(int X, int Z)> hotWaterColumns =
+                new();
+            BlockPos sample = new(0);
+            for (int dz =
+                    -NativeHotSpringExclusionRadius;
+                dz <
+                    ChunkSize +
+                    NativeHotSpringExclusionRadius;
+                dz++)
+            {
+                int worldZ = chunkOriginZ + dz;
+                for (int dx =
+                        -NativeHotSpringExclusionRadius;
+                    dx <
+                        ChunkSize +
+                        NativeHotSpringExclusionRadius;
+                    dx++)
+                {
+                    int worldX = chunkOriginX + dx;
+                    if (!TryGetWorldgenTerrainHeight(
+                            blockAccessor,
+                            worldX,
+                            worldZ,
+                            out int terrainY))
+                    {
+                        continue;
+                    }
+                    for (int y = Math.Max(
+                            1,
+                            terrainY - 1);
+                        y <= Math.Min(
+                            api.WorldManager.MapSizeY - 2,
+                            terrainY + 1);
+                        y++)
+                    {
+                        sample.Set(worldX, y, worldZ);
+                        Block fluid =
+                            blockAccessor.GetBlock(
+                                sample,
+                                BlockLayersAccess.Fluid
+                            );
+                        if (fluid.Id !=
+                            hotSpringWaterSourceId)
+                        {
+                            continue;
+                        }
+                        hotWaterColumns.Add(
+                            (worldX, worldZ)
+                        );
+                        break;
+                    }
+                }
+            }
+
+            int radiusSquared =
+                NativeHotSpringExclusionRadius *
+                NativeHotSpringExclusionRadius;
+            foreach ((int hotX, int hotZ)
+                in hotWaterColumns)
+            {
+                int minimumLocalX = Math.Max(
+                    0,
+                    hotX -
+                        NativeHotSpringExclusionRadius -
+                        chunkOriginX
+                );
+                int maximumLocalX = Math.Min(
+                    ChunkSize - 1,
+                    hotX +
+                        NativeHotSpringExclusionRadius -
+                        chunkOriginX
+                );
+                int minimumLocalZ = Math.Max(
+                    0,
+                    hotZ -
+                        NativeHotSpringExclusionRadius -
+                        chunkOriginZ
+                );
+                int maximumLocalZ = Math.Min(
+                    ChunkSize - 1,
+                    hotZ +
+                        NativeHotSpringExclusionRadius -
+                        chunkOriginZ
+                );
+                for (int localZ = minimumLocalZ;
+                    localZ <= maximumLocalZ;
+                    localZ++)
+                {
+                    int worldZ =
+                        chunkOriginZ + localZ;
+                    for (int localX = minimumLocalX;
+                        localX <= maximumLocalX;
+                        localX++)
+                    {
+                        int worldX =
+                            chunkOriginX + localX;
+                        int distanceX =
+                            worldX - hotX;
+                        int distanceZ =
+                            worldZ - hotZ;
+                        if (distanceX * distanceX +
+                                distanceZ * distanceZ <=
+                            radiusSquared)
+                        {
+                            reserved[
+                                localZ * ChunkSize +
+                                localX
+                            ] = true;
+                        }
+                    }
+                }
+            }
+
+            // A native spring updates the map height itself. Keep the current
+            // chunk's exact spring columns reserved even if a neighbouring map
+            // chunk was unavailable during the safety-margin scan.
+            for (int localZ = 0;
+                localZ < ChunkSize;
+                localZ++)
+            {
+                for (int localX = 0;
+                    localX < ChunkSize;
+                    localX++)
+                {
+                    int index =
+                        localZ * ChunkSize + localX;
+                    int terrainY = heights[index];
+                    sample.Set(
+                        chunkOriginX + localX,
+                        terrainY,
+                        chunkOriginZ + localZ
+                    );
+                    Block fluid =
+                        blockAccessor.GetBlock(
+                            sample,
+                            BlockLayersAccess.Fluid
+                        );
+                    if (fluid.Id ==
+                        hotSpringWaterSourceId)
+                    {
+                        reserved[index] = true;
+                    }
+                }
+            }
+        }
+
+        private static bool TryGetWorldgenTerrainHeight(
+            IWorldGenBlockAccessor blockAccessor,
+            int worldX,
+            int worldZ,
+            out int terrainY)
+        {
+            int chunkX =
+                FloorDiv(worldX, ChunkSize);
+            int chunkZ =
+                FloorDiv(worldZ, ChunkSize);
+            IMapChunk? mapChunk =
+                blockAccessor.GetMapChunk(
+                    chunkX,
+                    chunkZ
+                );
+            ushort[]? heights =
+                mapChunk?.WorldGenTerrainHeightMap;
+            if (heights == null ||
+                heights.Length <
+                    ChunkSize * ChunkSize)
+            {
+                terrainY = 0;
+                return false;
+            }
+            int localX =
+                worldX - chunkX * ChunkSize;
+            int localZ =
+                worldZ - chunkZ * ChunkSize;
+            terrainY = heights[
+                localZ * ChunkSize + localX
+            ];
+            return true;
+        }
+
+        private void ConvertNaturalWaterBasins(
+            IChunkColumnGenerateRequest request,
+            DangerWorldState state,
+            ushort[] heights,
+            ushort[] rainHeights,
+            bool[] nativeHotSpringReserved,
+            byte[] heatedLiquidKinds,
+            out int suppressedWaterBlocks,
+            out int changedMagmaWaterBlocks)
+        {
+            int columnCount = ChunkSize * ChunkSize;
+            int[] minimumWaterY = new int[columnCount];
+            int[] maximumWaterY = new int[columnCount];
+            bool[] visited = new bool[columnCount];
+            Array.Fill(minimumWaterY, -1);
+            suppressedWaterBlocks = 0;
+            changedMagmaWaterBlocks = 0;
+
+            for (int localZ = 0;
+                localZ < ChunkSize;
+                localZ++)
+            {
+                int row = localZ * ChunkSize;
+                int worldZ =
+                    request.ChunkZ * ChunkSize + localZ;
+                for (int localX = 0;
+                    localX < ChunkSize;
+                    localX++)
+                {
+                    int mapIndex = row + localX;
+                    int terrainY = heights[mapIndex];
+                    int worldX =
+                        request.ChunkX * ChunkSize +
+                        localX;
+                    if (terrainY <= SurfaceDepth ||
+                        GetRealmStrength(
+                            state,
+                            worldX + 0.5,
+                            worldZ + 0.5
+                        ) <= 0 ||
+                        !TryFindNaturalWaterRange(
+                            request.Chunks,
+                            localX,
+                            localZ,
+                            terrainY,
+                            rainHeights[mapIndex],
+                            out int minimumY,
+                            out int maximumY))
+                    {
+                        continue;
+                    }
+
+                    minimumWaterY[mapIndex] = minimumY;
+                    maximumWaterY[mapIndex] = maximumY;
+                }
+            }
+
+            int[] queue = new int[columnCount];
+            List<int> component =
+                new(columnCount);
+            for (int startIndex = 0;
+                startIndex < columnCount;
+                startIndex++)
+            {
+                if (visited[startIndex] ||
+                    minimumWaterY[startIndex] < 0)
+                {
+                    continue;
+                }
+
+                component.Clear();
+                int queueRead = 0;
+                int queueWrite = 0;
+                queue[queueWrite++] = startIndex;
+                visited[startIndex] = true;
+                int canonicalWorldX =
+                    request.ChunkX * ChunkSize +
+                    startIndex % ChunkSize;
+                int canonicalWorldZ =
+                    request.ChunkZ * ChunkSize +
+                    startIndex / ChunkSize;
+                while (queueRead < queueWrite)
+                {
+                    int current = queue[queueRead++];
+                    component.Add(current);
+                    int currentX = current % ChunkSize;
+                    int currentZ = current / ChunkSize;
+                    int worldX =
+                        request.ChunkX * ChunkSize +
+                        currentX;
+                    int worldZ =
+                        request.ChunkZ * ChunkSize +
+                        currentZ;
+                    if (worldX < canonicalWorldX ||
+                        (worldX == canonicalWorldX &&
+                         worldZ < canonicalWorldZ))
+                    {
+                        canonicalWorldX = worldX;
+                        canonicalWorldZ = worldZ;
+                    }
+
+                    TryQueueConnectedWaterColumn(
+                        currentX - 1,
+                        currentZ,
+                        current,
+                        minimumWaterY,
+                        maximumWaterY,
+                        visited,
+                        queue,
+                        ref queueWrite
+                    );
+                    TryQueueConnectedWaterColumn(
+                        currentX + 1,
+                        currentZ,
+                        current,
+                        minimumWaterY,
+                        maximumWaterY,
+                        visited,
+                        queue,
+                        ref queueWrite
+                    );
+                    TryQueueConnectedWaterColumn(
+                        currentX,
+                        currentZ - 1,
+                        current,
+                        minimumWaterY,
+                        maximumWaterY,
+                        visited,
+                        queue,
+                        ref queueWrite
+                    );
+                    TryQueueConnectedWaterColumn(
+                        currentX,
+                        currentZ + 1,
+                        current,
+                        minimumWaterY,
+                        maximumWaterY,
+                        visited,
+                        queue,
+                        ref queueWrite
+                    );
+                }
+
+                bool suppressForNativeSpring =
+                    !IsMagmaFeatureCell(
+                        canonicalWorldX,
+                        canonicalWorldZ
+                    );
+                if (!suppressForNativeSpring)
+                {
+                    foreach (int mapIndex in component)
+                    {
+                        if (nativeHotSpringReserved[
+                                mapIndex
+                            ])
+                        {
+                            suppressForNativeSpring =
+                                true;
+                            break;
+                        }
+                    }
+                }
+                int replacementFluidId =
+                    suppressForNativeSpring
+                        ? 0
+                        : coolingMagmaSourceId;
+                foreach (int mapIndex in component)
+                {
+                    int localX = mapIndex % ChunkSize;
+                    int localZ = mapIndex / ChunkSize;
+                    int converted =
+                        ConvertNaturalWaterColumn(
+                            request.Chunks,
+                            localX,
+                            localZ,
+                            minimumWaterY[mapIndex],
+                            maximumWaterY[mapIndex],
+                            replacementFluidId
+                        );
+                    if (converted <= 0)
+                    {
+                        continue;
+                    }
+                    if (suppressForNativeSpring)
+                    {
+                        suppressedWaterBlocks +=
+                            converted;
+                    }
+                    else
+                    {
+                        heatedLiquidKinds[mapIndex] =
+                            CoolingMagmaLiquid;
+                        changedMagmaWaterBlocks +=
+                            converted;
+                    }
+                }
+            }
+        }
+
+        private bool TryFindNaturalWaterRange(
+            IServerChunk[] chunks,
+            int localX,
+            int localZ,
+            int terrainY,
+            int rainHeight,
+            out int minimumY,
+            out int maximumY)
+        {
+            minimumY = -1;
+            maximumY = -1;
+            int scanMaximumY = Math.Min(
+                api.WorldManager.MapSizeY - 2,
+                Math.Max(terrainY + 1, rainHeight + 1)
+            );
+            int scanMinimumY = Math.Max(
+                0,
+                terrainY - 3
+            );
+            for (int y = scanMaximumY;
+                y >= scanMinimumY;
+                y--)
+            {
+                int fluidId = GetGeneratedFluidId(
+                    chunks,
+                    localX,
+                    y,
+                    localZ
+                );
+                bool ordinaryWater =
+                    fluidId > 0 &&
+                    IsOrdinaryWaterFluid(
+                        BlockPath(fluidId)
+                    );
+                if (!ordinaryWater)
+                {
+                    if (maximumY >= 0)
+                    {
+                        break;
+                    }
+                    continue;
+                }
+                maximumY = Math.Max(maximumY, y);
+                minimumY = y;
+            }
+            return minimumY >= 0;
+        }
+
+        private static void TryQueueConnectedWaterColumn(
+            int localX,
+            int localZ,
+            int sourceIndex,
+            int[] minimumWaterY,
+            int[] maximumWaterY,
+            bool[] visited,
+            int[] queue,
+            ref int queueWrite)
+        {
+            if (!IsInsideChunkBounds(localX, localZ))
+            {
+                return;
+            }
+            int targetIndex =
+                localZ * ChunkSize + localX;
+            if (visited[targetIndex] ||
+                minimumWaterY[targetIndex] < 0 ||
+                Math.Max(
+                    minimumWaterY[sourceIndex],
+                    minimumWaterY[targetIndex]
+                ) >
+                Math.Min(
+                    maximumWaterY[sourceIndex],
+                    maximumWaterY[targetIndex]
+                ))
+            {
+                return;
+            }
+            visited[targetIndex] = true;
+            queue[queueWrite++] = targetIndex;
+        }
+
+        private int ConvertNaturalWaterColumn(
+            IServerChunk[] chunks,
+            int localX,
+            int localZ,
+            int minimumY,
+            int maximumY,
+            int replacementFluidId)
+        {
+            int converted = 0;
+            for (int y = minimumY;
+                y <= maximumY;
+                y++)
+            {
+                int fluidId = GetGeneratedFluidId(
+                    chunks,
+                    localX,
+                    y,
+                    localZ
+                );
+                if (fluidId <= 0 ||
+                    !IsOrdinaryWaterFluid(
+                        BlockPath(fluidId)))
+                {
+                    continue;
+                }
+                SetGeneratedFluid(
+                    chunks,
+                    localX,
+                    y,
+                    localZ,
+                    replacementFluidId
+                );
+                converted++;
+            }
+            return converted;
+        }
+
+        private byte GetNearbyHeatedLiquidKind(
+            byte[] heatedLiquidKinds,
+            int localX,
+            int localZ,
+            int worldX,
+            int terrainY,
+            int worldZ,
+            IWorldGenBlockAccessor? blockAccessor,
+            out int selectedDistanceSquared)
+        {
+            int nearestMagma = int.MaxValue;
+            int magmaRadiusSquared =
+                MagmaShoreRadius *
+                MagmaShoreRadius;
+            for (int dz = -MagmaShoreRadius;
+                dz <= MagmaShoreRadius;
+                dz++)
+            {
+                for (int dx = -MagmaShoreRadius;
+                    dx <= MagmaShoreRadius;
+                    dx++)
+                {
+                    int distanceSquared =
+                        dx * dx + dz * dz;
+                    if (distanceSquared >
+                        magmaRadiusSquared)
+                    {
+                        continue;
+                    }
+
+                    int sampleLocalX = localX + dx;
+                    int sampleLocalZ = localZ + dz;
+                    byte kind;
+                    if (IsInsideChunkBounds(
+                            sampleLocalX,
+                            sampleLocalZ))
+                    {
+                        kind = heatedLiquidKinds[
+                            sampleLocalZ * ChunkSize +
+                            sampleLocalX
+                        ];
+                    }
+                    else if (blockAccessor != null)
+                    {
+                        kind = GetWorldgenHeatedLiquidKind(
+                            blockAccessor,
+                            worldX + dx,
+                            terrainY,
+                            worldZ + dz
+                        );
+                    }
+                    else
+                    {
+                        kind = NoHeatedLiquid;
+                    }
+
+                    if (kind == CoolingMagmaLiquid)
+                    {
+                        nearestMagma = Math.Min(
+                            nearestMagma,
+                            distanceSquared
+                        );
+                    }
+                }
+            }
+
+            if (nearestMagma != int.MaxValue)
+            {
+                selectedDistanceSquared =
+                    nearestMagma;
+                return CoolingMagmaLiquid;
+            }
+            selectedDistanceSquared = int.MaxValue;
+            return NoHeatedLiquid;
+        }
+
+        private byte GetWorldgenHeatedLiquidKind(
+            IWorldGenBlockAccessor blockAccessor,
+            int worldX,
+            int terrainY,
+            int worldZ)
+        {
+            BlockPos sample = new(worldX, 0, worldZ);
+            int minimumY = Math.Max(
+                0,
+                terrainY - 4
+            );
+            int maximumY = Math.Min(
+                api.WorldManager.MapSizeY - 1,
+                terrainY + 4
+            );
+            for (int y = minimumY;
+                y <= maximumY;
+                y++)
+            {
+                sample.Y = y;
+                Block fluid = blockAccessor.GetBlock(
+                    sample,
+                    BlockLayersAccess.Fluid
+                );
+                if (fluid.Id == coolingMagmaSourceId ||
+                    fluid.Id == legacyLavaSourceId)
+                {
+                    return CoolingMagmaLiquid;
+                }
+            }
+            return NoHeatedLiquid;
         }
 
         private bool TransformSurfaceColumn(
@@ -441,7 +1674,7 @@ namespace Apprentice
             int maximumY = Math.Min(
                 api.WorldManager.MapSizeY - 2,
                 Math.Max(
-                    terrainY + 24,
+                    terrainY + 48,
                     rainHeight + 8
                 )
             );
@@ -478,6 +1711,21 @@ namespace Apprentice
                     continue;
                 }
 
+                int fluidId = GetGeneratedFluidId(
+                    chunks,
+                    localX,
+                    y,
+                    localZ
+                );
+                if (fluidId == hotSpringWaterSourceId)
+                {
+                    continue;
+                }
+                int restoredHeatedFluidId =
+                    fluidId == coolingMagmaSourceId ||
+                    fluidId == legacyLavaSourceId
+                        ? fluidId
+                        : 0;
                 SetGeneratedBlock(
                     chunks,
                     localX,
@@ -485,6 +1733,16 @@ namespace Apprentice
                     localZ,
                     0
                 );
+                if (restoredHeatedFluidId > 0)
+                {
+                    SetGeneratedFluid(
+                        chunks,
+                        localX,
+                        y,
+                        localZ,
+                        restoredHeatedFluidId
+                    );
+                }
                 changed++;
             }
 
@@ -824,6 +2082,14 @@ namespace Apprentice
             localZ >= 1 &&
             localZ < ChunkSize - 1;
 
+        private static bool IsInsideChunkBounds(
+            int localX,
+            int localZ) =>
+            localX >= 0 &&
+            localX < ChunkSize &&
+            localZ >= 0 &&
+            localZ < ChunkSize;
+
         private static double GetRealmStrength(
             DangerWorldState state,
             double worldX,
@@ -901,6 +2167,15 @@ namespace Apprentice
                 "crackedrock-",
                 StringComparison.Ordinal);
 
+        private static bool IsOrdinaryWaterFluid(
+            string path) =>
+            path.StartsWith(
+                "water-",
+                StringComparison.Ordinal) ||
+            path.StartsWith(
+                "saltwater-",
+                StringComparison.Ordinal);
+
         private static bool IsTreeWood(
             string path) =>
             path.StartsWith(
@@ -914,6 +2189,12 @@ namespace Apprentice
             string path) =>
             path.StartsWith(
                 "tallgrass",
+                StringComparison.Ordinal) ||
+            path.StartsWith(
+                "shortgrass",
+                StringComparison.Ordinal) ||
+            path.StartsWith(
+                "grass-",
                 StringComparison.Ordinal) ||
             path.StartsWith(
                 "flower",
@@ -935,6 +2216,30 @@ namespace Apprentice
                 StringComparison.Ordinal) ||
             path.StartsWith(
                 "bush",
+                StringComparison.Ordinal) ||
+            path.StartsWith(
+                "berrybush",
+                StringComparison.Ordinal) ||
+            path.StartsWith(
+                "vine",
+                StringComparison.Ordinal) ||
+            path.StartsWith(
+                "moss",
+                StringComparison.Ordinal) ||
+            path.StartsWith(
+                "lichen",
+                StringComparison.Ordinal) ||
+            path.StartsWith(
+                "bamboo",
+                StringComparison.Ordinal) ||
+            path.StartsWith(
+                "cattail",
+                StringComparison.Ordinal) ||
+            path.StartsWith(
+                "reed",
+                StringComparison.Ordinal) ||
+            path.StartsWith(
+                "waterlily",
                 StringComparison.Ordinal) ||
             path.StartsWith(
                 "mushroom",
@@ -1004,6 +2309,68 @@ namespace Apprentice
             chunk.Data.SetFluid(index, 0);
         }
 
+        private static int GetGeneratedFluidId(
+            IServerChunk[] chunks,
+            int localX,
+            int y,
+            int localZ)
+        {
+            if (y < 0)
+            {
+                return 0;
+            }
+            int chunkY = y / ChunkSize;
+            if (chunkY < 0 ||
+                chunkY >= chunks.Length)
+            {
+                return 0;
+            }
+            IServerChunk? chunk = chunks[chunkY];
+            if (chunk == null || chunk.Disposed)
+            {
+                return 0;
+            }
+            return chunk.Data.GetFluid(
+                ChunkIndex3d(
+                    localX,
+                    y % ChunkSize,
+                    localZ
+                )
+            );
+        }
+
+        private static void SetGeneratedFluid(
+            IServerChunk[] chunks,
+            int localX,
+            int y,
+            int localZ,
+            int blockId)
+        {
+            if (y < 0)
+            {
+                return;
+            }
+            int chunkY = y / ChunkSize;
+            if (chunkY < 0 ||
+                chunkY >= chunks.Length)
+            {
+                return;
+            }
+            IServerChunk? chunk = chunks[chunkY];
+            if (chunk == null || chunk.Disposed)
+            {
+                return;
+            }
+            chunk.Data.SetFluid(
+                ChunkIndex3d(
+                    localX,
+                    y % ChunkSize,
+                    localZ
+                ),
+                blockId
+            );
+        }
+
         private static int ChunkIndex3d(
             int x,
             int y,
@@ -1045,6 +2412,35 @@ namespace Apprentice
                 : quotient;
         }
 
+        private static bool IsMagmaFeatureCell(
+            int worldX,
+            int worldZ) =>
+            IsMagmaFeatureCellCoordinates(
+                FloorDiv(
+                    worldX,
+                    LiquidFeatureCellSize
+                ),
+                FloorDiv(
+                    worldZ,
+                    LiquidFeatureCellSize
+                )
+            );
+
+        private static bool IsMagmaFeatureCellCoordinates(
+            int cellX,
+            int cellZ)
+        {
+            ulong typeHash = StableHash(
+                cellX,
+                cellZ,
+                LiquidTypeSalt
+            );
+            return typeHash % (ulong)(
+                LavaBasinPercent +
+                HotSpringBasinPercent
+            ) < (ulong)LavaBasinPercent;
+        }
+
         private void ResetResolvedBlocks()
         {
             basaltId = 0;
@@ -1056,6 +2452,9 @@ namespace Apprentice
             ashenWeedId = 0;
             wraithThornId = 0;
             wraithWoodId = 0;
+            hotSpringWaterSourceId = 0;
+            coolingMagmaSourceId = 0;
+            legacyLavaSourceId = 0;
         }
     }
 }

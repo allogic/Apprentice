@@ -1,0 +1,18 @@
+{
+  "code": "lootmarker",
+  "class": "Block",
+  "shape": { "base": "game:block/basic/cube" },
+  "drawtype": "cube",
+  "textures": {
+    "all": {
+      "base": "game:block/stone/rock/obsidian1"
+    }
+  },
+  "blockmaterial": "Stone",
+  "replaceable": 9000,
+  "resistance": 0,
+  "lightAbsorption": 0,
+  "sidesolid": { "all": false },
+  "sideopaque": { "all": false },
+  "drops": []
+}
