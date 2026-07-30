@@ -20,13 +20,14 @@ using VSImGui.API;
 
 namespace Apprentice.src._burgi
 {
+	using static Apprentice.src._burgi.Behaviour.DashBehaviour;
 	using static Apprentice.src._burgi.Shader;
 
 	internal class Behaviour
 	{
 		internal class DashBehaviour : EntityBehavior
 		{
-			private static ICoreClientAPI? clientApi = null;
+			public static ICoreClientAPI? clientApi = null;
 
 			private static bool enable = false;
 			private static bool enableRunAnimations = true;
@@ -119,7 +120,12 @@ namespace Apprentice.src._burgi
 				{
 					if (enable == false) return true; // Don't skip the original method
 
-					return whitelistedAnimationCodes.Contains(animdata.Code);
+					if (whitelistedAnimationCodes.Contains(animdata.Code))
+					{
+						return true; // Don't skip the original method
+					}
+
+					return false; // Skip the original method
 				}
 			}
 			[HarmonyPatch(typeof(AnimationManager), nameof(AnimationManager.StartAnimation), [typeof(string)])]
@@ -129,7 +135,12 @@ namespace Apprentice.src._burgi
 				{
 					if (enable == false) return true; // Don't skip the original method
 
-					return whitelistedAnimationCodes.Contains(configCode);
+					if (whitelistedAnimationCodes.Contains(configCode))
+					{
+						return true; // Don't skip the original method
+					}
+
+					return false; // Skip the original method
 				}
 			}
 
@@ -516,19 +527,8 @@ namespace Apprentice.src._burgi
 			};
 			#endregion
 
-			public static void Register(ICoreClientAPI api)
+			public DashBehaviour(Entity entity) : base(entity)
 			{
-				clientApi = api;
-				clientApi.Event.PlayerJoin += (IClientPlayer byPlayer) =>
-				{
-					byPlayer.Entity.AddBehavior(new DashBehaviour(byPlayer.Entity));
-				};
-			}
-
-			private DashBehaviour(Entity entity) : base(entity)
-			{
-				if (clientApi == null) return;
-
 				// TODO: fix api injection
 				motionBlur = new(clientApi);
 				darkAges = new(clientApi);
@@ -1649,9 +1649,9 @@ namespace Apprentice.src._burgi
 		}
 		internal class TrueThirdPerson : EntityBehavior
 		{
-			private static ICoreClientAPI? clientApi = null;
+			public static ICoreClientAPI? clientApi = null;
 
-			private static bool enable = true;
+			private static bool enable = false;
 			private static bool enableSpringLinearVelocity = true;
 			private static bool enableSpringAngularVelocity = true;
 			private static bool enableBoneBobbing = true;
@@ -1894,19 +1894,8 @@ namespace Apprentice.src._burgi
 			private Harmony? harmonyInstance = null;
 			private ImGuiModSystem? imguiInstance = null;
 
-			public static void Register(ICoreClientAPI api)
+			public TrueThirdPerson(Entity entity) : base(entity)
 			{
-				clientApi = api;
-				clientApi.Event.PlayerJoin += (IClientPlayer byPlayer) =>
-				{
-					byPlayer.Entity.AddBehavior(new TrueThirdPerson(byPlayer.Entity));
-				};
-			}
-
-			private TrueThirdPerson(Entity entity) : base(entity)
-			{
-				if (clientApi == null) return;
-
 				// TODO: fix api injection
 				harmonyInstance = new("Vintagestory.Client.NoObf");
 #if DEBUG
@@ -1993,6 +1982,84 @@ namespace Apprentice.src._burgi
 				ImGui.End();
 
 				return CallbackGUIStatus.DontGrabMouse;
+			}
+		}
+		internal class AmbientCutscene : EntityBehavior
+		{
+			public static ICoreClientAPI? clientApi = null;
+
+			private static bool enable = false;
+
+			internal class Point
+			{
+				public Matrixf transform = new();
+			}
+
+			private static List<Point> points = [];
+
+			private float time = 0.0F;
+
+			private bool isInit = true;
+			private bool isReset = false;
+			private bool isRunning = false;
+
+			public AmbientCutscene(Entity entity) : base(entity)
+			{
+				// TODO: fix api injection
+
+				// Register realm discovered
+				RealmDiscoveryManager.Callbacks += OnRealmDiscovered;
+			}
+
+			public void Play()
+			{
+				if (enable == false) return;
+				if (clientApi == null) return;
+
+				if (isRunning == false)
+				{
+					isInit = true;
+					isReset = false;
+					isRunning = true;
+				}
+
+
+			}
+			public void Reset()
+			{
+				if (enable == false) return;
+				if (clientApi == null) return;
+
+				isInit = true;
+				isReset = false;
+				isRunning = false;
+			}
+
+			public override string PropertyName()
+			{
+				return "AmbientCutsceneBehaviour";
+			}
+			public override void OnGameTick(float deltaTime)
+			{
+				if (enable == false) return;
+				if (clientApi == null) return;
+
+				EntityPlayer entityPlayer = clientApi.World.Player.Entity;
+				EntityControls controls = entityPlayer.Controls;
+				EntityPos transform = entityPlayer.Pos;
+
+				// Loop animation
+				// if (timeAcc >= animationTime + animationLength)
+				// {
+				// 	timeAcc = 0.0F;
+				// }
+
+
+			}
+
+			private void OnRealmDiscovered()
+			{
+				int x = 42;
 			}
 		}
 	}
