@@ -1,22 +1,21 @@
-﻿using Apprentice.AnimationReference;
-using HarmonyLib;
+﻿using HarmonyLib;
+
 using ImGuiNET;
+
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Numerics;
+
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
 using Vintagestory.API.MathTools;
 using Vintagestory.Client.NoObf;
-using Vintagestory.GameContent;
+
 using VSImGui;
 using VSImGui.API;
 
-// TODO: delete all UpperTorso animation keyframes for all strafing animations + sprint-forward and sprint-back
 // TODO: refactor Directional8 on dash quadrant angle
-// TODO: add attack pose on top of run animation based on mouse right down/up
 // TODO: update frame buffer sizes at runtime
 
 namespace Apprentice.src._burgi
@@ -31,6 +30,7 @@ namespace Apprentice.src._burgi
 
 			private static bool enable = false;
 			private static bool enableRunAnimations = true;
+			private static bool enableInverseKinematic = true;
 			private static bool enableBlendAttackPose = false;
 
 			internal enum Directional8
@@ -161,6 +161,7 @@ namespace Apprentice.src._burgi
 			private bool jumpAllowed = true;
 			private bool doubleDashAllowed = true;
 			private bool isRunning = false;
+			private bool suppressMouseInput = false;
 
 			private float physicSpeedFactor = 8.356F;
 			private float maxVelocity = 0.3F;
@@ -627,7 +628,7 @@ namespace Apprentice.src._burgi
 				}
 
 				// TODO: Adjust animation speed with player motion vector..
-				// Play animation when player is running
+				// Handle strafing
 				if (enableRunAnimations)
 				{
 					float motionLength = (float)transform.Motion.Length();
@@ -760,6 +761,25 @@ namespace Apprentice.src._burgi
 							runningRunAnimation = null;
 						}
 					}
+				}
+
+				// Handle inverse kinematics
+				if (enableInverseKinematic)
+				{
+					ElementPose pose = entity.AnimManager.Animator.GetPosebyName("LowerArmR");
+
+					Vec3f cameraPosition = entityPlayer.CameraPos.ToVec3f();
+					Vec3f localForward = transform.GetViewVector();
+
+					pose.AnimModelMatrix = [
+							1, 0, 0, 0,
+							0, 1, 0, 0,
+							0, 0, 1, 0,
+							0, 0, 0, 1
+						];
+					// pose.AnimModelMatrix[12] = cameraPosition.X + localForward.X * 3.0F;
+					// pose.AnimModelMatrix[13] = cameraPosition.Y + localForward.Y * 3.0F;
+					// pose.AnimModelMatrix[14] = cameraPosition.Z + localForward.Z * 3.0F;
 				}
 
 				// Apply motion blur
@@ -1513,6 +1533,7 @@ namespace Apprentice.src._burgi
 			private void OnMouseDown(MouseEvent e)
 			{
 				if (enable == false) return;
+				if (suppressMouseInput == true) return;
 
 				if (e.Button == EnumMouseButton.Left)
 				{
@@ -1540,6 +1561,8 @@ namespace Apprentice.src._burgi
 					if (ImGui.BeginTabItem("General"))
 					{
 						ImGui.Checkbox("enable", ref enable);
+						ImGui.Checkbox("suppressMouseInput", ref suppressMouseInput);
+						ImGui.SeparatorText("Cooldowns");
 						ImGui.Checkbox("enableLineGizmo", ref lineGizmo.gizmoEnable);
 						ImGui.DragInt("dashCooldownMs", ref dashCooldownMs);
 						ImGui.DragInt("jumpCooldownMs", ref jumpCooldownMs);
@@ -1586,6 +1609,7 @@ namespace Apprentice.src._burgi
 					if (ImGui.BeginTabItem("Animation"))
 					{
 						ImGui.Checkbox("enableRunAnimations", ref enableRunAnimations);
+						ImGui.Checkbox("enableInverseKinematic", ref enableInverseKinematic);
 						ImGui.DragFloat("runAnimationDeadzone", ref runAnimationDeadzone, 0.1F);
 						ImGui.SeparatorText("Animation Speed");
 						ImGui.DragFloat("animationSpeedDash", ref animationSpeedDash, 0.1F, 0.0F, 20.0F);
@@ -1627,11 +1651,12 @@ namespace Apprentice.src._burgi
 		{
 			private static ICoreClientAPI? clientApi = null;
 
-			private static bool enable = false;
-			private static bool enableLinearVelocity = true;
-			private static bool enableAngularVelocity = true;
+			private static bool enable = true;
+			private static bool enableSpringLinearVelocity = true;
+			private static bool enableSpringAngularVelocity = true;
 			private static bool enableBoneBobbing = true;
 			private static bool enableRandomRotation = true;
+			private static bool enableMotionBobbing = true;
 
 			private static readonly AccessTools.FieldRef<Camera, Vec3d> camEyePosInRef = AccessTools.FieldRefAccess<Camera, Vec3d>("camEyePosIn");
 			private static readonly AccessTools.FieldRef<Camera, Vec3d> originPosRef = AccessTools.FieldRefAccess<Camera, Vec3d>("originPos");
@@ -1641,21 +1666,42 @@ namespace Apprentice.src._burgi
 
 			private static LineGizmo? lineGizmo = null;
 
+			// General settings
 			private static Vec3f cameraRootOffset = new(-0.17F, 0.03F, -0.33F);
-			private static float bobbingAmount = 2.0F;
-			private static float yawRotationAmount = 0.012F;
-			private static float pitchRotationAmount = 0.02F;
+
+			// Physic spring
+			private static float springLinearStiffness = 22.0F;
+			private static float springAngularStiffness = 22.0F;
+			private static float springLinearDamping = 8.0F;
+			private static float springAngularDamping = 8.0F;
+
+			// Random rotation
+			private static float randomYawRotationIntensity = 0.012F;
+			private static float randomPitchRotationIntensity = 0.02F;
+			private static float randomYawRotationSpeed = 1.0F;
+			private static float randomPitchRotationSpeed = 1.0F;
+
+			// Bone bobbing
+			private static float boneBobSpeed = 2.0F;
+
+			// Motion bobbing
+			private static float motionBobSpeed = 160.0F;
+			private static float motionBobDeadzone = 0.05F;
+			private static float motionSmoothFactor = 1.0F;
+			private static float motionBobVerticalIntensity = 0.04F;
+			private static float motionBobHorizontalIntensity = 0.01F;
+			private static float motionBobPitchIntensity = 0.003F;
+			private static float motionBobRollIntensity = 0.004F;
+
+			private static double lastBoneY = 0.0;
+
+			private static double smoothedSpeed = 0.0;
 
 			private static Vec3d linearVelocity = new(0, 0, 0);
 			private static double yawVelocity = 0.0;
 			private static double pitchVelocity = 0.0;
 
-			private static float linearStiffness = 22.0F;
-			private static float angularStiffness = 22.0F;
-			private static float linearDamping = 8.0F;
-			private static float angularDamping = 8.0F;
-
-			private static double lastBoneY = 0.0;
+			private static double bobMotionTime = 0.0;
 			private static double yawRotationTime = 0.0;
 			private static double pitchRotationTime = 0.0;
 
@@ -1683,66 +1729,108 @@ namespace Apprentice.src._burgi
 					targetPosition = BurgiMath.RotateAroundAxis(targetPosition, BurgiMath.WorldRight, transform.Pitch);
 					targetPosition = BurgiMath.RotateAroundAxis(targetPosition, BurgiMath.WorldUp, transform.Yaw);
 
+					// Compute target speed
+					double targetSpeed = entityPlayer.Pos.Motion.Length();
+
+					// Get target camera rotation
+					double targetPitch = transform.Pitch;
+					double targetYaw = transform.Yaw;
+					double targetRoll = transform.Roll;
+
 					// Linear interpolation
 					Vec3d linearDisplacement = targetPosition - __instance.OriginPosition;
-					Vec3d linearAcceleration = linearDisplacement * linearStiffness - linearVelocity * linearDamping;
+					Vec3d linearAcceleration = linearDisplacement * springLinearStiffness - linearVelocity * springLinearDamping;
 					linearVelocity += linearAcceleration * deltaTime;
-					Vec3d physicCameraPosition = targetPosition + linearVelocity;
 
 					// Angular interpolation
-					double targetYaw = transform.Yaw;
-					double targetPitch = transform.Pitch;
 					double yawDisplacement = BurgiMath.AngleDifference(targetYaw, __instance.Yaw);
 					double pitchDisplacement = targetPitch - __instance.Pitch;
-					double yawAcceleration = yawDisplacement * angularStiffness - yawVelocity * angularDamping;
-					double pitchAcceleration = pitchDisplacement * angularStiffness - pitchVelocity * angularDamping;
+					double yawAcceleration = yawDisplacement * springAngularStiffness - yawVelocity * springAngularDamping;
+					double pitchAcceleration = pitchDisplacement * springAngularStiffness - pitchVelocity * springAngularDamping;
 					yawVelocity += yawAcceleration * deltaTime;
 					pitchVelocity += pitchAcceleration * deltaTime;
-					double physicCameraYaw = targetYaw + yawVelocity;
-					double physicCameraPitch = targetPitch + pitchVelocity;
 
 					// Apply bone bobbing
-					double deltaY = 0.0;
-					if (enableBoneBobbing)
+					double bobBoneY = 0.0;
+					if (entityPlayer.AnimManager != null)
 					{
-						if (entityPlayer.AnimManager != null)
+						if (entityPlayer.AnimManager.Animator != null)
 						{
-							if (entityPlayer.AnimManager.Animator != null)
-							{
-								ElementPose pose = entityPlayer.AnimManager.Animator.GetPosebyName("UpperTorso");
+							ElementPose pose = entityPlayer.AnimManager.Animator.GetPosebyName("UpperTorso");
 
-								double boneX = pose.AnimModelMatrix[12];
-								double boneY = pose.AnimModelMatrix[13];
-								double boneZ = pose.AnimModelMatrix[14];
+							double boneX = pose.AnimModelMatrix[12];
+							double boneY = pose.AnimModelMatrix[13];
+							double boneZ = pose.AnimModelMatrix[14];
 
-								deltaY = (boneY - lastBoneY);
-								lastBoneY = boneY;
-							}
+							bobBoneY = (boneY - lastBoneY);
+							lastBoneY = boneY;
 						}
 					}
 
-					// Apply random camera rotation
+					// Apply motion bobbing
+					smoothedSpeed += (targetSpeed - smoothedSpeed) * Math.Min(deltaTime * motionSmoothFactor, 1.0);
+					if (entityPlayer.OnGround)
+					{
+						bobMotionTime += deltaTime * smoothedSpeed * motionBobSpeed;
+					}
+					double bobVertical = Math.Sin(bobMotionTime) * motionBobVerticalIntensity;
+					double bobHorizontal = Math.Cos(bobMotionTime) * motionBobHorizontalIntensity;
+					double bobPitch = Math.Sin(bobMotionTime) * motionBobPitchIntensity;
+					double bobRoll = Math.Cos(bobMotionTime) * motionBobRollIntensity;
+
+					// Apply random rotation
 					double deltaYaw = 0.0;
 					double deltaPitch = 0.0;
-					if (enableRandomRotation)
+					deltaYaw = Math.Sin(yawRotationTime * randomYawRotationSpeed) * randomYawRotationIntensity;
+					deltaPitch = Math.Cos(pitchRotationTime * randomPitchRotationSpeed) * randomPitchRotationIntensity;
+					yawRotationTime += deltaTime;
+					pitchRotationTime += deltaTime;
+
+					// Apply camera position
+					if (enableSpringLinearVelocity)
 					{
-						deltaYaw = Math.Sin(yawRotationTime) * yawRotationAmount;
-						deltaPitch = Math.Cos(pitchRotationTime) * pitchRotationAmount;
-						yawRotationTime += deltaTime;
-						pitchRotationTime += deltaTime;
+						targetPosition += linearVelocity;
 					}
 
-					// Apply our camera position
-					__instance.OriginPosition = enableLinearVelocity
-						? physicCameraPosition
-						: targetPosition; // TODO: * deltaTime
-					__instance.OriginPosition.Y += deltaY * bobbingAmount;
-					__instance.Yaw = enableAngularVelocity
-						? physicCameraYaw + deltaYaw
-						: targetYaw; // TODO: * deltaTime
-					__instance.Pitch = enableAngularVelocity
-						? physicCameraPitch + deltaPitch
-						: targetPitch; // TODO: * deltaTime
+					// Apply camera rotation
+					if (enableSpringAngularVelocity)
+					{
+						targetPitch += pitchVelocity;
+						targetYaw += yawVelocity;
+					}
+
+					// Apply bone bobbing
+					if (enableBoneBobbing)
+					{
+						targetPosition.Y += bobBoneY * boneBobSpeed; // TODO: * deltaTime
+					}
+
+					// Apply random camera rotation
+					if (enableRandomRotation)
+					{
+						targetPitch += deltaPitch; // TODO: * deltaTime
+						targetYaw += deltaYaw; // TODO: * deltaTime
+					}
+
+					// Apply motion position bobbing
+					if (enableMotionBobbing)
+					{
+						targetPosition += localRight * bobHorizontal; // TODO: * deltaTime
+						targetPosition += BurgiMath.WorldUp * bobVertical; // TODO: * deltaTime
+					}
+
+					// Apply motion rotation bobbing
+					if (enableMotionBobbing)
+					{
+						targetPitch += bobPitch; // TODO: * deltaTime
+						targetRoll += bobRoll; // TODO: * deltaTime
+					}
+
+					// Compute camera stuff
+					__instance.OriginPosition = targetPosition;
+					__instance.Pitch = targetPitch;
+					__instance.Yaw = targetYaw;
+					__instance.Roll = targetRoll;
 					__instance.CameraMatrix = __instance.GetCameraMatrix(camEyePosInRef(__instance), camEyePosInRef(__instance), __instance.Yaw, __instance.Pitch, intersectionTester);
 					__instance.CameraEyePos.Set(camEyePosOutTmpRef(__instance));
 					__instance.CameraMatrixOrigin = __instance.GetCameraMatrix(originPosRef(__instance), camEyePosInRef(__instance), __instance.Yaw, __instance.Pitch, intersectionTester);
@@ -1865,19 +1953,37 @@ namespace Apprentice.src._burgi
 						ImGui.EndTabItem();
 					}
 
-					if (ImGui.BeginTabItem("Physic"))
+					if (ImGui.BeginTabItem("Immersion"))
 					{
-						ImGui.Checkbox("enableLinearVelocity", ref enableLinearVelocity);
-						ImGui.Checkbox("enableAngularVelocity", ref enableAngularVelocity);
-						ImGui.Checkbox("enableBoneBobbing", ref enableBoneBobbing);
+						ImGui.SeparatorText("Physic Spring");
+						ImGui.Checkbox("enableSpringLinearVelocity", ref enableSpringLinearVelocity);
+						ImGui.Checkbox("enableSpringAngularVelocity", ref enableSpringAngularVelocity);
+						ImGui.DragFloat("springLinearStiffness", ref springLinearStiffness, 0.1F);
+						ImGui.DragFloat("springAngularStiffness", ref springAngularStiffness, 0.1F);
+						ImGui.DragFloat("springLinearDamping", ref springLinearDamping, 0.1F);
+						ImGui.DragFloat("springAngularDamping", ref springAngularDamping, 0.1F);
+
+						ImGui.SeparatorText("Random Rotation");
 						ImGui.Checkbox("enableRandomRotation", ref enableRandomRotation);
-						ImGui.DragFloat("bobbingAmount", ref bobbingAmount, 0.1F);
-						ImGui.DragFloat("bobbingAmountYaw", ref yawRotationAmount, 0.1F);
-						ImGui.DragFloat("bobbingAmountPitch", ref pitchRotationAmount, 0.1F);
-						ImGui.DragFloat("motionStiffness", ref linearStiffness, 0.1F);
-						ImGui.DragFloat("angularStiffness", ref angularStiffness, 0.1F);
-						ImGui.DragFloat("motionDamping", ref linearDamping, 0.1F);
-						ImGui.DragFloat("angularDamping", ref angularDamping, 0.1F);
+						ImGui.DragFloat("randomYawRotationIntensity", ref randomYawRotationIntensity, 0.1F);
+						ImGui.DragFloat("randomPitchRotationIntensity", ref randomPitchRotationIntensity, 0.1F);
+						ImGui.DragFloat("randomYawRotationSpeed", ref randomYawRotationSpeed, 0.1F);
+						ImGui.DragFloat("randomPitchRotationSpeed", ref randomPitchRotationSpeed, 0.1F);
+
+						ImGui.SeparatorText("Bone Bobbing");
+						ImGui.Checkbox("enableBoneBobbing", ref enableBoneBobbing);
+						ImGui.DragFloat("boneBobSpeed", ref boneBobSpeed, 0.1F);
+
+						ImGui.SeparatorText("Motion Bobbing");
+						ImGui.Checkbox("enableMotionBobbing", ref enableMotionBobbing);
+						ImGui.DragFloat("motionBobSpeed", ref motionBobSpeed, 0.1F);
+						ImGui.DragFloat("motionBobDeadzone", ref motionBobDeadzone, 0.1F);
+						ImGui.DragFloat("motionSmoothFactor", ref motionSmoothFactor, 0.1F);
+						ImGui.DragFloat("motionBobVerticalIntensity", ref motionBobVerticalIntensity, 0.1F);
+						ImGui.DragFloat("motionBobHorizontalIntensity", ref motionBobHorizontalIntensity, 0.1F);
+						ImGui.DragFloat("motionBobPitchIntensity", ref motionBobPitchIntensity, 0.1F);
+						ImGui.DragFloat("motionBobRollIntensity", ref motionBobRollIntensity, 0.1F);
+
 						ImGui.EndTabItem();
 					}
 
