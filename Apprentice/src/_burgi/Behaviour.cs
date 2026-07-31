@@ -14,25 +14,21 @@ using Vintagestory.Client.NoObf;
 
 using VSImGui;
 using VSImGui.API;
+using static Apprentice.src._burgi.Behaviour.CharacterController;
 
 // TODO: refactor Directional8 on dash quadrant angle
 // TODO: update frame buffer sizes at runtime
 
 namespace Apprentice.src._burgi
 {
-	using static Apprentice.src._burgi.Behaviour.DashBehaviour;
-	using static Apprentice.src._burgi.Shader;
-
 	internal class Behaviour
 	{
-		internal class DashBehaviour : EntityBehavior
+		internal class CharacterController : EntityBehavior
 		{
-			public static ICoreClientAPI? clientApi = null;
-
-			private static bool enable = false;
-			private static bool enableRunAnimations = true;
-			private static bool enableInverseKinematic = true;
-			private static bool enableBlendAttackPose = false;
+			public static bool enable = false;
+			public static bool enableRunAnimations = true;
+			public static bool enableInverseKinematic = true;
+			public static bool enableBlendAttackPose = false;
 
 			internal enum Directional8
 			{
@@ -144,94 +140,87 @@ namespace Apprentice.src._burgi
 				}
 			}
 
-			private readonly AssetLocation dashSound1 = new("apprentice", "sounds/dash-1");
-			private readonly AssetLocation dashSound2 = new("apprentice", "sounds/dash-2");
-			private readonly AssetLocation dashRecoverSound1 = new("apprentice", "sounds/dash-recover-1");
-			private readonly AssetLocation dashRecoverSound2 = new("apprentice", "sounds/dash-recover-2");
-			private readonly AssetLocation ushigatanaDashSound = new("apprentice", "sounds/ushigatana-dash");
-			private readonly AssetLocation wooshSound1 = new("apprentice", "sounds/woosh-1");
-			private readonly AssetLocation wooshSound2 = new("apprentice", "sounds/woosh-2");
-			private readonly AssetLocation wooshSound3 = new("apprentice", "sounds/woosh-3");
-			private readonly AssetLocation footstepGrassSound1 = new("apprentice", "sounds/footstep-grass-1");
-			private readonly AssetLocation footstepGrassSound2 = new("apprentice", "sounds/footstep-grass-2");
-			private readonly AssetLocation footstepGrassSound3 = new("apprentice", "sounds/footstep-grass-3");
-			private readonly AssetLocation footstepGrassSound4 = new("apprentice", "sounds/footstep-grass-4");
-			private readonly AssetLocation footstepGrassSound5 = new("apprentice", "sounds/footstep-grass-5");
+			private static readonly AssetLocation dashSound1 = new("apprentice", "sounds/dash-1");
+			private static readonly AssetLocation dashSound2 = new("apprentice", "sounds/dash-2");
+			private static readonly AssetLocation dashRecoverSound1 = new("apprentice", "sounds/dash-recover-1");
+			private static readonly AssetLocation dashRecoverSound2 = new("apprentice", "sounds/dash-recover-2");
+			private static readonly AssetLocation ushigatanaDashSound = new("apprentice", "sounds/ushigatana-dash");
+			private static readonly AssetLocation wooshSound1 = new("apprentice", "sounds/woosh-1");
+			private static readonly AssetLocation wooshSound2 = new("apprentice", "sounds/woosh-2");
+			private static readonly AssetLocation wooshSound3 = new("apprentice", "sounds/woosh-3");
+			private static readonly AssetLocation footstepGrassSound1 = new("apprentice", "sounds/footstep-grass-1");
+			private static readonly AssetLocation footstepGrassSound2 = new("apprentice", "sounds/footstep-grass-2");
+			private static readonly AssetLocation footstepGrassSound3 = new("apprentice", "sounds/footstep-grass-3");
+			private static readonly AssetLocation footstepGrassSound4 = new("apprentice", "sounds/footstep-grass-4");
+			private static readonly AssetLocation footstepGrassSound5 = new("apprentice", "sounds/footstep-grass-5");
 
-			private LineGizmo? lineGizmo = null;
-			private MotionBlur? motionBlur = null;
-			private DarkAges? darkAges = null;
-			private ObamaPrism? obamaPrism = null;
-			private Harmony? harmonyInstance = null;
-			private ImGuiModSystem? imguiInstance = null;
+			private static bool isPhysicActive = false;
+			private static bool isDoubleDashActive = false;
+			private static bool dashAllowed = true;
+			private static bool attackAllowed = true;
+			private static bool jumpAllowed = true;
+			private static bool doubleDashAllowed = true;
+			private static bool isRunning = false;
+			public static bool suppressMouseInput = false;
 
-			private bool isPhysicActive = false;
-			private bool isDoubleDashActive = false;
-			private bool dashAllowed = true;
-			private bool attackAllowed = true;
-			private bool jumpAllowed = true;
-			private bool doubleDashAllowed = true;
-			private bool isRunning = false;
-			private bool suppressMouseInput = false;
+			public static float physicSpeedFactor = 8.356F;
+			public static float maxVelocity = 0.3F;
 
-			private float physicSpeedFactor = 8.356F;
-			private float maxVelocity = 0.3F;
+			public static float dashHorizontalImpulseGrounded = 1.0F;
+			public static float dashHorizontalImpulseAirbourne = 0.036F;
+			public static float dashVerticalImpulseGrounded = 0.02F;
+			public static float dashVerticalImpulseAirbourne = 0.04F;
+			public static float attackHorizontalImpulse = 0.15F;
+			public static float jumpHorizontalImpulse = 0.15F;
 
-			private float dashHorizontalImpulseGrounded = 1.0F;
-			private float dashHorizontalImpulseAirbourne = 0.036F;
-			private float dashVerticalImpulseGrounded = 0.02F;
-			private float dashVerticalImpulseAirbourne = 0.04F;
-			private float attackHorizontalImpulse = 0.15F;
-			private float jumpHorizontalImpulse = 0.15F;
+			public static float runAnimationDeadzone = 0.01F;
 
-			private float runAnimationDeadzone = 0.01F;
+			public static float animationSpeedDash = 2.5F;
+			public static float animationSpeedJump = 2.5F;
+			public static float animationSpeedSwordHit = 2.5F;
+			public static float animationSpeedSwordHit2 = 2.5F;
+			public static float animationSpeedCleaverHit = 2.5F;
+			public static float animationSpeedSprintForward = 0.7F;
+			public static float animationSpeedSprintBack = 0.5F;
+			public static float animationSpeedStrafeForwardLeft90 = 0.6F;
+			public static float animationSpeedStrafeForwardRight90 = 0.6F;
+			public static float animationSpeedStrafeForwardLeft45 = 0.6F;
+			public static float animationSpeedStrafeForwardRight45 = 0.6F;
+			public static float animationSpeedRunMultiplier = 2.1F;
 
-			private float animationSpeedDash = 2.5F;
-			private float animationSpeedJump = 2.5F;
-			private float animationSpeedSwordHit = 2.5F;
-			private float animationSpeedSwordHit2 = 2.5F;
-			private float animationSpeedCleaverHit = 2.5F;
-			private float animationSpeedSprintForward = 0.7F;
-			private float animationSpeedSprintBack = 0.5F;
-			private float animationSpeedStrafeForwardLeft90 = 0.6F;
-			private float animationSpeedStrafeForwardRight90 = 0.6F;
-			private float animationSpeedStrafeForwardLeft45 = 0.6F;
-			private float animationSpeedStrafeForwardRight45 = 0.6F;
-			private float animationSpeedRunMultiplier = 2.1F;
+			public static float motionSpeedSprintForward = 1.0F;
+			public static float motionSpeedSprintBack = 1.0F;
+			public static float motionSpeedStrafeForwardLeft90 = 1.0F;
+			public static float motionSpeedStrafeForwardLeft45 = 1.0F;
+			public static float motionSpeedStrafeForwardRight90 = 1.0F;
+			public static float motionSpeedStrafeForwardRight45 = 1.0F;
 
-			private float motionSpeedSprintForward = 1.0F;
-			private float motionSpeedSprintBack = 1.0F;
-			private float motionSpeedStrafeForwardLeft90 = 1.0F;
-			private float motionSpeedStrafeForwardLeft45 = 1.0F;
-			private float motionSpeedStrafeForwardRight90 = 1.0F;
-			private float motionSpeedStrafeForwardRight45 = 1.0F;
+			public static int dashCooldownMs = 1500;
+			public static int jumpCooldownMs = 150;
+			public static int attackCooldownMs = 300;
 
-			private int dashCooldownMs = 1500;
-			private int jumpCooldownMs = 150;
-			private int attackCooldownMs = 300;
+			private static float physicFrame = 0.0F;
+			private static int animationFrame = 0;
 
-			private float physicFrame = 0.0F;
-			private int animationFrame = 0;
+			public static int dashFrameCount = 18;
+			public static int dashRetractFrameCount = 0;
+			public static int attackFrameCount = 10;
+			public static int jumpFrameCount = 10;
 
-			private int dashFrameCount = 18;
-			private int dashRetractFrameCount = 0;
-			private int attackFrameCount = 10;
-			private int jumpFrameCount = 10;
+			private static Vec3d dashDirection = new(0, 0, 0);
+			private static Vec3d attackDirection = new(0, 0, 0);
+			private static Vec3d jumpDirection = new(0, 0, 0);
 
-			private Vec3d dashDirection = new(0, 0, 0);
-			private Vec3d attackDirection = new(0, 0, 0);
-			private Vec3d jumpDirection = new(0, 0, 0);
+			private static RunningAnimation? runningRunAnimation = null;
+			private static RunningAnimation? runningCombatAnimation = null;
 
-			private RunningAnimation? runningRunAnimation = null;
-			private RunningAnimation? runningCombatAnimation = null;
+			// private static float currAnimationFrame = 0;
+			// private static float prevAnimationFrame = 0;
 
-			// private float currAnimationFrame = 0;
-			// private float prevAnimationFrame = 0;
+			// private static bool leftFootSoundReset = true;
+			// private static bool rightFootSoundReset = true;
 
-			// private bool leftFootSoundReset = true;
-			// private bool rightFootSoundReset = true;
-
-			Dictionary<string, float> strafeAimWeights = new Dictionary<string, float>()
+			private static Dictionary<string, float> strafeAimWeights = new Dictionary<string, float>()
 			{
 				{ "UpperTorso", 0.0F },
 				{ "UpperArmR", 0.0F },
@@ -245,7 +234,7 @@ namespace Apprentice.src._burgi
 				{ "ItemAnchor", 0.0F },
 				{ "ItemAnchorL", 0.0F },
 			};
-			Dictionary<string, EnumAnimationBlendMode> strafeAimBlendModes = new Dictionary<string, EnumAnimationBlendMode>()
+			private static Dictionary<string, EnumAnimationBlendMode> strafeAimBlendModes = new Dictionary<string, EnumAnimationBlendMode>()
 			{
 				{ "UpperTorso", EnumAnimationBlendMode.Add },
 				{ "UpperArmR", EnumAnimationBlendMode.Add },
@@ -261,7 +250,7 @@ namespace Apprentice.src._burgi
 			};
 
 			#region Dash Animations
-			private AnimationMetaData dashForwardData = new()
+			private static AnimationMetaData dashForwardData = new()
 			{
 				Animation = "dash-forward",
 				Code = "dash-forward",
@@ -277,7 +266,7 @@ namespace Apprentice.src._burgi
 					{ "root", EnumAnimationBlendMode.Add },
 				},
 			};
-			private AnimationMetaData dashBackData = new()
+			private static AnimationMetaData dashBackData = new()
 			{
 				Animation = "dash-back",
 				Code = "dash-back",
@@ -293,7 +282,7 @@ namespace Apprentice.src._burgi
 					{ "root", EnumAnimationBlendMode.Add },
 				},
 			};
-			private AnimationMetaData dashLeftData = new()
+			private static AnimationMetaData dashLeftData = new()
 			{
 				Animation = "dash-left",
 				Code = "dash-left",
@@ -309,7 +298,7 @@ namespace Apprentice.src._burgi
 					{ "root", EnumAnimationBlendMode.Add },
 				},
 			};
-			private AnimationMetaData dashRightData = new()
+			private static AnimationMetaData dashRightData = new()
 			{
 				Animation = "dash-right",
 				Code = "dash-right",
@@ -328,7 +317,7 @@ namespace Apprentice.src._burgi
 			#endregion
 
 			#region Strafing Animations
-			private AnimationMetaData[] strafingAnimations =
+			private static AnimationMetaData[] strafingAnimations =
 			{
 				// DIR8_FORWARD
 				new AnimationMetaData {
@@ -430,7 +419,7 @@ namespace Apprentice.src._burgi
 			#endregion
 
 			#region Combat Animations
-			private AnimationMetaData holdWeaponCombatPassiveData = new()
+			private static AnimationMetaData holdWeaponCombatPassiveData = new()
 			{
 				Animation = "hold-weapon-combat-passive",
 				Code = "hold-weapon-combat-passive",
@@ -461,7 +450,7 @@ namespace Apprentice.src._burgi
 			#endregion
 
 			#region Internal Animations
-			private AnimationMetaData swordHitData = new()
+			private static AnimationMetaData swordHitData = new()
 			{
 				Animation = "SwordHit",
 				Code = "swordhit",
@@ -477,7 +466,7 @@ namespace Apprentice.src._burgi
 					{ "UpperTorso", EnumAnimationBlendMode.Add },
 				},
 			};
-			private AnimationMetaData swordHit2Data = new()
+			private static AnimationMetaData swordHit2Data = new()
 			{
 				Animation = "SwordHit2",
 				Code = "swordhit2",
@@ -493,7 +482,7 @@ namespace Apprentice.src._burgi
 					{ "UpperTorso", EnumAnimationBlendMode.Add },
 				},
 			};
-			private AnimationMetaData cleaverHitData = new()
+			private static AnimationMetaData cleaverHitData = new()
 			{
 				Animation = "cleaverhit",
 				Code = "cleaverhit",
@@ -509,7 +498,7 @@ namespace Apprentice.src._burgi
 					{ "UpperTorso", EnumAnimationBlendMode.Add },
 				},
 			};
-			private AnimationMetaData bowAimLongData = new()
+			private static AnimationMetaData bowAimLongData = new()
 			{
 				Animation = "BowAimLong",
 				Code = "bowaimlong",
@@ -527,68 +516,47 @@ namespace Apprentice.src._burgi
 			};
 			#endregion
 
-			public DashBehaviour(Entity entity) : base(entity)
+			public CharacterController(Entity entity) : base(entity)
 			{
-				// TODO: fix api injection
-				motionBlur = new(clientApi);
-				darkAges = new(clientApi);
-				obamaPrism = new(clientApi, 32);
-				harmonyInstance = new("Vintagestory.API.Common");
-#if DEBUG
-				lineGizmo = new(clientApi, 1000);
-
-				imguiInstance = clientApi.ModLoader.GetModSystem<ImGuiModSystem>();
-				imguiInstance?.Draw += OnImGuiDraw;
-#endif
-
 				// Apply all harmony patches
-				harmonyInstance.CreateClassProcessor(typeof(AnimationManager_StartAnimation0_Patch)).Patch();
-				harmonyInstance.CreateClassProcessor(typeof(AnimationManager_StartAnimation1_Patch)).Patch();
+				Main.apiCommon.CreateClassProcessor(typeof(AnimationManager_StartAnimation0_Patch)).Patch();
+				Main.apiCommon.CreateClassProcessor(typeof(AnimationManager_StartAnimation1_Patch)).Patch();
 
 				// Register hotkey's
-				clientApi.Input.RegisterHotKey("sprint_w", "", GlKeys.W, HotkeyType.MovementControls);
-				clientApi.Input.RegisterHotKey("sprint_a", "", GlKeys.A, HotkeyType.MovementControls);
-				clientApi.Input.RegisterHotKey("sprint_s", "", GlKeys.S, HotkeyType.MovementControls);
-				clientApi.Input.RegisterHotKey("sprint_d", "", GlKeys.D, HotkeyType.MovementControls);
-				clientApi.Input.RegisterHotKey("sprint", "", GlKeys.ShiftLeft, HotkeyType.MovementControls);
-				clientApi.Input.RegisterHotKey("reset", "", GlKeys.B, HotkeyType.GUIOrOtherControls);
+				Main.clientApi.Input.RegisterHotKey("sprint_w", "", GlKeys.W, HotkeyType.MovementControls);
+				Main.clientApi.Input.RegisterHotKey("sprint_a", "", GlKeys.A, HotkeyType.MovementControls);
+				Main.clientApi.Input.RegisterHotKey("sprint_s", "", GlKeys.S, HotkeyType.MovementControls);
+				Main.clientApi.Input.RegisterHotKey("sprint_d", "", GlKeys.D, HotkeyType.MovementControls);
+				Main.clientApi.Input.RegisterHotKey("sprint", "", GlKeys.ShiftLeft, HotkeyType.MovementControls);
+				Main.clientApi.Input.RegisterHotKey("reset", "", GlKeys.B, HotkeyType.GUIOrOtherControls);
 
 				// Register hotkey handler's
-				clientApi.Input.SetHotKeyHandler("sprint_w", OnSprintW);
-				clientApi.Input.SetHotKeyHandler("sprint_a", OnSprintA);
-				clientApi.Input.SetHotKeyHandler("sprint_s", OnSprintS);
-				clientApi.Input.SetHotKeyHandler("sprint_d", OnSprintD);
-				clientApi.Input.SetHotKeyHandler("sprint", OnSprint);
-				clientApi.Input.SetHotKeyHandler("reset", OnReset);
+				Main.clientApi.Input.SetHotKeyHandler("sprint_w", OnSprintW);
+				Main.clientApi.Input.SetHotKeyHandler("sprint_a", OnSprintA);
+				Main.clientApi.Input.SetHotKeyHandler("sprint_s", OnSprintS);
+				Main.clientApi.Input.SetHotKeyHandler("sprint_d", OnSprintD);
+				Main.clientApi.Input.SetHotKeyHandler("sprint", OnSprint);
+				Main.clientApi.Input.SetHotKeyHandler("reset", OnReset);
 
 				// Register event's
-				clientApi.Event.MouseDown += OnMouseDown;
+				Main.clientApi.Event.MouseDown += OnMouseDown;
 			}
 
 			public override string PropertyName()
 			{
-				return "UchigatanaDashBehaviour";
+				return "CharacterControllerBehaviour";
 			}
 			public override void OnGameTick(float deltaTime)
 			{
 				if (enable == false) return;
-				if (clientApi == null) return;
-				if (motionBlur == null) return;
-				if (darkAges == null) return;
-				if (obamaPrism == null) return;
-				if (harmonyInstance == null) return;
 
-#if DEBUG
-				imguiInstance?.Show();
-#endif
-
-				EntityPlayer entityPlayer = clientApi.World.Player.Entity;
+				EntityPlayer entityPlayer = Main.clientApi.World.Player.Entity;
 				EntityControls controls = entityPlayer.Controls;
 				EntityPos transform = entityPlayer.Pos;
 
 				// Check if not running anymore
-				if (!clientApi.Input.KeyboardKeyState[(int)GlKeys.ShiftLeft] &&
-					!clientApi.Input.KeyboardKeyState[(int)GlKeys.ShiftRight])
+				if (!Main.clientApi.Input.KeyboardKeyState[(int)GlKeys.ShiftLeft] &&
+					!Main.clientApi.Input.KeyboardKeyState[(int)GlKeys.ShiftRight])
 				{
 					isRunning = false;
 				}
@@ -785,49 +753,24 @@ namespace Apprentice.src._burgi
 				// Apply motion blur
 				if (sequenceType == SequenceType.SEQUENCE_TYPE_NONE)
 				{
-					motionBlur.blurEnable = false;
+					Main.motionBlur.blurEnable = false;
 				}
 				else
 				{
-					motionBlur.blurEnable = true;
-					motionBlur.blurLength = (float)transform.Motion.Length();
+					Main.motionBlur.blurEnable = true;
+					Main.motionBlur.blurLength = (float)transform.Motion.Length();
 				}
-
-#if DEBUG
-				if (lineGizmo != null)
-				{
-					if ((sequenceType != SequenceType.SEQUENCE_TYPE_NONE) && (lineGizmo.gizmoEnable == true))
-					{
-						// Track motion trajectory
-						lineGizmo.AddLine(
-							(float)transform.X,
-							(float)transform.Y,
-							(float)transform.Z,
-							(float)transform.X + (float)transform.Motion.X * 10.0F,
-							(float)transform.Y + (float)transform.Motion.Y * 10.0F,
-							(float)transform.Z + (float)transform.Motion.Z * 10.0F,
-							ColorUtil.ToRgba(0xFF, 0xFF, 0xFF, 0xFF)
-						);
-
-						// Upload memory
-						lineGizmo.Commit();
-					}
-				}
-#endif
 
 				// Update obama prism
-				if (obamaPrism.obamaEnable)
+				if (Main.obamaPrism.obamaEnable)
 				{
-					obamaPrism.Update(deltaTime);
+					Main.obamaPrism.Update(deltaTime);
 				}
 			}
 
 			private void DashSequenceTick(float deltaTime)
 			{
-				if (clientApi == null) return;
-				if (motionBlur == null) return;
-
-				EntityPlayer entityPlayer = clientApi.World.Player.Entity;
+				EntityPlayer entityPlayer = Main.clientApi.World.Player.Entity;
 				EntityControls controls = entityPlayer.Controls;
 				EntityPos transform = entityPlayer.Pos;
 
@@ -881,21 +824,6 @@ namespace Apprentice.src._burgi
 								attackDirection.Y = 0.0F;
 								attackDirection.Normalize();
 							}
-
-#if DEBUG
-							// Add start point position
-							if (lineGizmo != null)
-							{
-								if (lineGizmo.gizmoEnable)
-								{
-									lineGizmo.AddBox(
-										(float)transform.X, (float)transform.Y, (float)transform.Z,
-										0.5F, 0.5F, 0.5F,
-										ColorUtil.ToRgba(0xFF, 0xFF, 0xFF, 0xFF)
-									);
-								}
-							}
-#endif
 
 							// Stop dash animations only
 							if (entity.AnimManager.IsAnimationActive([dashForwardData.Code])) entity.AnimManager.StopAnimation(dashForwardData.Code);
@@ -1007,21 +935,6 @@ namespace Apprentice.src._burgi
 						}
 					case DashSequenceState.DASH_SEQUENCE_STATE_STOP:
 						{
-#if DEBUG
-							// Add end point position
-							if (lineGizmo != null)
-							{
-								if (lineGizmo.gizmoEnable)
-								{
-									lineGizmo.AddBox(
-										(float)transform.X, (float)transform.Y, (float)transform.Z,
-										0.5F, 0.5F, 0.5F,
-										ColorUtil.ToRgba(0xFF, 0xFF, 0xFF, 0xFF)
-									);
-								}
-							}
-#endif
-
 							// Reset sequence
 							sequenceType = SequenceType.SEQUENCE_TYPE_NONE;
 							dashSequenceState = DashSequenceState.DASH_SEQUENCE_STATE_IDLE;
@@ -1064,10 +977,7 @@ namespace Apprentice.src._burgi
 			}
 			private void JumpSequenceTick(float deltaTime)
 			{
-				if (clientApi == null) return;
-				if (motionBlur == null) return;
-
-				EntityPlayer entityPlayer = clientApi.World.Player.Entity;
+				EntityPlayer entityPlayer = Main.clientApi.World.Player.Entity;
 				EntityControls controls = entityPlayer.Controls;
 				EntityPos transform = entityPlayer.Pos;
 
@@ -1222,10 +1132,7 @@ namespace Apprentice.src._burgi
 			}
 			private void AttackSequenceTick(float deltaTime)
 			{
-				if (clientApi == null) return;
-				if (motionBlur == null) return;
-
-				EntityPlayer entityPlayer = clientApi.World.Player.Entity;
+				EntityPlayer entityPlayer = Main.clientApi.World.Player.Entity;
 				EntityControls controls = entityPlayer.Controls;
 				EntityPos transform = entityPlayer.Pos;
 
@@ -1366,10 +1273,8 @@ namespace Apprentice.src._burgi
 			private bool OnDashReset(KeyCombination keyComb)
 			{
 				if (enable == false) return false;
-				if (clientApi == null) return false;
-				if (motionBlur == null) return false;
 
-				EntityPlayer entityPlayer = clientApi.World.Player.Entity;
+				EntityPlayer entityPlayer = Main.clientApi.World.Player.Entity;
 				EntityPos transform = entityPlayer.Pos;
 				BlockPos soundPos = new(entityPlayer.Pos.XYZInt, 0);
 
@@ -1387,14 +1292,14 @@ namespace Apprentice.src._burgi
 					dashSequenceState = DashSequenceState.DASH_SEQUENCE_STATE_START;
 
 					// Play dash sounds
-					clientApi.World.PlaySoundAt(dashSound1, soundPos, 0.0, null, true, 64.0F, 1.0F);
-					clientApi.World.PlaySoundAt(ushigatanaDashSound, soundPos, 0.0, null, false, 64.0F, 6.0F);
+					Main.clientApi.World.PlaySoundAt(dashSound1, soundPos, 0.0, null, true, 64.0F, 1.0F);
+					Main.clientApi.World.PlaySoundAt(ushigatanaDashSound, soundPos, 0.0, null, false, 64.0F, 6.0F);
 
 					// Register fixed dash recover action
-					clientApi.World.RegisterCallback(_ =>
+					Main.clientApi.World.RegisterCallback(_ =>
 					{
 						dashAllowed = true;
-						clientApi.World.PlaySoundAt(dashRecoverSound1, soundPos, 0.0, null, true, 64.0F, 1.0F);
+						Main.clientApi.World.PlaySoundAt(dashRecoverSound1, soundPos, 0.0, null, true, 64.0F, 1.0F);
 					}, dashCooldownMs);
 				}
 				else
@@ -1414,8 +1319,8 @@ namespace Apprentice.src._burgi
 							dashSequenceState = DashSequenceState.DASH_SEQUENCE_STATE_START;
 
 							// Play dash sounds
-							clientApi.World.PlaySoundAt(dashSound2, soundPos, 0.0, null, true, 64.0F, 1.0F);
-							clientApi.World.PlaySoundAt(ushigatanaDashSound, soundPos, 0.0, null, false, 64.0F, 6.0F);
+							Main.clientApi.World.PlaySoundAt(dashSound2, soundPos, 0.0, null, true, 64.0F, 1.0F);
+							Main.clientApi.World.PlaySoundAt(ushigatanaDashSound, soundPos, 0.0, null, false, 64.0F, 6.0F);
 						}
 					}
 				}
@@ -1443,10 +1348,8 @@ namespace Apprentice.src._burgi
 			private void OnAttackReset()
 			{
 				if (enable == false) return;
-				if (clientApi == null) return;
-				if (motionBlur == null) return;
 
-				EntityPlayer entityPlayer = clientApi.World.Player.Entity;
+				EntityPlayer entityPlayer = Main.clientApi.World.Player.Entity;
 				EntityPos transform = entityPlayer.Pos;
 				BlockPos soundPos = new(entityPlayer.Pos.XYZInt, 0);
 
@@ -1462,10 +1365,10 @@ namespace Apprentice.src._burgi
 					attackSequenceState = AttackSequenceState.ATTACK_SEQUENCE_STATE_START;
 
 					// Play woosh sounds
-					clientApi.World.PlaySoundAt(wooshSound3, soundPos, 0.0, null, true, 64.0F, 10.0F);
+					Main.clientApi.World.PlaySoundAt(wooshSound3, soundPos, 0.0, null, true, 64.0F, 10.0F);
 
 					// Register fixed attack recover action
-					clientApi.World.RegisterCallback(_ =>
+					Main.clientApi.World.RegisterCallback(_ =>
 					{
 						attackAllowed = true;
 					}, attackCooldownMs);
@@ -1474,10 +1377,8 @@ namespace Apprentice.src._burgi
 			private void OnJumpReset()
 			{
 				if (enable == false) return;
-				if (clientApi == null) return;
-				if (motionBlur == null) return;
 
-				EntityPlayer entityPlayer = clientApi.World.Player.Entity;
+				EntityPlayer entityPlayer = Main.clientApi.World.Player.Entity;
 				EntityPos transform = entityPlayer.Pos;
 				BlockPos soundPos = new(entityPlayer.Pos.XYZInt, 0);
 
@@ -1493,10 +1394,10 @@ namespace Apprentice.src._burgi
 					jumpSequenceState = JumpSequenceState.JUMP_SEQUENCE_STATE_START;
 
 					// Play woosh sounds
-					clientApi.World.PlaySoundAt(wooshSound1, soundPos, 0.0, null, true, 64.0F, 1.0F);
+					Main.clientApi.World.PlaySoundAt(wooshSound1, soundPos, 0.0, null, true, 64.0F, 1.0F);
 
 					// Register fixed jump recover action
-					clientApi.World.RegisterCallback(_ =>
+					Main.clientApi.World.RegisterCallback(_ =>
 					{
 						jumpAllowed = true;
 					}, jumpCooldownMs);
@@ -1547,151 +1448,47 @@ namespace Apprentice.src._burgi
 
 				e.Handled = true;
 			}
-			private CallbackGUIStatus OnImGuiDraw(float deltaSeconds)
-			{
-				if (lineGizmo == null) return CallbackGUIStatus.DontGrabMouse;
-				if (motionBlur == null) return CallbackGUIStatus.DontGrabMouse;
-				if (darkAges == null) return CallbackGUIStatus.DontGrabMouse;
-				if (obamaPrism == null) return CallbackGUIStatus.DontGrabMouse;
-
-				ImGui.Begin("Ushigatana");
-
-				if (ImGui.BeginTabBar("Settings", ImGuiTabBarFlags.None))
-				{
-					if (ImGui.BeginTabItem("General"))
-					{
-						ImGui.Checkbox("enable", ref enable);
-						ImGui.Checkbox("suppressMouseInput", ref suppressMouseInput);
-						ImGui.SeparatorText("Cooldowns");
-						ImGui.Checkbox("enableLineGizmo", ref lineGizmo.gizmoEnable);
-						ImGui.DragInt("dashCooldownMs", ref dashCooldownMs);
-						ImGui.DragInt("jumpCooldownMs", ref jumpCooldownMs);
-						ImGui.DragInt("attackCooldownMs", ref attackCooldownMs);
-						ImGui.EndTabItem();
-					}
-
-					if (ImGui.BeginTabItem("Shader"))
-					{
-						ImGui.SeparatorText("Motion Blur");
-						ImGui.Checkbox("enableMotionBlur (Don't touch)", ref motionBlur.blurEnable);
-						ImGui.DragFloat("motionBlurIntensity", ref motionBlur.blurIntensity, 0.1F, 0.0F, 10.0F); // TODO
-						ImGui.SeparatorText("Dark Ages");
-						ImGui.Checkbox("enableDarkAges", ref darkAges.darkEnable);
-						ImGui.DragFloat("darkIntensity", ref darkAges.darkIntensity, 0.1F, 0.0F, 10.0F);
-						ImGui.DragFloat("darkRadius", ref darkAges.darkRadius, 0.001F, -10000.0F, 10000.0F); // TODO
-						ImGui.DragFloat("depthFactor", ref darkAges.depthFactor, 0.001F, -10000.0F, 10000.0F); // TODO
-						ImGui.SeparatorText("Obama");
-						ImGui.Checkbox("obamaEnable", ref obamaPrism.obamaEnable);
-						ImGui.DragFloat("obamaMaxVelocity", ref obamaPrism.obamaMaxVelocity, 0.1F);
-						ImGui.DragFloat("obamaRandDistance", ref obamaPrism.obamaRandDistance, 0.1F);
-						ImGui.DragFloat("obamaUpOffset", ref obamaPrism.obamaUpOffset, 0.1F);
-						ImGui.DragFloat("obamaForwardOffset", ref obamaPrism.obamaForwardOffset, 0.1F);
-						ImGui.DragInt("obamaUpdateFrames", ref obamaPrism.obamaUpdateFrames);
-						ImGui.EndTabItem();
-					}
-
-					if (ImGui.BeginTabItem("Physic"))
-					{
-						ImGui.DragFloat("physicSpeedFactor", ref physicSpeedFactor, 0.1F, -50.0F, 50.0F);
-						ImGui.DragFloat("maxVelocity", ref maxVelocity, 0.01F, -10.0F, 10.0F);
-						ImGui.SeparatorText("Dash");
-						ImGui.DragFloat("dashHorizontalImpulseGrounded", ref dashHorizontalImpulseGrounded, 0.1F, -10.0F, 10.0F);
-						ImGui.DragFloat("dashHorizontalImpulseAirbourne", ref dashHorizontalImpulseAirbourne, 0.1F, -1.0F, 1.0F);
-						ImGui.DragFloat("dashVerticalImpulseGrounded", ref dashVerticalImpulseGrounded, 0.1F, -0.1F, 0.1F);
-						ImGui.DragFloat("dashVerticalImpulseAirbourne", ref dashVerticalImpulseAirbourne, 0.1F, -0.1F, 0.1F);
-						ImGui.SeparatorText("Jump");
-						ImGui.DragFloat("jumpHorizontalImpulse", ref jumpHorizontalImpulse, 0.1F, -10.0F, 10.0F);
-						ImGui.SeparatorText("Attack");
-						ImGui.DragFloat("attackHorizontalImpulse", ref attackHorizontalImpulse, 0.1F, -10.0F, 10.0F);
-						ImGui.EndTabItem();
-					}
-
-					if (ImGui.BeginTabItem("Animation"))
-					{
-						ImGui.Checkbox("enableRunAnimations", ref enableRunAnimations);
-						ImGui.Checkbox("enableInverseKinematic", ref enableInverseKinematic);
-						ImGui.DragFloat("runAnimationDeadzone", ref runAnimationDeadzone, 0.1F);
-						ImGui.SeparatorText("Animation Speed");
-						ImGui.DragFloat("animationSpeedDash", ref animationSpeedDash, 0.1F, 0.0F, 20.0F);
-						ImGui.DragFloat("animationSpeedJump", ref animationSpeedJump, 0.1F, 0.0F, 20.0F);
-						ImGui.DragFloat("animationSpeedSwordHit", ref animationSpeedSwordHit, 0.1F, 0.0F, 20.0F);
-						ImGui.DragFloat("animationSpeedSwordHit2", ref animationSpeedSwordHit2, 0.1F, 0.0F, 20.0F);
-						ImGui.DragFloat("animationSpeedCleaverHit", ref animationSpeedCleaverHit, 0.1F, 0.0F, 20.0F);
-						ImGui.DragFloat("animationSpeedSprintForward", ref animationSpeedSprintForward, 0.1F, 0.0F, 20.0F);
-						ImGui.DragFloat("animationSpeedSprintBack", ref animationSpeedSprintBack, 0.1F, 0.0F, 20.0F);
-						ImGui.DragFloat("animationSpeedStrafeForwardLeft90", ref animationSpeedStrafeForwardLeft90, 0.1F, 0.0F, 20.0F);
-						ImGui.DragFloat("animationSpeedStrafeForwardRight90", ref animationSpeedStrafeForwardRight90, 0.1F, 0.0F, 20.0F);
-						ImGui.DragFloat("animationSpeedStrafeForwardLeft45", ref animationSpeedStrafeForwardLeft45, 0.1F, 0.0F, 20.0F);
-						ImGui.DragFloat("animationSpeedStrafeForwardRight45", ref animationSpeedStrafeForwardRight45, 0.1F, 0.0F, 20.0F);
-						ImGui.DragFloat("animationSpeedRunMultiplier", ref animationSpeedRunMultiplier, 0.1F, 0.0F, 20.0F);
-						ImGui.SeparatorText("Motion Speed");
-						ImGui.DragFloat("motionSpeedSprintForward", ref motionSpeedSprintForward, 0.1F, 0.0F, 20.0F);
-						ImGui.DragFloat("motionSpeedSprintBack", ref motionSpeedSprintBack, 0.1F, 0.0F, 20.0F);
-						ImGui.DragFloat("motionSpeedStrafeForwardLeft90", ref motionSpeedStrafeForwardLeft90, 0.1F, 0.0F, 20.0F);
-						ImGui.DragFloat("motionSpeedStrafeForwardRight90", ref motionSpeedStrafeForwardRight90, 0.1F, 0.0F, 20.0F);
-						ImGui.DragFloat("motionSpeedStrafeForwardLeft45", ref motionSpeedStrafeForwardLeft45, 0.1F, 0.0F, 20.0F);
-						ImGui.DragFloat("motionSpeedStrafeForwardRight45", ref motionSpeedStrafeForwardRight45, 0.1F, 0.0F, 20.0F);
-						ImGui.SeparatorText("Frame Counts");
-						ImGui.DragInt("dashFrameCount", ref dashFrameCount);
-						ImGui.DragInt("dashRetractFrameCount", ref dashRetractFrameCount);
-						ImGui.DragInt("jumpFrameCount", ref jumpFrameCount);
-						ImGui.DragInt("attackFrameCount", ref attackFrameCount);
-						ImGui.EndTabItem();
-					}
-
-					ImGui.EndTabBar();
-				}
-
-				ImGui.End();
-
-				return CallbackGUIStatus.DontGrabMouse;
-			}
 		}
 		internal class TrueThirdPerson : EntityBehavior
 		{
-			public static ICoreClientAPI? clientApi = null;
-
-			private static bool enable = false;
-			private static bool enableSpringLinearVelocity = true;
-			private static bool enableSpringAngularVelocity = true;
-			private static bool enableBoneBobbing = true;
-			private static bool enableRandomRotation = true;
-			private static bool enableMotionBobbing = true;
+			public static bool enable = false;
+			public static bool enableSpringLinearVelocity = true;
+			public static bool enableSpringAngularVelocity = true;
+			public static bool enableBoneBobbing = true;
+			public static bool enableRandomRotation = true;
+			public static bool enableMotionBobbing = true;
 
 			private static readonly AccessTools.FieldRef<Camera, Vec3d> camEyePosInRef = AccessTools.FieldRefAccess<Camera, Vec3d>("camEyePosIn");
 			private static readonly AccessTools.FieldRef<Camera, Vec3d> originPosRef = AccessTools.FieldRefAccess<Camera, Vec3d>("originPos");
-			private static readonly AccessTools.FieldRef<Camera, Vec3d> camTargetTmpRef = AccessTools.FieldRefAccess<Camera, Vec3d>("camTargetTmp");
 			private static readonly AccessTools.FieldRef<Camera, Vec3d> camEyePosOutTmpRef = AccessTools.FieldRefAccess<Camera, Vec3d>("camEyePosOutTmp");
 			private static readonly AccessTools.FieldRef<Camera, EnumCameraMode> cameraModeRef = AccessTools.FieldRefAccess<Camera, EnumCameraMode>("CameraMode");
 
-			private static LineGizmo? lineGizmo = null;
-
 			// General settings
-			private static Vec3f cameraRootOffset = new(-0.17F, 0.03F, -0.33F);
+			public static Vec3f cameraRootOffset = new(-0.17F, 0.03F, -0.33F);
 
 			// Physic spring
-			private static float springLinearStiffness = 22.0F;
-			private static float springAngularStiffness = 22.0F;
-			private static float springLinearDamping = 8.0F;
-			private static float springAngularDamping = 8.0F;
+			public static float springLinearStiffness = 22.0F;
+			public static float springAngularStiffness = 22.0F;
+			public static float springLinearDamping = 8.0F;
+			public static float springAngularDamping = 8.0F;
 
 			// Random rotation
-			private static float randomYawRotationIntensity = 0.012F;
-			private static float randomPitchRotationIntensity = 0.02F;
-			private static float randomYawRotationSpeed = 1.0F;
-			private static float randomPitchRotationSpeed = 1.0F;
+			public static float randomYawRotationIntensity = 0.012F;
+			public static float randomPitchRotationIntensity = 0.02F;
+			public static float randomYawRotationSpeed = 1.0F;
+			public static float randomPitchRotationSpeed = 1.0F;
 
 			// Bone bobbing
-			private static float boneBobSpeed = 2.0F;
+			public static float boneBobSpeed = 2.0F;
 
 			// Motion bobbing
-			private static float motionBobSpeed = 160.0F;
-			private static float motionBobDeadzone = 0.05F;
-			private static float motionSmoothFactor = 1.0F;
-			private static float motionBobVerticalIntensity = 0.04F;
-			private static float motionBobHorizontalIntensity = 0.01F;
-			private static float motionBobPitchIntensity = 0.003F;
-			private static float motionBobRollIntensity = 0.004F;
+			public static float motionBobSpeed = 160.0F;
+			public static float motionBobDeadzone = 0.05F;
+			public static float motionSmoothFactor = 1.0F;
+			public static float motionBobVerticalIntensity = 0.04F;
+			public static float motionBobHorizontalIntensity = 0.01F;
+			public static float motionBobPitchIntensity = 0.003F;
+			public static float motionBobRollIntensity = 0.004F;
 
 			private static double lastBoneY = 0.0;
 
@@ -1711,9 +1508,8 @@ namespace Apprentice.src._burgi
 				public static bool Prefix(Camera __instance, float deltaTime, AABBIntersectionTest intersectionTester)
 				{
 					if (enable == false) return true; // Don't skip the original method
-					if (clientApi == null) return true; // Don't skip the original method
 
-					EntityPlayer entityPlayer = clientApi.World.Player.Entity;
+					EntityPlayer entityPlayer = Main.clientApi.World.Player.Entity;
 					EntityPos transform = entityPlayer.Pos;
 
 					// Set third person mode forever
@@ -1849,15 +1645,43 @@ namespace Apprentice.src._burgi
 					return false; // Skip the original method
 				}
 			}
+
+			public TrueThirdPerson(Entity entity) : base(entity)
+			{
+				// Apply all harmony patches
+				Main.clientNoObf.CreateClassProcessor(typeof(Camera_Update_Patch)).Patch();
+			}
+
+			public override string PropertyName()
+			{
+				return "TrueThirdPersonBehaviour";
+			}
+		}
+		internal class AmbientCutscene : EntityBehavior
+		{
+			public static bool enable = false;
+			public static bool isInit = true;
+			public static bool isReset = false;
+			public static bool isRunning = false;
+			public static bool enableLoop = true;
+
+			private static readonly AccessTools.FieldRef<Camera, Vec3d> camTargetTmpRef = AccessTools.FieldRefAccess<Camera, Vec3d>("camTargetTmp");
+			private static readonly AccessTools.FieldRef<Camera, Vec3d> camEyePosOutTmpRef = AccessTools.FieldRefAccess<Camera, Vec3d>("camEyePosOutTmp");
+
+			internal class Point
+			{
+				public Matrixf transform = new();
+			}
+
 			[HarmonyPatch(typeof(Camera), nameof(Camera.GetCameraMatrix), [typeof(Vec3d), typeof(Vec3d), typeof(double), typeof(double), typeof(AABBIntersectionTest)])]
 			internal class Camera_GetCameraMatrix_Patch
 			{
 				public static bool Prefix(Camera __instance, Vec3d camEyePosIn, Vec3d worldPos, double yaw, double pitch, AABBIntersectionTest intersectionTester, ref double[] __result)
 				{
 					if (enable == false) return true; // Don't skip the original method
-					if (clientApi == null) return true; // Don't skip the original method
+					if (isRunning == false) return true; // Don't skip the original method
 
-					EntityPlayer entityPlayer = clientApi.World.Player.Entity;
+					EntityPlayer entityPlayer = Main.clientApi.World.Player.Entity;
 					EntityPos transform = entityPlayer.Pos;
 
 					// Compute local direction
@@ -1880,10 +1704,10 @@ namespace Apprentice.src._burgi
 
 					__result = [
 						1, 0, 0, 0,
-					0, 1, 0, 0,
-					0, 0, 1, 0,
-					0, 0, 0, 1,
-				];
+						0, 1, 0, 0,
+						0, 0, 1, 0,
+						0, 0, 0, 1,
+					];
 
 					Mat4d.LookAt(__result, eye.ToDoubleArray(), center.ToDoubleArray(), up.ToDoubleArray());
 
@@ -1891,148 +1715,22 @@ namespace Apprentice.src._burgi
 				}
 			}
 
-			private Harmony? harmonyInstance = null;
-			private ImGuiModSystem? imguiInstance = null;
-
-			public TrueThirdPerson(Entity entity) : base(entity)
-			{
-				// TODO: fix api injection
-				harmonyInstance = new("Vintagestory.Client.NoObf");
-#if DEBUG
-				lineGizmo = new(clientApi, 1000);
-
-				imguiInstance = clientApi.ModLoader.GetModSystem<ImGuiModSystem>();
-				imguiInstance?.Draw += OnImGuiDraw;
-#endif
-
-				// Apply all harmony patches
-				harmonyInstance.CreateClassProcessor(typeof(Camera_Update_Patch)).Patch();
-				// harmonyInstance.CreateClassProcessor(typeof(Camera_GetCameraMatrix_Patch)).Patch();
-			}
-
-			public override string PropertyName()
-			{
-				return "TrueThirdPersonBehaviour";
-			}
-			public override void OnGameTick(float deltaTime)
-			{
-				if (clientApi == null) return;
-				if (harmonyInstance == null) return;
-
-#if DEBUG
-				imguiInstance?.Show();
-#endif
-			}
-
-			private CallbackGUIStatus OnImGuiDraw(float deltaSeconds)
-			{
-				if (lineGizmo == null) return CallbackGUIStatus.DontGrabMouse;
-
-				ImGui.Begin("TrueThirdPerson");
-
-				if (ImGui.BeginTabBar("Settings", ImGuiTabBarFlags.None))
-				{
-					if (ImGui.BeginTabItem("General"))
-					{
-						ImGui.Checkbox("enable", ref enable);
-						ImGui.Checkbox("enableLineGizmo", ref lineGizmo.gizmoEnable);
-						ImGui.SeparatorText("Camera");
-						Vector3 p = new(cameraRootOffset.X, cameraRootOffset.Y, cameraRootOffset.Z);
-						if (ImGui.DragFloat3("cameraRootOffset", ref p, 0.01F)) cameraRootOffset.Set(p.X, p.Y, p.Z);
-						ImGui.EndTabItem();
-					}
-
-					if (ImGui.BeginTabItem("Immersion"))
-					{
-						ImGui.SeparatorText("Physic Spring");
-						ImGui.Checkbox("enableSpringLinearVelocity", ref enableSpringLinearVelocity);
-						ImGui.Checkbox("enableSpringAngularVelocity", ref enableSpringAngularVelocity);
-						ImGui.DragFloat("springLinearStiffness", ref springLinearStiffness, 0.1F);
-						ImGui.DragFloat("springAngularStiffness", ref springAngularStiffness, 0.1F);
-						ImGui.DragFloat("springLinearDamping", ref springLinearDamping, 0.1F);
-						ImGui.DragFloat("springAngularDamping", ref springAngularDamping, 0.1F);
-
-						ImGui.SeparatorText("Random Rotation");
-						ImGui.Checkbox("enableRandomRotation", ref enableRandomRotation);
-						ImGui.DragFloat("randomYawRotationIntensity", ref randomYawRotationIntensity, 0.1F);
-						ImGui.DragFloat("randomPitchRotationIntensity", ref randomPitchRotationIntensity, 0.1F);
-						ImGui.DragFloat("randomYawRotationSpeed", ref randomYawRotationSpeed, 0.1F);
-						ImGui.DragFloat("randomPitchRotationSpeed", ref randomPitchRotationSpeed, 0.1F);
-
-						ImGui.SeparatorText("Bone Bobbing");
-						ImGui.Checkbox("enableBoneBobbing", ref enableBoneBobbing);
-						ImGui.DragFloat("boneBobSpeed", ref boneBobSpeed, 0.1F);
-
-						ImGui.SeparatorText("Motion Bobbing");
-						ImGui.Checkbox("enableMotionBobbing", ref enableMotionBobbing);
-						ImGui.DragFloat("motionBobSpeed", ref motionBobSpeed, 0.1F);
-						ImGui.DragFloat("motionBobDeadzone", ref motionBobDeadzone, 0.1F);
-						ImGui.DragFloat("motionSmoothFactor", ref motionSmoothFactor, 0.1F);
-						ImGui.DragFloat("motionBobVerticalIntensity", ref motionBobVerticalIntensity, 0.1F);
-						ImGui.DragFloat("motionBobHorizontalIntensity", ref motionBobHorizontalIntensity, 0.1F);
-						ImGui.DragFloat("motionBobPitchIntensity", ref motionBobPitchIntensity, 0.1F);
-						ImGui.DragFloat("motionBobRollIntensity", ref motionBobRollIntensity, 0.1F);
-
-						ImGui.EndTabItem();
-					}
-
-					ImGui.EndTabBar();
-				}
-
-				ImGui.End();
-
-				return CallbackGUIStatus.DontGrabMouse;
-			}
-		}
-		internal class AmbientCutscene : EntityBehavior
-		{
-			public static ICoreClientAPI? clientApi = null;
-
-			private static bool enable = false;
-
-			internal class Point
-			{
-				public Matrixf transform = new();
-			}
-
 			private static List<Point> points = [];
 
-			private float time = 0.0F;
+			public static float animationSpeed = 1.0F;
+			public static float animationLength = 1.0F;
 
-			private bool isInit = true;
-			private bool isReset = false;
-			private bool isRunning = false;
+			public static float timeAcc = 0.0F;
+
+			private static int pointIndex = 0;
 
 			public AmbientCutscene(Entity entity) : base(entity)
 			{
-				// TODO: fix api injection
+				// Apply all harmony patches
+				Main.clientNoObf.CreateClassProcessor(typeof(Camera_GetCameraMatrix_Patch)).Patch();
 
 				// Register realm discovered
 				RealmDiscoveryManager.Callbacks += OnRealmDiscovered;
-			}
-
-			public void Play()
-			{
-				if (enable == false) return;
-				if (clientApi == null) return;
-
-				if (isRunning == false)
-				{
-					isInit = true;
-					isReset = false;
-					isRunning = true;
-				}
-
-
-			}
-			public void Reset()
-			{
-				if (enable == false) return;
-				if (clientApi == null) return;
-
-				isInit = true;
-				isReset = false;
-				isRunning = false;
 			}
 
 			public override string PropertyName()
@@ -2042,24 +1740,92 @@ namespace Apprentice.src._burgi
 			public override void OnGameTick(float deltaTime)
 			{
 				if (enable == false) return;
-				if (clientApi == null) return;
 
-				EntityPlayer entityPlayer = clientApi.World.Player.Entity;
+				EntityPlayer entityPlayer = Main.clientApi.World.Player.Entity;
 				EntityControls controls = entityPlayer.Controls;
 				EntityPos transform = entityPlayer.Pos;
 
 				// Loop animation
-				// if (timeAcc >= animationTime + animationLength)
-				// {
-				// 	timeAcc = 0.0F;
-				// }
+				if (isRunning)
+				{
+					if (isInit)
+					{
+						isInit = false;
+						isReset = false;
 
+						timeAcc = 0.0F;
+						pointIndex = 0;
+					}
 
+					Point currPoint = points[pointIndex];
+					Point nextPoint = points[pointIndex + 1];
+
+					// TODO
+
+					timeAcc += deltaTime * 0.5F;
+					timeAcc += deltaTime * animationSpeed;
+					timeAcc += deltaTime * 0.5F;
+
+					if (timeAcc > animationLength)
+					{
+						isInit = true;
+						isReset = true;
+
+						isRunning = enableLoop;
+					}
+				}
 			}
 
-			private void OnRealmDiscovered()
+			public static void PushPoint(Matrixf transform)
+			{
+				Point point = new();
+
+				point.transform = transform;
+
+				points.Add(point);
+			}
+			public static void ClearPoints()
+			{
+				points.Clear();
+			}
+
+			public static void Play()
+			{
+				if (enable == false) return;
+
+				isRunning = !isRunning;
+			}
+			public static void Stop()
+			{
+				if (enable == false) return;
+
+				isRunning = false;
+			}
+			public static void Reset()
+			{
+				if (enable == false) return;
+
+				isInit = true;
+				isReset = false;
+				isRunning = false;
+			}
+
+			private static void OnRealmDiscovered()
 			{
 				int x = 42;
+
+				// Build animation
+				for (int i = 0; i < 10; i++)
+				{
+					Matrixf transform = new();
+
+					transform.Identity();
+
+					PushPoint(transform);
+				}
+
+				Reset();
+				Play();
 			}
 		}
 	}

@@ -1,3 +1,4 @@
+using Apprentice.src._burgi;
 using HarmonyLib;
 using Microsoft.Win32;
 using Newtonsoft.Json.Linq;
@@ -14,10 +15,6 @@ using Vintagestory.GameContent;
 
 namespace Apprentice
 {
-	using static Apprentice.src._burgi.Behaviour;
-	using static Apprentice.src._burgi.WorldGen;
-	using static Apprentice.src._burgi.Shader;
-
 	public sealed class ApprenticeModSystem : ModSystem
 	{
 		private const string PlaytestVersion = "2.7.0-dev.20260728.108";
@@ -793,18 +790,7 @@ namespace Apprentice
 				api.Logger.Error(exception);
 			}
 
-			// How does it feel..
-
-			DashBehaviour.clientApi = api;
-			TrueThirdPerson.clientApi = api;
-			AmbientCutscene.clientApi = api;
-
-			api.Event.PlayerJoin += (IClientPlayer byPlayer) =>
-			{
-				byPlayer.Entity.AddBehavior(new DashBehaviour(byPlayer.Entity));
-				byPlayer.Entity.AddBehavior(new TrueThirdPerson(byPlayer.Entity));
-				byPlayer.Entity.AddBehavior(new AmbientCutscene(byPlayer.Entity));
-			};
+			Main.Init(api); // Let me life..
 		}
 
 		public override void Dispose()

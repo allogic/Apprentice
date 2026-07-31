@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
+using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
 
 namespace Apprentice.src._burgi
@@ -12,12 +13,7 @@ namespace Apprentice.src._burgi
 	{
 		internal class LineGizmo : IRenderer
 		{
-			private readonly ICoreClientAPI clientApi;
-			private readonly IClientEventAPI eventApi;
-			private readonly IRenderAPI renderApi;
-			private readonly IShaderAPI shaderApi;
-
-			private readonly IShaderProgram lineProgram;
+			private IShaderProgram lineProgram = null!;
 
 			private MeshData? mesh = null;
 			private MeshRef? meshRef = null;
@@ -27,26 +23,14 @@ namespace Apprentice.src._burgi
 			public double RenderOrder => 1.0;
 			public int RenderRange => 10;
 
-			public LineGizmo(ICoreClientAPI api, int numLines)
+			public LineGizmo(int numLines)
 			{
-				clientApi = api;
-				eventApi = api.Event;
-				renderApi = api.Render;
-				shaderApi = api.Shader;
-
-				// Create line program
-				lineProgram = shaderApi.NewShaderProgram();
-				lineProgram.AssetDomain = "apprentice";
-				lineProgram.VertexShader = shaderApi.NewShader(EnumShaderType.VertexShader);
-				lineProgram.FragmentShader = shaderApi.NewShader(EnumShaderType.FragmentShader);
-				shaderApi.RegisterFileShaderProgram("line-shader", lineProgram);
-				lineProgram.Compile();
-
 				// Create mesh
 				mesh = new(numLines * 2, numLines * 2, false, false, true, false);
 				mesh?.mode = EnumDrawMode.Lines;
 
-				eventApi.RegisterRenderer(this, EnumRenderStage.Opaque);
+				// Register renderer
+				Main.clientApi.Event.RegisterRenderer(this, EnumRenderStage.Opaque);
 			}
 
 			public void OnRenderFrame(float deltaTime, EnumRenderStage stage)
@@ -57,20 +41,22 @@ namespace Apprentice.src._burgi
 
 				if (gizmoEnable)
 				{
-					renderApi.GlDisableCullFace();
-					renderApi.GlToggleBlend(false);
+					CompileOrUpdatePrograms();
 
-					renderApi.LineWidth = 10;
+					Main.clientApi.Render.GlDisableCullFace();
+					Main.clientApi.Render.GlToggleBlend(false);
+
+					Main.clientApi.Render.LineWidth = 10;
 
 					// Draw the gizmo
 					lineProgram.Use();
-					lineProgram.UniformMatrix("projectionMatrix", renderApi.CurrentProjectionMatrix);
-					lineProgram.UniformMatrix("viewMatrix", renderApi.CurrentModelviewMatrix);
-					renderApi.RenderMesh(meshRef);
+					lineProgram.UniformMatrix("projectionMatrix", Main.clientApi.Render.CurrentProjectionMatrix);
+					lineProgram.UniformMatrix("viewMatrix", Main.clientApi.Render.CurrentModelviewMatrix);
+					Main.clientApi.Render.RenderMesh(meshRef);
 					lineProgram.Stop();
 
-					renderApi.GlToggleBlend(true);
-					renderApi.GlEnableCullFace();
+					Main.clientApi.Render.GlToggleBlend(true);
+					Main.clientApi.Render.GlEnableCullFace();
 				}
 			}
 
@@ -167,25 +153,37 @@ namespace Apprentice.src._burgi
 			{
 				if (mesh == null) return;
 
-				meshRef = renderApi.UploadMesh(mesh);
+				meshRef = Main.clientApi.Render.UploadMesh(mesh);
 			}
 			public void Dispose()
 			{
-				eventApi.UnregisterRenderer(this, EnumRenderStage.Opaque);
+				// Unregister renderer
+				Main.clientApi.Event.UnregisterRenderer(this, EnumRenderStage.Opaque);
+
+				mesh?.Dispose();
+			}
+
+			private void CompileOrUpdatePrograms()
+			{
+				if ((lineProgram == null) || lineProgram.Disposed)
+				{
+					lineProgram = Main.clientApi.Shader.NewShaderProgram();
+					lineProgram.AssetDomain = "apprentice";
+					lineProgram.VertexShader = Main.clientApi.Shader.NewShader(EnumShaderType.VertexShader);
+					lineProgram.FragmentShader = Main.clientApi.Shader.NewShader(EnumShaderType.FragmentShader);
+					Main.clientApi.Shader.RegisterFileShaderProgram("line-shader", lineProgram);
+					lineProgram.Compile();
+				}
 			}
 		}
 		internal class MotionBlur : IRenderer
 		{
-			private readonly IClientEventAPI eventApi;
-			private readonly IRenderAPI renderApi;
-			private readonly IShaderAPI shaderApi;
+			private IShaderProgram blitProgram = null!;
+			private IShaderProgram blurProgram = null!;
 
-			private readonly RawTexture blitTexture;
-			private readonly RawTexture accTextureA;
-			private readonly RawTexture accTextureB;
-
-			private readonly IShaderProgram blitProgram;
-			private readonly IShaderProgram blurProgram;
+			private RawTexture? blitTexture = null;
+			private RawTexture? accTextureA = null;
+			private RawTexture? accTextureB = null;
 
 			private MeshRef? meshRef = null;
 			private FrameBufferRef? frameBufferBlitRef = null;
@@ -199,29 +197,10 @@ namespace Apprentice.src._burgi
 			public double RenderOrder => 1.0;
 			public int RenderRange => 9999;
 
-			public MotionBlur(ICoreClientAPI api)
+			public MotionBlur()
 			{
-				eventApi = api.Event;
-				renderApi = api.Render;
-				shaderApi = api.Shader;
-
-				// Create blit program
-				blitProgram = shaderApi.NewShaderProgram();
-				blitProgram.AssetDomain = "apprentice";
-				blitProgram.VertexShader = shaderApi.NewShader(EnumShaderType.VertexShader);
-				blitProgram.FragmentShader = shaderApi.NewShader(EnumShaderType.FragmentShader);
-				shaderApi.RegisterFileShaderProgram("blit-shader", blitProgram);
-				blitProgram.Compile();
-
-				// Create blur program
-				blurProgram = shaderApi.NewShaderProgram();
-				blurProgram.AssetDomain = "apprentice";
-				blurProgram.VertexShader = shaderApi.NewShader(EnumShaderType.VertexShader);
-				blurProgram.FragmentShader = shaderApi.NewShader(EnumShaderType.FragmentShader);
-				shaderApi.RegisterFileShaderProgram("dash-blur", blurProgram);
-				blurProgram.Compile();
-
-				meshRef = renderApi.UploadMesh(QuadMeshUtil.GetQuad());
+				// Create mesh
+				meshRef = Main.clientApi.Render.UploadMesh(QuadMeshUtil.GetQuad());
 
 				// Create blitTexture render target
 				blitTexture = new RawTexture();
@@ -230,10 +209,10 @@ namespace Apprentice.src._burgi
 				blitTexture.WrapS = EnumTextureWrap.ClampToEdge;
 				blitTexture.WrapT = EnumTextureWrap.ClampToEdge;
 				blitTexture.PixelInternalFormat = EnumTextureInternalFormat.Rgba8;
-				blitTexture.Width = renderApi.FrameWidth; // TODO: update these values when main framebuffer changes size
-				blitTexture.Height = renderApi.FrameHeight;
+				blitTexture.Width = Main.clientApi.Render.FrameWidth; // TODO: update these values when main framebuffer changes size
+				blitTexture.Height = Main.clientApi.Render.FrameHeight;
 				blitTexture.TextureId = 0;
-				renderApi.GenTexture(blitTexture);
+				Main.clientApi.Render.GenTexture(blitTexture);
 
 				// Create accumulator render target A
 				accTextureA = new RawTexture();
@@ -242,10 +221,10 @@ namespace Apprentice.src._burgi
 				accTextureA.WrapS = EnumTextureWrap.ClampToEdge;
 				accTextureA.WrapT = EnumTextureWrap.ClampToEdge;
 				accTextureA.PixelInternalFormat = EnumTextureInternalFormat.Rgba8;
-				accTextureA.Width = renderApi.FrameWidth; // TODO: update these values when main framebuffer changes size
-				accTextureA.Height = renderApi.FrameHeight;
+				accTextureA.Width = Main.clientApi.Render.FrameWidth; // TODO: update these values when main framebuffer changes size
+				accTextureA.Height = Main.clientApi.Render.FrameHeight;
 				accTextureA.TextureId = 0;
-				renderApi.GenTexture(accTextureA);
+				Main.clientApi.Render.GenTexture(accTextureA);
 
 				// Create accumulator render target B
 				accTextureB = new RawTexture();
@@ -254,36 +233,37 @@ namespace Apprentice.src._burgi
 				accTextureB.WrapS = EnumTextureWrap.ClampToEdge;
 				accTextureB.WrapT = EnumTextureWrap.ClampToEdge;
 				accTextureB.PixelInternalFormat = EnumTextureInternalFormat.Rgba8;
-				accTextureB.Width = renderApi.FrameWidth; // TODO: update these values when main framebuffer changes size
-				accTextureB.Height = renderApi.FrameHeight;
+				accTextureB.Width = Main.clientApi.Render.FrameWidth; // TODO: update these values when main framebuffer changes size
+				accTextureB.Height = Main.clientApi.Render.FrameHeight;
 				accTextureB.TextureId = 0;
-				renderApi.GenTexture(accTextureB);
+				Main.clientApi.Render.GenTexture(accTextureB);
 
 				// Create blit frame buffer
-				FramebufferAttrs frameBufferBlitAttribs = new("blit", renderApi.FrameWidth, renderApi.FrameHeight);
+				FramebufferAttrs frameBufferBlitAttribs = new("blit", Main.clientApi.Render.FrameWidth, Main.clientApi.Render.FrameHeight);
 				frameBufferBlitAttribs.Attachments = new FramebufferAttrsAttachment[1];
 				frameBufferBlitAttribs.Attachments[0] = new();
 				frameBufferBlitAttribs.Attachments[0].Texture = blitTexture;
 				frameBufferBlitAttribs.Attachments[0].AttachmentType = EnumFramebufferAttachment.ColorAttachment0;
-				frameBufferBlitRef = renderApi.CreateFrameBuffer(frameBufferBlitAttribs);
+				frameBufferBlitRef = Main.clientApi.Render.CreateFrameBuffer(frameBufferBlitAttribs);
 
 				// Create ping pong frame buffer A
-				FramebufferAttrs frameBufferAAttribs = new("accA", renderApi.FrameWidth, renderApi.FrameHeight);
+				FramebufferAttrs frameBufferAAttribs = new("accA", Main.clientApi.Render.FrameWidth, Main.clientApi.Render.FrameHeight);
 				frameBufferAAttribs.Attachments = new FramebufferAttrsAttachment[1];
 				frameBufferAAttribs.Attachments[0] = new();
 				frameBufferAAttribs.Attachments[0].Texture = accTextureA;
 				frameBufferAAttribs.Attachments[0].AttachmentType = EnumFramebufferAttachment.ColorAttachment0;
-				frameBufferARef = renderApi.CreateFrameBuffer(frameBufferAAttribs);
+				frameBufferARef = Main.clientApi.Render.CreateFrameBuffer(frameBufferAAttribs);
 
 				// Create ping pong frame buffer B
-				FramebufferAttrs frameBufferBAttribs = new("accB", renderApi.FrameWidth, renderApi.FrameHeight);
+				FramebufferAttrs frameBufferBAttribs = new("accB", Main.clientApi.Render.FrameWidth, Main.clientApi.Render.FrameHeight);
 				frameBufferBAttribs.Attachments = new FramebufferAttrsAttachment[1];
 				frameBufferBAttribs.Attachments[0] = new();
 				frameBufferBAttribs.Attachments[0].Texture = accTextureB;
 				frameBufferBAttribs.Attachments[0].AttachmentType = EnumFramebufferAttachment.ColorAttachment0;
-				frameBufferBRef = renderApi.CreateFrameBuffer(frameBufferBAttribs);
+				frameBufferBRef = Main.clientApi.Render.CreateFrameBuffer(frameBufferBAttribs);
 
-				eventApi.RegisterRenderer(this, EnumRenderStage.Done);
+				// Register renderer
+				Main.clientApi.Event.RegisterRenderer(this, EnumRenderStage.Done);
 			}
 
 			public void OnRenderFrame(float deltaTime, EnumRenderStage stage)
@@ -297,28 +277,30 @@ namespace Apprentice.src._burgi
 
 				if (blurEnable)
 				{
+					CompileOrUpdatePrograms();
+
 					// Blit render target
-					renderApi.CurrentFrameBuffer = frameBufferBlitRef;
+					Main.clientApi.Render.CurrentFrameBuffer = frameBufferBlitRef;
 					blitProgram.Use();
-					blitProgram.BindTexture2D("tex", renderApi.FrameBuffers[(int)EnumFrameBuffer.Primary].ColorTextureIds[0], 0);
-					renderApi.RenderMesh(meshRef);
+					blitProgram.BindTexture2D("tex", Main.clientApi.Render.FrameBuffers[(int)EnumFrameBuffer.Primary].ColorTextureIds[0], 0);
+					Main.clientApi.Render.RenderMesh(meshRef);
 					blitProgram.Stop();
 
 					// Accumulate motion blur
-					renderApi.CurrentFrameBuffer = frameBufferARef;
+					Main.clientApi.Render.CurrentFrameBuffer = frameBufferARef;
 					blurProgram.Use();
 					blurProgram.BindTexture2D("blitTex", frameBufferBlitRef.ColorTextureIds[0], 0);
 					blurProgram.BindTexture2D("accTex", frameBufferBRef.ColorTextureIds[0], 1);
 					blurProgram.Uniform("blurLength", blurLength);
 					blurProgram.Uniform("blurIntensity", blurIntensity);
-					renderApi.RenderMesh(meshRef);
+					Main.clientApi.Render.RenderMesh(meshRef);
 					blurProgram.Stop();
 
 					// Blit render target
-					renderApi.CurrentFrameBuffer = null;
+					Main.clientApi.Render.CurrentFrameBuffer = null;
 					blitProgram.Use();
 					blitProgram.BindTexture2D("tex", frameBufferARef.ColorTextureIds[0], 0);
-					renderApi.RenderMesh(meshRef);
+					Main.clientApi.Render.RenderMesh(meshRef);
 					blitProgram.Stop();
 				}
 
@@ -330,25 +312,46 @@ namespace Apprentice.src._burgi
 
 			public void Dispose()
 			{
-				eventApi.UnregisterRenderer(this, EnumRenderStage.Done);
+				// Unregister renderer
+				Main.clientApi.Event.UnregisterRenderer(this, EnumRenderStage.Done);
 
-				renderApi.DestroyFrameBuffer(frameBufferARef);
-				renderApi.DestroyFrameBuffer(frameBufferBRef);
-				renderApi.DestroyFrameBuffer(frameBufferBlitRef);
+				// Destroy framebuffer
+				Main.clientApi.Render.DestroyFrameBuffer(frameBufferARef);
+				Main.clientApi.Render.DestroyFrameBuffer(frameBufferBRef);
+				Main.clientApi.Render.DestroyFrameBuffer(frameBufferBlitRef);
 
-				renderApi.GLDeleteTexture(blitTexture.TextureId);
-				renderApi.GLDeleteTexture(accTextureA.TextureId);
-				renderApi.GLDeleteTexture(accTextureB.TextureId);
+				// Destroy textures
+				if (blitTexture != null) Main.clientApi.Render.GLDeleteTexture(blitTexture.TextureId);
+				if (accTextureA != null) Main.clientApi.Render.GLDeleteTexture(accTextureA.TextureId);
+				if (accTextureB != null) Main.clientApi.Render.GLDeleteTexture(accTextureB.TextureId);
+			}
+
+			private void CompileOrUpdatePrograms()
+			{
+				if ((blitProgram == null) || blitProgram.Disposed)
+				{
+					blitProgram = Main.clientApi.Shader.NewShaderProgram();
+					blitProgram.AssetDomain = "apprentice";
+					blitProgram.VertexShader = Main.clientApi.Shader.NewShader(EnumShaderType.VertexShader);
+					blitProgram.FragmentShader = Main.clientApi.Shader.NewShader(EnumShaderType.FragmentShader);
+					Main.clientApi.Shader.RegisterFileShaderProgram("blit-shader", blitProgram);
+					blitProgram.Compile();
+				}
+
+				if ((blurProgram == null) || blurProgram.Disposed)
+				{
+					blurProgram = Main.clientApi.Shader.NewShaderProgram();
+					blurProgram.AssetDomain = "apprentice";
+					blurProgram.VertexShader = Main.clientApi.Shader.NewShader(EnumShaderType.VertexShader);
+					blurProgram.FragmentShader = Main.clientApi.Shader.NewShader(EnumShaderType.FragmentShader);
+					Main.clientApi.Shader.RegisterFileShaderProgram("blur-shader", blurProgram);
+					blurProgram.Compile();
+				}
 			}
 		}
 		internal class DarkAges : IRenderer
 		{
-			private readonly ICoreClientAPI clientApi;
-			private readonly IClientEventAPI eventApi;
-			private readonly IRenderAPI renderApi;
-			private readonly IShaderAPI shaderApi;
-
-			private readonly IShaderProgram darkProgram;
+			private IShaderProgram darkProgram = null!;
 
 			private MeshRef? meshRef = null;
 
@@ -360,162 +363,140 @@ namespace Apprentice.src._burgi
 			public double RenderOrder => 1.0;
 			public int RenderRange => 9999;
 
-			public DarkAges(ICoreClientAPI api)
+			public DarkAges()
 			{
-				clientApi = api;
-				eventApi = api.Event;
-				renderApi = api.Render;
-				shaderApi = api.Shader;
+				// Create mesh
+				meshRef = Main.clientApi.Render.UploadMesh(QuadMeshUtil.GetQuad());
 
-				// Create dark program
-				darkProgram = shaderApi.NewShaderProgram();
-				darkProgram.AssetDomain = "apprentice";
-				darkProgram.VertexShader = shaderApi.NewShader(EnumShaderType.VertexShader);
-				darkProgram.FragmentShader = shaderApi.NewShader(EnumShaderType.FragmentShader);
-				shaderApi.RegisterFileShaderProgram("dark-ages", darkProgram);
-				darkProgram.Compile();
-
-				meshRef = renderApi.UploadMesh(QuadMeshUtil.GetQuad());
-
-				eventApi.RegisterRenderer(this, EnumRenderStage.OIT);
+				// Register renderer
+				Main.clientApi.Event.RegisterRenderer(this, EnumRenderStage.OIT);
 			}
 
 			public void OnRenderFrame(float deltaTime, EnumRenderStage stage)
 			{
 				if (stage != EnumRenderStage.OIT) return;
 
-				EntityPlayer entityPlayer = clientApi.World.Player.Entity;
+				EntityPlayer entityPlayer = Main.clientApi.World.Player.Entity;
 				EntityPos transform = entityPlayer.Pos;
 
 				if (meshRef == null) return;
 
 				if (darkEnable)
 				{
-					renderApi.GLDisableDepthTest();
-					renderApi.GlDisableStencilTest();
-					renderApi.GlToggleBlend(false);
+					CompileOrUpdatePrograms();
+
+					Main.clientApi.Render.GLDisableDepthTest();
+					Main.clientApi.Render.GlDisableStencilTest();
+					Main.clientApi.Render.GlToggleBlend(false);
 
 					// Extract near and far plane
-					float m22 = renderApi.CurrentProjectionMatrix[10];
-					float m32 = renderApi.CurrentProjectionMatrix[14];
+					float m22 = Main.clientApi.Render.CurrentProjectionMatrix[10];
+					float m32 = Main.clientApi.Render.CurrentProjectionMatrix[14];
 					float nearZ = m32 / (m22 - 1.0F);
 					float farZ = m32 / (m22 + 1.0F);
 
 					// TODO: make blit..
 
 					// Make it dark
-					renderApi.CurrentFrameBuffer = renderApi.FrameBuffers[(int)EnumFrameBuffer.Primary];
+					Main.clientApi.Render.CurrentFrameBuffer = Main.clientApi.Render.FrameBuffers[(int)EnumFrameBuffer.Primary];
 					darkProgram.Use();
 					float[] playerPosition = { (float)transform.X, (float)transform.Y, (float)transform.Z };
 					darkProgram.Uniforms4("playerPosition", 1, playerPosition);
 					darkProgram.BindTexture2D("colorTex", 0 /* Use blit color */, 0);
-					darkProgram.BindTexture2D("depthTex", renderApi.FrameBuffers[(int)EnumFrameBuffer.Primary].DepthTextureId, 0);
-					float[] screenSize = { renderApi.FrameWidth, renderApi.FrameHeight, 0, 0 };
+					darkProgram.BindTexture2D("depthTex", Main.clientApi.Render.FrameBuffers[(int)EnumFrameBuffer.Primary].DepthTextureId, 0);
+					float[] screenSize = { Main.clientApi.Render.FrameWidth, Main.clientApi.Render.FrameHeight, 0, 0 };
 					darkProgram.Uniforms4("screenSize", 1, playerPosition);
-					darkProgram.UniformMatrix("projectionMatrix", renderApi.CurrentProjectionMatrix);
-					darkProgram.UniformMatrix("viewMatrix", renderApi.CurrentModelviewMatrix);
+					darkProgram.UniformMatrix("projectionMatrix", Main.clientApi.Render.CurrentProjectionMatrix);
+					darkProgram.UniformMatrix("viewMatrix", Main.clientApi.Render.CurrentModelviewMatrix);
 					darkProgram.Uniform("darkIntensity", darkIntensity);
 					darkProgram.Uniform("darkRadius", darkRadius);
 					darkProgram.Uniform("depthFactor", depthFactor);
 					darkProgram.Uniform("nearZ", nearZ);
 					darkProgram.Uniform("farZ", farZ);
-					renderApi.RenderMesh(meshRef);
+					Main.clientApi.Render.RenderMesh(meshRef);
 					darkProgram.Stop();
 
-					renderApi.GlToggleBlend(true);
-					renderApi.GLEnableDepthTest();
-					renderApi.GLEnableDepthTest();
+					Main.clientApi.Render.GlToggleBlend(true);
+					Main.clientApi.Render.GLEnableDepthTest();
+					Main.clientApi.Render.GLEnableDepthTest();
 				}
 			}
 
 			public void Dispose()
 			{
-				eventApi.UnregisterRenderer(this, EnumRenderStage.OIT);
+				// Unregister renderer
+				Main.clientApi.Event.UnregisterRenderer(this, EnumRenderStage.OIT);
+			}
+
+			private void CompileOrUpdatePrograms()
+			{
+				if ((darkProgram == null) || darkProgram.Disposed)
+				{
+					darkProgram = Main.clientApi.Shader.NewShaderProgram();
+					darkProgram.AssetDomain = "apprentice";
+					darkProgram.VertexShader = Main.clientApi.Shader.NewShader(EnumShaderType.VertexShader);
+					darkProgram.FragmentShader = Main.clientApi.Shader.NewShader(EnumShaderType.FragmentShader);
+					Main.clientApi.Shader.RegisterFileShaderProgram("dark-ages", darkProgram);
+					darkProgram.Compile();
+				}
 			}
 		}
 		internal class HealthBar : IRenderer
 		{
-			public double RenderOrder { get { return 1; } }
-			public int RenderRange { get { return 10; } }
+			private IShaderProgram healthProgram = null!;
 
-			private readonly ICoreClientAPI capi;
+			private MeshRef? backgroundRectRef = null;
+			private MeshRef? healthRectRef = null;
 
-			private readonly MeshRef backgroundRectRef;
-			private readonly MeshRef healthRectRef;
+			public bool healthEnable = false;
+			public float renderDistance = 30.0F;
 
-			private readonly Matrixf mvMatrix = new();
+			private Matrixf mvMatrix = new();
 
-			private readonly IShaderProgram program;
+			public double RenderOrder => 1.0;
+			public int RenderRange => 9999;
 
-			public HealthBar(ICoreClientAPI capi)
+			public HealthBar()
 			{
-				this.capi = capi;
+				// Create mesh
+				backgroundRectRef = Main.clientApi.Render.UploadMesh(QuadMeshUtil.GetQuad());
+				healthRectRef = Main.clientApi.Render.UploadMesh(QuadMeshUtil.GetQuad());
 
-				IShaderProgram shader = capi.Shader.NewShaderProgram();
-				shader.AssetDomain = "apprentice";
-				shader.VertexShader = capi.Shader.NewShader(
-					EnumShaderType.VertexShader
-				);
-				shader.FragmentShader = capi.Shader.NewShader(
-					EnumShaderType.FragmentShader
-				);
-
-				try
-				{
-					capi.Shader.RegisterFileShaderProgram(
-						"apprenticehealthbar",
-						shader
-					);
-					if (!shader.Compile())
-					{
-						throw new InvalidOperationException(
-							"The Apprentice health-bar shader did not compile."
-						);
-					}
-				}
-				catch
-				{
-					shader.Dispose();
-					throw;
-				}
-
-				program = shader;
-				backgroundRectRef = capi.Render.UploadMesh(QuadMeshUtil.GetQuad());
-				healthRectRef = capi.Render.UploadMesh(QuadMeshUtil.GetQuad());
-
-				capi.Event.RegisterRenderer(this, EnumRenderStage.Opaque);
+				// Register renderer
+				Main.clientApi.Event.RegisterRenderer(this, EnumRenderStage.Opaque);
 			}
 
-			#region IRenderer Impl
 			public void OnRenderFrame(float deltaTime, EnumRenderStage stage)
 			{
-				EntityPlayer playerEntity = capi.World.Player.Entity;
-
-				foreach (Entity entity in capi.World.LoadedEntities.Values)
+				if (healthEnable)
 				{
-					if (entity == playerEntity) continue;
-					if (!HasAttrib(entity, "health")) continue;
+					EntityPlayer playerEntity = Main.clientApi.World.Player.Entity;
 
-					double distance = entity.Pos.DistanceTo(playerEntity.Pos.XYZ);
+					foreach (Entity entity in Main.clientApi.World.LoadedEntities.Values)
+					{
+						if (entity == playerEntity) continue;
+						if (!HasAttrib(entity, "health")) continue;
 
-					if (distance > RenderRange) continue;
-					if (!IsEntityVisible(entity, playerEntity)) continue;
+						double distance = entity.Pos.DistanceTo(playerEntity.Pos.XYZ);
 
-					RenderHealthBar(entity);
+						if (distance > renderDistance) continue;
+						if (!IsEntityVisible(entity, playerEntity)) continue;
+
+						RenderHealthBar(entity);
+					}
 				}
 			}
+
 			public void Dispose()
 			{
-				capi.Event.UnregisterRenderer(this, EnumRenderStage.Opaque);
+				// Unregister renderer
+				Main.clientApi.Event.UnregisterRenderer(this, EnumRenderStage.Opaque);
 
-				capi.Render.DeleteMesh(backgroundRectRef);
-				capi.Render.DeleteMesh(healthRectRef);
-
-				program.Dispose();
+				// Destroy meshes
+				Main.clientApi.Render.DeleteMesh(backgroundRectRef);
+				Main.clientApi.Render.DeleteMesh(healthRectRef);
 			}
-			#endregion
 
-			#region Private Impl
 			private bool HasAttrib(Entity entity, string attribName)
 			{
 				return entity.WatchedAttributes.HasAttribute(attribName);
@@ -523,8 +504,8 @@ namespace Apprentice.src._burgi
 			private bool IsEntityVisible(Entity entity, Entity playerEntity)
 			{
 				Vec3d entityPosition = entity.Pos.XYZ;
-				Vec3d cameraPosition = capi.World.Player.Entity.Pos.XYZ;
-				Vec3d dir = entityPosition.SubCopy(cameraPosition);
+				Vec3d cameraPosition = Main.clientApi.World.Player.Entity.Pos.XYZ;
+				Vec3d dir = entityPosition - cameraPosition;
 
 				double distance = dir.Length();
 
@@ -540,63 +521,68 @@ namespace Apprentice.src._burgi
 			}
 			private void RenderHealthBar(Entity entity)
 			{
-				float health = entity.WatchedAttributes.GetFloat("health");
-				float maxHealth = entity.WatchedAttributes.GetFloat("maxhealth");
-				if (!float.IsFinite(health) || !float.IsFinite(maxHealth) ||
-					maxHealth <= 0)
-				{
-					return;
-				}
-				float percentage = Math.Clamp(health / maxHealth, 0, 1);
+				ITreeAttribute healthTree = entity.WatchedAttributes.GetTreeAttribute("health");
+
+				if (healthTree == null) return;
+
+				float health = healthTree.GetFloat("currenthealth");
+				float maxHealth= healthTree.GetFloat("maxhealth");
+				float percentage = Math.Clamp((health + 1) / maxHealth, 0.0F, 1.0F);
 
 				Vec3d position = entity.Pos.XYZ;
-				Vec3d cameraPosition = capi.World.Player.Entity.Pos.XYZ;
+				Vec3d cameraPosition = Main.clientApi.World.Player.Entity.Pos.XYZ;
 
 				mvMatrix
-					.Set(capi.Render.CurrentModelviewMatrix)
+					.Set(Main.clientApi.Render.CurrentModelviewMatrix)
 					.Translate(
 						position.X - cameraPosition.X,
-						position.Y + entity.SelectionBox.Y2 + 0.3 - cameraPosition.Y,
+						position.Y + entity.SelectionBox.Y2 + 0.3F - cameraPosition.Y,
 						position.Z - cameraPosition.Z
 					)
-					.Scale(1.5f, 0.15f, 1);
+					.Scale(1.5F, 1.0F, 1.0F);
 
-				if (!program.Disposed)
+				CompileOrUpdatePrograms();
+
+				healthProgram.Use();
+
+				healthProgram.UniformMatrix("projectionMatrix", Main.clientApi.Render.CurrentProjectionMatrix);
+				healthProgram.UniformMatrix("modelViewMatrix", mvMatrix.Values);
+				healthProgram.Uniform("color", new Vec4f(0, 0, 0, 0.7F));
+
+				Main.clientApi.Render.RenderMesh(backgroundRectRef);
+
+				mvMatrix
+					.Set(Main.clientApi.Render.CurrentModelviewMatrix)
+					.Translate(
+						position.X - cameraPosition.X,
+						position.Y + entity.SelectionBox.Y2 + 0.3F - cameraPosition.Y,
+						position.Z - cameraPosition.Z
+					)
+					.Scale(1.5F * percentage, 0.15F, 1);
+
+				healthProgram.UniformMatrix("modelViewMatrix", mvMatrix.Values);
+				healthProgram.Uniform("color", new Vec4f(1, 0, 0, 1));
+
+				Main.clientApi.Render.RenderMesh(healthRectRef);
+
+				healthProgram.Stop();
+			}
+
+			private void CompileOrUpdatePrograms()
+			{
+				if ((healthProgram == null) || healthProgram.Disposed)
 				{
-					program.Use();
-
-					program.Uniform("rgbaIn", new Vec4f(0, 0, 0, 0.7f));
-					program.UniformMatrix("modelViewMatrix", mvMatrix.Values);
-					program.UniformMatrix("projectionMatrix", capi.Render.CurrentProjectionMatrix);
-
-					capi.Render.RenderMesh(backgroundRectRef);
-
-					mvMatrix
-						.Set(capi.Render.CurrentModelviewMatrix)
-						.Translate(
-							position.X - cameraPosition.X,
-							position.Y + entity.SelectionBox.Y2 + 0.3 - cameraPosition.Y,
-							position.Z - cameraPosition.Z
-						)
-						.Scale(1.5f * percentage, 0.15f, 1);
-
-					program.Uniform("rgbaIn", new Vec4f(1, 0, 0, 1));
-					program.UniformMatrix("modelViewMatrix", mvMatrix.Values);
-
-					capi.Render.RenderMesh(healthRectRef);
-
-					program.Stop();
+					healthProgram = Main.clientApi.Shader.NewShaderProgram();
+					healthProgram.AssetDomain = "apprentice";
+					healthProgram.VertexShader = Main.clientApi.Shader.NewShader(EnumShaderType.VertexShader);
+					healthProgram.FragmentShader = Main.clientApi.Shader.NewShader(EnumShaderType.FragmentShader);
+					Main.clientApi.Shader.RegisterFileShaderProgram("health-shader", healthProgram);
+					healthProgram.Compile();
 				}
 			}
-			#endregion
 		}
 		internal class ObamaPrism : IRenderer
 		{
-			private readonly ICoreClientAPI clientApi;
-			private readonly IClientEventAPI eventApi;
-			private readonly IRenderAPI renderApi;
-			private readonly IShaderAPI shaderApi;
-
 			internal class Obama
 			{
 				public int index;
@@ -624,7 +610,7 @@ namespace Apprentice.src._burgi
 				}
 			}
 
-			private readonly IShaderProgram obamaProgram;
+			private IShaderProgram obamaProgram = null!;
 
 			private MeshData? mesh = null;
 			private MeshRef? meshRef = null;
@@ -648,26 +634,13 @@ namespace Apprentice.src._burgi
 			public double RenderOrder => 1.0;
 			public int RenderRange => 9999;
 
-			public ObamaPrism(ICoreClientAPI api, int obamaCount)
+			public ObamaPrism(int obamaCount)
 			{
-				clientApi = api;
-				eventApi = api.Event;
-				renderApi = api.Render;
-				shaderApi = api.Shader;
-
 				// Create obamas
 				for (int i = 0; i < obamaCount; i++)
 				{
 					obamas.Add(new Obama(i, random));
 				}
-
-				// Create dark program
-				obamaProgram = shaderApi.NewShaderProgram();
-				obamaProgram.AssetDomain = "apprentice";
-				obamaProgram.VertexShader = shaderApi.NewShader(EnumShaderType.VertexShader);
-				obamaProgram.FragmentShader = shaderApi.NewShader(EnumShaderType.FragmentShader);
-				shaderApi.RegisterFileShaderProgram("obama-shader", obamaProgram);
-				obamaProgram.Compile();
 
 				// Create mesh
 				mesh = new(20, 60, false, true, false, false);
@@ -726,52 +699,55 @@ namespace Apprentice.src._burgi
 
 					mesh.mode = EnumDrawMode.Triangles;
 				}
-				meshRef = renderApi.UploadMesh(mesh);
+				meshRef = Main.clientApi.Render.UploadMesh(mesh);
 
 				// Create obama texture
-				obamaTexture = renderApi.GetOrLoadTexture(new AssetLocation("apprentice", "textures/real-obama.png"));
+				obamaTexture = Main.clientApi.Render.GetOrLoadTexture(new AssetLocation("apprentice", "textures/real-obama.png"));
 
 				// Register renderer
-				eventApi.RegisterRenderer(this, EnumRenderStage.Opaque);
+				Main.clientApi.Event.RegisterRenderer(this, EnumRenderStage.Opaque);
 			}
 
 			public void OnRenderFrame(float deltaTime, EnumRenderStage stage)
 			{
 				if (stage != EnumRenderStage.Opaque) return;
-
-				EntityPlayer entityPlayer = clientApi.World.Player.Entity;
-				EntityPos transform = entityPlayer.Pos;
-
 				if (meshRef == null) return;
+
+				EntityPlayer entityPlayer = Main.clientApi.World.Player.Entity;
+				EntityPos transform = entityPlayer.Pos;
 
 				if (obamaEnable)
 				{
-					renderApi.GlDisableStencilTest();
-					renderApi.GlToggleBlend(false);
-					renderApi.GlEnableCullFace();
+					CompileOrUpdatePrograms();
+
+					Main.clientApi.Render.GlDisableStencilTest();
+					Main.clientApi.Render.GlToggleBlend(false);
+					Main.clientApi.Render.GlEnableCullFace();
 
 					// Make it obama
-					renderApi.CurrentFrameBuffer = renderApi.FrameBuffers[(int)EnumFrameBuffer.Primary];
+					Main.clientApi.Render.CurrentFrameBuffer = Main.clientApi.Render.FrameBuffers[(int)EnumFrameBuffer.Primary];
 					obamaProgram.Use();
-					obamaProgram.UniformMatrix("projectionMatrix", renderApi.CurrentProjectionMatrix);
-					obamaProgram.UniformMatrix("viewMatrix", renderApi.CurrentModelviewMatrix);
+					obamaProgram.UniformMatrix("projectionMatrix", Main.clientApi.Render.CurrentProjectionMatrix);
+					obamaProgram.UniformMatrix("viewMatrix", Main.clientApi.Render.CurrentModelviewMatrix);
 					obamaProgram.BindTexture2D("tex", obamaTexture, 0);
 					foreach (Obama obama in obamas)
 					{
 						obamaProgram.UniformMatrix("modelMatrix", obama.transform.Values);
-						renderApi.RenderMesh(meshRef);
+						Main.clientApi.Render.RenderMesh(meshRef);
 					}
 					obamaProgram.Stop();
 
-					renderApi.GlToggleBlend(true);
-					renderApi.GlEnableStencilTest();
-					renderApi.GlDisableCullFace();
+					Main.clientApi.Render.GlToggleBlend(true);
+					Main.clientApi.Render.GlEnableStencilTest();
+					Main.clientApi.Render.GlDisableCullFace();
 				}
 			}
 
+			// TODO: Why is this update here..
+			//       change it into OnRenderFrame
 			public void Update(float deltaTime)
 			{
-				EntityPlayer entityPlayer = clientApi.World.Player.Entity;
+				EntityPlayer entityPlayer = Main.clientApi.World.Player.Entity;
 				EntityPos transform = entityPlayer.Pos;
 
 				// Update obamas
@@ -841,9 +817,24 @@ namespace Apprentice.src._burgi
 			}
 			public void Dispose()
 			{
-				eventApi.UnregisterRenderer(this, EnumRenderStage.Opaque);
+				// Unregister renderer
+				Main.clientApi.Event.UnregisterRenderer(this, EnumRenderStage.Opaque);
 
-				renderApi.GLDeleteTexture(obamaTexture);
+				// Destroy textures
+				Main.clientApi.Render.GLDeleteTexture(obamaTexture);
+			}
+
+			private void CompileOrUpdatePrograms()
+			{
+				if ((obamaProgram == null) || obamaProgram.Disposed)
+				{
+					obamaProgram = Main.clientApi.Shader.NewShaderProgram();
+					obamaProgram.AssetDomain = "apprentice";
+					obamaProgram.VertexShader = Main.clientApi.Shader.NewShader(EnumShaderType.VertexShader);
+					obamaProgram.FragmentShader = Main.clientApi.Shader.NewShader(EnumShaderType.FragmentShader);
+					Main.clientApi.Shader.RegisterFileShaderProgram("obama-shader", obamaProgram);
+					obamaProgram.Compile();
+				}
 			}
 		}
 	}
